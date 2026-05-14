@@ -67,6 +67,30 @@ UFrameHeader {
 
 `UFrameHeader` combines native uProtocol metadata with explicit wire-format metadata.
 
+`UFrameHeader` is a language-binding frame metadata bundle. It is not a new generated transport envelope and it is not intended to replace `UAttributes` as the protocol metadata model. Language bindings MAY choose a less ambiguous name, such as `UFrameMetadata`, if that better communicates the distinction between protocol metadata and transport frame bookkeeping.
+
+Transport implementations MUST preserve both members when crossing a transport boundary. They MAY project individual `UAttributes` fields into transport-native metadata channels when doing so is cheaper than serializing the whole structure. They MAY also project `UEncoding` into transport-native metadata when the transport provides a suitable channel.
+
+If a binding provides typed deserialization helpers on an owned frame or a zero-copy receive lease, those helpers MUST verify that the frame's `UEncoding` matches the selected `WireFormat` before decoding payload bytes. A mismatch MUST fail rather than silently handing bytes to the wrong deserializer.
+
+== Native Message Builder
+
+Language bindings SHOULD provide builder ergonomics for common frame construction without requiring applications to manually populate every metadata field.
+
+A native builder:
+
+* MUST build the language binding's native frame type, for example `UOwnedFrame`, rather than a generated transport envelope;
+* MUST support Publish, Notification, Request, and Response frames;
+* SHOULD support creating a Response from a Request's `UAttributes`;
+* SHOULD support raw payload bytes;
+* SHOULD support explicit `UEncoding` metadata;
+* SHOULD support the same serializer contract used by owned and zero-copy transports;
+* MAY support optional payload codecs such as Protocol Buffers when the binding exposes those codecs behind explicit features.
+
+Builder helpers MUST validate message-type-specific metadata constraints before producing a frame. For example, Request and Response frames require RPC priority classes, Request frames require a non-zero TTL, Response frames require a request identifier, and request-only authorization fields MUST NOT appear on Publish or Notification frames.
+
+The presence of a native builder MUST NOT require transports to accept generated message envelopes. Transports still consume native frame metadata plus payload bytes.
+
 == Owned Frame
 
 ----
@@ -135,3 +159,5 @@ The same serializer MUST be usable with an owned buffer or with a zero-copy tran
 * The same serializer can target an owned buffer or a zero-copy transmit loan.
 * The deserializer can return values borrowing from a receive lease where the language supports that lifetime model.
 * Raw bytes are supported without an application schema.
+* Typed deserialization rejects wire-format metadata mismatches.
+* Common frame builder helpers produce native frames, not generated envelopes.

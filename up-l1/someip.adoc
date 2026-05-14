@@ -103,6 +103,47 @@ NOTES::
 
 The following sections highlight the mapping of xref:../basics/uattributes.adoc[UAttributes] to *SOME/IP* fields.
 
+==== Native Frame Payload Prefix for vSOMEIP Bindings
+
+Some SOME/IP bindings, including `vsomeip`, expose only the SOME/IP payload bytes to language-level transport implementations and do not expose a protocol-native metadata channel large enough to preserve all uProtocol frame metadata. Such bindings *MAY* encode a native frame prefix inside the SOME/IP payload.
+
+This prefix is a transport binding artifact. It *MUST NOT* be modeled as a generated Protocol Buffers transport envelope and *MUST NOT* constrain the application payload `WireFormat`. The application payload begins after the native frame prefix and remains exactly the bytes produced by the selected serializer.
+
+For Rust `vsomeip` interoperability, the native frame prefix is:
+
+[source]
+----
+someip_native_frame =
+  magic[4] = "USIP"
+  version: uint8 = 1
+  id_msb: uint64 little-endian
+  id_lsb: uint64 little-endian
+  message_type: uint8
+  priority: uint8
+  ttl: optional<uint32 little-endian>
+  source_uri: string
+  sink_uri: string              // empty string means absent
+  encoding_format_id: string
+  encoding_content_type: string
+  encoding_schema_ref: string   // empty string means absent
+  request_id: optional<uuid>
+  traceparent: optional<string>
+  token: optional<string>
+  permission_level: optional<uint32 little-endian>
+  commstatus: optional<uint8>
+  application_payload: bytes
+
+string =
+  len: uint32 little-endian
+  utf8_bytes[len]
+
+optional<T> =
+  present: uint8      // 0 = absent, 1 = present
+  T                   // present only when present == 1
+----
+
+Implementations *MUST* reject unknown magic values, unsupported versions, malformed UTF-8, invalid optional markers, invalid UUIDs, and oversized metadata fields. Implementations *MUST* reconstruct the original native frame metadata before delivering the frame to uProtocol application code.
+
 ==== Common UMessage Attributes
 
 .Common UMessage Attributes
@@ -312,5 +353,4 @@ NOTE: handled by underlying SOME/IP library.
 === uDiscovery Translation
 
 *TODO:* _Pending uDiscovery v3 redesign_
-
 

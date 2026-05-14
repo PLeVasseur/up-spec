@@ -122,13 +122,13 @@ a| *MUST* describe the payload loan size and requested serializer alignment.
 
 The user header *MUST NOT* contain a serialized generated `UAttributes` blob. Transports SHOULD project native attributes into fields that are cheap for the transport to inspect. URI entity/version/resource components are numeric, and authority names are bounded by the uProtocol authority-name constraint.
 
-Variable metadata that is not naturally fixed-size for iceoryx2 user headers, such as `UEncoding`, `traceparent`, and `token`, SHOULD be encoded in an implementation metadata sidecar rather than forcing arbitrary fixed user-header capacities. The sidecar length is carried by `metadata_len`. The sidecar is transport metadata and *MUST NOT* be exposed as part of the frame payload by the language transport API.
+Variable metadata that is not naturally fixed-size for iceoryx2 user headers, such as `UEncoding`, `traceparent`, and `token`, SHOULD be encoded in an implementation metadata prefix rather than forcing arbitrary fixed user-header capacities. The prefix length is carried by `metadata_len`. The prefix is transport metadata and *MUST NOT* be exposed as part of the frame payload by the language transport API.
 
-==== Implementation Metadata Sidecar
+==== Implementation Metadata Prefix
 
-The implementation metadata sidecar preserves variable frame metadata while keeping the iceoryx2 user header small and cheap to inspect.
+The implementation metadata prefix preserves variable frame metadata while keeping the iceoryx2 user header small and cheap to inspect. The prefix is stored before the user payload bytes in the underlying iceoryx2 sample payload and is hidden by the uProtocol transport API.
 
-The sidecar *MUST* preserve:
+The prefix *MUST* preserve:
 
 * `UEncoding.format_id`;
 * `UEncoding.content_type`;
@@ -136,7 +136,28 @@ The sidecar *MUST* preserve:
 * `UAttributes.traceparent`, when present;
 * `UAttributes.token`, when present.
 
-The exact binary representation is language-binding specific unless and until this document standardizes cross-language iceoryx2 sidecar interoperability. Regardless of representation, the transport API *MUST* reconstruct the same native frame metadata on receive.
+The prefix binary representation for cross-language interoperability is:
+
+[source]
+----
+metadata_prefix =
+  magic[4] = "UFM1"
+  format_id: string
+  content_type: string
+  schema_ref: optional<string>
+  traceparent: optional<string>
+  token: optional<string>
+
+string =
+  len: uint32 little-endian
+  utf8_bytes[len]
+
+optional<string> =
+  present: uint8      // 0 = absent, 1 = present
+  string              // present only when present == 1
+----
+
+Implementations *MUST* reject metadata prefixes with an unknown magic value, malformed UTF-8, invalid optional markers, trailing bytes, or lengths that exceed the sample payload. Regardless of representation, the transport API *MUST* reconstruct the same native frame metadata on receive.
 
 ==== Message Priority
 
@@ -148,7 +169,7 @@ Currently not a clear path to map from uProtocol message priority to iceoryx2 Qo
 --
 An iceoryx2 `Sample` that is used to convey a uProtocol frame *MUST* expose through the uProtocol transport API the frame payload bytes exactly as produced by the selected `WireFormat` serializer.
 
-An implementation *MAY* reserve metadata sidecar bytes before the frame payload bytes in the underlying iceoryx2 sample payload. If it does so, those bytes *MUST* be hidden from `UTxBuffer.payload_mut()` and `UZeroCopyRxFrame.payload()`.
+An implementation *MAY* reserve metadata prefix bytes before the frame payload bytes in the underlying iceoryx2 sample payload. If it does so, those bytes *MUST* be hidden from `UTxBuffer.payload_mut()` and `UZeroCopyRxFrame.payload()`.
 --
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-payload-zero-copy~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]

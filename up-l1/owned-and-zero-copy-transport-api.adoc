@@ -51,7 +51,7 @@ UZeroCopyTransport {
 
 The zero-copy send sequence is:
 
-. Create a `UFrameHeader`.
+. Create frame metadata, represented in Rust today as `UFrameHeader`.
 . Select a wire format.
 . Reserve a transmit loan for the encoded length and alignment.
 . Serialize directly into the transmit loan payload.
@@ -85,3 +85,5 @@ Filters use the same source and sink matching rules defined for uProtocol transp
 Zenoh is an owned-buffer transport unless a future Zenoh API exposes true transmit and receive loans.
 
 iceoryx2 is a zero-copy transport. Its mapping should use transmit loans, receive leases, and user-header metadata for `UFrameHeader` and `UEncoding`.
+
+Transport bindings SHOULD expose builder/helper APIs from the language library rather than reimplementing common Publish, Notification, Request, or Response construction. Transport implementations MAY still construct frame metadata directly when reconstructing a frame from protocol-native fields on receive.

@@ -25,7 +25,7 @@ The purpose of this layer of uProtocol is to define a common API for sending and
 
 This specification defines the transport layer's abstract API which is mapped to supported programming languages by means of uProtocol's xref:../languages.adoc[language specific libraries]. The API is _implemented_ for particular transport protocols and programming languages by _uProtocol Transport Libraries_.
 
-The serialization-neutral frame model is defined in xref:wire-format-and-frame-api.adoc[Wire Format and Frame API]. Owned-buffer and zero-copy transport capabilities are defined in xref:owned-and-zero-copy-transport-api.adoc[Owned and Zero-Copy Transport API].
+The serialization-neutral frame model, frame metadata bundle, typed serializer contract, and native builder expectations are defined in xref:wire-format-and-frame-api.adoc[Wire Format and Frame API]. Owned-buffer and zero-copy transport capabilities are defined in xref:owned-and-zero-copy-transport-api.adoc[Owned and Zero-Copy Transport API].
 
 The Transport Layer API is defined using UML2 notation.
 
