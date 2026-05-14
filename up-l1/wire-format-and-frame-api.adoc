@@ -56,18 +56,18 @@ UEncoding {
 
 Adding a new payload format MUST NOT require changing the transport API.
 
-== Frame Header
+== Frame Metadata
 
 ----
-UFrameHeader {
+UFrameMetadata {
   attributes: UAttributes,
   encoding: UEncoding
 }
 ----
 
-`UFrameHeader` combines native uProtocol metadata with explicit wire-format metadata.
+`UFrameMetadata` combines native uProtocol metadata with explicit wire-format metadata.
 
-`UFrameHeader` is a language-binding frame metadata bundle. It is not a new generated transport envelope and it is not intended to replace `UAttributes` as the protocol metadata model. Language bindings MAY choose a less ambiguous name, such as `UFrameMetadata`, if that better communicates the distinction between protocol metadata and transport frame bookkeeping.
+`UFrameMetadata` is a language-binding frame metadata bundle. It is not a new generated transport envelope and it is not intended to replace `UAttributes` as the protocol metadata model.
 
 Transport implementations MUST preserve both members when crossing a transport boundary. They MAY project individual `UAttributes` fields into transport-native metadata channels when doing so is cheaper than serializing the whole structure. They MAY also project `UEncoding` into transport-native metadata when the transport provides a suitable channel.
 
@@ -95,7 +95,7 @@ The presence of a native builder MUST NOT require transports to accept generated
 
 ----
 UOwnedFrame {
-  header: UFrameHeader,
+  metadata: UFrameMetadata,
   payload: Bytes
 }
 ----
@@ -108,8 +108,8 @@ UOwnedFrame {
 
 ----
 UTxBuffer {
-  header() -> UFrameHeader
-  header_mut() -> UFrameHeader
+  metadata() -> UFrameMetadata
+  metadata_mut() -> UFrameMetadata
   payload() -> BytesView
   payload_mut() -> MutableBytesView
 }
@@ -123,7 +123,7 @@ Serializers write directly into `payload_mut()`. Sending the buffer commits the 
 
 ----
 UZeroCopyRxFrame {
-  header() -> UFrameHeader
+  metadata() -> UFrameMetadata
   payload() -> BytesView
 }
 ----

@@ -53,7 +53,6 @@ The value of a iceoryx2 Service that is used to convey a uProtocol frame *MUST* 
 
 [source,rust]
 ----
-const MAX_AUTHORITY_NAME_LENGTH: usize = 128;
 #[repr(C)]
 #[derive(ZeroCopySend)]
 struct UProtocolHeader {
@@ -71,12 +70,10 @@ struct UProtocolHeader {
     permission_level: u32,
     commstatus_present: u8,
     commstatus: u8,
-    source_authority: FixedSizeVec<u8, MAX_AUTHORITY_NAME_LENGTH>,
     source_ue_id: u32,
     source_ue_version_major: u32,
     source_resource_id: u32,
     sink_present: u8,
-    sink_authority: FixedSizeVec<u8, MAX_AUTHORITY_NAME_LENGTH>,
     sink_ue_id: u32,
     sink_ue_version_major: u32,
     sink_resource_id: u32,
@@ -107,10 +104,10 @@ a| *MUST* preserve the native `UAttributes.permission_level` field when present.
 a| *MUST* preserve the native `UAttributes.commstatus` field when present. The status value *MUST* use the language binding's stable native uProtocol status-code mapping.
 
 | `source_*`
-a| *MUST* be set from the native source `UUri`. Numeric URI components SHOULD be stored as numeric header fields instead of serializing the URI string.
+a| *MUST* be set from the numeric native source `UUri` fields. The variable-length source authority name *MUST* be preserved in the implementation metadata prefix.
 
 | `sink_present`, `sink_*`
-a| *MUST* indicate whether a sink exists. When present, the sink fields *MUST* be set from the native sink `UUri`. When absent, `sink_present` *MUST* be zero and sink fields *MUST* be ignored.
+a| *MUST* indicate whether a sink exists. When present, the sink fields *MUST* be set from the numeric native sink `UUri` fields and the variable-length sink authority name *MUST* be preserved in the implementation metadata prefix. When absent, `sink_present` *MUST* be zero and sink fields *MUST* be ignored.
 
 | `metadata_len`
 a| *MUST* identify the number of implementation metadata sidecar bytes preceding the frame payload bytes in the loaned iceoryx2 sample payload.
@@ -120,9 +117,9 @@ a| *MUST* describe the payload loan size and requested serializer alignment.
 
 |===
 
-The user header *MUST NOT* contain a serialized generated `UAttributes` blob. Transports SHOULD project native attributes into fields that are cheap for the transport to inspect. URI entity/version/resource components are numeric, and authority names are bounded by the uProtocol authority-name constraint.
+The user header *MUST NOT* contain a serialized generated `UAttributes` blob. Transports SHOULD project native attributes into fields that are cheap for the transport to inspect. URI entity/version/resource components are numeric and SHOULD live in the user header. Authority names are variable-length strings and SHOULD live in the implementation metadata prefix instead of fixed-capacity user-header buffers.
 
-Variable metadata that is not naturally fixed-size for iceoryx2 user headers, such as `UEncoding`, `traceparent`, and `token`, SHOULD be encoded in an implementation metadata prefix rather than forcing arbitrary fixed user-header capacities. The prefix length is carried by `metadata_len`. The prefix is transport metadata and *MUST NOT* be exposed as part of the frame payload by the language transport API.
+Variable metadata that is not naturally fixed-size for iceoryx2 user headers, such as URI authority names, `UEncoding`, `traceparent`, and `token`, SHOULD be encoded in an implementation metadata prefix rather than forcing arbitrary fixed user-header capacities. The prefix length is carried by `metadata_len`. The prefix is transport metadata and *MUST NOT* be exposed as part of the frame payload by the language transport API.
 
 ==== Implementation Metadata Prefix
 
@@ -133,6 +130,8 @@ The prefix *MUST* preserve:
 * `UEncoding.format_id`;
 * `UEncoding.content_type`;
 * `UEncoding.schema_ref`, when present;
+* `UAttributes.source.authority_name`;
+* `UAttributes.sink.authority_name`, when a sink is present;
 * `UAttributes.traceparent`, when present;
 * `UAttributes.token`, when present.
 
@@ -142,6 +141,8 @@ The prefix binary representation for cross-language interoperability is:
 ----
 metadata_prefix =
   magic[4] = "UFM1"
+  source_authority: string
+  sink_authority: optional<string>
   format_id: string
   content_type: string
   schema_ref: optional<string>
