@@ -37,6 +37,10 @@ UOwnedTransport {
 
 The owned path preserves a simple user experience for common transports. Applications build a frame, select a wire format, and send bytes. No zero-copy capability is required.
 
+`receive_owned` MAY be implemented directly by a transport that has a native pull receive model. A language binding MAY also provide `receive_owned` as a listener-backed convenience over `register_owned_listener` and `unregister_owned_listener`. In that case the call registers a temporary listener for the supplied filters, returns the first matching owned frame, and unregisters the temporary listener before completing.
+
+The listener-backed `receive_owned` convenience does not change transport capability. It is still an owned-buffer receive path and MUST NOT be used to claim zero-copy behavior.
+
 == Zero-Copy Transport
 
 ----
@@ -73,12 +77,23 @@ Push delivery is orthogonal to owned versus zero-copy movement.
 
 Filters use the same source and sink matching rules defined for uProtocol transports.
 
+== Generic Endpoint Adapters
+
+Language bindings MAY expose an endpoint adapter that wraps either an owned transport or a true zero-copy transport behind a single routing-oriented object. Such an adapter can be useful for streamers and bridge code that route frames without depending on a concrete transport type.
+
+For an owned transport, sending an owned frame through the adapter delegates to `send_owned`, and registering an owned listener delegates to `register_owned_listener`.
+
+For a zero-copy transport, sending an owned frame through the adapter reserves a transmit loan, copies the owned payload into the loan, and commits with `send_zero_copy`. Receiving through an owned listener adapter converts a zero-copy receive lease into an owned frame before invoking the owned listener.
+
+This adapter is a boundary utility, not a claim that all transports are zero-copy. The zero-copy constructor MUST only accept transports that implement the true zero-copy capability interface.
+
 == Capability Rules
 
 * A transport that cannot loan storage implements `UOwnedTransport` only.
 * A transport that can loan storage implements `UZeroCopyTransport`.
 * A transport MAY implement both when it has a useful owned path and a true loaned path.
 * Returning `UNIMPLEMENTED` for zero-copy calls is correct when the underlying transport cannot provide zero-copy semantics.
+* Returning `UNIMPLEMENTED` for direct pull receive remains valid when a binding does not provide a listener-backed receive convenience.
 
 == Transport Guidance
 
