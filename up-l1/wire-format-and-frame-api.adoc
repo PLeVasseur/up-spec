@@ -1,0 +1,137 @@
+= Wire Format and Frame API
+:toc:
+:sectnums:
+
+----
+SPDX-FileCopyrightText: 2026 Contributors to the Eclipse Foundation
+
+See the NOTICE file(s) distributed with this work for additional
+information regarding copyright ownership.
+
+This program and the accompanying materials are made available under
+the terms of the Apache License Version 2.0 which is available at
+https://www.apache.org/licenses/LICENSE-2.0
+
+SPDX-FileType: DOCUMENTATION
+SPDX-License-Identifier: Apache-2.0
+----
+
+== Goal
+
+The Transport Layer frame API is serialization-neutral. A frame carries native uProtocol routing metadata, wire-format metadata, and payload bytes. The frame API MUST NOT require a format-specific generated message envelope.
+
+== Native Frame Metadata
+
+`UAttributes` is the native metadata carried by a frame. It contains the uProtocol metadata required for routing, validation, correlation, expiry, and prioritization.
+
+Required fields:
+
+* `id`: a uProtocol UUID.
+* `source`: source `UUri`.
+* `message_type`: publish, notification, request, or response.
+
+Optional fields:
+
+* `sink`: destination `UUri`.
+* `priority`: priority class.
+* `ttl`: message time-to-live in milliseconds.
+* `request_id`: request UUID for response correlation.
+* `traceparent`: distributed tracing context.
+
+The metadata model is native to the language binding. It is not defined as a generated envelope requirement.
+
+== Wire Encoding
+
+`UEncoding` identifies the payload wire representation.
+
+----
+UEncoding {
+  format_id: String,
+  content_type: String,
+  schema_ref: Optional<String>
+}
+----
+
+`format_id` is a stable identifier for the codec family or IDL binding. `content_type` is the media type used by transport bindings, gateways, diagnostics, and tools. `schema_ref` can identify a schema URI, registry key, type hash, package-qualified type name, or another stable schema identity.
+
+Adding a new payload format MUST NOT require changing the transport API.
+
+== Frame Header
+
+----
+UFrameHeader {
+  attributes: UAttributes,
+  encoding: UEncoding
+}
+----
+
+`UFrameHeader` combines native uProtocol metadata with explicit wire-format metadata.
+
+== Owned Frame
+
+----
+UOwnedFrame {
+  header: UFrameHeader,
+  payload: Bytes
+}
+----
+
+`UOwnedFrame` owns its payload bytes. This is the natural representation for network, brokered, file, or in-process transports that accept application-owned buffers.
+
+== Transmit Loan
+
+`UTxBuffer` represents mutable transmit storage reserved from a zero-copy transport.
+
+----
+UTxBuffer {
+  header() -> UFrameHeader
+  header_mut() -> UFrameHeader
+  payload() -> BytesView
+  payload_mut() -> MutableBytesView
+}
+----
+
+Serializers write directly into `payload_mut()`. Sending the buffer commits the transport-owned storage.
+
+== Receive Lease
+
+`UZeroCopyRxFrame` represents a receive-side lease. Dropping the lease releases the underlying transport storage.
+
+----
+UZeroCopyRxFrame {
+  header() -> UFrameHeader
+  payload() -> BytesView
+}
+----
+
+Decoded values MAY borrow from the receive lease. Such values MUST NOT outlive the lease.
+
+== Serializer Contract
+
+Language bindings SHOULD provide a serializer contract equivalent to:
+
+----
+WireFormat {
+  name() -> String
+  encoding() -> UEncoding
+}
+
+Serializer {
+  encoded_len(value) -> Integer
+  serialize_into(value, mutable_bytes) -> Integer
+}
+
+Deserializer {
+  deserialize_from(bytes) -> Value
+}
+----
+
+The same serializer MUST be usable with an owned buffer or with a zero-copy transmit loan.
+
+== Acceptance Criteria
+
+* The frame API does not expose a format-specific generated envelope.
+* Applications can select any wire format by providing serializer and deserializer implementations.
+* The same serializer can target an owned buffer or a zero-copy transmit loan.
+* The deserializer can return values borrowing from a receive lease where the language supports that lifetime model.
+* Raw bytes are supported without an application schema.

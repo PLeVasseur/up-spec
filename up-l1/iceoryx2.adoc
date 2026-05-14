@@ -28,7 +28,7 @@ This document defines how uProtocol messages can be exchanged by means of iceory
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-protocol-version~1",oft-needs="impl",oft-tags="TransportLayerImpl"]
 --
-Each transport implementing this specification **MUST** use version `0.6.1` of the iceoryx2 protocol in order to ensure interoperability of different language libraries.
+Each transport implementing this specification **MUST** use version `0.7.0` of the iceoryx2 protocol in order to ensure interoperability of different language libraries.
 --
 
 == iceoryx2 MessagingPattern
@@ -38,30 +38,51 @@ Each transport implementing this specification **MUST** use version `0.6.1` of t
 All types of uProtocol messages *MUST* be transferred using iceoryx2's PublishSubscribe MessagingPattern only. iceoryx2's RequestResponse API *MUST NOT* be used.
 --
 
-== UMessage Mapping
+== Frame Mapping
 
-A uProtocol message consists of _UAttributes_ and optional payload. The following sections define how these are mapped to/from iceoryx2 Services.
+A native uProtocol frame consists of _UAttributes_, wire-format metadata, and optional payload bytes. The following sections define how these are mapped to/from iceoryx2 Services without requiring a generated Protocol Buffers envelope.
 
 === UAttributes
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-attributes-mapping~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-The value of a iceoryx2 Service that is used to convey a uProtocol message *MUST* have a https://docs.rs/iceoryx2/0.6.1/iceoryx2/service/builder/publish_subscribe/struct.Builder.html#method.user_header[user header] as defined in <<uAttributes Mapping to iceoryx2 user header>>.
+The value of a iceoryx2 Service that is used to convey a uProtocol frame *MUST* have a https://docs.rs/iceoryx2/0.6.1/iceoryx2/service/builder/publish_subscribe/struct.Builder.html#method.user_header[user header] as defined in <<uAttributes Mapping to iceoryx2 user header>>.
 --
 
 ==== uAttributes Mapping to iceoryx2 user header
 
 [source,rust]
 ----
-const MAX_FEASIBLE_UATTRIBUTES_SERIALIZED_LENGTH: usize = 1000; // choosing ~1000 u8s
-                                                                // somewhat arbitrarily
-                                                                // this should be confirmed
-
+const MAX_AUTHORITY_NAME_LENGTH: usize = 128;
 #[repr(C)]
 #[derive(ZeroCopySend)]
 struct UProtocolHeader {
     uprotocol_major_version: u8,
-    uattributes_serialized: FixedSizeVec<u8, MAX_FEASIBLE_UATTRIBUTES_SERIALIZED_LENGTH>
+    id_msb: u64,
+    id_lsb: u64,
+    message_type: u8,
+    priority: u8,
+    ttl_present: u8,
+    ttl: u32,
+    request_id_present: u8,
+    request_id_msb: u64,
+    request_id_lsb: u64,
+    permission_level_present: u8,
+    permission_level: u32,
+    commstatus_present: u8,
+    commstatus: u8,
+    source_authority: FixedSizeVec<u8, MAX_AUTHORITY_NAME_LENGTH>,
+    source_ue_id: u32,
+    source_ue_version_major: u32,
+    source_resource_id: u32,
+    sink_present: u8,
+    sink_authority: FixedSizeVec<u8, MAX_AUTHORITY_NAME_LENGTH>,
+    sink_ue_id: u32,
+    sink_ue_version_major: u32,
+    sink_resource_id: u32,
+    metadata_len: u64,
+    payload_len: u64,
+    payload_alignment: u64,
 }
 ----
 
@@ -73,12 +94,49 @@ struct UProtocolHeader {
 | `uprotocol_major_version`
 a| *MUST* be set to a single byte representing the uProtocol major version (`0x01` at the time of writing)
 
-| `uattributes_serialized`
-a| *MUST* be set to the bytes representing the protobuf encoding of the UAttributes object as defined by the link:../up-core-api/uprotocol/v1/uattributes.proto[UAttributes Protocol Buffers definition]
+| `id_msb`, `id_lsb`, `message_type`, `priority`, `ttl_present`, `ttl`
+a| *MUST* be set from the corresponding native `UAttributes` fields.
+
+| `request_id_present`, `request_id_msb`, `request_id_lsb`
+a| *MUST* preserve the native `UAttributes.request_id` field when present. When absent, `request_id_present` *MUST* be zero and the request-id value fields *MUST* be ignored.
+
+| `permission_level_present`, `permission_level`
+a| *MUST* preserve the native `UAttributes.permission_level` field when present. When absent, `permission_level_present` *MUST* be zero and `permission_level` *MUST* be ignored.
+
+| `commstatus_present`, `commstatus`
+a| *MUST* preserve the native `UAttributes.commstatus` field when present. The status value *MUST* use the language binding's stable native uProtocol status-code mapping.
+
+| `source_*`
+a| *MUST* be set from the native source `UUri`. Numeric URI components SHOULD be stored as numeric header fields instead of serializing the URI string.
+
+| `sink_present`, `sink_*`
+a| *MUST* indicate whether a sink exists. When present, the sink fields *MUST* be set from the native sink `UUri`. When absent, `sink_present` *MUST* be zero and sink fields *MUST* be ignored.
+
+| `metadata_len`
+a| *MUST* identify the number of implementation metadata sidecar bytes preceding the frame payload bytes in the loaned iceoryx2 sample payload.
+
+| `payload_len`, `payload_alignment`
+a| *MUST* describe the payload loan size and requested serializer alignment.
 
 |===
 
-_Known limitations_: Using a `FixedSizeVec` in the header containing a serialization of the entire `UAttributes` is wasteful and unnecessarily makes every message larger than it really need be most of the time. The approach chosen here was chosen primarily for expediency and simplicity of implementation. It should be possible to optimize this significantly. Some low-hanging fruit: use custom structs for entirety of `UAttributes` in User Header, make use of `Option<T>` to cut down on size when e.g. not using `token` or `traceparent`.
+The user header *MUST NOT* contain a serialized generated `UAttributes` blob. Transports SHOULD project native attributes into fields that are cheap for the transport to inspect. URI entity/version/resource components are numeric, and authority names are bounded by the uProtocol authority-name constraint.
+
+Variable metadata that is not naturally fixed-size for iceoryx2 user headers, such as `UEncoding`, `traceparent`, and `token`, SHOULD be encoded in an implementation metadata sidecar rather than forcing arbitrary fixed user-header capacities. The sidecar length is carried by `metadata_len`. The sidecar is transport metadata and *MUST NOT* be exposed as part of the frame payload by the language transport API.
+
+==== Implementation Metadata Sidecar
+
+The implementation metadata sidecar preserves variable frame metadata while keeping the iceoryx2 user header small and cheap to inspect.
+
+The sidecar *MUST* preserve:
+
+* `UEncoding.format_id`;
+* `UEncoding.content_type`;
+* `UEncoding.schema_ref`, when present;
+* `UAttributes.traceparent`, when present;
+* `UAttributes.token`, when present.
+
+The exact binary representation is language-binding specific unless and until this document standardizes cross-language iceoryx2 sidecar interoperability. Regardless of representation, the transport API *MUST* reconstruct the same native frame metadata on receive.
 
 ==== Message Priority
 
@@ -88,7 +146,9 @@ Currently not a clear path to map from uProtocol message priority to iceoryx2 Qo
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-payload-mapping~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-An iceoryx2 `Sample` that is used to convey a uProtocol message *MUST* contain in its payload the unaltered value of the UMessage's _payload_ field.
+An iceoryx2 `Sample` that is used to convey a uProtocol frame *MUST* expose through the uProtocol transport API the frame payload bytes exactly as produced by the selected `WireFormat` serializer.
+
+An implementation *MAY* reserve metadata sidecar bytes before the frame payload bytes in the underlying iceoryx2 sample payload. If it does so, those bytes *MUST* be hidden from `UTxBuffer.payload_mut()` and `UZeroCopyRxFrame.payload()`.
 --
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-payload-zero-copy~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]

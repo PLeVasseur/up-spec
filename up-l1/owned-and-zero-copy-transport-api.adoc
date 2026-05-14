@@ -1,0 +1,87 @@
+= Owned and Zero-Copy Transport API
+:toc:
+:sectnums:
+
+----
+SPDX-FileCopyrightText: 2026 Contributors to the Eclipse Foundation
+
+See the NOTICE file(s) distributed with this work for additional
+information regarding copyright ownership.
+
+This program and the accompanying materials are made available under
+the terms of the Apache License Version 2.0 which is available at
+https://www.apache.org/licenses/LICENSE-2.0
+
+SPDX-FileType: DOCUMENTATION
+SPDX-License-Identifier: Apache-2.0
+----
+
+== Overview
+
+The transport API is split into two capability interfaces.
+
+`UOwnedTransport` is for transports that move owned payload buffers. This is the default path for network and broker transports.
+
+`UZeroCopyTransport` is for transports that can safely loan transmit storage and return receive leases. This is the path for shared-memory transports.
+
+== Owned Transport
+
+----
+UOwnedTransport {
+  send_owned(frame: UOwnedFrame)
+  receive_owned(source_filter: UUri, sink_filter: Optional<UUri>) -> UOwnedFrame
+  register_owned_listener(source_filter: UUri, sink_filter: Optional<UUri>, listener: UOwnedListener)
+  unregister_owned_listener(source_filter: UUri, sink_filter: Optional<UUri>, listener: UOwnedListener)
+}
+----
+
+The owned path preserves a simple user experience for common transports. Applications build a frame, select a wire format, and send bytes. No zero-copy capability is required.
+
+== Zero-Copy Transport
+
+----
+UZeroCopyTransport {
+  reserve(header: UFrameHeader, payload_len: Integer, alignment: Integer) -> UTxBuffer
+  send_zero_copy(buffer: UTxBuffer)
+  receive_zero_copy(source_filter: UUri, sink_filter: Optional<UUri>) -> UZeroCopyRxFrame
+  register_zero_copy_listener(source_filter: UUri, sink_filter: Optional<UUri>, listener: UZeroCopyListener)
+  unregister_zero_copy_listener(source_filter: UUri, sink_filter: Optional<UUri>, listener: UZeroCopyListener)
+}
+----
+
+The zero-copy send sequence is:
+
+. Create a `UFrameHeader`.
+. Select a wire format.
+. Reserve a transmit loan for the encoded length and alignment.
+. Serialize directly into the transmit loan payload.
+. Commit with `send_zero_copy`.
+
+The zero-copy receive sequence is:
+
+. Receive a transport-owned lease.
+. Deserialize from the lease payload.
+. Use the decoded view while the lease is alive.
+. Drop the lease to release storage.
+
+== Listener Semantics
+
+Push delivery is orthogonal to owned versus zero-copy movement.
+
+* `UOwnedListener` receives `UOwnedFrame`.
+* `UZeroCopyListener` receives transport-specific zero-copy receive leases.
+
+Filters use the same source and sink matching rules defined for uProtocol transports.
+
+== Capability Rules
+
+* A transport that cannot loan storage implements `UOwnedTransport` only.
+* A transport that can loan storage implements `UZeroCopyTransport`.
+* A transport MAY implement both when it has a useful owned path and a true loaned path.
+* Returning `UNIMPLEMENTED` for zero-copy calls is correct when the underlying transport cannot provide zero-copy semantics.
+
+== Transport Guidance
+
+Zenoh is an owned-buffer transport unless a future Zenoh API exposes true transmit and receive loans.
+
+iceoryx2 is a zero-copy transport. Its mapping should use transmit loans, receive leases, and user-header metadata for `UFrameHeader` and `UEncoding`.
