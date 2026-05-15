@@ -54,6 +54,15 @@ UEncoding {
 
 `format_id` is a stable identifier for the codec family or IDL binding. `content_type` is the media type used by transport bindings, gateways, diagnostics, and tools. `schema_ref` can identify a schema URI, registry key, type hash, package-qualified type name, or another stable schema identity.
 
+`format_id` and `content_type` *MUST* be preserved exactly across transport boundaries. A present `schema_ref` *MUST* be non-empty. Bindings that receive an empty schema reference from a transport representation *MUST* treat it as absent rather than as a distinct schema identity.
+
+Typed deserialization compatibility is defined as follows:
+
+* `format_id` must match exactly.
+* `content_type` must match exactly.
+* If the selected `WireFormat` declares a `schema_ref`, the frame's `schema_ref` must match exactly.
+* If the selected `WireFormat` declares no `schema_ref`, it is a generic decoder for the matching `format_id` and `content_type` and may accept frames that carry a more specific `schema_ref`.
+
 Adding a new payload format MUST NOT require changing the transport API.
 
 == Frame Metadata
@@ -71,7 +80,9 @@ UFrameMetadata {
 
 Transport implementations MUST preserve both members when crossing a transport boundary. They MAY project individual `UAttributes` fields into transport-native metadata channels when doing so is cheaper than serializing the whole structure. They MAY also project `UEncoding` into transport-native metadata when the transport provides a suitable channel.
 
-If a binding provides typed deserialization helpers on an owned frame or a zero-copy receive lease, those helpers MUST verify that the frame's `UEncoding` matches the selected `WireFormat` before decoding payload bytes. A mismatch MUST fail rather than silently handing bytes to the wrong deserializer.
+If a binding provides typed deserialization helpers on an owned frame or a zero-copy receive lease, those helpers MUST verify that the frame's `UEncoding` is compatible with the selected `WireFormat` before decoding payload bytes. A mismatch MUST fail rather than silently handing bytes to the wrong deserializer.
+
+For Rust bindings, the concrete native frame API currently consists of `UAttributes`, `UEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UMessageBuilder`, `UTxBuffer`, and `UZeroCopyRxFrame`. These are binding-level frame APIs and are not generated protocol envelopes.
 
 == Native Message Builder
 
@@ -117,6 +128,8 @@ UTxBuffer {
 
 Serializers write directly into `payload_mut()`. Sending the buffer commits the transport-owned storage.
 
+After `send_zero_copy` succeeds or fails, applications MUST treat the transmit loan as consumed unless the language binding explicitly documents recoverable ownership on failure.
+
 == Receive Lease
 
 `UZeroCopyRxFrame` represents a receive-side lease. Dropping the lease releases the underlying transport storage.
@@ -152,6 +165,8 @@ Deserializer {
 
 The same serializer MUST be usable with an owned buffer or with a zero-copy transmit loan.
 
+Serializers MUST NOT write partial payloads silently. If the supplied output buffer is too small, serialization MUST fail. If a serializer reports an encoded length and then writes a different number of bytes, language bindings SHOULD treat that as an invalid payload error.
+
 == Acceptance Criteria
 
 * The frame API does not expose a format-specific generated envelope.
@@ -159,5 +174,6 @@ The same serializer MUST be usable with an owned buffer or with a zero-copy tran
 * The same serializer can target an owned buffer or a zero-copy transmit loan.
 * The deserializer can return values borrowing from a receive lease where the language supports that lifetime model.
 * Raw bytes are supported without an application schema.
-* Typed deserialization rejects wire-format metadata mismatches.
+* Typed deserialization rejects incompatible wire-format metadata.
+* `UEncoding` is preserved across transport boundaries, including non-empty `schema_ref` values.
 * Common frame builder helpers produce native frames, not generated envelopes.

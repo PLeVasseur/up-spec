@@ -125,7 +125,7 @@ someip_native_frame =
   sink_uri: string              // empty string means absent
   encoding_format_id: string
   encoding_content_type: string
-  encoding_schema_ref: string   // empty string means absent
+  encoding_schema_ref: string   // empty string means absent; present schema refs are non-empty
   request_id: optional<uuid>
   traceparent: optional<string>
   token: optional<string>
@@ -353,4 +353,3 @@ NOTE: handled by underlying SOME/IP library.
 === uDiscovery Translation
 
 *TODO:* _Pending uDiscovery v3 redesign_
-

@@ -37,6 +37,8 @@ UOwnedTransport {
 
 The owned path preserves a simple user experience for common transports. Applications build a frame, select a wire format, and send bytes. No zero-copy capability is required.
 
+An owned send transfers an owned frame into the transport implementation. The transport may copy the payload into protocol buffers, broker client buffers, sockets, files, or other owned storage as needed. Implementing the owned API alone makes no zero-copy claim.
+
 `receive_owned` MAY be implemented directly by a transport that has a native pull receive model. A language binding MAY also provide `receive_owned` as a listener-backed convenience over `register_owned_listener` and `unregister_owned_listener`. In that case the call registers a temporary listener for the supplied filters, returns the first matching owned frame, and unregisters the temporary listener before completing.
 
 The listener-backed `receive_owned` convenience does not change transport capability. It is still an owned-buffer receive path and MUST NOT be used to claim zero-copy behavior.
@@ -68,6 +70,8 @@ The zero-copy receive sequence is:
 . Use the decoded view while the lease is alive.
 . Drop the lease to release storage.
 
+The receive lease owns the lifetime of payload references returned from `UZeroCopyRxFrame.payload()`. Applications MUST NOT store borrowed payload views beyond the lease lifetime. Implementations that copy payload bytes into a hidden buffer before handing them to callers MUST NOT advertise that path as zero-copy.
+
 == Listener Semantics
 
 Push delivery is orthogonal to owned versus zero-copy movement.
@@ -83,7 +87,7 @@ Language bindings MAY expose an endpoint adapter that wraps either an owned tran
 
 For an owned transport, sending an owned frame through the adapter delegates to `send_owned`, and registering an owned listener delegates to `register_owned_listener`.
 
-For a zero-copy transport, sending an owned frame through the adapter reserves a transmit loan, copies the owned payload into the loan, and commits with `send_zero_copy`. Receiving through an owned listener adapter converts a zero-copy receive lease into an owned frame before invoking the owned listener.
+For a zero-copy transport, sending an owned frame through the adapter reserves a transmit loan, copies the owned payload into the loan, and commits with `send_zero_copy`. Receiving through an owned listener adapter converts a zero-copy receive lease into an owned frame before invoking the owned listener. These copies are intentional boundary conversions and MUST be documented by the binding exposing the adapter.
 
 This adapter is a boundary utility, not a claim that all transports are zero-copy. The zero-copy constructor MUST only accept transports that implement the true zero-copy capability interface.
 

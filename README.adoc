@@ -30,6 +30,8 @@ To achieve the above mentioned objectives, we have split the specifications into
  * xref:basics/README.adoc[*The Basics:*] Foundational principles and concepts of uProtocol (ex. such as addressing, IDs, message header definitions, etc...). 
 
  * xref:up-l1/README.adoc[*Transport layer (uP-L1):*] Common interface for sending and receiving of messages intended to be implemented employing a particular communication middleware technology (ex. MQTT, SOME/IP, HTTP, Zenoh, etc...).
++
+Native frame APIs, serializer-neutral payload metadata, and owned/zero-copy capability splits are defined in xref:up-l1/wire-format-and-frame-api.adoc[Wire Format and Frame API] and xref:up-l1/owned-and-zero-copy-transport-api.adoc[Owned and Zero-Copy Transport API]. These documents describe the transition away from generated transport envelopes for language bindings that expose native frame APIs.
 
  * xref:up-l2/README.adoc[*Communication Layer (uP-L2):*] The common transport agnostic, programming language specific, API for the publisher/subscriber, notification, and RPC messaging patterns used by application/service developers to communicate with each other.
 

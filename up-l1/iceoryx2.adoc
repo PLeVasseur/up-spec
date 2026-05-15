@@ -129,7 +129,7 @@ The prefix *MUST* preserve:
 
 * `UEncoding.format_id`;
 * `UEncoding.content_type`;
-* `UEncoding.schema_ref`, when present;
+* non-empty `UEncoding.schema_ref`, when present;
 * `UAttributes.source.authority_name`;
 * `UAttributes.sink.authority_name`, when a sink is present;
 * `UAttributes.traceparent`, when present;
@@ -175,7 +175,7 @@ An implementation *MAY* reserve metadata prefix bytes before the frame payload b
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-payload-zero-copy~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-An iceoryx2 message that is used to convey a uProtocol message *MUST* be zero-copy and shared-memory compatible:
+An iceoryx2 frame that is used to convey a uProtocol frame *MUST* be zero-copy and shared-memory compatible:
 
 * is self contained, no heap, no pointers to external sources, no handles to external resources (files etc)
 * has a uniform memory representation
