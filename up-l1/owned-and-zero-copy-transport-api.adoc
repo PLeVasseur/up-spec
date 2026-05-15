@@ -39,9 +39,9 @@ The owned path preserves a simple user experience for common transports. Applica
 
 An owned send transfers an owned frame into the transport implementation. The transport may copy the payload into protocol buffers, broker client buffers, sockets, files, or other owned storage as needed. Implementing the owned API alone makes no zero-copy claim.
 
-`receive_owned` MAY be implemented directly by a transport that has a native pull receive model. A language binding MAY also provide `receive_owned` as a listener-backed convenience over `register_owned_listener` and `unregister_owned_listener`. In that case the call registers a temporary listener for the supplied filters, returns the first matching owned frame, and unregisters the temporary listener before completing.
+`receive_owned` MAY be implemented directly by a transport that has a native pull receive model. If a transport does not support pull receive, the language binding's default implementation MUST fail with `UCode.UNIMPLEMENTED`.
 
-The listener-backed `receive_owned` convenience does not change transport capability. It is still an owned-buffer receive path and MUST NOT be used to claim zero-copy behavior.
+Language bindings MUST NOT hide a listener-backed temporary registration behind the default `receive_owned` implementation unless the binding can guarantee cleanup when the receive future is cancelled. A listener-backed convenience, if provided, should be a separately documented helper with explicit lifecycle semantics. Such a helper does not change transport capability and MUST NOT be used to claim zero-copy behavior.
 
 == Zero-Copy Transport
 
@@ -97,7 +97,7 @@ This adapter is a boundary utility, not a claim that all transports are zero-cop
 * A transport that can loan storage implements `UZeroCopyTransport`.
 * A transport MAY implement both when it has a useful owned path and a true loaned path.
 * Returning `UNIMPLEMENTED` for zero-copy calls is correct when the underlying transport cannot provide zero-copy semantics.
-* Returning `UNIMPLEMENTED` for direct pull receive remains valid when a binding does not provide a listener-backed receive convenience.
+* Returning `UNIMPLEMENTED` for direct pull receive remains valid when a transport does not support a native pull receive model.
 
 == Transport Guidance
 

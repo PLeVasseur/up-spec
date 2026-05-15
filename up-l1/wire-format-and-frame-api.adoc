@@ -80,6 +80,8 @@ UFrameMetadata {
 
 Transport implementations MUST preserve both members when crossing a transport boundary. They MAY project individual `UAttributes` fields into transport-native metadata channels when doing so is cheaper than serializing the whole structure. They MAY also project `UEncoding` into transport-native metadata when the transport provides a suitable channel.
 
+Language bindings SHOULD expose validators for native `UAttributes` and `UFrameMetadata`. Checked construction paths MUST validate message identifiers, URI roles, Request TTL, RPC priority, Response request IDs, and message-type-specific fields. Bindings MAY expose unchecked convenience constructors for low-level adapters and tests, but those constructors MUST be documented as unchecked and paired with checked alternatives.
+
 If a binding provides typed deserialization helpers on an owned frame or a zero-copy receive lease, those helpers MUST verify that the frame's `UEncoding` is compatible with the selected `WireFormat` before decoding payload bytes. A mismatch MUST fail rather than silently handing bytes to the wrong deserializer.
 
 For Rust bindings, the concrete native frame API currently consists of `UAttributes`, `UEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UMessageBuilder`, `UTxBuffer`, and `UZeroCopyRxFrame`. These are binding-level frame APIs and are not generated protocol envelopes.
@@ -101,6 +103,10 @@ A native builder:
 Builder helpers MUST validate message-type-specific metadata constraints before producing a frame. For example, Request and Response frames require RPC priority classes, Request frames require a non-zero TTL, Response frames require a request identifier, and request-only authorization fields MUST NOT appear on Publish or Notification frames.
 
 The presence of a native builder MUST NOT require transports to accept generated message envelopes. Transports still consume native frame metadata plus payload bytes.
+
+== Service DTO Payloads
+
+Native frames do not remove service-defined payload wire formats. If a service API, such as uSubscription, specifies Protocol Buffers DTOs, the binding MUST carry those DTOs as protobuf payload bytes inside the native frame when that service API is used. The generated DTO is the application payload representation, not the transport envelope.
 
 == Owned Frame
 
