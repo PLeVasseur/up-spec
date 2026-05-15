@@ -27,7 +27,7 @@ This specification defines the transport layer's abstract API which is mapped to
 
 The serialization-neutral frame model, frame metadata bundle, typed serializer contract, and native builder expectations are defined in xref:wire-format-and-frame-api.adoc[Wire Format and Frame API]. Owned-buffer and zero-copy transport capabilities are defined in xref:owned-and-zero-copy-transport-api.adoc[Owned and Zero-Copy Transport API].
 
-The UML below defines the abstract transport contract in terms of `UMessage`. Language bindings that expose native frame APIs MAY split this contract into owned-buffer and zero-copy capability interfaces, provided they preserve the same uProtocol metadata, payload bytes, filtering, and delivery semantics.
+The UML below defines the abstract transport contract in terms of `UMessage`, the protocol-level message concept used throughout this specification. Language bindings MAY expose that contract using native frame types instead of generated message-envelope types. A native frame API is a binding-level representation of the same abstract message metadata and payload bytes; it is not a new protocol envelope. Language bindings that expose native frame APIs MAY split this contract into owned-buffer and zero-copy capability interfaces, provided they preserve the same uProtocol metadata, payload bytes, filtering, and delivery semantics.
 
 The Transport Layer API is defined using UML2 notation.
 

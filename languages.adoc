@@ -51,6 +51,15 @@ A language library
 * *MUST* contain a `README` file that explains how to build and use the library.
 --
 
+Language libraries that expose native frame or zero-copy APIs instead of a generated message envelope at their public transport boundary
+
+[.specitem,oft-sid="dsn~up-language-native-frame-api~1",oft-needs="impl,uman",oft-title="Native frame APIs preserve abstract message semantics",oft-tags="LanguageLibrary"]
+--
+* *MUST* document how the binding-level frame representation maps to the abstract uProtocol message metadata, payload bytes, filtering rules, and delivery semantics defined by the Transport Layer API.
+* *MUST NOT* require transport implementations to wrap application payload bytes in a format-specific generated envelope when the same metadata can be represented by the binding-level frame type.
+* *MUST* document any adapter that copies between owned-buffer and zero-copy transport capabilities, including the copy boundary and whether the adapter is intended for routing rather than end-to-end zero-copy delivery.
+--
+
 === Build
 
 A language library
