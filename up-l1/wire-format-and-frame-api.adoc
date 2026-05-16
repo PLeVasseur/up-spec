@@ -84,7 +84,7 @@ Language bindings SHOULD expose validators for native `UAttributes` and `UFrameM
 
 If a binding provides typed deserialization helpers on an owned frame or a zero-copy receive lease, those helpers MUST verify that the frame's `UEncoding` is compatible with the selected `WireFormat` before decoding payload bytes. A mismatch MUST fail rather than silently handing bytes to the wrong deserializer.
 
-For Rust bindings, the concrete native frame API currently consists of `UAttributes`, `UEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UMessageBuilder`, `UTxBuffer`, and `UZeroCopyRxFrame`. These are binding-level frame APIs and are not generated protocol envelopes.
+For Rust bindings, the concrete native frame API currently consists of `UAttributes`, `UEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UFrameBuilder`, `UTxBuffer`, and `UZeroCopyRxFrame`. These are binding-level frame APIs and are not generated protocol envelopes.
 
 == Native Message Builder
 

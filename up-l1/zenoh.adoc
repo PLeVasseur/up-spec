@@ -33,7 +33,7 @@ Each transport implementing this specification **MUST** use major version `1` of
 
 == UMessage Mapping
 
-A uProtocol message consists of _UAttributes_ and optional payload. The following sections define how these are mapped to/from Zenoh Resources.
+A uProtocol message consists of _UAttributes_ and optional payload. Native frame language bindings also carry explicit _UEncoding_ metadata for the payload wire representation. The following sections define how these are mapped to/from Zenoh Resources.
 
 === UAttributes
 
@@ -54,6 +54,42 @@ a| *MUST* be set to a single byte representing the UProtocol major version (`0x0
 a| *MUST* be set to the bytes representing the protobuf encoding of the UAttributes object as defined by link:../up-core-api/uprotocol/v1/uattributes.proto
 
 |===
+
+Native-frame language bindings *MAY* use a binding-defined Zenoh attachment representation instead of a serialized generated `UAttributes` blob, provided the representation preserves the same abstract uProtocol message semantics. Such a representation *MUST* preserve all native `UAttributes` fields required by xref:wire-format-and-frame-api.adoc[Wire Format and Frame API] and *MUST* preserve `UEncoding.format_id`, `UEncoding.content_type`, and any non-empty `UEncoding.schema_ref` across the Zenoh boundary.
+
+For Rust native-frame interoperability, the attachment representation is:
+
+[source]
+----
+zenoh_native_frame_attachment =
+  uprotocol_major_version: uint8 = 1
+  magic[4] = "UFRM"
+  id_msb: uint64 little-endian
+  id_lsb: uint64 little-endian
+  message_type: uint8
+  priority: uint8
+  ttl: optional<uint32 little-endian>
+  source_uri: string
+  sink_uri: string              // empty string means absent
+  encoding_format_id: string
+  encoding_content_type: string
+  encoding_schema_ref: string   // empty string means absent; present schema refs are non-empty
+  request_id: optional<uuid>
+  traceparent: optional<string>
+  token: optional<string>
+  permission_level: optional<uint32 little-endian>
+  commstatus: optional<uint8>
+
+string =
+  len: uint32 little-endian
+  utf8_bytes[len]
+
+optional<T> =
+  present: uint8      // 0 = absent, 1 = present
+  T                   // present only when present == 1
+----
+
+Implementations *MUST* reject unknown magic values, malformed UTF-8, invalid optional markers, invalid UUIDs, and trailing attachment bytes. Implementations *MUST* reconstruct the same native frame metadata before delivering the frame to uProtocol application code.
 
 
 ==== Message Type
@@ -90,6 +126,8 @@ The uProtocol service classes *MUST* be mapped to Zenoh message priority levels 
 [.specitem,oft-sid="dsn~up-transport-zenoh-payload-mapping~1",oft-covers="req~utransport-send-preserve-data~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
 A Zenoh message that is used to convey a uProtocol message *MUST* contain in its payload the unaltered value of the UMessage's _payload_ field.
+
+For native-frame language bindings, the Zenoh payload *MUST* contain exactly the application payload bytes produced by the selected `WireFormat` serializer. Binding-specific attachment metadata *MUST NOT* be exposed as part of the frame payload.
 --
 
 == Zenoh Key Structure
