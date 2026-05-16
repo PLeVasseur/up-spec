@@ -57,7 +57,7 @@ UZeroCopyTransport {
 
 The zero-copy send sequence is:
 
-. Create frame metadata, represented in Rust today as `UFrameMetadata`.
+. Create frame metadata.
 . Select a wire format.
 . Reserve a transmit loan for the encoded length and alignment.
 . Serialize directly into the transmit loan payload.
@@ -71,6 +71,8 @@ The zero-copy receive sequence is:
 . Drop the lease to release storage.
 
 The receive lease owns the lifetime of payload references returned from `UZeroCopyRxFrame.payload()`. Applications MUST NOT store borrowed payload views beyond the lease lifetime. Implementations that copy payload bytes into a hidden buffer before handing them to callers MUST NOT advertise that path as zero-copy.
+
+Payload encoding presence follows xref:wire-format-and-frame-api.adoc[Wire Format and Frame API]: a zero-length reservation with absent encoding represents no payload, while a present payload, including a present empty payload, requires encoding metadata unless the binding explicitly documents a raw-bytes default.
 
 == Listener Semantics
 

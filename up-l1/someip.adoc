@@ -107,15 +107,15 @@ The following sections highlight the mapping of xref:../basics/uattributes.adoc[
 
 Some SOME/IP bindings, including `vsomeip`, expose only the SOME/IP payload bytes to language-level transport implementations and do not expose a protocol-native metadata channel large enough to preserve all uProtocol frame metadata. Such bindings *MAY* encode a native frame prefix inside the SOME/IP payload.
 
-This prefix is a transport binding artifact. It *MUST NOT* be modeled as a generated Protocol Buffers transport envelope and *MUST NOT* constrain the application payload `WireFormat`. The application payload begins after the native frame prefix and remains exactly the bytes produced by the selected serializer.
+This prefix is a transport binding artifact. It *MUST NOT* be modeled as a generated Protocol Buffers transport envelope and *MUST NOT* constrain the application payload format. The application payload begins after the native frame prefix and remains exactly the bytes produced by the selected serializer.
 
-For Rust `vsomeip` interoperability, the native frame prefix is:
+For `vsomeip` native-frame interoperability, the binding prefix is:
 
 [source]
 ----
 someip_native_frame =
   magic[4] = "USIP"
-  version: uint8 = 1
+  version: uint8 = 2
   id_msb: uint64 little-endian
   id_lsb: uint64 little-endian
   message_type: uint8
@@ -123,15 +123,18 @@ someip_native_frame =
   ttl: optional<uint32 little-endian>
   source_uri: string
   sink_uri: string              // empty string means absent
-  encoding_format_id: string
-  encoding_content_type: string
-  encoding_schema_ref: string   // empty string means absent; present schema refs are non-empty
+  encoding: optional<encoding>
   request_id: optional<uuid>
   traceparent: optional<string>
   token: optional<string>
   permission_level: optional<uint32 little-endian>
   commstatus: optional<uint8>
-  application_payload: bytes
+  application_payload: bytes    // remaining bytes after the prefix
+
+encoding =
+  format_id: string
+  content_type: string
+  schema_ref: string            // empty string means absent; present schema refs are non-empty
 
 string =
   len: uint32 little-endian
@@ -142,7 +145,7 @@ optional<T> =
   T                   // present only when present == 1
 ----
 
-Implementations *MUST* reject unknown magic values, unsupported versions, malformed UTF-8, invalid optional markers, invalid UUIDs, and oversized metadata fields. Implementations *MUST* reconstruct the original native frame metadata before delivering the frame to uProtocol application code.
+If `encoding` is absent, `application_payload` *MUST* be empty and the delivered frame has no payload. If `encoding` is present, `application_payload` is present and may be empty. Implementations *MUST* reject unknown magic values, unsupported versions, malformed UTF-8, invalid optional markers, invalid UUIDs, oversized metadata fields, and non-empty application payload bytes without encoding metadata. Implementations *MUST* reconstruct the original native frame metadata before delivering the frame to uProtocol application code.
 
 ==== Common UMessage Attributes
 

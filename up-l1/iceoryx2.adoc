@@ -40,7 +40,7 @@ All types of uProtocol messages *MUST* be transferred using iceoryx2's PublishSu
 
 == Frame Mapping
 
-A native uProtocol frame consists of _UAttributes_, wire-format metadata, and optional payload bytes. The following sections define how these are mapped to/from iceoryx2 Services without requiring a generated Protocol Buffers envelope.
+A native uProtocol frame consists of _UAttributes_, optional payload wire-format metadata, and optional payload bytes. The following sections define how these are mapped to/from iceoryx2 Services without requiring a generated Protocol Buffers envelope.
 
 === UAttributes
 
@@ -113,7 +113,7 @@ a| *MUST* indicate whether a sink exists. When present, the sink fields *MUST* b
 a| *MUST* identify the number of implementation metadata sidecar bytes preceding the frame payload bytes in the loaned iceoryx2 sample payload.
 
 | `payload_len`, `payload_alignment`
-a| *MUST* describe the payload loan size and requested serializer alignment.
+a| *MUST* describe the payload loan size and requested serializer alignment. `payload_len` equal to zero with absent encoding represents no payload; `payload_len` equal to zero with present encoding represents a present empty payload.
 
 |===
 
@@ -127,9 +127,7 @@ The implementation metadata prefix preserves variable frame metadata while keepi
 
 The prefix *MUST* preserve:
 
-* `UEncoding.format_id`;
-* `UEncoding.content_type`;
-* non-empty `UEncoding.schema_ref`, when present;
+* `UEncoding`, when payload encoding is present;
 * `UAttributes.source.authority_name`;
 * `UAttributes.sink.authority_name`, when a sink is present;
 * `UAttributes.traceparent`, when present;
@@ -143,22 +141,25 @@ metadata_prefix =
   magic[4] = "UFM1"
   source_authority: string
   sink_authority: optional<string>
+  encoding: optional<encoding>
+  traceparent: optional<string>
+  token: optional<string>
+
+encoding =
   format_id: string
   content_type: string
   schema_ref: optional<string>
-  traceparent: optional<string>
-  token: optional<string>
 
 string =
   len: uint32 little-endian
   utf8_bytes[len]
 
-optional<string> =
+optional<T> =
   present: uint8      // 0 = absent, 1 = present
-  string              // present only when present == 1
+  T                   // present only when present == 1
 ----
 
-Implementations *MUST* reject metadata prefixes with an unknown magic value, malformed UTF-8, invalid optional markers, trailing bytes, or lengths that exceed the sample payload. Regardless of representation, the transport API *MUST* reconstruct the same native frame metadata on receive.
+Implementations *MUST* reject metadata prefixes with an unknown magic value, malformed UTF-8, invalid optional markers, trailing bytes, lengths that exceed the sample payload, or non-empty payload bytes without encoding metadata. Regardless of representation, the transport API *MUST* reconstruct the same native frame metadata on receive.
 
 ==== Message Priority
 
@@ -168,14 +169,16 @@ Currently not a clear path to map from uProtocol message priority to iceoryx2 Qo
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-payload-mapping~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-An iceoryx2 `Sample` that is used to convey a uProtocol frame *MUST* expose through the uProtocol transport API the frame payload bytes exactly as produced by the selected `WireFormat` serializer.
+An iceoryx2 `Sample` that is used to convey a uProtocol frame *MUST* expose through the uProtocol transport API the frame payload bytes exactly as produced by the selected serializer. Those bytes are arbitrary serializer output; they are not required to be represented as a generated protocol envelope.
 
-An implementation *MAY* reserve metadata prefix bytes before the frame payload bytes in the underlying iceoryx2 sample payload. If it does so, those bytes *MUST* be hidden from `UTxBuffer.payload_mut()` and `UZeroCopyRxFrame.payload()`.
+An implementation *MAY* reserve metadata prefix bytes before the frame payload bytes in the underlying iceoryx2 sample payload. If it does so, those bytes *MUST* be hidden from the binding's transmit payload view and receive payload view.
+
+When payload bytes are present, payload encoding metadata *MUST* be present. When payload encoding metadata is absent, `payload_len` *MUST* be zero and the frame has no payload.
 --
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-payload-zero-copy~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-An iceoryx2 frame that is used to convey a uProtocol frame *MUST* be zero-copy and shared-memory compatible:
+The iceoryx2 sample storage and user header used to convey a uProtocol frame *MUST* be zero-copy and shared-memory compatible:
 
 * is self contained, no heap, no pointers to external sources, no handles to external resources (files etc)
 * has a uniform memory representation
@@ -183,7 +186,9 @@ An iceoryx2 frame that is used to convey a uProtocol frame *MUST* be zero-copy a
 * has a lifetime of the entire program duration
 --
 
-The cleanest way to describe this is to say that the payload definition **MUST** have the link:https://docs.rs/iceoryx2/0.6.1/iceoryx2/prelude/trait.ZeroCopySend.html[`ZeroCopySend`] trait implemented for it if written in Rust.
+The application payload exposed by the uProtocol transport API is a byte range within that sample storage. It may contain bytes produced by any selected serializer. Implementations *MAY* insert alignment padding between hidden metadata and exposed payload bytes when required by the serializer alignment request, but padding *MUST NOT* be exposed as payload and *MUST* be accounted for in the sample layout.
+
+Rust binding note: the storage and user-header types used with iceoryx2 **MUST** implement link:https://docs.rs/iceoryx2/0.6.1/iceoryx2/prelude/trait.ZeroCopySend.html[`ZeroCopySend`].
 
 That encapsulates the following additional properties in Rust:
 

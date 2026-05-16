@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
 
 == Goal
 
-The Transport Layer frame API is serialization-neutral. A frame carries native uProtocol routing metadata, wire-format metadata, and payload bytes. The frame API MUST NOT require a format-specific generated message envelope.
+The Transport Layer frame API is serialization-neutral. A frame carries binding-native uProtocol routing metadata, optional payload wire-format metadata, and optional payload bytes. The frame API MUST NOT require a format-specific generated message envelope.
 
 == Native Frame Metadata
 
@@ -37,12 +37,20 @@ Optional fields:
 * `ttl`: message time-to-live in milliseconds.
 * `request_id`: request UUID for response correlation.
 * `traceparent`: distributed tracing context.
+* `token`: access token.
+* `permission_level`: authorization permission level.
+* `commstatus`: communication status code.
 
 The metadata model is native to the language binding. It is the binding representation of the protocol-level `UMessage` metadata used by the abstract Transport Layer API. It is not defined as a generated envelope requirement.
 
+[.specitem,oft-sid="dsn~up-l1-native-frame-metadata-fields~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Language bindings that expose frame metadata *MUST* preserve all required and optional `UAttributes` fields listed above when crossing a transport boundary, unless the existing transport mapping explicitly defines a lossy projection for that field.
+--
+
 == Wire Encoding
 
-`UEncoding` identifies the payload wire representation.
+`UEncoding` identifies the payload wire representation. It is present only when a frame carries a payload.
 
 ----
 UEncoding {
@@ -60,31 +68,36 @@ Typed deserialization compatibility is defined as follows:
 
 * `format_id` must match exactly.
 * `content_type` must match exactly.
-* If the selected `WireFormat` declares a `schema_ref`, the frame's `schema_ref` must match exactly.
-* If the selected `WireFormat` declares no `schema_ref`, it is a generic decoder for the matching `format_id` and `content_type` and may accept frames that carry a more specific `schema_ref`.
+* If the selected payload format declares a `schema_ref`, the frame's `schema_ref` must match exactly.
+* If the selected payload format declares no `schema_ref`, it is a generic decoder for the matching `format_id` and `content_type` and may accept frames that carry a more specific `schema_ref`.
 
 Adding a new payload format MUST NOT require changing the transport API.
+
+[.specitem,oft-sid="dsn~up-l1-frame-payload-encoding-presence~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Frames without payload *MUST NOT* carry payload encoding metadata. Frames with payload bytes *MUST* carry payload encoding metadata, unless a language binding explicitly documents a raw-bytes default for that API. A present empty payload is distinct from no payload and carries payload encoding metadata. A receiver that observes payload bytes without encoding metadata and has no such documented raw default *MUST* reject the frame as invalid.
+--
 
 == Frame Metadata
 
 ----
 UFrameMetadata {
   attributes: UAttributes,
-  encoding: UEncoding
+  encoding: Optional<UEncoding>
 }
 ----
 
-`UFrameMetadata` combines native uProtocol metadata with explicit wire-format metadata.
+`UFrameMetadata` combines native uProtocol metadata with optional payload wire-format metadata.
 
 `UFrameMetadata` is a language-binding frame metadata bundle. It is not a new generated transport envelope and it is not intended to replace `UAttributes` as the protocol metadata model.
 
-Transport implementations MUST preserve both members when crossing a transport boundary. They MAY project individual `UAttributes` fields into transport-native metadata channels when doing so is cheaper than serializing the whole structure. They MAY also project `UEncoding` into transport-native metadata when the transport provides a suitable channel.
+Transport implementations MUST preserve both members when crossing a transport boundary. They MAY project individual `UAttributes` fields into transport-native metadata channels when doing so is cheaper than serializing the whole structure. They MAY also project `UEncoding` into transport-native metadata when the transport provides a suitable channel. When `encoding` is absent, the frame has no payload encoding.
 
 Language bindings SHOULD expose validators for native `UAttributes` and `UFrameMetadata`. Checked construction paths MUST validate message identifiers, URI roles, Request TTL, RPC priority, Response request IDs, and message-type-specific fields. Bindings MAY expose unchecked convenience constructors for low-level adapters and tests, but those constructors MUST be documented as unchecked and paired with checked alternatives.
 
-If a binding provides typed deserialization helpers on an owned frame or a zero-copy receive lease, those helpers MUST verify that the frame's `UEncoding` is compatible with the selected `WireFormat` before decoding payload bytes. A mismatch MUST fail rather than silently handing bytes to the wrong deserializer.
+If a binding provides typed deserialization helpers on an owned frame or a zero-copy receive lease, those helpers MUST verify that the frame's `UEncoding` is compatible with the selected payload format before decoding payload bytes. A mismatch MUST fail rather than silently handing bytes to the wrong deserializer.
 
-For Rust bindings, the concrete native frame API currently consists of `UAttributes`, `UEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UFrameBuilder`, `UTxBuffer`, and `UZeroCopyRxFrame`. These are binding-level frame APIs and are not generated protocol envelopes.
+Rust binding note: the concrete frame API currently consists of `UAttributes`, `UEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UFrameBuilder`, `UTxBuffer`, and `UZeroCopyRxFrame`. These are binding-level frame APIs and are not generated protocol envelopes.
 
 == Native Message Builder
 
@@ -92,7 +105,7 @@ Language bindings SHOULD provide builder ergonomics for common frame constructio
 
 A native builder:
 
-* MUST build the language binding's native frame type, for example `UOwnedFrame`, rather than a generated transport envelope;
+* MUST build the language binding's native frame type rather than a generated transport envelope;
 * MUST support Publish, Notification, Request, and Response frames;
 * SHOULD support creating a Response from a Request's `UAttributes`;
 * SHOULD support raw payload bytes;
@@ -113,20 +126,20 @@ Native frames do not remove service-defined payload wire formats. If a service A
 == Owned Frame
 
 ----
-UOwnedFrame {
+OwnedFrame {
   metadata: UFrameMetadata,
-  payload: Bytes
+  payload: Optional<Bytes>
 }
 ----
 
-`UOwnedFrame` owns its payload bytes. This is the natural representation for network, brokered, file, or in-process transports that accept application-owned buffers.
+An owned frame owns its payload bytes when payload is present. This is the natural representation for network, brokered, file, or in-process transports that accept application-owned buffers.
 
 == Transmit Loan
 
-`UTxBuffer` represents mutable transmit storage reserved from a zero-copy transport.
+A transmit loan represents mutable transmit storage reserved from a zero-copy transport.
 
 ----
-UTxBuffer {
+TransmitLoan {
   metadata() -> UFrameMetadata
   metadata_mut() -> UFrameMetadata
   payload() -> BytesView
@@ -134,16 +147,16 @@ UTxBuffer {
 }
 ----
 
-Serializers write directly into `payload_mut()`. Sending the buffer commits the transport-owned storage.
+Serializers write directly into `payload_mut()` when a payload is present. Sending the buffer commits the transport-owned storage.
 
 After `send_zero_copy` succeeds or fails, applications MUST treat the transmit loan as consumed unless the language binding explicitly documents recoverable ownership on failure.
 
 == Receive Lease
 
-`UZeroCopyRxFrame` represents a receive-side lease. Dropping the lease releases the underlying transport storage.
+A zero-copy receive frame represents a receive-side lease. Dropping the lease releases the underlying transport storage.
 
 ----
-UZeroCopyRxFrame {
+ReceiveLease {
   metadata() -> UFrameMetadata
   payload() -> BytesView
 }
@@ -156,7 +169,7 @@ Decoded values MAY borrow from the receive lease. Such values MUST NOT outlive t
 Language bindings SHOULD provide a serializer contract equivalent to:
 
 ----
-WireFormat {
+PayloadFormat {
   name() -> String
   encoding() -> UEncoding
 }
@@ -178,7 +191,7 @@ Serializers MUST NOT write partial payloads silently. If the supplied output buf
 == Acceptance Criteria
 
 * The frame API does not expose a format-specific generated envelope.
-* Applications can select any wire format by providing serializer and deserializer implementations.
+* Applications can select any payload format by providing serializer and deserializer implementations.
 * The same serializer can target an owned buffer or a zero-copy transmit loan.
 * The deserializer can return values borrowing from a receive lease where the language supports that lifetime model.
 * Raw bytes are supported without an application schema.

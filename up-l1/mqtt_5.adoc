@@ -139,7 +139,7 @@ a| A tracing identifier to use for correlating messages across the system
 a| The type of data contained in the message's payload
 
 * Generated-envelope language bindings *MUST* set this to the link:../up-core-api/uprotocol/v1/uattributes.proto[UPayloadFormat enum] integer value's decimal string representation.
-* Native-frame language bindings *MUST* set this to `UEncoding.content_type`.
+* Native-frame language bindings *MUST* set this to `UEncoding.content_type` when payload encoding is present and *MUST NOT* set it for frames without payload.
 
 Note that the generated enum's integer value is used instead of the _uprotocol.mime_type_ option's value in generated-envelope bindings in order to reduce the overall size of the PUBLISH packet.
 
@@ -147,14 +147,14 @@ Note that the generated enum's integer value is used instead of the _uprotocol.m
 | User Property [key: _uformatid_]
 a| Stable identifier for the payload codec family or IDL binding.
 
-* Native-frame language bindings *MUST* set this property to `UEncoding.format_id`.
+* Native-frame language bindings *MUST* set this property to `UEncoding.format_id` when payload encoding is present and *MUST NOT* set it for frames without payload.
 * Receivers that support native frames *MUST* preserve this value exactly.
 
 | `UEncoding.schema_ref`
 | User Property [key: _uschemaref_]
 a| Optional stable schema identity for the payload.
 
-* Native-frame language bindings *MUST* set this property if, and only if, `UEncoding.schema_ref` is present.
+* Native-frame language bindings *MUST* set this property if, and only if, payload encoding is present and `UEncoding.schema_ref` is present.
 * Empty schema references *MUST* be treated as absent.
 * Receivers that support native frames *MUST* preserve non-empty values exactly.
 
@@ -166,7 +166,9 @@ a| Optional stable schema identity for the payload.
 --
 An MQTT 5 PUBLISH packet that is used to convey a uProtocol message *MUST* contain in its payload the unaltered value of the UMessage's _payload_ field.
 
-For native-frame language bindings, the MQTT 5 PUBLISH payload *MUST* contain exactly the application payload bytes produced by the selected `WireFormat` serializer. Native frame metadata is carried in MQTT properties and *MUST NOT* be prepended to or otherwise exposed as part of the application payload.
+For native-frame language bindings, the MQTT 5 PUBLISH payload *MUST* contain exactly the application payload bytes produced by the selected serializer. Native frame metadata is carried in MQTT properties and *MUST NOT* be prepended to or otherwise exposed as part of the application payload.
+
+Frames without payload *MUST* be sent with an empty PUBLISH payload and without native-frame payload encoding properties. Receivers *MUST* reject a non-empty PUBLISH payload that lacks native-frame payload encoding properties, unless the language binding explicitly documents a raw-bytes default.
 --
 
 
