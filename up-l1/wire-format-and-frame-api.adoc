@@ -158,14 +158,16 @@ A zero-copy receive frame represents a receive-side lease. Dropping the lease re
 ----
 ReceiveLease {
   metadata() -> UFrameMetadata
-  payload() -> BytesView
   payload_len() -> Integer
-  payload_contiguous() -> Optional<BytesView>
-  for_each_payload_slice(visitor)
+  payload_reader() -> OrderedByteReader
+  payload_slices() -> OrderedByteSliceIterator
+  try_contiguous_payload() -> Optional<BytesView>
 }
 ----
 
-The payload may be backed by one contiguous region or by multiple ordered byte slices, depending on the transport. `payload_contiguous()` returns a borrowed byte view only when the payload is available as one contiguous region. `for_each_payload_slice` exposes the ordered payload slices without requiring a coalescing copy.
+The payload may be backed by one contiguous region or by multiple ordered byte slices, depending on the transport. `payload_reader()` is the natural decode path for segmented-capable transports. `payload_slices()` exposes ordered payload slices without requiring a coalescing copy. `try_contiguous_payload()` returns a borrowed byte view only when the payload is available as one contiguous region.
+
+Language bindings MAY expose a separate contiguous receive capability with an explicit method such as `contiguous_payload()` for transports that guarantee contiguity. Copy helpers such as `payload_to_vec()` MUST be named and exposed as opt-in copying helpers, not as the primary zero-copy receive path.
 
 Decoded values MAY borrow from the receive lease when the selected deserializer can operate on the exposed payload shape. Such values MUST NOT outlive the lease. Borrowed deserializers that require `BytesView` contiguity MUST fail rather than silently copying segmented transport storage.
 

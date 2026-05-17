@@ -72,7 +72,7 @@ The zero-copy receive sequence is:
 
 The receive lease owns the lifetime of payload references returned from `UZeroCopyRxFrame`. Applications MUST NOT store borrowed payload views beyond the lease lifetime. Implementations that copy payload bytes into a hidden buffer before handing them to callers MUST NOT advertise that path as zero-copy.
 
-Receive payloads MAY be contiguous or segmented. Language bindings SHOULD expose both a contiguous convenience view and an ordered slice iteration view. Generic adapters that convert zero-copy receive leases to owned frames MUST copy from the ordered slice view so transports such as Zenoh can avoid hidden receive-side coalescing.
+Receive payloads MAY be contiguous or segmented. Language bindings SHOULD expose a reader-oriented decode path and an ordered slice iteration view on the base receive lease. Contiguous borrowed access SHOULD be an explicit capability for transports that guarantee contiguity. Generic adapters that convert zero-copy receive leases to owned frames MUST copy from the ordered slice view so transports such as Zenoh can avoid hidden receive-side coalescing.
 
 Payload encoding presence follows xref:wire-format-and-frame-api.adoc[Wire Format and Frame API]: a zero-length reservation with absent encoding represents no payload, while a present payload, including a present empty payload, requires encoding metadata unless the binding explicitly documents a raw-bytes default.
 
