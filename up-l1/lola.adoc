@@ -26,9 +26,23 @@ Eclipse S-CORE LoLa is a low-latency shared-memory communication binding exposed
 
 uProtocol frames are mapped to LoLa events using type-erased generic APIs. A transport implementation SHOULD use `GenericSkeleton`, `GenericSkeletonEvent`, `GenericProxy`, and `GenericProxyEvent` with `SampleAllocateePtr<void>` and `SamplePtr<void>` rather than requiring generated application data types for every uProtocol payload schema.
 
+An implementation using S-CORE generic events MUST ensure that the producer writes to the same raw event slot storage that `GenericProxyEvent` exposes to consumers. The middleware loan object and slot ownership metadata may be distinct from the byte address exposed to serializers.
+
 [.specitem,oft-sid="dsn~up-transport-lola-generic-events~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
 A LoLa uProtocol transport *MUST* use a LoLa event sample as the storage unit for one uProtocol native frame. The uProtocol payload bytes *MUST* be exposed as bytes within that sample and *MUST NOT* require a generated service-specific payload type at the transport API boundary.
+--
+
+The receive side follows the same ownership shape as the S-CORE Rust binding: a provider/skeleton owns transmit allocation and send, while each consumer subscription owns its receive queue and `SamplePtr` lifetimes.
+
+[.specitem,oft-sid="dsn~up-transport-lola-subscription-fanout~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+When multiple uProtocol listeners match the same LoLa event, the transport implementation *SHOULD* create an independent LoLa proxy subscription for each listener registration. A `SamplePtr<void>` lease is consumed by one subscriber, so local application listeners and streamer listeners *MUST NOT* be multiplexed through a single consumed receive sample unless the implementation explicitly copies for secondary listeners.
+--
+
+[.specitem,oft-sid="dsn~up-transport-lola-subscribe-before-send~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+A LoLa listener registration *SHOULD* establish its proxy subscription before publishers are expected to send matching events. Implementations MUST NOT rely on events sent before subscription establishment being delivered to that listener.
 --
 
 == Sample Layout
@@ -73,3 +87,5 @@ The LoLa transport maps uProtocol source/sink filters to configured LoLa service
 * middleware configuration path, when required by the runtime
 
 Build integration for the S-CORE communication repository MAY use Bazel, but that integration SHOULD remain local to the LoLa transport implementation and MUST NOT impose Bazel as a workspace-wide requirement for language libraries or unrelated transports.
+
+Native runtime smoke tests SHOULD report invalid frame magic explicitly. If stale or foreign samples can be present in the LoLa shared-memory segment, test code MAY drain those samples before sending the test frame, but runtime correctness is only proven once a sent frame with the expected uProtocol frame magic is received.

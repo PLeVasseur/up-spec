@@ -220,6 +220,20 @@ Please refer to <<UUri Encoding Rules>> for details regarding the encoding of th
 
 --
 
+== iceoryx2 Service Attributes And Discovery
+
+An iceoryx2 service name is exact, but uProtocol listeners can contain wildcards. To support streamer-style wildcard subscriptions, implementations SHOULD attach service attributes describing the concrete uProtocol source URI to each created publish/subscribe service.
+
+[.specitem,oft-sid="dsn~up-transport-iceoryx2-service-attributes~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+An iceoryx2 uProtocol service created for a publish source *SHOULD* define service attributes for the effective source authority, entity type, entity instance, major version, and resource identifier. A listener whose source filter contains wildcards *SHOULD* discover matching concrete services by listing iceoryx2 services and matching those attributes against the source filter.
+--
+
+[.specitem,oft-sid="dsn~up-transport-iceoryx2-listener-fanout~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+When multiple uProtocol listeners match the same iceoryx2 service, the transport implementation *SHOULD* create an independent iceoryx2 subscriber for each listener registration. A received sample lease is consumed by one subscriber, so a single subscriber *MUST NOT* be used as the only fanout source for multiple independent uProtocol listeners.
+--
+
 === UUri Encoding Rules
 
 The table below contains the rules for encoding a UUri's fields into an iceoryx2 ServiceName's segments.
