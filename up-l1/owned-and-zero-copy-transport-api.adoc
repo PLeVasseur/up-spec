@@ -70,7 +70,9 @@ The zero-copy receive sequence is:
 . Use the decoded view while the lease is alive.
 . Drop the lease to release storage.
 
-The receive lease owns the lifetime of payload references returned from `UZeroCopyRxFrame.payload()`. Applications MUST NOT store borrowed payload views beyond the lease lifetime. Implementations that copy payload bytes into a hidden buffer before handing them to callers MUST NOT advertise that path as zero-copy.
+The receive lease owns the lifetime of payload references returned from `UZeroCopyRxFrame`. Applications MUST NOT store borrowed payload views beyond the lease lifetime. Implementations that copy payload bytes into a hidden buffer before handing them to callers MUST NOT advertise that path as zero-copy.
+
+Receive payloads MAY be contiguous or segmented. Language bindings SHOULD expose both a contiguous convenience view and an ordered slice iteration view. Generic adapters that convert zero-copy receive leases to owned frames MUST copy from the ordered slice view so transports such as Zenoh can avoid hidden receive-side coalescing.
 
 Payload encoding presence follows xref:wire-format-and-frame-api.adoc[Wire Format and Frame API]: a zero-length reservation with absent encoding represents no payload, while a present payload, including a present empty payload, requires encoding metadata unless the binding explicitly documents a raw-bytes default.
 
@@ -103,8 +105,10 @@ This adapter is a boundary utility, not a claim that all transports are zero-cop
 
 == Transport Guidance
 
-Zenoh is an owned-buffer transport unless a future Zenoh API exposes true transmit and receive loans.
+Zenoh can be used as an owned-buffer transport and MAY also expose a zero-copy path around `ZBytes`. The zero-copy receive path SHOULD expose `ZBytes` slices directly and MUST NOT call APIs that coalesce segmented `ZBytes` into a newly allocated contiguous buffer unless crossing an explicit owned-frame adapter boundary. Zenoh shared-memory transmit support depends on Zenoh's shared-memory and unstable feature set.
 
 iceoryx2 is a zero-copy transport. Its mapping should use transmit loans, receive leases, and user-header metadata for `UFrameMetadata` and `UEncoding`.
+
+LoLa is a zero-copy transport when mapped to GenericSkeleton/GenericProxy events with fixed-size shared-memory samples. Its transport binding should keep LoLa/Bazel build integration local to the LoLa transport implementation.
 
 Transport bindings SHOULD expose builder/helper APIs from the language library rather than reimplementing common Publish, Notification, Request, or Response construction. Transport implementations MAY still construct frame metadata directly when reconstructing a frame from protocol-native fields on receive.

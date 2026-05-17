@@ -133,6 +133,20 @@ A Zenoh message that is used to convey a uProtocol message *MUST* contain in its
 For native-frame language bindings, the Zenoh payload *MUST* contain exactly the application payload bytes produced by the selected serializer. Binding-specific attachment metadata *MUST NOT* be exposed as part of the frame payload.
 --
 
+=== Zero-Copy Payload Access
+
+Zenoh represents payload bytes as `ZBytes`. `ZBytes` can be backed by one or more byte slices and can also represent shared-memory-backed buffers when Zenoh's shared-memory support is enabled.
+
+[.specitem,oft-sid="dsn~up-transport-zenoh-zero-copy-zbytes-slices~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+A Zenoh zero-copy receive implementation *MUST* expose payload bytes from `ZBytes` using the ordered slice view. It *MUST NOT* call a `ZBytes` API that allocates and coalesces segmented payload storage into a contiguous buffer except when explicitly adapting the message to an owned-frame API.
+--
+
+[.specitem,oft-sid="dsn~up-transport-zenoh-shm-feature-gate~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Zenoh shared-memory transmit support *MUST* be feature-gated or otherwise explicitly opted into, because the underlying Zenoh shared-memory APIs require Zenoh's shared-memory support and may depend on unstable Zenoh APIs.
+--
+
 == Zenoh Key Structure
 
 Message producers publish messages to the Zenoh network using _keys_. Other clients can indicate their interest in particular keys or patterns in order to receive the messages that are being published using matching keys.

@@ -1,0 +1,75 @@
+= LoLa
+:toc: preamble
+:sectnums:
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
+
+----
+SPDX-FileCopyrightText: 2026 Contributors to the Eclipse Foundation
+
+See the NOTICE file(s) distributed with this work for additional
+information regarding copyright ownership.
+
+This program and the accompanying materials are made available under
+the terms of the Apache License Version 2.0 which is available at
+https://www.apache.org/licenses/LICENSE-2.0
+
+SPDX-FileType: DOCUMENTATION
+SPDX-License-Identifier: Apache-2.0
+----
+
+== Overview
+
+Eclipse S-CORE LoLa is a low-latency shared-memory communication binding exposed through the S-CORE communication repository. This document defines how uProtocol native frames can be exchanged by means of LoLa generic events.
+
+== LoLa Binding Model
+
+uProtocol frames are mapped to LoLa events using type-erased generic APIs. A transport implementation SHOULD use `GenericSkeleton`, `GenericSkeletonEvent`, `GenericProxy`, and `GenericProxyEvent` with `SampleAllocateePtr<void>` and `SamplePtr<void>` rather than requiring generated application data types for every uProtocol payload schema.
+
+[.specitem,oft-sid="dsn~up-transport-lola-generic-events~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+A LoLa uProtocol transport *MUST* use a LoLa event sample as the storage unit for one uProtocol native frame. The uProtocol payload bytes *MUST* be exposed as bytes within that sample and *MUST NOT* require a generated service-specific payload type at the transport API boundary.
+--
+
+== Sample Layout
+
+LoLa generic events are configured with fixed sample `size` and `alignment` through `DataTypeMetaInfo`.
+
+The sample layout is:
+
+[source]
+----
+lola_sample =
+  frame_header
+  metadata_prefix
+  alignment_padding
+  payload_bytes
+  unused_tail
+----
+
+The `frame_header` and `metadata_prefix` preserve `UFrameMetadata`, including all required `UAttributes` fields and optional `UEncoding`. The exposed uProtocol payload view begins at `payload_bytes` and has the exact serializer-produced payload length.
+
+[.specitem,oft-sid="dsn~up-transport-lola-fixed-sample-size~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+If a frame's metadata, padding, and payload cannot fit into the configured LoLa event sample size, `reserve` *MUST* fail before handing a transmit loan to the serializer.
+--
+
+[.specitem,oft-sid="dsn~up-transport-lola-alignment~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+A LoLa transport implementation *MUST* honor the serializer alignment requested by the zero-copy transport API, or fail `reserve` with an invalid-argument error when the configured event sample alignment cannot satisfy the request.
+--
+
+== Routing And Configuration
+
+The LoLa transport maps uProtocol source/sink filters to configured LoLa service instances and event names. Because LoLa deployment uses S-CORE communication configuration, the transport configuration MUST identify at least:
+
+* local authority
+* instance specifier
+* service type
+* event name
+* sample size
+* sample alignment
+* maximum sample count
+* middleware configuration path, when required by the runtime
+
+Build integration for the S-CORE communication repository MAY use Bazel, but that integration SHOULD remain local to the LoLa transport implementation and MUST NOT impose Bazel as a workspace-wide requirement for language libraries or unrelated transports.

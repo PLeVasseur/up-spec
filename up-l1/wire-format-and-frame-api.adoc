@@ -159,10 +159,20 @@ A zero-copy receive frame represents a receive-side lease. Dropping the lease re
 ReceiveLease {
   metadata() -> UFrameMetadata
   payload() -> BytesView
+  payload_len() -> Integer
+  payload_contiguous() -> Optional<BytesView>
+  for_each_payload_slice(visitor)
 }
 ----
 
-Decoded values MAY borrow from the receive lease. Such values MUST NOT outlive the lease.
+The payload may be backed by one contiguous region or by multiple ordered byte slices, depending on the transport. `payload_contiguous()` returns a borrowed byte view only when the payload is available as one contiguous region. `for_each_payload_slice` exposes the ordered payload slices without requiring a coalescing copy.
+
+Decoded values MAY borrow from the receive lease when the selected deserializer can operate on the exposed payload shape. Such values MUST NOT outlive the lease. Borrowed deserializers that require `BytesView` contiguity MUST fail rather than silently copying segmented transport storage.
+
+[.specitem,oft-sid="dsn~up-l1-zero-copy-receive-segmented-payload~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Zero-copy receive leases *MUST* expose the payload byte order exactly as sent. If the underlying transport stores the payload in multiple regions, the receive lease *MUST* provide a segmented view or explicitly document that the advertised API is an owned/copying receive path rather than a zero-copy receive path.
+--
 
 == Serializer Contract
 
