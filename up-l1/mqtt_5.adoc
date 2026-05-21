@@ -32,7 +32,7 @@ This document defines how MQTT 5 PUBLISH packets can be used to transfer uProtoc
 
 == UMessage Mapping
 
-A uProtocol message consists of _UAttributes_ and optional payload. Native frame language bindings also carry explicit _UEncoding_ metadata for the payload wire representation. The following sections define how these are mapped to/from an MQTT 5 PUBLISH packet.
+A uProtocol message consists of _UAttributes_ and optional payload. Native frame language bindings also carry explicit _PayloadEncoding_ metadata for the payload wire representation. The following sections define how these are mapped to/from an MQTT 5 PUBLISH packet.
 
 === UAttributes
 
@@ -139,24 +139,24 @@ a| A tracing identifier to use for correlating messages across the system
 a| The type of data contained in the message's payload
 
 * Generated-envelope language bindings *MUST* set this to the link:../up-core-api/uprotocol/v1/uattributes.proto[UPayloadFormat enum] integer value's decimal string representation.
-* Native-frame language bindings *MUST* set this to `UEncoding.content_type` when payload encoding is present and *MUST NOT* set it for frames without payload.
+* Native-frame language bindings *MUST* set this to the selected payload encoding's content type when one is known and *MUST NOT* set it for frames without payload.
 
 Note that the generated enum's integer value is used instead of the _uprotocol.mime_type_ option's value in generated-envelope bindings in order to reduce the overall size of the PUBLISH packet.
 
-| `UEncoding.format_id`
-| User Property [key: _uformatid_]
-a| Stable identifier for the payload codec family or IDL binding.
+| Standard `PayloadEncoding`
+| User Property [key: _12_]
+a| Integer value of the upstream `UPayloadFormat`.
 
-* Native-frame language bindings *MUST* set this property to `UEncoding.format_id` when payload encoding is present and *MUST NOT* set it for frames without payload.
+* Native-frame language bindings *MUST* set this property to the standard `UPayloadFormat` value when standard payload encoding is present and *MUST NOT* set it for frames without payload or with custom payload encoding.
 * Receivers that support native frames *MUST* preserve this value exactly.
 
-| `UEncoding.schema_ref`
-| User Property [key: _uschemaref_]
-a| Optional stable schema identity for the payload.
+| Custom `PayloadEncoding.id`
+| User Property [key: _uencodingid_]
+a| Stable identifier for a native-only custom payload codec family or byte-compatible layout.
 
-* Native-frame language bindings *MUST* set this property if, and only if, payload encoding is present and `UEncoding.schema_ref` is present.
-* Empty schema references *MUST* be treated as absent.
-* Receivers that support native frames *MUST* preserve non-empty values exactly.
+* Native-frame language bindings *MUST* set this property when custom payload encoding is present and *MUST NOT* set it for standard payload encoding or frames without payload.
+* Custom payload encoding *MUST* also set the MQTT Content Type property to `PayloadEncoding.content_type`.
+* Receivers that support native frames *MUST* preserve custom encoding IDs and content types exactly.
 
 |===
 

@@ -50,28 +50,33 @@ Language bindings that expose frame metadata *MUST* preserve all required and op
 
 == Wire Encoding
 
-`UEncoding` identifies the payload wire representation. It is present only when a frame carries a payload.
+`PayloadEncoding` identifies the payload wire representation. It is present only when a frame carries a payload.
 
 ----
-UEncoding {
-  format_id: String,
-  content_type: String,
-  schema_ref: Optional<String>
+PayloadEncoding =
+  StandardPayloadEncoding | CustomPayloadEncoding
+
+StandardPayloadEncoding {
+  payload_format: UPayloadFormat
+}
+
+CustomPayloadEncoding {
+  id: String,
+  content_type: String
 }
 ----
 
-`format_id` is a stable identifier for the codec family or IDL binding. `content_type` is the media type used by transport bindings, gateways, diagnostics, and tools. `schema_ref` can identify a schema URI, registry key, type hash, package-qualified type name, or another stable schema identity.
+Standard payload encodings use the upstream `UPayloadFormat` values from `UAttributes.payload_format` and are representable in generated `UMessage` envelopes. Custom payload encodings identify native-only byte-compatible layouts and are not representable in generated `UMessage` envelopes. A binding that intentionally serializes an entire native frame as a generated `UMessage` envelope *MUST* reject custom payload encodings rather than silently mapping them to `UPAYLOAD_FORMAT_UNSPECIFIED`. A custom `id` is a stable identifier for the native codec family or layout; `content_type` is the media type used by transport bindings, gateways, diagnostics, and tools.
 
-`format_id` and `content_type` *MUST* be preserved exactly across transport boundaries. A present `schema_ref` *MUST* be non-empty. Bindings that receive an empty schema reference from a transport representation *MUST* treat it as absent rather than as a distinct schema identity.
+`payload_format` values for standard encodings *MUST* be preserved exactly across native transport boundaries. Custom `id` and `content_type` values *MUST* be non-empty and *MUST* be preserved exactly across native transport boundaries.
 
 Typed deserialization compatibility is defined as follows:
 
-* `format_id` must match exactly.
-* `content_type` must match exactly.
-* If the selected payload format declares a `schema_ref`, the frame's `schema_ref` must match exactly.
-* If the selected payload format declares no `schema_ref`, it is a generic decoder for the matching `format_id` and `content_type` and may accept frames that carry a more specific `schema_ref`.
+* A standard decoder matches only a standard frame encoding with the same `UPayloadFormat` value.
+* A custom decoder matches only a custom frame encoding with the same `id` and `content_type` values.
+* A standard decoder *MUST NOT* accept a custom frame encoding, and a custom decoder *MUST NOT* accept a standard frame encoding.
 
-Adding a new payload format MUST NOT require changing the transport API.
+Adding a new native-only payload format MUST NOT require changing the transport API.
 
 [.specitem,oft-sid="dsn~up-l1-frame-payload-encoding-presence~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
@@ -83,7 +88,7 @@ Frames without payload *MUST NOT* carry payload encoding metadata. Frames with p
 ----
 UFrameMetadata {
   attributes: UAttributes,
-  encoding: Optional<UEncoding>
+  encoding: Optional<PayloadEncoding>
 }
 ----
 
@@ -91,13 +96,13 @@ UFrameMetadata {
 
 `UFrameMetadata` is a language-binding frame metadata bundle. It is not a new generated transport envelope and it is not intended to replace `UAttributes` as the protocol metadata model.
 
-Transport implementations MUST preserve both members when crossing a transport boundary. They MAY project individual `UAttributes` fields into transport-native metadata channels when doing so is cheaper than serializing the whole structure. They MAY also project `UEncoding` into transport-native metadata when the transport provides a suitable channel. When `encoding` is absent, the frame has no payload encoding.
+Transport implementations MUST preserve both members when crossing a transport boundary. They MAY project individual `UAttributes` fields into transport-native metadata channels when doing so is cheaper than serializing the whole structure. They MAY also project `PayloadEncoding` into transport-native metadata when the transport provides a suitable channel. When `encoding` is absent, the frame has no payload encoding.
 
 Language bindings SHOULD expose validators for native `UAttributes` and `UFrameMetadata`. Checked construction paths MUST validate message identifiers, URI roles, Request TTL, RPC priority, Response request IDs, and message-type-specific fields. Bindings MAY expose unchecked convenience constructors for low-level adapters and tests, but those constructors MUST be documented as unchecked and paired with checked alternatives.
 
-If a binding provides typed deserialization helpers on an owned frame or a zero-copy receive lease, those helpers MUST verify that the frame's `UEncoding` is compatible with the selected payload format before decoding payload bytes. A mismatch MUST fail rather than silently handing bytes to the wrong deserializer.
+If a binding provides typed deserialization helpers on an owned frame or a zero-copy receive lease, those helpers MUST verify that the frame's `PayloadEncoding` is compatible with the selected payload format before decoding payload bytes. A mismatch MUST fail rather than silently handing bytes to the wrong deserializer.
 
-Rust binding note: the concrete frame API currently consists of `UAttributes`, `UEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UFrameBuilder`, `UTxBuffer`, and `UZeroCopyRxFrame`. These are binding-level frame APIs and are not generated protocol envelopes.
+Rust binding note: the concrete frame API currently consists of `UAttributes`, `PayloadEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UFrameBuilder`, `UTxBuffer`, and `UZeroCopyRxFrame`. These are binding-level frame APIs and are not generated protocol envelopes. Deprecated compatibility aliases may exist in bindings but do not change the abstract model.
 
 == Native Message Builder
 
@@ -109,7 +114,7 @@ A native builder:
 * MUST support Publish, Notification, Request, and Response frames;
 * SHOULD support creating a Response from a Request's `UAttributes`;
 * SHOULD support raw payload bytes;
-* SHOULD support explicit `UEncoding` metadata;
+* SHOULD support explicit `PayloadEncoding` metadata;
 * SHOULD support the same serializer contract used by owned and zero-copy transports;
 * MAY support optional payload codecs such as Protocol Buffers when the binding exposes those codecs behind explicit features.
 
@@ -141,7 +146,6 @@ A transmit loan represents mutable transmit storage reserved from a zero-copy tr
 ----
 TransmitLoan {
   metadata() -> UFrameMetadata
-  metadata_mut() -> UFrameMetadata
   payload() -> BytesView
   payload_mut() -> MutableBytesView
 }
@@ -183,7 +187,7 @@ Language bindings SHOULD provide a serializer contract equivalent to:
 ----
 PayloadFormat {
   name() -> String
-  encoding() -> UEncoding
+  encoding() -> PayloadEncoding
 }
 
 Serializer {
@@ -208,5 +212,5 @@ Serializers MUST NOT write partial payloads silently. If the supplied output buf
 * The deserializer can return values borrowing from a receive lease where the language supports that lifetime model.
 * Raw bytes are supported without an application schema.
 * Typed deserialization rejects incompatible wire-format metadata.
-* `UEncoding` is preserved across transport boundaries, including non-empty `schema_ref` values.
+* `PayloadEncoding` is preserved across transport boundaries, including both standard `UPayloadFormat` values and native-only custom encodings.
 * Common frame builder helpers produce native frames, not generated envelopes.

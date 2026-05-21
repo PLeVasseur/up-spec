@@ -61,7 +61,7 @@ lola_sample =
   unused_tail
 ----
 
-The `frame_header` and `metadata_prefix` preserve `UFrameMetadata`, including all required `UAttributes` fields and optional `UEncoding`. The exposed uProtocol payload view begins at `payload_bytes` and has the exact serializer-produced payload length.
+The `frame_header` and `metadata_prefix` preserve `UFrameMetadata`, including all required `UAttributes` fields and optional `PayloadEncoding`. The exposed uProtocol payload view begins at `payload_bytes` and has the exact serializer-produced payload length.
 
 [.specitem,oft-sid="dsn~up-transport-lola-fixed-sample-size~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --

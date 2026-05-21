@@ -33,7 +33,7 @@ Each transport implementing this specification **MUST** use major version `1` of
 
 == UMessage Mapping
 
-A uProtocol message consists of _UAttributes_ and optional payload. Native frame language bindings also carry explicit _UEncoding_ metadata for the payload wire representation. The following sections define how these are mapped to/from Zenoh Resources.
+A uProtocol message consists of _UAttributes_ and optional payload. Native frame language bindings also carry explicit _PayloadEncoding_ metadata for the payload wire representation. The following sections define how these are mapped to/from Zenoh Resources.
 
 === UAttributes
 
@@ -87,9 +87,11 @@ optional<T> =
   T                   // present only when present == 1
 
 encoding =
-  format_id: string
-  content_type: string
-  schema_ref: string  // empty string means absent; present schema refs are non-empty
+  kind: uint8                  // 0 = standard, 1 = custom
+  standard_payload_format: uint8
+                               // present only when kind == 0; UPayloadFormat value
+  custom_id: string            // present only when kind == 1
+  custom_content_type: string  // present only when kind == 1
 ----
 
 Implementations *MUST* reject unknown magic values, malformed UTF-8, invalid optional markers, invalid UUIDs, trailing attachment bytes, and payload bytes without encoding metadata. Implementations *MUST* reconstruct the same native frame metadata before delivering the frame to uProtocol application code. If encoding metadata is absent, the Zenoh payload *MUST* be empty and the delivered frame has no payload.

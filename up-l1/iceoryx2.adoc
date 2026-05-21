@@ -119,7 +119,7 @@ a| *MUST* describe the payload loan size and requested serializer alignment. `pa
 
 The user header *MUST NOT* contain a serialized generated `UAttributes` blob. Transports SHOULD project native attributes into fields that are cheap for the transport to inspect. URI entity/version/resource components are numeric and SHOULD live in the user header. Authority names are variable-length strings and SHOULD live in the implementation metadata prefix instead of fixed-capacity user-header buffers.
 
-Variable metadata that is not naturally fixed-size for iceoryx2 user headers, such as URI authority names, `UEncoding`, `traceparent`, and `token`, SHOULD be encoded in an implementation metadata prefix rather than forcing arbitrary fixed user-header capacities. The prefix length is carried by `metadata_len`. The prefix is transport metadata and *MUST NOT* be exposed as part of the frame payload by the language transport API.
+Variable metadata that is not naturally fixed-size for iceoryx2 user headers, such as URI authority names, custom `PayloadEncoding` fields, `traceparent`, and `token`, SHOULD be encoded in an implementation metadata prefix rather than forcing arbitrary fixed user-header capacities. The prefix length is carried by `metadata_len`. The prefix is transport metadata and *MUST NOT* be exposed as part of the frame payload by the language transport API.
 
 ==== Implementation Metadata Prefix
 
@@ -127,7 +127,7 @@ The implementation metadata prefix preserves variable frame metadata while keepi
 
 The prefix *MUST* preserve:
 
-* `UEncoding`, when payload encoding is present;
+* `PayloadEncoding`, when payload encoding is present;
 * `UAttributes.source.authority_name`;
 * `UAttributes.sink.authority_name`, when a sink is present;
 * `UAttributes.traceparent`, when present;
@@ -146,9 +146,11 @@ metadata_prefix =
   token: optional<string>
 
 encoding =
-  format_id: string
-  content_type: string
-  schema_ref: optional<string>
+  kind: uint8                  // 0 = standard, 1 = custom
+  standard_payload_format: uint8
+                               // present only when kind == 0; UPayloadFormat value
+  custom_id: string            // present only when kind == 1
+  custom_content_type: string  // present only when kind == 1
 
 string =
   len: uint32 little-endian

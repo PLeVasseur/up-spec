@@ -132,9 +132,11 @@ someip_native_frame =
   application_payload: bytes    // remaining bytes after the prefix
 
 encoding =
-  format_id: string
-  content_type: string
-  schema_ref: string            // empty string means absent; present schema refs are non-empty
+  kind: uint8                   // 0 = standard, 1 = custom
+  standard_payload_format: uint8
+                                // present only when kind == 0; UPayloadFormat value
+  custom_id: string             // present only when kind == 1
+  custom_content_type: string   // present only when kind == 1
 
 string =
   len: uint32 little-endian

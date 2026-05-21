@@ -107,7 +107,7 @@ This adapter is a boundary utility, not a claim that all transports are zero-cop
 
 Zenoh can be used as an owned-buffer transport and MAY also expose a zero-copy path around `ZBytes`. The zero-copy receive path SHOULD expose `ZBytes` slices directly and MUST NOT call APIs that coalesce segmented `ZBytes` into a newly allocated contiguous buffer unless crossing an explicit owned-frame adapter boundary. Zenoh shared-memory transmit support depends on Zenoh's shared-memory and unstable feature set.
 
-iceoryx2 is a zero-copy transport. Its mapping should use transmit loans, receive leases, and user-header metadata for `UFrameMetadata` and `UEncoding`.
+iceoryx2 is a zero-copy transport. Its mapping should use transmit loans, receive leases, and user-header metadata for `UFrameMetadata` and `PayloadEncoding`.
 
 LoLa is a zero-copy transport when mapped to GenericSkeleton/GenericProxy events with fixed-size shared-memory samples. Its transport binding should keep LoLa/Bazel build integration local to the LoLa transport implementation.
 
