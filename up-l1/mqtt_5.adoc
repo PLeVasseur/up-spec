@@ -171,6 +171,8 @@ For native-frame language bindings, the MQTT 5 PUBLISH payload *MUST* contain ex
 Frames without payload *MUST* be sent with an empty PUBLISH payload and without native-frame payload encoding properties. Receivers *MUST* reject a non-empty PUBLISH payload that lacks native-frame payload encoding properties, unless the language binding explicitly documents a raw-bytes default.
 --
 
+MQTT 5 native-frame bindings that carry stable-container payloads *MUST* preserve the `up.stable-container` custom payload encoding metadata and application payload bytes exactly. MQTT broker delivery is an owned/buffered path and does not provide loan-backed stable-container typed borrowing.
+
 
 == MQTT Topic Structure
 

@@ -204,6 +204,65 @@ The same serializer MUST be usable with an owned buffer or with a zero-copy tran
 
 Serializers MUST NOT write partial payloads silently. If the supplied output buffer is too small, serialization MUST fail. If a serializer reports an encoded length and then writes a different number of bytes, language bindings SHOULD treat that as an invalid payload error.
 
+== Stable-Container Payloads
+
+Stable-container payloads are native custom payload encodings for typed values whose bytes can be transported and borrowed without a generated message envelope. They are intended for shared-memory and other loan-backed transports that can preserve payload alignment and lifetime.
+
+The stable-container encoding is a `CustomPayloadEncoding` with:
+
+----
+id = "up.stable-container"
+content_type = "application/vnd.uprotocol.stable-container;type=<stable-type>;variant=<variant>;size=<bytes>;align=<bytes>"
+----
+
+The `type` parameter is the cross-process and cross-language stable type identity. The `variant` parameter identifies the stable-container layout family. The `size` parameter is the exact payload byte length for fixed-size variants. The `align` parameter is the required minimum byte alignment of the first exposed payload byte.
+
+The `fixed` variant represents exactly one fixed-size typed value. A receiver that borrows a `fixed` stable-container payload as a typed value *MUST* verify all of the following before constructing the typed borrow:
+
+* `PayloadEncoding` is present and is a custom encoding with `id` equal to `up.stable-container`.
+* `content_type` has media type `application/vnd.uprotocol.stable-container`.
+* `type` matches the selected stable payload type identity.
+* `variant` is `fixed`.
+* Payload length is exactly `size` bytes.
+* The exposed payload start address satisfies `align` and the selected stable type's alignment requirement.
+* The receive lease keeps the payload storage alive for the entire typed borrow lifetime.
+* The payload storage provenance is loan-backed or otherwise explicitly documented as stable for borrowing; owned buffers that may move or be reallocated MUST NOT be advertised as loan-backed stable-container borrows.
+
+Dynamic stable-container variants are reserved for future specification. A binding or transport that introduces a dynamic variant MUST define the variant metadata, length calculation, alignment rules, initialization requirements, and borrow lifetime rules before advertising typed dynamic borrowing.
+
+[.specitem,oft-sid="dsn~up-l1-stable-container-encoding~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Transport implementations *MUST* preserve stable-container custom encoding metadata exactly across transport boundaries. A transport that cannot preserve custom payload encodings *MUST* reject stable-container frames rather than silently degrading them to an unspecified or raw payload format.
+--
+
+[.specitem,oft-sid="dsn~up-l1-stable-container-layout~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Stable-container transmit paths *MUST* reserve enough storage for the exact encoded payload length and requested alignment. Any hidden metadata prefix or padding inserted by the transport *MUST NOT* be exposed as payload bytes. Padding bytes outside the exposed payload are transport-private; bytes inside the exposed stable-container payload *MUST* be initialized according to the selected stable type's object representation contract.
+--
+
+Language bindings MAY expose an expert escape hatch for manually proving that a type is stable-container safe. Such an escape hatch *MUST* be unsafe or equivalently marked as expert-only in that language, and its documentation *MUST* require a proof of stable layout, exact size, alignment, initialized bytes including padding, valid bit patterns, no incompatible drop behavior, and receive-side provenance/lifetime safety. Binding-provided derive/code-generation paths SHOULD be the default application path.
+
+.Stable-container transport conformance
+[cols="1,3",options="header"]
+|===
+| Transport class | Stable-container expectation
+
+| Owned network or broker transports, such as MQTT5
+| Preserve payload bytes and `PayloadEncoding` metadata. They do not provide loan-backed typed borrowing and MUST NOT claim stable-container zero-copy receives.
+
+| C++/FFI owned transports, such as vSomeIP bindings
+| Preserve payload bytes and `PayloadEncoding` metadata across the binding-defined native frame prefix. They may copy through C++ payload storage and MUST document pointer and ownership contracts; they do not provide loan-backed stable-container typed borrowing unless a separate proven loaned path exists.
+
+| Zenoh owned/`ZBytes` transports
+| Preserve payload bytes and custom encoding metadata. A zero-copy receive path SHOULD expose ordered `ZBytes` slices without coalescing; typed stable-container borrowing is valid only when the binding can prove contiguity, alignment, lifetime, and loan-backed provenance for the exposed slice.
+
+| iceoryx2 shared-memory transports
+| Preserve metadata in user headers or hidden prefixes, reserve aligned shared-memory payload ranges, and expose receive leases whose lifetime backs typed stable-container borrows.
+
+| LoLa shared-memory transports
+| Preserve metadata in the configured sample layout, reserve aligned payload ranges within fixed-size samples, and expose receive leases whose lifetime backs typed stable-container borrows.
+|===
+
 == Acceptance Criteria
 
 * The frame API does not expose a format-specific generated envelope.

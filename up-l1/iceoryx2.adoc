@@ -190,6 +190,8 @@ The iceoryx2 sample storage and user header used to convey a uProtocol frame *MU
 
 The application payload exposed by the uProtocol transport API is a byte range within that sample storage. It may contain bytes produced by any selected serializer. Implementations *MAY* insert alignment padding between hidden metadata and exposed payload bytes when required by the serializer alignment request, but padding *MUST NOT* be exposed as payload and *MUST* be accounted for in the sample layout.
 
+For stable-container payloads, the exposed payload byte range *MUST* begin at an address satisfying the stable-container `align` parameter and *MUST* have exactly the stable-container `size` for the fixed-size variant. The receive lease lifetime *MUST* cover any typed borrow derived from the sample payload.
+
 Rust binding note: the storage and user-header types used with iceoryx2 **MUST** implement link:https://docs.rs/iceoryx2/0.6.1/iceoryx2/prelude/trait.ZeroCopySend.html[`ZeroCopySend`].
 
 That encapsulates the following additional properties in Rust:

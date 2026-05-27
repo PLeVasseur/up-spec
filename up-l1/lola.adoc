@@ -73,6 +73,8 @@ If a frame's metadata, padding, and payload cannot fit into the configured LoLa 
 A LoLa transport implementation *MUST* honor the serializer alignment requested by the zero-copy transport API, or fail `reserve` with an invalid-argument error when the configured event sample alignment cannot satisfy the request.
 --
 
+For stable-container payloads, the exposed payload byte range *MUST* begin at an address satisfying the stable-container `align` parameter and *MUST* have exactly the stable-container `size` for the fixed-size variant. The LoLa sample lease lifetime *MUST* cover any typed borrow derived from the sample payload.
+
 == Routing And Configuration
 
 The LoLa transport maps uProtocol source/sink filters to configured LoLa service instances and event names. Because LoLa deployment uses S-CORE communication configuration, the transport configuration MUST identify at least:

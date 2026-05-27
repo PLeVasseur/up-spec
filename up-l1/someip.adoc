@@ -149,6 +149,8 @@ optional<T> =
 
 If `encoding` is absent, `application_payload` *MUST* be empty and the delivered frame has no payload. If `encoding` is present, `application_payload` is present and may be empty. Implementations *MUST* reject unknown magic values, unsupported versions, malformed UTF-8, invalid optional markers, invalid UUIDs, oversized metadata fields, and non-empty application payload bytes without encoding metadata. Implementations *MUST* reconstruct the original native frame metadata before delivering the frame to uProtocol application code.
 
+SOME/IP bindings that carry stable-container payloads through this native-frame prefix *MUST* preserve the `up.stable-container` custom payload encoding metadata and application payload bytes exactly. A binding that copies payload bytes through SOME/IP or C++ library storage *MUST NOT* claim loan-backed stable-container typed borrowing unless it defines and proves a separate loaned receive path with the stable-container alignment and lifetime guarantees.
+
 ==== Common UMessage Attributes
 
 .Common UMessage Attributes

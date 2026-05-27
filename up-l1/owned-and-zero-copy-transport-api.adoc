@@ -76,6 +76,8 @@ Receive payloads MAY be contiguous or segmented. Language bindings SHOULD expose
 
 Payload encoding presence follows xref:wire-format-and-frame-api.adoc[Wire Format and Frame API]: a zero-length reservation with absent encoding represents no payload, while a present payload, including a present empty payload, requires encoding metadata unless the binding explicitly documents a raw-bytes default.
 
+Stable-container payloads additionally require the alignment, size, initialized-byte, and provenance checks defined by xref:wire-format-and-frame-api.adoc#_stable_container_payloads[Stable-Container Payloads]. A transport may preserve stable-container bytes and metadata without providing typed stable-container borrowing; only loan-backed receive paths with proven contiguity, alignment, and lifetime may expose typed stable-container borrows.
+
 == Listener Semantics
 
 Push delivery is orthogonal to owned versus zero-copy movement.
