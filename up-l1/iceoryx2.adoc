@@ -180,7 +180,7 @@ When payload bytes are present, payload encoding metadata *MUST* be present. Whe
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-payload-zero-copy~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-The iceoryx2 sample storage and user header used to convey a uProtocol frame *MUST* be zero-copy and shared-memory compatible:
+The iceoryx2 sample storage and user header used to convey a uProtocol frame through a direct true-zero-copy path *MUST* be loan-backed and shared-memory compatible:
 
 * is self contained, no heap, no pointers to external sources, no handles to external resources (files etc)
 * has a uniform memory representation
@@ -188,9 +188,11 @@ The iceoryx2 sample storage and user header used to convey a uProtocol frame *MU
 * has a lifetime of the entire program duration
 --
 
+Direct true-zero-copy transmit requires that the payload is written or constructed directly in the iceoryx2 transmit loan before the loan is sent. Direct true-zero-copy receive requires that the application borrows from the iceoryx2 receive sample lease without allocation, coalescing, or copied fallback storage.
+
 The application payload exposed by the uProtocol transport API is a byte range within that sample storage. It may contain bytes produced by any selected serializer. Implementations *MAY* insert alignment padding between hidden metadata and exposed payload bytes when required by the serializer alignment request, but padding *MUST NOT* be exposed as payload and *MUST* be accounted for in the sample layout.
 
-For stable-container payloads, the exposed payload byte range *MUST* begin at an address satisfying the stable-container `align` parameter and *MUST* have exactly the stable-container `size` for the fixed-size variant. The receive lease lifetime *MUST* cover any typed borrow derived from the sample payload.
+For stable-container payloads, the exposed payload byte range *MUST* begin at an address satisfying the stable-container `align` parameter and *MUST* have exactly the stable-container `size` for the fixed-size variant. The receive lease lifetime *MUST* cover any typed borrow derived from the sample payload. Rust stable-container typed receive MUST use a loan-backed stable receive method such as `borrow_stable_payload<T>()`.
 
 Rust binding note: the storage and user-header types used with iceoryx2 **MUST** implement link:https://docs.rs/iceoryx2/0.6.1/iceoryx2/prelude/trait.ZeroCopySend.html[`ZeroCopySend`].
 

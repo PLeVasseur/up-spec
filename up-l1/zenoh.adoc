@@ -144,7 +144,7 @@ Zenoh represents payload bytes as `ZBytes`. `ZBytes` can be backed by one or mor
 A Zenoh zero-copy receive implementation *MUST* expose payload bytes from `ZBytes` using the ordered slice view. It *MUST NOT* call a `ZBytes` API that allocates and coalesces segmented payload storage into a contiguous buffer except when explicitly adapting the message to an owned-frame API.
 --
 
-Zenoh transports that receive stable-container payloads *MUST* preserve the `up.stable-container` custom payload encoding metadata. They *MUST NOT* expose typed stable-container borrowing unless the binding can prove the relevant `ZBytes` view is contiguous, aligned to the stable-container `align` parameter, loan-backed for the receive lease lifetime, and not produced by a hidden coalescing copy.
+Ordinary Zenoh payload transport is not by itself a loan-backed receive contract. Zenoh transports that receive stable-container payloads *MUST* preserve the `up.stable-container` custom payload encoding metadata. They *MUST NOT* expose typed stable-container borrowing unless the binding can prove the relevant `ZBytes` view is contiguous, aligned to the stable-container `align` parameter, loan-backed for the receive lease lifetime, and not produced by a hidden coalescing copy. Rust stable-container typed receive MUST use a loan-backed stable receive method such as `borrow_stable_payload<T>()`.
 
 [.specitem,oft-sid="dsn~up-transport-zenoh-shm-feature-gate~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --

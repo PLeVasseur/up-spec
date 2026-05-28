@@ -65,15 +65,15 @@ The `frame_header` and `metadata_prefix` preserve `UFrameMetadata`, including al
 
 [.specitem,oft-sid="dsn~up-transport-lola-fixed-sample-size~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-If a frame's metadata, padding, and payload cannot fit into the configured LoLa event sample size, `reserve` *MUST* fail before handing a transmit loan to the serializer.
+If a frame's metadata, padding, and payload cannot fit into the configured LoLa event sample size, `loan_tx` *MUST* fail before handing a transmit loan to the serializer.
 --
 
 [.specitem,oft-sid="dsn~up-transport-lola-alignment~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-A LoLa transport implementation *MUST* honor the serializer alignment requested by the zero-copy transport API, or fail `reserve` with an invalid-argument error when the configured event sample alignment cannot satisfy the request.
+A LoLa transport implementation *MUST* honor the serializer alignment requested by the zero-copy transport API, or fail `loan_tx` with an invalid-argument error when the configured event sample alignment cannot satisfy the request.
 --
 
-For stable-container payloads, the exposed payload byte range *MUST* begin at an address satisfying the stable-container `align` parameter and *MUST* have exactly the stable-container `size` for the fixed-size variant. The LoLa sample lease lifetime *MUST* cover any typed borrow derived from the sample payload.
+For stable-container payloads, the exposed payload byte range *MUST* begin at an address satisfying the stable-container `align` parameter and *MUST* have exactly the stable-container `size` for the fixed-size variant. The LoLa sample lease lifetime *MUST* cover any typed borrow derived from the sample payload. Rust stable-container typed receive MUST use a loan-backed stable receive method such as `borrow_stable_payload<T>()`.
 
 == Routing And Configuration
 

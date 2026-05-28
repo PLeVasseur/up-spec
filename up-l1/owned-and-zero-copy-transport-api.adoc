@@ -24,6 +24,43 @@ The transport API is split into two capability interfaces.
 
 `UZeroCopyTransport` is for transports that can safely loan transmit storage and return receive leases. This is the path for shared-memory transports.
 
+== Capability Scope and Terminology
+
+Native-frame and zero-copy bindings MUST use copy-boundary terms precisely:
+
+[cols="1,3",options="header"]
+|===
+| Term | Meaning
+
+| owned native-frame transport
+| A transport API whose send and receive values own their payload bytes. It preserves uProtocol metadata and payload bytes, but it does not expose loan-backed typed payload borrows.
+
+| copying adapter
+| An adapter that exposes one API shape by copying into or out of another API shape, for example an owned-frame facade over a zero-copy transport. It is an explicit copy boundary.
+
+| copy-minimized route
+| A route that avoids unnecessary intermediate payload buffers but still copies payload bytes at least once, for example into an egress transmit loan.
+
+| direct true-zero-copy transmit
+| A path where the application writes or constructs the payload directly in transport-owned transmit loan storage that is later committed by the transport.
+
+| direct true-zero-copy receive
+| A path where the application borrows payload bytes directly from a receive lease backed by the transport or shared-memory runtime, without allocation, coalescing, or copied fallback storage.
+
+| strict loan-backed zero-copy receive
+| A direct true-zero-copy receive path that rejects copied fallback storage instead of exposing it through loan-backed typed borrow APIs.
+|===
+
+[.specitem,oft-sid="dsn~utransport-native-zero-copy-classes~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Native-frame transport libraries *MUST* document which transport class they implement and *MUST NOT* describe owned native-frame transports, copying adapters, or copy-minimized routes as direct true-zero-copy transmit or receive paths.
+--
+
+[.specitem,oft-sid="dsn~utransport-zero-copy-operation-scope~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+A zero-copy transport capability *MUST NOT* be interpreted as a claim that every helper operation using that transport is zero-copy. Serializing an existing object into a transmit loan may still copy or transform from the source object. Direct true-zero-copy transmit requires constructing or writing the application payload directly in the transport loan. Direct true-zero-copy receive requires borrowing from the receive lease without allocation, coalescing, or copied fallback storage.
+--
+
 == Owned Transport
 
 ----
@@ -47,7 +84,7 @@ Language bindings MUST NOT hide a listener-backed temporary registration behind 
 
 ----
 UZeroCopyTransport {
-  reserve(metadata: UFrameMetadata, payload_len: Integer, alignment: Integer) -> UTxBuffer
+  loan_tx(spec: UTxLoanSpec) -> UTxBuffer
   send_zero_copy(buffer: UTxBuffer)
   receive_zero_copy(source_filter: UUri, sink_filter: Optional<UUri>) -> UZeroCopyRxFrame
   register_zero_copy_listener(source_filter: UUri, sink_filter: Optional<UUri>, listener: UZeroCopyListener)
@@ -59,7 +96,8 @@ The zero-copy send sequence is:
 
 . Create frame metadata.
 . Select a wire format.
-. Reserve a transmit loan for the encoded length and alignment.
+. Construct a validated transmit loan spec containing metadata, payload presence, encoded length, and alignment.
+. Reserve a transmit loan from that spec.
 . Serialize directly into the transmit loan payload.
 . Commit with `send_zero_copy`.
 
@@ -74,9 +112,32 @@ The receive lease owns the lifetime of payload references returned from `UZeroCo
 
 Receive payloads MAY be contiguous or segmented. Language bindings SHOULD expose a reader-oriented decode path and an ordered slice iteration view on the base receive lease. Contiguous borrowed access SHOULD be an explicit capability for transports that guarantee contiguity. Generic adapters that convert zero-copy receive leases to owned frames MUST copy from the ordered slice view so transports such as Zenoh can avoid hidden receive-side coalescing.
 
-Payload encoding presence follows xref:wire-format-and-frame-api.adoc[Wire Format and Frame API]: a zero-length reservation with absent encoding represents no payload, while a present payload, including a present empty payload, requires encoding metadata unless the binding explicitly documents a raw-bytes default.
+Payload encoding presence follows xref:wire-format-and-frame-api.adoc[Wire Format and Frame API]: a validated `UTxLoanSpec` with absent payload has no payload encoding metadata, while a present payload, including a present empty payload, requires encoding metadata unless the binding explicitly documents a raw-bytes default.
 
-Stable-container payloads additionally require the alignment, size, initialized-byte, and provenance checks defined by xref:wire-format-and-frame-api.adoc#_stable_container_payloads[Stable-Container Payloads]. A transport may preserve stable-container bytes and metadata without providing typed stable-container borrowing; only loan-backed receive paths with proven contiguity, alignment, and lifetime may expose typed stable-container borrows.
+Stable-container payloads additionally require the alignment, size, initialized-byte, and provenance checks defined by xref:wire-format-and-frame-api.adoc#_stable_container_payloads[Stable-Container Payloads]. A transport may preserve stable-container bytes and metadata without providing typed stable-container borrowing; only loan-backed receive paths with proven contiguity, alignment, and lifetime may expose typed stable-container borrows through a stable-specific method such as `borrow_stable_payload<T>()`.
+
+=== Transmit Loan Spec
+
+A transmit loan spec represents the complete, validated request for transmit storage. It prevents invalid payload presence combinations from reaching a zero-copy transport implementation.
+
+[cols="1,3",options="header"]
+|===
+| Payload state | Required metadata and layout
+
+| no payload
+| Payload encoding is absent and the payload spec is `Absent`.
+
+| present empty payload
+| Payload encoding is present and the payload spec is `Present` with length `0` and alignment `1`.
+
+| payload bytes
+| Payload encoding is present and the payload spec is `Present` with the exact encoded length and required alignment.
+|===
+
+[.specitem,oft-sid="dsn~utransport-tx-loan-spec-validation~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Language bindings that expose zero-copy transmit loans *MUST* validate the transmit loan spec before invoking the transport-specific loan operation. Payload bytes without encoding metadata and encoding metadata with an absent payload *MUST* be rejected unless the binding explicitly documents a raw-bytes default for that API.
+--
 
 == Listener Semantics
 
@@ -97,6 +158,8 @@ For a zero-copy transport, sending an owned frame through the adapter reserves a
 
 This adapter is a boundary utility, not a claim that all transports are zero-copy. The zero-copy constructor MUST only accept transports that implement the true zero-copy capability interface.
 
+Strict zero-copy forwarding through a generic Streamer route is out of scope for this revision unless a transport-pair-specific proof exists. Streamer routes that are documented as copy-minimized MUST be treated as one-copy routes until such a proof exists. If a copy-minimized route preserves stable-container bytes but the configured egress transmit loan cannot satisfy the advertised stable-container alignment, the route MUST fail or report the condition instead of silently forwarding with reduced typed-borrow guarantees.
+
 == Capability Rules
 
 * A transport that cannot loan storage implements `UOwnedTransport` only.
@@ -112,5 +175,7 @@ Zenoh can be used as an owned-buffer transport and MAY also expose a zero-copy p
 iceoryx2 is a zero-copy transport. Its mapping should use transmit loans, receive leases, and user-header metadata for `UFrameMetadata` and `PayloadEncoding`.
 
 LoLa is a zero-copy transport when mapped to GenericSkeleton/GenericProxy events with fixed-size shared-memory samples. Its transport binding should keep LoLa/Bazel build integration local to the LoLa transport implementation.
+
+MQTT 5 and SOME/IP/vSomeIP are owned native-frame transports in this revision. They preserve required metadata and payload bytes according to their protocol binding, but they MUST NOT advertise direct true-zero-copy transmit, direct true-zero-copy receive, or loan-backed stable-container typed borrowing.
 
 Transport bindings SHOULD expose builder/helper APIs from the language library rather than reimplementing common Publish, Notification, Request, or Response construction. Transport implementations MAY still construct frame metadata directly when reconstructing a frame from protocol-native fields on receive.

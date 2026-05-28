@@ -102,7 +102,7 @@ Language bindings SHOULD expose validators for native `UAttributes` and `UFrameM
 
 If a binding provides typed deserialization helpers on an owned frame or a zero-copy receive lease, those helpers MUST verify that the frame's `PayloadEncoding` is compatible with the selected payload format before decoding payload bytes. A mismatch MUST fail rather than silently handing bytes to the wrong deserializer.
 
-Rust binding note: the concrete frame API currently consists of `UAttributes`, `PayloadEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UFrameBuilder`, `UTxBuffer`, and `UZeroCopyRxFrame`. These are binding-level frame APIs and are not generated protocol envelopes. Deprecated compatibility aliases may exist in bindings but do not change the abstract model.
+Rust binding note: the concrete frame API currently consists of `UAttributes`, `PayloadEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UFrameBuilder`, `UTxLoanSpec`, `UTxBuffer`, and `UZeroCopyRxFrame`. These are binding-level frame APIs and are not generated protocol envelopes.
 
 == Native Message Builder
 
@@ -171,7 +171,7 @@ ReceiveLease {
 
 The payload may be backed by one contiguous region or by multiple ordered byte slices, depending on the transport. `payload_reader()` is the natural decode path for segmented-capable transports. `payload_slices()` exposes ordered payload slices without requiring a coalescing copy. `try_contiguous_payload()` returns a borrowed byte view only when the payload is available as one contiguous region.
 
-Language bindings MAY expose a separate contiguous receive capability with an explicit method such as `contiguous_payload()` for transports that guarantee contiguity. Copy helpers such as `payload_to_vec()` MUST be named and exposed as opt-in copying helpers, not as the primary zero-copy receive path.
+Language bindings MAY expose a separate contiguous receive capability with an explicit method such as `contiguous_payload()` for transports that guarantee contiguity. Copy helpers such as `try_payload_to_vec()` MUST be named and exposed as checked opt-in copying helpers, not as the primary zero-copy receive path.
 
 Decoded values MAY borrow from the receive lease when the selected deserializer can operate on the exposed payload shape. Such values MUST NOT outlive the lease. Borrowed deserializers that require `BytesView` contiguity MUST fail rather than silently copying segmented transport storage.
 
@@ -217,7 +217,7 @@ content_type = "application/vnd.uprotocol.stable-container;type=<stable-type>;va
 
 The `type` parameter is the cross-process and cross-language stable type identity. The `variant` parameter identifies the stable-container layout family. The `size` parameter is the exact payload byte length for fixed-size variants. The `align` parameter is the required minimum byte alignment of the first exposed payload byte.
 
-The `fixed` variant represents exactly one fixed-size typed value. A receiver that borrows a `fixed` stable-container payload as a typed value *MUST* verify all of the following before constructing the typed borrow:
+The `fixed` variant represents exactly one fixed-size typed value. A receiver that borrows a `fixed` stable-container payload as a typed value *MUST* do so through a loan-backed stable-specific receive method such as `borrow_stable_payload<T>()` and *MUST* verify all of the following before constructing the typed borrow:
 
 * `PayloadEncoding` is present and is a custom encoding with `id` equal to `up.stable-container`.
 * `content_type` has media type `application/vnd.uprotocol.stable-container`.
@@ -227,6 +227,13 @@ The `fixed` variant represents exactly one fixed-size typed value. A receiver th
 * The exposed payload start address satisfies `align` and the selected stable type's alignment requirement.
 * The receive lease keeps the payload storage alive for the entire typed borrow lifetime.
 * The payload storage provenance is loan-backed or otherwise explicitly documented as stable for borrowing; owned buffers that may move or be reallocated MUST NOT be advertised as loan-backed stable-container borrows.
+
+If a binding exposes payload loan provenance, the provenance value is diagnostic. Typed stable-container borrowing MUST depend on the loan-backed receive trait or equivalent lifetime/provenance proof, not on matching a particular public provenance enum value. Public provenance values SHOULD stay semantic, for example opaque transport loan or shared-memory loan, and SHOULD NOT become backend-specific or test-stub-specific taxonomy.
+
+[.specitem,oft-sid="dsn~up-l1-stable-container-loan-backed-borrow~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Language bindings that expose fixed-size stable-container typed borrowing *MUST* expose the safe typed borrow only through a loan-backed receive API. Owned native-frame transports *MAY* preserve stable-container bytes and metadata, but they *MUST NOT* advertise those owned bytes as loan-backed typed stable-container borrows.
+--
 
 Dynamic stable-container variants are reserved for future specification. A binding or transport that introduces a dynamic variant MUST define the variant metadata, length calculation, alignment rules, initialization requirements, and borrow lifetime rules before advertising typed dynamic borrowing.
 
@@ -273,3 +280,4 @@ Language bindings MAY expose an expert escape hatch for manually proving that a 
 * Typed deserialization rejects incompatible wire-format metadata.
 * `PayloadEncoding` is preserved across transport boundaries, including both standard `UPayloadFormat` values and native-only custom encodings.
 * Common frame builder helpers produce native frames, not generated envelopes.
+* Stable-container typed receive is loan-backed only and uses a stable-specific borrow method such as `borrow_stable_payload<T>()`.
