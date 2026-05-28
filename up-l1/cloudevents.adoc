@@ -166,6 +166,11 @@ The sections below define the mapping of uPayload to CloudEvent attributes.
 
 NOTE: The custom `pformat` property is used to indicate the payload type instead of the standard `datacontenttype` property defined by CloudEvents. Its value is set to the integer value assigned to the link:../up-core-api/uprotocol/uattributes.proto[UPayloadFormat]. This helps to reduce the size of the resulting data structure.
 
+[.specitem,oft-sid="dsn~cloudevents-pformat-without-datacontenttype~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+When a UMessage payload format is mapped through the custom `pformat` property, the CloudEvent *MUST NOT* also set `datacontenttype` solely from that UPayloadFormat value. A transport binding *MAY* set `datacontenttype` only when it carries an independent CloudEvents media type outside the UPayloadFormat-to-`pformat` mapping.
+--
+
 ==== Mapping to CloudEvent Protobuf Format
 
 The rules defined in https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/protobuf-format.md[Protobuf Event Format for CloudEvents, Version 1.0.2] MUST be applied when mapping UPayload to CloudEvents using the Protobuf Format. The table below defines specific values to use for the different UMessage payload types.

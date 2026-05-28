@@ -93,7 +93,7 @@ An iceoryx2 message that is used to convey a uProtocol message *MUST* contain in
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-payload-zero-copy~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-An iceoryx2 message that is used to convey a uProtocol message *MUST* be zero-copy and shared-memory compatible:
+An iceoryx2 message that is used to convey a uProtocol message through a direct true-zero-copy path *MUST* be loan-backed and shared-memory compatible:
 
 * is self contained, no heap, no pointers to external sources, no handles to external resources (files etc)
 * has a uniform memory representation
@@ -101,13 +101,17 @@ An iceoryx2 message that is used to convey a uProtocol message *MUST* be zero-co
 * has a lifetime of the entire program duration
 --
 
-The cleanest way to describe this is to say that the payload definition **MUST** have the link:https://docs.rs/iceoryx2/0.6.1/iceoryx2/prelude/trait.ZeroCopySend.html[`ZeroCopySend`] trait implemented for it if written in Rust.
+Direct true-zero-copy transmit requires that the payload is written or constructed directly in the iceoryx2 transmit loan before the loan is sent. Direct true-zero-copy receive requires that the application borrows from the iceoryx2 receive sample lease without allocation, coalescing or copied fallback storage.
+
+The cleanest way to describe the payload type constraint is to say that the payload definition **MUST** have the link:https://docs.rs/iceoryx2/0.6.1/iceoryx2/prelude/trait.ZeroCopySend.html[`ZeroCopySend`] trait implemented for it if written in Rust.
 
 That encapsulates the following additional properties in Rust:
 
 * Rust `enum` and `struct` are marked  as `#[reprpass:[(C)]]`
 * members don't implement `Drop` explicitly
 * has a `'static` lifetime
+
+Rust stable-container typed receive *MUST* use a loan-backed stable receive method such as `borrow_stable_payload<T>()`; preserving compatible stable-container bytes in an owned frame is not sufficient to advertise loan-backed typed borrowing.
 
 == iceoryx2 Service Name Structure
 

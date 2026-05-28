@@ -132,6 +132,8 @@ Check `ttl` link:#note-ttl[NOTE] below.
 It is assumed that the payload is serialized in the format that the other end knows how to deserialize (i.e. it is fixed per topic). As such, when converting between uProtocol and SOME/IP, the `payload_format` field *SHOULD* be ignored (left at the default or `UPAYLOAD_FORMAT_UNSPECIFIED`).
 |===
 
+SOME/IP/vSomeIP is an owned native-frame transport in this revision. Preserving uProtocol metadata and payload bytes through a SOME/IP binding does not provide a transport loan or receive lease. SOME/IP/vSomeIP transport implementations *MUST NOT* advertise direct true-zero-copy transmit, direct true-zero-copy receive, or loan-backed stable-container typed borrowing.
+
 
 [[note-ttl]]
 NOTE:  Unix timestamps in UUID are likely to be different between hosts,
@@ -312,5 +314,4 @@ NOTE: handled by underlying SOME/IP library.
 === uDiscovery Translation
 
 *TODO:* _Pending uDiscovery v3 redesign_
-
 

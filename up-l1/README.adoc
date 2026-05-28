@@ -25,6 +25,66 @@ The purpose of this layer of uProtocol is to define a common API for sending and
 
 This specification defines the transport layer's abstract API which is mapped to supported programming languages by means of uProtocol's xref:../languages.adoc[language specific libraries]. The API is _implemented_ for particular transport protocols and programming languages by _uProtocol Transport Libraries_.
 
+[#native-frame-zero-copy-scope]
+== Native Frame and Zero-Copy Capability Scope
+
+Language libraries *MAY* expose native-frame transport APIs in addition to the abstract `UTransport` API shown below. A native frame carries uProtocol attributes, payload encoding metadata and payload bytes without requiring a generated `UMessage` envelope at every transport boundary. Native-frame APIs are conformant only if they preserve the same uProtocol message semantics defined by this specification.
+
+This section defines the terminology used by native-frame and zero-copy bindings. It does not require every transport protocol to provide every capability.
+
+[width="100%",cols="1,3"]
+|===
+| Term | Meaning
+
+| owned native-frame transport
+| A transport API whose send and receive values own their payload bytes. The implementation preserves uProtocol metadata and payload bytes, but it does not expose loan-backed typed payload borrows.
+
+| copying adapter
+| An adapter that exposes one API shape by copying into or out of another API shape, for example an owned-frame facade over a zero-copy transport. It is an explicit copy boundary.
+
+| copy-minimized route
+| A routing path that avoids unnecessary intermediate payload buffers but still copies payload bytes at least once, for example into an egress transmit loan.
+
+| direct true-zero-copy transmit
+| A path where the application writes or constructs the payload directly in transport-owned transmit loan storage that is later committed by the transport.
+
+| direct true-zero-copy receive
+| A path where the application borrows payload bytes directly from a receive lease backed by the transport or shared-memory runtime, without allocation, payload coalescing or copied fallback storage.
+
+| strict loan-backed zero-copy receive
+| A direct true-zero-copy receive path that rejects copied fallback storage instead of exposing it through loan-backed typed borrow APIs.
+|===
+
+[.specitem,oft-sid="dsn~utransport-native-zero-copy-classes~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Native-frame transport libraries *MUST* document which of the above transport classes they implement and *MUST NOT* describe owned native-frame transports, copying adapters, or copy-minimized routes as direct true-zero-copy transmit or receive paths.
+--
+
+[.specitem,oft-sid="dsn~utransport-stable-container-borrow-scope~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Language bindings that expose fixed-size stable-container typed payload borrowing *MUST* expose the safe typed borrow only through a loan-backed receive API. In the Rust binding this API is a stable-specific loan-backed receive method such as `borrow_stable_payload<T>()` on the loan-backed receive trait. Owned native-frame transports *MAY* preserve stable-container payload bytes and stable-container metadata, but they *MUST NOT* advertise those owned bytes as loan-backed typed stable-container borrows.
+--
+
+[.specitem,oft-sid="dsn~utransport-loan-provenance-diagnostic~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+If a language binding exposes payload loan provenance, that provenance *MUST* be treated as diagnostic information and *MUST NOT* be the safety gate for typed payload borrowing. Public provenance values *SHOULD* remain semantic, for example opaque transport loan or shared-memory loan, and *SHOULD NOT* become a backend-specific or test-stub-specific taxonomy.
+--
+
+[.specitem,oft-sid="dsn~utransport-zero-copy-operation-scope~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+A zero-copy transport capability *MUST NOT* be interpreted as a claim that every helper operation using that transport is zero-copy. Serializing an existing object into a transmit loan may still copy or transform from the source object. Direct true-zero-copy transmit requires constructing or writing the application payload directly in the transport loan. Direct true-zero-copy receive requires borrowing from the receive lease without allocation, coalescing or copied fallback storage.
+--
+
+[.specitem,oft-sid="dsn~utransport-streamer-copy-minimized-scope~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Strict zero-copy forwarding through a generic Streamer route is out of scope for this revision unless a transport-pair-specific proof exists. Streamer routes that are documented as copy-minimized *MUST* be treated as one-copy routes until such a proof exists. If a copy-minimized route preserves stable-container bytes but the configured egress transmit loan cannot satisfy the advertised stable-container alignment, the route *MUST* fail or report the condition instead of silently forwarding with reduced typed-borrow guarantees.
+--
+
+[.specitem,oft-sid="dsn~utransport-owned-protocol-zero-copy-claims~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+MQTT 5 and SOME/IP/vSomeIP native-frame transports are owned native-frame transports in this revision. They *MUST* preserve required uProtocol metadata and payload bytes according to their protocol binding, but they *MUST NOT* advertise direct true-zero-copy transmit, direct true-zero-copy receive or loan-backed stable-container typed borrowing.
+--
+
 The Transport Layer API is defined using UML2 notation.
 
 [mermaid]

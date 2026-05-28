@@ -91,6 +91,8 @@ The uProtocol and Zenoh message priority levels *MUST* be mapped according to th
 A Zenoh message that is used to convey a uProtocol message *MUST* contain in its payload the unaltered value of the UMessage's _payload_ field.
 --
 
+Ordinary Zenoh payload transport is not by itself a loan-backed receive contract. A Zenoh shared-memory transport implementation *MAY* advertise direct true-zero-copy transmit or receive only for APIs that write directly into Zenoh shared-memory transmit storage or borrow directly from a Zenoh shared-memory receive lease without allocation, payload coalescing or copied fallback storage.
+
 == Zenoh Key Structure
 
 Message producers publish messages to the Zenoh network using _keys_. Other clients can indicate their interest in particular keys or patterns in order to receive the messages that are being published using matching keys.

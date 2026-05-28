@@ -151,6 +151,8 @@ Note that the enum's integer value is used instead of the _uprotocol.mime_type_ 
 An MQTT 5 PUBLISH packet that is used to convey a uProtocol message *MUST* contain in its payload the unaltered value of the UMessage's _payload_ field.
 --
 
+MQTT 5 is an owned native-frame transport in this revision. Preserving uProtocol metadata and payload bytes in MQTT properties and PUBLISH payloads does not provide a transport loan or receive lease. MQTT 5 transport implementations *MUST NOT* advertise direct true-zero-copy transmit, direct true-zero-copy receive, or loan-backed stable-container typed borrowing.
+
 
 == MQTT Topic Structure
 
