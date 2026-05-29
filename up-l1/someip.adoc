@@ -151,6 +151,15 @@ If `encoding` is absent, `application_payload` *MUST* be empty and the delivered
 
 SOME/IP/vSomeIP is an owned native-frame transport in this revision. SOME/IP bindings that carry stable-container payloads through this native-frame prefix *MUST* preserve the `up.stable-container` custom payload encoding metadata and application payload bytes exactly. A binding that copies payload bytes through SOME/IP or C++ library storage *MUST NOT* advertise direct true-zero-copy transmit, direct true-zero-copy receive, or loan-backed stable-container typed borrowing.
 
+==== Native-Frame Conformance Expectations
+
+SOME/IP native-frame conformance tests SHOULD cover prefix version and magic rejection, malformed UTF-8 rejection, optional-marker rejection, oversized metadata rejection, custom payload encoding preservation, standard payload encoding preservation, stable-container metadata preservation without typed borrowing, payload/encoding mismatch rejection, and exact exclusion of the native-frame prefix from the delivered application payload.
+
+[.specitem,oft-sid="dsn~up-transport-someip-native-frame-conformance~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+SOME/IP native-frame bindings that use an in-payload metadata prefix *MUST* prove that the prefix is validated as transport metadata, hidden from application payload bytes, and compatible only with owned/copying transport semantics unless a separate proven loaned path exists.
+--
+
 ==== Common UMessage Attributes
 
 .Common UMessage Attributes

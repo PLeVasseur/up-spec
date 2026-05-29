@@ -73,7 +73,18 @@ If a frame's metadata, padding, and payload cannot fit into the configured LoLa 
 A LoLa transport implementation *MUST* honor the serializer alignment requested by the zero-copy transport API, or fail `loan_tx` with an invalid-argument error when the configured event sample alignment cannot satisfy the request.
 --
 
-For stable-container payloads, the exposed payload byte range *MUST* begin at an address satisfying the stable-container `align` parameter and *MUST* have exactly the stable-container `size` for the fixed-size variant. The LoLa sample lease lifetime *MUST* cover any typed borrow derived from the sample payload. Rust stable-container typed receive MUST use a loan-backed stable receive method such as `borrow_stable_payload<T>()`.
+For stable-container payloads, the exposed payload byte range *MUST* begin at an address satisfying the stable-container `align` parameter and *MUST* have exactly the stable-container `size` for the fixed-size variant. The LoLa sample lease lifetime *MUST* cover any typed borrow derived from the sample payload. Rust binding note: stable-container typed receive uses a loan-backed stable receive method rather than an owned-frame helper.
+
+=== Native-Frame Conformance Expectations
+
+LoLa native-frame conformance tests SHOULD cover fixed sample-size rejection, alignment rejection, malformed frame-header and metadata-prefix rejection, payload/encoding mismatch rejection, hidden header/prefix/padding exclusion from payload views, exact standard and custom payload encoding preservation, stable-container metadata preservation, and stable-container typed borrowing only when the configured sample layout satisfies size, alignment, initialization, and lease-lifetime requirements.
+
+Listener conformance tests SHOULD cover independent proxy subscriptions or an explicitly documented copying fanout path when multiple listeners match the same event. Runtime smoke tests SHOULD distinguish stale or foreign samples from the test frame by validating frame magic before delivery.
+
+[.specitem,oft-sid="dsn~up-transport-lola-native-frame-conformance~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+LoLa native-frame bindings *MUST* prove that sample header bytes, metadata-prefix bytes, alignment padding, unused tail bytes, and exposed application payload bytes remain distinct, and that loan-backed typed stable-container borrowing is exposed only for valid LoLa sample leases.
+--
 
 == Routing And Configuration
 

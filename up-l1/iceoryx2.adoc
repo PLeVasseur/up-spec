@@ -192,7 +192,7 @@ Direct true-zero-copy transmit requires that the payload is written or construct
 
 The application payload exposed by the uProtocol transport API is a byte range within that sample storage. It may contain bytes produced by any selected serializer. Implementations *MAY* insert alignment padding between hidden metadata and exposed payload bytes when required by the serializer alignment request, but padding *MUST NOT* be exposed as payload and *MUST* be accounted for in the sample layout.
 
-For stable-container payloads, the exposed payload byte range *MUST* begin at an address satisfying the stable-container `align` parameter and *MUST* have exactly the stable-container `size` for the fixed-size variant. The receive lease lifetime *MUST* cover any typed borrow derived from the sample payload. Rust stable-container typed receive MUST use a loan-backed stable receive method such as `borrow_stable_payload<T>()`.
+For stable-container payloads, the exposed payload byte range *MUST* begin at an address satisfying the stable-container `align` parameter and *MUST* have exactly the stable-container `size` for the fixed-size variant. The receive lease lifetime *MUST* cover any typed borrow derived from the sample payload. Rust binding note: stable-container typed receive uses a loan-backed stable receive method rather than an owned-frame helper.
 
 Rust binding note: the storage and user-header types used with iceoryx2 **MUST** implement link:https://docs.rs/iceoryx2/0.6.1/iceoryx2/prelude/trait.ZeroCopySend.html[`ZeroCopySend`].
 
@@ -201,6 +201,17 @@ That encapsulates the following additional properties in Rust:
 * Rust `enum` and `struct` are marked  as `#[reprpass:[(C)]]`
 * members don't implement `Drop` explicitly
 * has a `'static` lifetime
+
+=== Native-Frame Conformance Expectations
+
+iceoryx2 native-frame conformance tests SHOULD cover user-header and metadata-prefix round trips, malformed metadata-prefix rejection, payload/encoding mismatch rejection, hidden prefix and alignment-padding exclusion from payload views, exact standard and custom payload encoding preservation, stable-container metadata preservation, and stable-container typed borrowing only when sample storage satisfies size, alignment, initialization, and lease-lifetime requirements.
+
+Wildcard listener conformance tests SHOULD cover independent subscriber creation or an explicitly documented copying fanout path when multiple listeners match the same service.
+
+[.specitem,oft-sid="dsn~up-transport-iceoryx2-native-frame-conformance~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+iceoryx2 native-frame bindings *MUST* prove that user-header metadata, hidden metadata-prefix bytes, payload alignment padding, and exposed payload bytes remain distinct, and that loan-backed typed stable-container borrowing is exposed only for valid shared-memory sample leases.
+--
 
 == iceoryx2 Service Name Structure
 

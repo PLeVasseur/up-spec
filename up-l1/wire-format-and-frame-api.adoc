@@ -102,7 +102,7 @@ Language bindings SHOULD expose validators for native `UAttributes` and `UFrameM
 
 If a binding provides typed deserialization helpers on an owned frame or a zero-copy receive lease, those helpers MUST verify that the frame's `PayloadEncoding` is compatible with the selected payload format before decoding payload bytes. A mismatch MUST fail rather than silently handing bytes to the wrong deserializer.
 
-Rust binding note: the concrete frame API currently consists of `UAttributes`, `PayloadEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UFrameBuilder`, `UTxLoanSpec`, `UTxBuffer`, and `UZeroCopyRxFrame`. These are binding-level frame APIs and are not generated protocol envelopes.
+Rust binding note: the concrete frame API currently consists of `UAttributes`, `PayloadEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UFrameBuilder`, `UTxLoanSpec`, `UTxBuffer`, a neutral `UFrameView`, and receive-lease traits such as `UZeroCopyRxLease`. These are binding-level frame APIs and are not generated protocol envelopes.
 
 == Native Message Builder
 
@@ -157,7 +157,7 @@ After `send_zero_copy` succeeds or fails, applications MUST treat the transmit l
 
 == Receive Lease
 
-A zero-copy receive frame represents a receive-side lease. Dropping the lease releases the underlying transport storage.
+A zero-copy receive value represents a receive-side lease. Dropping the lease releases the underlying transport storage. A binding may also expose a neutral frame-view interface for owned frames and receive leases, but that neutral view is not by itself a zero-copy receive contract.
 
 ----
 ReceiveLease {
@@ -217,7 +217,7 @@ content_type = "application/vnd.uprotocol.stable-container;type=<stable-type>;va
 
 The `type` parameter is the cross-process and cross-language stable type identity. The `variant` parameter identifies the stable-container layout family. The `size` parameter is the exact payload byte length for fixed-size variants. The `align` parameter is the required minimum byte alignment of the first exposed payload byte.
 
-The `fixed` variant represents exactly one fixed-size typed value. A receiver that borrows a `fixed` stable-container payload as a typed value *MUST* do so through a loan-backed stable-specific receive method such as `borrow_stable_payload<T>()` and *MUST* verify all of the following before constructing the typed borrow:
+The `fixed` variant represents exactly one fixed-size typed value. A receiver that borrows a `fixed` stable-container payload as a typed value *MUST* do so through a loan-backed stable-specific receive operation and *MUST* verify all of the following before constructing the typed borrow:
 
 * `PayloadEncoding` is present and is a custom encoding with `id` equal to `up.stable-container`.
 * `content_type` has media type `application/vnd.uprotocol.stable-container`.
@@ -236,6 +236,24 @@ Language bindings that expose fixed-size stable-container typed borrowing *MUST*
 --
 
 Dynamic stable-container variants are reserved for future specification. A binding or transport that introduces a dynamic variant MUST define the variant metadata, length calculation, alignment rules, initialization requirements, and borrow lifetime rules before advertising typed dynamic borrowing.
+
+=== Cross-Language Stable Identity
+
+The stable-container `type` parameter is a cross-language stable type identity, not a language-local class name unless the schema owner explicitly defines that class name as the cross-language identity. The owner of the stable type definition is responsible for publishing the canonical `type` string, variant semantics, size, alignment, initialization rules, and compatible code-generation outputs.
+
+The `variant`, `size`, and `align` parameters are part of typed-borrow compatibility. A receiver MUST reject typed borrowing when any of these values differs from the selected stable type definition. A receiver MAY still preserve and forward the stable-container payload as opaque bytes when the transport class permits metadata-preserving owned or loaned forwarding.
+
+This revision intentionally does not define a layout hash. A layout hash that is not governed by the stable type owner can create false confidence across languages, compilers, ABI settings, or code-generation versions. Compatibility is therefore established by the stable type owner's published identity and by exact `type`, `variant`, `size`, `align`, initialization, and borrow-lifetime checks.
+
+[.specitem,oft-sid="dsn~up-l1-stable-container-cross-language-identity~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Bindings that advertise stable-container typed borrowing *MUST* require a canonical cross-language stable type identity and *MUST* reject typed borrowing when `type`, `variant`, `size`, `align`, initialization rules, or loan-backed lifetime/provenance requirements do not match the selected stable type definition.
+--
+
+[.specitem,oft-sid="dsn~up-l1-stable-container-layout-hash-absent~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Bindings *MUST NOT* rely on an unspecified layout hash for stable-container compatibility in this revision. Unknown dynamic variants or unknown stable type identities *MUST* be rejected for typed borrowing, though they MAY be preserved as opaque payload bytes by transports that preserve custom encodings.
+--
 
 [.specitem,oft-sid="dsn~up-l1-stable-container-encoding~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
@@ -280,4 +298,4 @@ Language bindings MAY expose an expert escape hatch for manually proving that a 
 * Typed deserialization rejects incompatible wire-format metadata.
 * `PayloadEncoding` is preserved across transport boundaries, including both standard `UPayloadFormat` values and native-only custom encodings.
 * Common frame builder helpers produce native frames, not generated envelopes.
-* Stable-container typed receive is loan-backed only and uses a stable-specific borrow method such as `borrow_stable_payload<T>()`.
+* Stable-container typed receive is loan-backed only and uses a stable-specific borrow operation.
