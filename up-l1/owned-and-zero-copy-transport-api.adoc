@@ -20,9 +20,9 @@ SPDX-License-Identifier: Apache-2.0
 
 The transport API is split into two capability interfaces.
 
-`UOwnedTransport` is for transports that move owned payload buffers. This is the default path for network and broker transports.
+An owned native-frame transport interface is for transports that move owned payload buffers. This is the default path for network and broker transports.
 
-`UZeroCopyTransport` is for transports that can safely loan transmit storage and return receive leases. This is the path for shared-memory transports.
+A zero-copy transport capability interface is for transports that can safely loan transmit storage and return receive leases. This is the path for shared-memory transports.
 
 == Capability Scope and Terminology
 
@@ -64,13 +64,15 @@ A zero-copy transport capability *MUST NOT* be interpreted as a claim that every
 == Owned Transport
 
 ----
-UOwnedTransport {
-  send_owned(frame: UOwnedFrame)
-  receive_owned(source_filter: UUri, sink_filter: Optional<UUri>) -> UOwnedFrame
-  register_owned_listener(source_filter: UUri, sink_filter: Optional<UUri>, listener: UOwnedListener)
-  unregister_owned_listener(source_filter: UUri, sink_filter: Optional<UUri>, listener: UOwnedListener)
+OwnedNativeFrameTransport {
+  send_owned(frame: NativeFrame)
+  receive_owned(source_filter: Uri, sink_filter: Optional<Uri>) -> NativeFrame
+  register_owned_listener(source_filter: Uri, sink_filter: Optional<Uri>, listener: OwnedFrameListener)
+  unregister_owned_listener(source_filter: Uri, sink_filter: Optional<Uri>, listener: OwnedFrameListener)
 }
 ----
+
+Rust binding note: the corresponding Rust trait is `UOwnedTransport`; the owned frame type is `UOwnedFrame` and owned listeners implement `UOwnedListener`.
 
 The owned path preserves a simple user experience for common transports. Applications build a frame, select a wire format, and send bytes. No zero-copy capability is required.
 
@@ -83,14 +85,16 @@ Language bindings MUST NOT hide a listener-backed temporary registration behind 
 == Zero-Copy Transport
 
 ----
-UZeroCopyTransport {
-  loan_tx(spec: UTxLoanSpec) -> UTxBuffer
-  send_zero_copy(buffer: UTxBuffer)
-  receive_zero_copy(source_filter: UUri, sink_filter: Optional<UUri>) -> ReceiveLease
-  register_zero_copy_listener(source_filter: UUri, sink_filter: Optional<UUri>, listener: UZeroCopyListener)
-  unregister_zero_copy_listener(source_filter: UUri, sink_filter: Optional<UUri>, listener: UZeroCopyListener)
+ZeroCopyNativeFrameTransport {
+  loan_tx(spec: TransmitLoanRequest) -> TransmitLoan
+  send_zero_copy(buffer: TransmitLoan)
+  receive_zero_copy(source_filter: Uri, sink_filter: Optional<Uri>) -> ReceiveLease
+  register_zero_copy_listener(source_filter: Uri, sink_filter: Optional<Uri>, listener: ReceiveLeaseListener)
+  unregister_zero_copy_listener(source_filter: Uri, sink_filter: Optional<Uri>, listener: ReceiveLeaseListener)
 }
 ----
+
+Rust binding note: the corresponding Rust trait is `UZeroCopyTransport`; the validated transmit loan request is represented by `UTxLoanSpec`, transmit loans implement `UTxBuffer`, and zero-copy listeners implement `UZeroCopyListener`.
 
 The zero-copy send sequence is:
 
@@ -112,13 +116,13 @@ The receive lease owns the lifetime of payload references returned from the zero
 
 Receive payloads MAY be contiguous or segmented. Language bindings SHOULD expose a reader-oriented decode path and an ordered slice iteration view on the base receive lease. Contiguous borrowed access SHOULD be an explicit capability for transports that guarantee contiguity. Generic adapters that convert zero-copy receive leases to owned frames MUST copy from the ordered slice view so transports such as Zenoh can avoid hidden receive-side coalescing.
 
-Payload encoding presence follows xref:wire-format-and-frame-api.adoc[Wire Format and Frame API]: a validated `UTxLoanSpec` with absent payload has no payload encoding metadata, while a present payload, including a present empty payload, requires encoding metadata unless the binding explicitly documents a raw-bytes default.
+Payload encoding presence follows xref:wire-format-and-frame-api.adoc[Wire Format and Frame API]: a validated transmit loan request with absent payload has no payload encoding metadata, while a present payload, including a present empty payload, requires encoding metadata unless the binding explicitly documents a raw-bytes default.
 
 Stable-container payloads additionally require the alignment, size, initialized-byte, and provenance checks defined by xref:wire-format-and-frame-api.adoc#_stable_container_payloads[Stable-Container Payloads]. A transport may preserve stable-container bytes and metadata without providing typed stable-container borrowing; only loan-backed receive paths with proven contiguity, alignment, and lifetime may expose typed stable-container borrows through a stable-specific borrow operation.
 
 === Public Validation Boundary
 
-Language bindings SHOULD separate public transport APIs from implementation hooks. The public API accepts ordinary frame or loan-spec values, validates metadata, filter arguments, payload presence, and payload encoding consistency, then delegates to implementation hooks that receive validated inputs.
+Language bindings *MUST* separate public transport validation from implementation hooks. The public API accepts ordinary frame or loan-request values, validates metadata, filter arguments, payload presence, and payload encoding consistency, then delegates to implementation hooks that receive validated inputs.
 
 An owned transport implementation hook receives a validated owned frame. A zero-copy transport implementation hook receives a validated transmit loan specification before storage is reserved. Receive paths validate reconstructed metadata and payload presence before returning a pull receive lease or invoking a listener.
 
@@ -132,9 +136,9 @@ Language bindings that expose public owned or zero-copy transport APIs *MUST* re
 Language bindings *MUST* distinguish a neutral frame-byte view from a zero-copy receive lease. Owned frames *MAY* implement generic frame-view operations, but a value advertised as a zero-copy receive lease *MUST* represent transport-owned receive storage whose borrowed payload views are bounded by the lease lifetime.
 --
 
-=== Transmit Loan Spec
+=== Transmit Loan Request
 
-A transmit loan spec represents the complete, validated request for transmit storage. It prevents invalid payload presence combinations from reaching a zero-copy transport implementation.
+A transmit loan request represents the complete, validated request for transmit storage. It prevents invalid payload presence combinations from reaching a zero-copy transport implementation.
 
 [cols="1,3",options="header"]
 |===
@@ -152,13 +156,14 @@ A transmit loan spec represents the complete, validated request for transmit sto
 
 [.specitem,oft-sid="dsn~utransport-tx-loan-spec-validation~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-Language bindings that expose zero-copy transmit loans *MUST* validate the transmit loan spec before invoking the transport-specific loan operation. Payload bytes without encoding metadata and encoding metadata with an absent payload *MUST* be rejected unless the binding explicitly documents a raw-bytes default for that API.
+Language bindings that expose zero-copy transmit loans *MUST* validate the transmit loan request before invoking the transport-specific loan operation. Payload bytes without encoding metadata and encoding metadata with an absent payload *MUST* be rejected unless the binding explicitly documents a raw-bytes default for that API.
 --
 
 === General Transport Conformance
 
-Transport binding conformance tests SHOULD cover the following behavior for every native-frame transport class:
+Transport binding conformance tests *MUST* cover the following behavior for every native-frame transport class:
 
+* invalid native attributes are rejected before send, transmit-loan reservation, pull receive return, or listener delivery;
 * payload bytes without encoding metadata are rejected unless the binding documents a raw/default adapter rule;
 * encoding metadata without payload is rejected or normalized to an absent-payload frame according to the binding contract;
 * standard `UPayloadFormat` values are preserved exactly;
@@ -167,17 +172,21 @@ Transport binding conformance tests SHOULD cover the following behavior for ever
 * stable-container `type`, `variant`, `size`, and `align` metadata survive the transport boundary;
 * loan-backed typed borrowing is exposed only when contiguity, alignment, lifetime, and loan provenance are proven.
 
+Transport-specific smoke tests that require a broker, shared-memory daemon, native middleware installation, or deployment fixture *SHOULD* run where that environment is available and *SHOULD* report the missing environment clearly when skipped.
+
 [.specitem,oft-sid="dsn~utransport-native-frame-conformance-baseline~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-Native-frame transport bindings *MUST* provide implementation or conformance coverage for payload/encoding consistency, standard and custom encoding preservation, hidden-metadata isolation, stable-container metadata preservation, and the absence or presence of loan-backed typed borrowing according to the transport class they advertise.
+Native-frame transport bindings *MUST* provide implementation or conformance coverage for invalid-attribute rejection, payload/encoding consistency, standard and custom encoding preservation, hidden-metadata isolation, stable-container metadata preservation, and the absence or presence of loan-backed typed borrowing according to the transport class they advertise.
 --
 
 == Listener Semantics
 
 Push delivery is orthogonal to owned versus zero-copy movement.
 
-* `UOwnedListener` receives `UOwnedFrame`.
-* `UZeroCopyListener` receives transport-specific zero-copy receive leases.
+* An owned-frame listener receives owned native frames.
+* A zero-copy receive listener receives transport-specific zero-copy receive leases.
+
+Rust binding note: the Rust listener traits are `UOwnedListener` and `UZeroCopyListener`.
 
 Filters use the same source and sink matching rules defined for uProtocol transports.
 
@@ -195,8 +204,8 @@ Strict zero-copy forwarding through a generic Streamer route is out of scope for
 
 == Capability Rules
 
-* A transport that cannot loan storage implements `UOwnedTransport` only.
-* A transport that can loan storage implements `UZeroCopyTransport` and returns transport receive leases for zero-copy receive.
+* A transport that cannot loan storage implements only the owned native-frame transport interface.
+* A transport that can loan storage implements the zero-copy transport capability interface and returns transport receive leases for zero-copy receive.
 * A transport MAY implement both when it has a useful owned path and a true loaned path.
 * Returning `UNIMPLEMENTED` for zero-copy calls is correct when the underlying transport cannot provide zero-copy semantics.
 * Returning `UNIMPLEMENTED` for direct pull receive remains valid when a transport does not support a native pull receive model.

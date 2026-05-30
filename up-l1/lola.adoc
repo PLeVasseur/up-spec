@@ -28,6 +28,21 @@ uProtocol frames are mapped to LoLa events using type-erased generic APIs. A tra
 
 An implementation using S-CORE generic events MUST ensure that the producer writes to the same raw event slot storage that `GenericProxyEvent` exposes to consumers. The middleware loan object and slot ownership metadata may be distinct from the byte address exposed to serializers.
 
+=== Raw Sample Safety Contract
+
+A LoLa binding that exposes direct true-zero-copy access to raw generic-event sample bytes *MUST* base that access on either a supported S-CORE raw-sample API or a version-pinned S-CORE layout assumption. If it relies on S-CORE internals, the binding *MUST* document the exact S-CORE source revision or released version and cite the concrete source files and functions whose allocation, slot layout, and consumer sample-address behavior are assumed.
+
+Before exposing raw sample storage to application serializers or receive borrowers, the native bridge *MUST* check all of the following:
+
+* TX and RX data pointers are non-null for non-zero sample sizes;
+* configured sample alignment is supported, non-zero, and a power of two;
+* exposed data pointers satisfy the configured sample alignment;
+* slot offset multiplication and derived pointer arithmetic cannot overflow or underflow;
+* the exposed payload/sample range is contained inside the configured sample storage range and a single allocation;
+* pool ownership prevents double release and use-after-free across reserve, send, drop, receive, and release paths.
+
+Language bindings *MUST* repeat the checks that are visible at the language boundary before constructing slices or typed views, including null-pointer rejection, configured sample-size bounds, and alignment checks. If these criteria cannot be proven for the pinned S-CORE version, the binding *MUST NOT* claim sound direct true-zero-copy raw-sample access and *MUST* return an unsupported or failed-precondition error for those paths until a supported raw-sample API is available.
+
 [.specitem,oft-sid="dsn~up-transport-lola-generic-events~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
 A LoLa uProtocol transport *MUST* use a LoLa event sample as the storage unit for one uProtocol native frame. The uProtocol payload bytes *MUST* be exposed as bytes within that sample and *MUST NOT* require a generated service-specific payload type at the transport API boundary.
@@ -77,13 +92,13 @@ For stable-container payloads, the exposed payload byte range *MUST* begin at an
 
 === Native-Frame Conformance Expectations
 
-LoLa native-frame conformance tests SHOULD cover fixed sample-size rejection, alignment rejection, malformed frame-header and metadata-prefix rejection, payload/encoding mismatch rejection, hidden header/prefix/padding exclusion from payload views, exact standard and custom payload encoding preservation, stable-container metadata preservation, and stable-container typed borrowing only when the configured sample layout satisfies size, alignment, initialization, and lease-lifetime requirements.
+LoLa native-frame conformance tests *MUST* cover fixed sample-size rejection, alignment rejection, invalid native attributes, malformed frame-header and metadata-prefix rejection, payload/encoding mismatch rejection, hidden header/prefix/padding exclusion from payload views, exact standard and custom payload encoding preservation, stable-container metadata preservation, and stable-container typed borrowing only when the configured sample layout satisfies size, alignment, initialization, and lease-lifetime requirements.
 
-Listener conformance tests SHOULD cover independent proxy subscriptions or an explicitly documented copying fanout path when multiple listeners match the same event. Runtime smoke tests SHOULD distinguish stale or foreign samples from the test frame by validating frame magic before delivery.
+Listener conformance tests *MUST* cover independent proxy subscriptions or an explicitly documented copying fanout path when multiple listeners match the same event. Environment-dependent native runtime smoke tests *SHOULD* distinguish stale or foreign samples from the test frame by validating frame magic before delivery.
 
 [.specitem,oft-sid="dsn~up-transport-lola-native-frame-conformance~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-LoLa native-frame bindings *MUST* prove that sample header bytes, metadata-prefix bytes, alignment padding, unused tail bytes, and exposed application payload bytes remain distinct, and that loan-backed typed stable-container borrowing is exposed only for valid LoLa sample leases.
+LoLa native-frame bindings *MUST* prove that invalid attributes are rejected, sample header bytes, metadata-prefix bytes, alignment padding, unused tail bytes, and exposed application payload bytes remain distinct, and that loan-backed typed stable-container borrowing is exposed only for valid LoLa sample leases that satisfy the raw sample safety contract.
 --
 
 == Routing And Configuration

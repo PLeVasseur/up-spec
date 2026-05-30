@@ -51,35 +51,33 @@ The value of a iceoryx2 Service that is used to convey a uProtocol frame *MUST* 
 
 ==== uAttributes Mapping to iceoryx2 user header
 
-[source,rust]
+[source]
 ----
-#[repr(C)]
-#[derive(ZeroCopySend)]
-struct UProtocolHeader {
-    uprotocol_major_version: u8,
-    id_msb: u64,
-    id_lsb: u64,
-    message_type: u8,
-    priority: u8,
-    ttl_present: u8,
-    ttl: u32,
-    request_id_present: u8,
-    request_id_msb: u64,
-    request_id_lsb: u64,
-    permission_level_present: u8,
-    permission_level: u32,
-    commstatus_present: u8,
-    commstatus: u8,
-    source_ue_id: u32,
-    source_ue_version_major: u32,
-    source_resource_id: u32,
-    sink_present: u8,
-    sink_ue_id: u32,
-    sink_ue_version_major: u32,
-    sink_resource_id: u32,
-    metadata_len: u64,
-    payload_len: u64,
-    payload_alignment: u64,
+UProtocolHeader = fixed-layout user header {
+    uprotocol_major_version: uint8
+    id_msb: uint64
+    id_lsb: uint64
+    message_type: uint8
+    priority: uint8
+    ttl_present: uint8
+    ttl: uint32
+    request_id_present: uint8
+    request_id_msb: uint64
+    request_id_lsb: uint64
+    permission_level_present: uint8
+    permission_level: uint32
+    commstatus_present: uint8
+    commstatus: uint8
+    source_ue_id: uint32
+    source_ue_version_major: uint32
+    source_resource_id: uint32
+    sink_present: uint8
+    sink_ue_id: uint32
+    sink_ue_version_major: uint32
+    sink_resource_id: uint32
+    metadata_len: uint64
+    payload_len: uint64
+    payload_alignment: uint64
 }
 ----
 
@@ -117,9 +115,9 @@ a| *MUST* describe the payload loan size and requested serializer alignment. `pa
 
 |===
 
-The user header *MUST NOT* contain a serialized generated `UAttributes` blob. Transports SHOULD project native attributes into fields that are cheap for the transport to inspect. URI entity/version/resource components are numeric and SHOULD live in the user header. Authority names are variable-length strings and SHOULD live in the implementation metadata prefix instead of fixed-capacity user-header buffers.
+The user header *MUST NOT* contain a serialized generated `UAttributes` blob. Transports *SHOULD* project native attributes into fields that are cheap for the transport to inspect. URI entity/version/resource components are numeric and *SHOULD* live in the user header. Authority names are variable-length strings and *SHOULD* live in the implementation metadata prefix instead of fixed-capacity user-header buffers.
 
-Variable metadata that is not naturally fixed-size for iceoryx2 user headers, such as URI authority names, custom `PayloadEncoding` fields, `traceparent`, and `token`, SHOULD be encoded in an implementation metadata prefix rather than forcing arbitrary fixed user-header capacities. The prefix length is carried by `metadata_len`. The prefix is transport metadata and *MUST NOT* be exposed as part of the frame payload by the language transport API.
+Variable metadata that is not naturally fixed-size for iceoryx2 user headers, such as URI authority names, custom `PayloadEncoding` fields, `traceparent`, and `token`, *SHOULD* be encoded in an implementation metadata prefix rather than forcing arbitrary fixed user-header capacities. The prefix length is carried by `metadata_len`. The prefix is transport metadata and *MUST NOT* be exposed as part of the frame payload by the language transport API.
 
 ==== Implementation Metadata Prefix
 
@@ -180,12 +178,12 @@ When payload bytes are present, payload encoding metadata *MUST* be present. Whe
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-payload-zero-copy~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-The iceoryx2 sample storage and user header used to convey a uProtocol frame through a direct true-zero-copy path *MUST* be loan-backed and shared-memory compatible:
+The iceoryx2 sample storage and user header used to convey a uProtocol frame through a direct true-zero-copy path *MUST* be loan-backed and shared-memory compatible. The language binding's concrete header and storage types *MUST* satisfy the middleware's fixed-layout shared-memory requirements:
 
 * is self contained, no heap, no pointers to external sources, no handles to external resources (files etc)
 * has a uniform memory representation
 * does not use pointers to manage their internal structure
-* has a lifetime of the entire program duration
+* has a stable type identity and layout for the lifetime of the process using the service
 --
 
 Direct true-zero-copy transmit requires that the payload is written or constructed directly in the iceoryx2 transmit loan before the loan is sent. Direct true-zero-copy receive requires that the application borrows from the iceoryx2 receive sample lease without allocation, coalescing, or copied fallback storage.
@@ -194,23 +192,21 @@ The application payload exposed by the uProtocol transport API is a byte range w
 
 For stable-container payloads, the exposed payload byte range *MUST* begin at an address satisfying the stable-container `align` parameter and *MUST* have exactly the stable-container `size` for the fixed-size variant. The receive lease lifetime *MUST* cover any typed borrow derived from the sample payload. Rust binding note: stable-container typed receive uses a loan-backed stable receive method rather than an owned-frame helper.
 
-Rust binding note: the storage and user-header types used with iceoryx2 **MUST** implement link:https://docs.rs/iceoryx2/0.6.1/iceoryx2/prelude/trait.ZeroCopySend.html[`ZeroCopySend`].
+Rust binding note: the storage and user-header types used with iceoryx2 **MUST** implement link:https://docs.rs/iceoryx2/0.6.1/iceoryx2/prelude/trait.ZeroCopySend.html[`ZeroCopySend`]. That Rust binding requirement encapsulates these Rust-specific properties:
 
-That encapsulates the following additional properties in Rust:
-
-* Rust `enum` and `struct` are marked  as `#[reprpass:[(C)]]`
-* members don't implement `Drop` explicitly
-* has a `'static` lifetime
+* Rust `enum` and `struct` types are marked as `#[reprpass:[(C)]]` or another representation accepted by the binding;
+* members do not implement `Drop` explicitly;
+* the type satisfies Rust's `'static` lifetime requirement for iceoryx2 shared-memory types.
 
 === Native-Frame Conformance Expectations
 
-iceoryx2 native-frame conformance tests SHOULD cover user-header and metadata-prefix round trips, malformed metadata-prefix rejection, payload/encoding mismatch rejection, hidden prefix and alignment-padding exclusion from payload views, exact standard and custom payload encoding preservation, stable-container metadata preservation, and stable-container typed borrowing only when sample storage satisfies size, alignment, initialization, and lease-lifetime requirements.
+iceoryx2 native-frame conformance tests *MUST* cover user-header and metadata-prefix round trips, invalid native attributes, malformed metadata-prefix rejection, payload/encoding mismatch rejection, hidden prefix and alignment-padding exclusion from payload views, exact standard and custom payload encoding preservation, stable-container metadata preservation, and stable-container typed borrowing only when sample storage satisfies size, alignment, initialization, and lease-lifetime requirements.
 
-Wildcard listener conformance tests SHOULD cover independent subscriber creation or an explicitly documented copying fanout path when multiple listeners match the same service.
+Wildcard listener conformance tests *MUST* cover independent subscriber creation or an explicitly documented copying fanout path when multiple listeners match the same service. Environment-dependent native shared-memory smoke tests *SHOULD* run where the iceoryx2 runtime is available.
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-native-frame-conformance~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-iceoryx2 native-frame bindings *MUST* prove that user-header metadata, hidden metadata-prefix bytes, payload alignment padding, and exposed payload bytes remain distinct, and that loan-backed typed stable-container borrowing is exposed only for valid shared-memory sample leases.
+iceoryx2 native-frame bindings *MUST* prove that invalid attributes are rejected, user-header metadata, hidden metadata-prefix bytes, payload alignment padding, and exposed payload bytes remain distinct, and that loan-backed typed stable-container borrowing is exposed only for valid shared-memory sample leases.
 --
 
 == iceoryx2 Service Name Structure

@@ -153,9 +153,9 @@ Zenoh shared-memory transmit support *MUST* be feature-gated or otherwise explic
 
 === Native-Frame Conformance Expectations
 
-Zenoh native-frame conformance tests SHOULD cover attachment round trips for required and optional `UAttributes`, standard payload encoding preservation, custom payload encoding preservation, malformed attachment rejection, payload bytes without encoding rejection, and hidden attachment exclusion from the delivered payload.
+Zenoh native-frame conformance tests *MUST* cover attachment round trips for required and optional native attributes, invalid native attributes, standard payload encoding preservation, custom payload encoding preservation, malformed attachment rejection, payload bytes without encoding rejection, and hidden attachment exclusion from the delivered payload.
 
-Zero-copy receive conformance tests SHOULD additionally cover segmented `ZBytes` delivery without hidden coalescing, rejection or non-advertisement of typed stable-container borrowing for non-SHM or non-contiguous payloads, and successful typed stable-container borrowing only when shared-memory provenance, contiguity, alignment, and receive-lease lifetime are proven.
+Zero-copy receive conformance tests *MUST* additionally cover segmented `ZBytes` delivery without hidden coalescing, rejection or non-advertisement of typed stable-container borrowing for non-SHM or non-contiguous payloads, and successful typed stable-container borrowing only when shared-memory provenance, contiguity, alignment, and receive-lease lifetime are proven. Native shared-memory smoke tests *SHOULD* run where the Zenoh SHM environment is available.
 
 [.specitem,oft-sid="dsn~up-transport-zenoh-native-frame-conformance~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --

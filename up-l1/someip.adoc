@@ -153,7 +153,7 @@ SOME/IP/vSomeIP is an owned native-frame transport in this revision. SOME/IP bin
 
 ==== Native-Frame Conformance Expectations
 
-SOME/IP native-frame conformance tests SHOULD cover prefix version and magic rejection, malformed UTF-8 rejection, optional-marker rejection, oversized metadata rejection, custom payload encoding preservation, standard payload encoding preservation, stable-container metadata preservation without typed borrowing, payload/encoding mismatch rejection, and exact exclusion of the native-frame prefix from the delivered application payload.
+SOME/IP native-frame conformance tests *MUST* cover prefix version and magic rejection, invalid native attributes, malformed UTF-8 rejection, optional-marker rejection, oversized metadata rejection, custom payload encoding preservation, standard payload encoding preservation, stable-container metadata preservation without typed borrowing, payload/encoding mismatch rejection, and exact exclusion of the native-frame prefix from the delivered application payload. Native vSomeIP runtime smoke tests *SHOULD* run where the middleware installation and network fixture are available.
 
 [.specitem,oft-sid="dsn~up-transport-someip-native-frame-conformance~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --

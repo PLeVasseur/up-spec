@@ -175,7 +175,7 @@ MQTT 5 is an owned native-frame transport in this revision. MQTT 5 native-frame 
 
 === Native-Frame Conformance Expectations
 
-MQTT 5 native-frame conformance tests SHOULD cover standard payload encoding preservation, custom payload encoding preservation, stable-container metadata preservation without typed borrowing, missing encoding rejection for non-empty PUBLISH payloads, absent-payload normalization for empty PUBLISH payloads without encoding, and exact application-payload delivery without exposing MQTT properties as payload bytes.
+MQTT 5 native-frame conformance tests *MUST* cover invalid native attributes, standard payload encoding preservation, custom payload encoding preservation, stable-container metadata preservation without typed borrowing, missing encoding rejection for non-empty PUBLISH payloads, absent-payload normalization for empty PUBLISH payloads without encoding, and exact application-payload delivery without exposing MQTT properties as payload bytes. Broker-dependent integration smoke tests *SHOULD* run where an MQTT 5 broker fixture is available.
 
 [.specitem,oft-sid="dsn~up-transport-mqtt5-native-frame-conformance~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
