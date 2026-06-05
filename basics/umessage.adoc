@@ -22,6 +22,8 @@ SPDX-License-Identifier: Apache-2.0
 
 uProtocol entities communicate with each other by means of exchanging `UMessages`. A uEntity can for example publish an event to a topic or invoke a remote service provider's operations using a UMessage. Please refer to the xref:../up-l2/README.adoc[uProtocol Communication Layer API] for details.
 
+NOTE: `UMessage` remains the protocol message data model and the compatibility serialization shape. Transport language bindings MAY also expose native frame APIs that carry binding-native uProtocol attributes, payload encoding metadata, and payload bytes without requiring `UMessage` to be the transport envelope. See xref:../up-l1/wire-format-and-frame-api.adoc[Wire Format and Frame API].
+
 [#data-model-definition]
 == Data Model
 

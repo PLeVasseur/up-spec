@@ -1,0 +1,116 @@
+= Wire Format and Frame API
+:toc:
+:sectnums:
+
+----
+SPDX-FileCopyrightText: 2026 Contributors to the Eclipse Foundation
+
+See the NOTICE file(s) distributed with this work for additional
+information regarding copyright ownership.
+
+This program and the accompanying materials are made available under
+the terms of the Apache License Version 2.0 which is available at
+https://www.apache.org/licenses/LICENSE-2.0
+
+SPDX-FileType: DOCUMENTATION
+SPDX-License-Identifier: Apache-2.0
+----
+
+== Goal
+
+The Transport Layer frame API is serialization-neutral. A native frame carries binding-native uProtocol attributes, optional payload encoding metadata, and optional payload bytes. The frame API *MUST NOT* require a format-specific generated message envelope when the same metadata and payload bytes can be represented by the binding-level frame type.
+
+`UMessage` remains the protocol message data model and the compatibility serialization shape. Native frame APIs are binding-level transport APIs, not a replacement for the protocol message model.
+
+== Native Frame Model
+
+A native frame contains:
+
+* uProtocol message metadata needed for routing, validation, correlation, expiry, prioritization, tracing, authorization, and communication status;
+* optional payload encoding metadata;
+* optional application payload bytes.
+
+Language bindings *MUST* define how their native frame metadata maps to the abstract metadata carried by `UMessage`. Transport implementations *MUST* preserve all required metadata fields when crossing a transport boundary unless an existing transport mapping explicitly defines a lossy projection for that field.
+
+[.specitem,oft-sid="dsn~up-l1-native-frame-metadata-fields~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Language bindings that expose frame metadata *MUST* preserve the uProtocol metadata required for routing, validation, correlation, expiry, priority, tracing, authorization, and communication status when crossing a transport boundary, unless the relevant transport mapping explicitly defines a lossy projection for that field.
+--
+
+== Payload Encoding
+
+Payload encoding metadata identifies the payload wire representation. It is present only when a frame carries a payload.
+
+A standard payload encoding uses an existing `UPayloadFormat` value and is representable in generated `UMessage` envelopes. A custom payload encoding has a stable `id` and `content_type` and identifies a native-only byte-compatible layout or codec family that is not representable in generated `UMessage` envelopes.
+
+A binding that intentionally serializes an entire native frame as a generated `UMessage` envelope *MUST* reject custom payload encodings rather than silently mapping them to `UPAYLOAD_FORMAT_UNSPECIFIED` or any other standard value. Standard payload encoding values *MUST* be preserved exactly across native transport boundaries. Custom encoding `id` and `content_type` values *MUST* be non-empty and *MUST* be preserved exactly across native transport boundaries.
+
+Typed deserialization compatibility is defined as follows:
+
+* A standard decoder matches only a standard frame encoding with the same `UPayloadFormat` value.
+* A custom decoder matches only a custom frame encoding with the same `id` and `content_type` values.
+* A standard decoder *MUST NOT* accept a custom frame encoding, and a custom decoder *MUST NOT* accept a standard frame encoding.
+
+[.specitem,oft-sid="dsn~up-l1-frame-payload-encoding-presence~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Frames without payload *MUST NOT* carry payload encoding metadata. Frames with payload bytes *MUST* carry payload encoding metadata, unless a language binding explicitly documents a raw-bytes default for that API. A present empty payload is distinct from no payload and carries payload encoding metadata. A receiver that observes payload bytes without encoding metadata and has no such documented raw default *MUST* reject the frame as invalid.
+--
+
+== Native Message Builder
+
+Language bindings SHOULD provide builder ergonomics for common frame construction without requiring applications to manually populate every metadata field.
+
+A native builder:
+
+* *MUST* build the language binding's native frame type rather than a generated transport envelope;
+* *MUST* support Publish, Notification, Request, and Response frames;
+* *SHOULD* support creating a Response from a Request's metadata;
+* *SHOULD* support raw payload bytes;
+* *SHOULD* support explicit payload encoding metadata;
+* *SHOULD* support the same serializer contract used by owned and zero-copy transports;
+* *MAY* support optional payload codecs such as Protocol Buffers when the binding exposes those codecs behind explicit features.
+
+Builder helpers *MUST* validate message-type-specific metadata constraints before producing a frame. The presence of a native builder *MUST NOT* require transports to accept generated message envelopes. Transports still consume native frame metadata plus payload bytes.
+
+== Serializer Contract
+
+Language bindings SHOULD provide serializer and deserializer contracts that can target an owned payload buffer or a zero-copy transmit loan. A serializer reports the encoded payload length and writes exactly that number of bytes into the supplied output buffer. A deserializer consumes payload bytes whose encoding metadata has already been checked for compatibility.
+
+Serializers *MUST NOT* write partial payloads silently. If the supplied output buffer is too small, serialization *MUST* fail. If a serializer reports an encoded length and then writes a different number of bytes, language bindings SHOULD treat that as an invalid payload error.
+
+== Stable-Container Payloads
+
+Stable-container payloads are native custom payload encodings for typed values whose bytes can be transported and borrowed without a generated message envelope. They are intended for shared-memory and other loan-backed transports that can preserve payload alignment and lifetime.
+
+The stable-container encoding uses custom encoding `id` value `up.stable-container`. Its `content_type` identifies the stable type, variant, exact payload size, and required alignment.
+
+A receiver that borrows a fixed-size stable-container payload as a typed value *MUST* verify all of the following before constructing the typed borrow:
+
+* the custom encoding `id` is `up.stable-container`;
+* the stable type identity matches the selected stable payload type identity;
+* the variant is fixed-size;
+* payload length is exactly the declared size;
+* the exposed payload start address satisfies the declared alignment and the selected stable type's alignment requirement;
+* the receive lease keeps the payload storage alive for the entire typed borrow lifetime;
+* the payload storage provenance is loan-backed or otherwise explicitly documented as stable for borrowing.
+
+[.specitem,oft-sid="dsn~up-l1-stable-container-loan-backed-borrow~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Language bindings that expose fixed-size stable-container typed borrowing *MUST* expose the safe typed borrow only through a loan-backed receive API. Owned native-frame transports *MAY* preserve stable-container bytes and metadata, but they *MUST NOT* advertise those owned bytes as loan-backed typed stable-container borrows.
+--
+
+[.specitem,oft-sid="dsn~up-l1-stable-container-encoding~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Transport implementations *MUST* preserve stable-container custom encoding metadata exactly across transport boundaries. A transport that cannot preserve custom payload encodings *MUST* reject stable-container frames rather than silently degrading them to an unspecified or raw payload format.
+--
+
+Rust binding note: the concrete Rust frame API may use names such as `UAttributes`, `PayloadEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UFrameBuilder`, `UTxLoanSpec`, `UTxBuffer`, a neutral `UFrameView`, and receive-lease traits. These names are Rust binding APIs and are not generated protocol envelopes.
+
+== Acceptance Criteria
+
+* The frame API does not expose a format-specific generated envelope as a transport requirement.
+* Applications can select any payload format by providing serializer and deserializer implementations.
+* The same serializer can target an owned buffer or a zero-copy transmit loan.
+* Typed deserialization rejects incompatible payload encoding metadata.
+* Payload encoding metadata is preserved across transport boundaries, including both standard `UPayloadFormat` values and native-only custom encodings.
+* Stable-container typed receive is loan-backed only and uses a stable-specific borrow operation.

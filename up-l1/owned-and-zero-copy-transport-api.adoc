@@ -1,0 +1,112 @@
+= Owned and Zero-Copy Transport API
+:toc:
+:sectnums:
+
+----
+SPDX-FileCopyrightText: 2026 Contributors to the Eclipse Foundation
+
+See the NOTICE file(s) distributed with this work for additional
+information regarding copyright ownership.
+
+This program and the accompanying materials are made available under
+the terms of the Apache License Version 2.0 which is available at
+https://www.apache.org/licenses/LICENSE-2.0
+
+SPDX-FileType: DOCUMENTATION
+SPDX-License-Identifier: Apache-2.0
+----
+
+== Overview
+
+The ordinary message transport API remains the compatibility API for language bindings that send and receive `UMessage` values. Native frame APIs are additional binding-level capabilities for transports that want to avoid generated transport envelopes or expose loan-backed storage. They do not make the compatibility API obsolete.
+
+Owned native-frame transport and zero-copy transport capability APIs are separate capability interfaces:
+
+* An owned native-frame transport moves frames whose payload bytes are owned by the sender or receiver. This is the default model for network, broker, file, and in-process transports.
+* A zero-copy transport can safely loan transmit storage and return receive leases. This is the model for transports that provide shared-memory or equivalent loan-backed storage.
+
+== Capability Scope and Terminology
+
+Native-frame and zero-copy bindings *MUST* use copy-boundary terms precisely.
+
+[cols="1,3",options="header"]
+|===
+| Term | Meaning
+
+| owned native-frame transport
+| A transport API whose send and receive values own their payload bytes. It preserves uProtocol metadata and payload bytes, but it does not expose loan-backed typed payload borrows.
+
+| copying adapter
+| An adapter that exposes one API shape by copying into or out of another API shape. It is an explicit copy boundary.
+
+| copy-minimized route
+| A route that avoids unnecessary intermediate payload buffers but still copies payload bytes at least once, for example into an egress transmit loan.
+
+| direct true-zero-copy transmit
+| A path where the application writes or constructs the payload directly in transport-owned transmit loan storage that is later committed by the transport.
+
+| direct true-zero-copy receive
+| A path where the application borrows payload bytes directly from a receive lease backed by the transport or shared-memory runtime, without allocation, coalescing, or copied fallback storage.
+
+| strict loan-backed zero-copy receive
+| A direct true-zero-copy receive path that rejects copied fallback storage instead of exposing it through loan-backed typed borrow APIs.
+|===
+
+[.specitem,oft-sid="dsn~utransport-native-zero-copy-classes~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Native-frame transport libraries *MUST* document which transport class they implement and *MUST NOT* describe owned native-frame transports, copying adapters, or copy-minimized routes as direct true-zero-copy transmit or receive paths.
+--
+
+[.specitem,oft-sid="dsn~utransport-zero-copy-operation-scope~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+A zero-copy transport capability *MUST NOT* be interpreted as a claim that every helper operation using that transport is zero-copy. Serializing an existing object into a transmit loan may still copy or transform from the source object. Direct true-zero-copy transmit requires constructing or writing the application payload directly in the transport loan. Direct true-zero-copy receive requires borrowing from the receive lease without allocation, coalescing, or copied fallback storage.
+--
+
+== Owned Native-Frame Transport
+
+An owned send transfers an owned frame into the transport implementation. The transport may copy the payload into protocol buffers, broker client buffers, sockets, files, middleware-owned buffers, or other owned storage as needed. Implementing the owned API alone makes no zero-copy claim.
+
+Owned receive returns a frame whose metadata and payload bytes are owned by the caller. Owned receive MAY be implemented directly by a transport that has a native pull receive model. If a transport does not support pull receive, the language binding's default implementation MUST fail with an unimplemented operation error.
+
+Language bindings *MUST NOT* hide a listener-backed temporary registration behind the default owned receive implementation unless the binding can guarantee cleanup when the receive operation is cancelled. A listener-backed convenience, if provided, should be a separately documented helper with explicit lifecycle semantics. Such a helper does not change transport capability and *MUST NOT* be used to claim zero-copy behavior.
+
+Rust binding note: the corresponding Rust trait may be named `UOwnedTransport`; the owned frame type may be named `UOwnedFrame`, and owned listeners may implement `UOwnedListener`.
+
+== Zero-Copy Transport
+
+A zero-copy send sequence reserves a transmit loan from validated frame metadata, payload presence, encoded length, and alignment requirements. The application or serializer writes directly into the loaned payload storage, and the transport commits that storage when sending.
+
+A zero-copy receive sequence returns a receive lease. The lease owns the lifetime of any borrowed payload views returned from the zero-copy receive API. Applications *MUST NOT* store borrowed payload views beyond the lease lifetime. Implementations that copy payload bytes into a hidden buffer before handing them to callers *MUST NOT* advertise that path as zero-copy.
+
+Receive payloads MAY be contiguous or segmented. Language bindings SHOULD expose a reader-oriented decode path and an ordered slice iteration view on the base receive lease. Contiguous borrowed access SHOULD be an explicit capability for transports that guarantee contiguity. Generic adapters that convert zero-copy receive leases to owned frames MUST copy from the ordered slice view so transports can avoid hidden receive-side coalescing.
+
+Rust binding note: a Rust zero-copy trait may be named `UZeroCopyTransport`; validated transmit loan requests may be represented by `UTxLoanSpec`, transmit loans may implement `UTxBuffer`, and zero-copy listeners may implement `UZeroCopyListener`.
+
+== Public Validation Boundary
+
+Language bindings *MUST* separate public transport validation from implementation hooks. The public API accepts ordinary frame or loan-request values, validates metadata, filter arguments, payload presence, payload encoding consistency, and loan layout requirements, then delegates to implementation hooks that receive validated inputs.
+
+[.specitem,oft-sid="dsn~utransport-public-api-validates-before-impl~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Language bindings that expose public owned or zero-copy transport APIs *MUST* reject invalid frames, invalid filters, invalid transmit loan specifications, and invalid reconstructed receive frames before the transport implementation callback observes or delivers them.
+--
+
+== Generic Endpoint Adapters
+
+Language bindings MAY expose an endpoint adapter that wraps either an owned transport or a true zero-copy transport behind a single routing-oriented object. Such an adapter can be useful for streamers and bridge code that route frames without depending on a concrete transport type.
+
+For an owned transport, sending an owned frame through the adapter delegates to owned send, and registering an owned listener delegates to owned listener registration.
+
+For a zero-copy transport, sending an owned frame through the adapter reserves a transmit loan, copies the owned payload into the loan, and commits the loan through zero-copy send. Receiving through an owned listener adapter converts a zero-copy receive lease into an owned frame before invoking the owned listener. These copies are intentional boundary conversions and *MUST* be documented by the binding exposing the adapter.
+
+This adapter is a boundary utility, not a claim that all transports are zero-copy. Strict zero-copy forwarding through a generic route is out of scope for this revision unless a transport-pair-specific proof exists. Routes documented as copy-minimized *MUST* be treated as one-copy routes until such a proof exists.
+
+== Capability Rules
+
+* A transport that cannot loan storage implements only the owned native-frame transport interface.
+* A transport that can loan storage implements the zero-copy transport capability interface and returns transport receive leases for zero-copy receive.
+* A transport MAY implement both when it has a useful owned path and a true loaned path.
+* Returning an unimplemented operation error for zero-copy calls is correct when the underlying transport cannot provide zero-copy semantics.
+* Returning an unimplemented operation error for direct pull receive remains valid when a transport does not support a native pull receive model.
+
+Rust binding benchmark note: a benchmark label such as `stable_owned_bytes_full` is not a universal transport capability claim. In Rust transport benchmarks, Zenoh may use the ordinary `UTransport<UMessage>` compatibility path for that label, while iceoryx2 and LoLa may use a feature-gated `UOwnedTransport` path. This label records the benchmark fixture's owned-path semantics, not direct true-zero-copy behavior.
