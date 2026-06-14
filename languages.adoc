@@ -61,6 +61,15 @@ Language libraries that expose native frame or zero-copy APIs instead of a gener
 * *MUST* document any adapter that copies between owned-buffer and zero-copy transport capabilities, including the copy boundary and whether the adapter is intended for routing rather than end-to-end zero-copy delivery.
 --
 
+Language libraries that expose wire formats or wire-bound native-frame transports
+
+[.specitem,oft-sid="dsn~up-language-wire-format-typed-support~1",oft-needs="impl,uman",oft-title="Wire-format typed support is binding-neutral",oft-tags="LanguageLibrary"]
+--
+* *MUST* document how a selected wire format maps native frame metadata and payload encoding metadata at the transport boundary.
+* *MUST* document how typed payload support is checked for each claimed operation, such as static type checking, compile-time validation, code-generation validation, or equivalent binding-time validation.
+* *MUST* document dynamically configured wire-format paths as runtime-checked paths, not as static selected-wire guarantees.
+--
+
 === Build
 
 A language library

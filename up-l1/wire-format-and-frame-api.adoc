@@ -18,9 +18,52 @@ SPDX-License-Identifier: Apache-2.0
 
 == Goal
 
-The Transport Layer frame API is serialization-neutral. A native frame carries binding-native uProtocol attributes, optional payload encoding metadata, and optional payload bytes. The frame API *MUST NOT* require a format-specific generated message envelope when the same metadata and payload bytes can be represented by the binding-level frame type.
+The Transport Layer frame API is wire-format-neutral. A native frame carries binding-native uProtocol attributes, optional payload encoding metadata, and optional payload bytes. The frame API *MUST NOT* require a format-specific generated message envelope when the same metadata and payload bytes can be represented by the binding-level frame type.
 
 `UMessage` remains the protocol message data model and the compatibility serialization shape. Native frame APIs are binding-level transport APIs, not a replacement for the protocol message model.
+
+== Wire Format Terminology
+
+[cols="1,3",options="header"]
+|===
+| Term | Meaning
+
+| wire format
+| A binding-level contract that defines how native frame metadata and application payload values are represented at a transport boundary.
+
+| metadata codec
+| The part of a wire format that serializes and deserializes native uProtocol frame metadata, including abstract `UAttributes` fields and payload encoding metadata.
+
+| payload codec family
+| The part of a wire format that defines which application payload types can be encoded, decoded, borrowed, or loan-initialized under that wire format.
+
+| typed payload support
+| A binding-time claim that a wire format supports a specific application payload type for a specific operation such as encode, decode, loaned transmit, or borrowed receive.
+
+| wire-bound transport
+| A concrete transport value initialized with one wire format and exposing typed helpers constrained by that selected wire format.
+
+| metadata-prefix wire format
+| A wire format whose metadata codec writes transport metadata separately from the payload bytes. The transport may place those metadata bytes in a protocol header, attachment, shared-memory prefix, or equivalent physical metadata slot.
+
+| whole-frame wire format
+| A wire format that serializes or deserializes a complete native frame as one envelope because the transport has no native metadata and payload split.
+|===
+
+Rust trait and type names such as `UWire`, `UWireTransport`, or `up_rust::wire` are examples of one language binding's API shape. They are not required names for other language bindings.
+
+== Wire Format Contract
+
+A native-frame transport SHOULD be structured so that a transport core can be paired with any wire format satisfying the transport's physical mapping requirements. Transport-specific constraints, such as maximum metadata size, alignment, payload contiguity, or supported delivery modes, *MUST* be documented by the language binding or transport library.
+
+Every interoperable wire format *MUST* define a stable wire identity, payload codec family identity, metadata layout identity when metadata-prefix metadata is used, supported metadata version range, and compatibility rules. A receiver *MUST* reject unknown or incompatible wire identity, payload codec family mismatch, unsupported metadata version, malformed metadata, and payload encoding inconsistencies before exposing a native frame, receive lease, typed payload, or listener callback to the application.
+
+If a transport mirrors routing, size, offset, priority, alignment, or other physical fields outside the wire format metadata, those physical fields *MUST NOT* override the decoded wire format metadata. Mirrored fields that duplicate or bound wire metadata *MUST* either be validated against the decoded metadata before application exposure or be documented as routing hints only.
+
+[.specitem,oft-sid="dsn~up-l1-wire-format-selected-wire-validation~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Native-frame transports that expose wire-bound APIs *MUST* reject incompatible wire identity, payload codec family mismatch, unsupported metadata version, malformed metadata, and payload encoding inconsistencies before exposing the frame, receive lease, typed payload, or listener callback to the application.
+--
 
 == Native Frame Model
 
@@ -54,6 +97,30 @@ Typed deserialization compatibility is defined as follows:
 [.specitem,oft-sid="dsn~up-l1-frame-payload-encoding-presence~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
 Frames without payload *MUST NOT* carry payload encoding metadata. Frames with payload bytes *MUST* carry payload encoding metadata, unless a language binding explicitly documents a raw-bytes default for that API. A present empty payload is distinct from no payload and carries payload encoding metadata. A receiver that observes payload bytes without encoding metadata and has no such documented raw default *MUST* reject the frame as invalid.
+--
+
+== Payload Codec Family and Typed Payload Support
+
+A payload codec family defines the payload types and operations supported by a wire format. Supported operations can include owned encode, owned decode, reader decode, loaned transmit initialization, uninitialized loan completion, or loan-backed receive borrow. A binding that claims typed payload support *MUST* document the operation and the checking mechanism for each supported payload type.
+
+Language bindings SHOULD expose a static or binding-time typed path where unsupported payload and wire format combinations are rejected by static type checking, compile-time validation, code-generation validation, or an equivalent binding-time validation mechanism. A later dynamic path, if provided by a binding or tool, is runtime-checked only and *MUST NOT* be documented as providing static selected-wire guarantees.
+
+Loan-backed typed borrow and direct loan initialization require more than matching payload bytes. A wire format *MUST NOT* advertise those operations unless the payload representation satisfies the binding's storage, alignment, lifetime, provenance, and initialization requirements.
+
+[.specitem,oft-sid="dsn~up-l1-wire-format-typed-payload-support~1",oft-needs="impl,utest",oft-tags="LanguageLibrary,TransportLayerImpl"]
+--
+Language bindings that claim typed payload support for a wire format *MUST* document the supported payload operation and checking mechanism. Bindings SHOULD reject unsupported payload and wire format combinations by static type checking, compile-time validation, code-generation validation, or equivalent binding-time validation when that binding can provide such a path.
+--
+
+== Metadata-Prefix and Whole-Frame Wire Formats
+
+A metadata-prefix wire format separates encoded native frame metadata from payload bytes. Transports using this model consume already-encoded metadata bytes and payload bytes; they do not choose the selected wire identity, payload codec family, or payload encoding on their own. A transport may choose a physical placement for the encoded metadata bytes, but that placement is not a new wire format unless it also defines a metadata codec and compatibility rules.
+
+A whole-frame wire format serializes a complete native frame into one generated or binary envelope. Whole-frame formats are compatibility paths for transports that cannot preserve a native metadata and payload split. A whole-frame format *MAY* reject native-only custom payload encodings that cannot be represented in the envelope, but it *MUST NOT* silently degrade them to `UPAYLOAD_FORMAT_UNSPECIFIED`, raw bytes, or another standard payload format.
+
+[.specitem,oft-sid="dsn~up-l1-wire-format-whole-frame-custom-encoding~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+Whole-frame wire formats that cannot represent a native-only custom payload encoding *MUST* reject the frame instead of silently degrading the payload encoding metadata.
 --
 
 == Native Message Builder
@@ -104,11 +171,17 @@ Language bindings that expose fixed-size stable-container typed borrowing *MUST*
 Transport implementations *MUST* preserve stable-container custom encoding metadata exactly across transport boundaries. A transport that cannot preserve custom payload encodings *MUST* reject stable-container frames rather than silently degrading them to an unspecified or raw payload format.
 --
 
+== Deferred Runtime Wire Selection
+
+Runtime-selected wire formats, registries, plugins, and bridge/tool configuration are outside this revision's first-wave normative native-frame transport model. A later runtime-selected path may select a wire format dynamically, but unsupported typed payloads on that path are runtime errors and must not be described as static selected-wire rejections.
+
 Rust binding note: the concrete Rust frame API may use names such as `UAttributes`, `PayloadEncoding`, `UFrameMetadata`, `UOwnedFrame`, `UFrameBuilder`, `UTxLoanSpec`, `UTxBuffer`, a neutral `UFrameView`, and receive-lease traits. These names are Rust binding APIs and are not generated protocol envelopes.
 
 == Acceptance Criteria
 
-* The frame API does not expose a format-specific generated envelope as a transport requirement.
+* The frame API does not expose a format-specific generated envelope as a universal transport requirement.
+* A wire-bound transport exposes typed helpers constrained by one selected wire format.
+* Incompatible wire identity and payload codec family mismatches are rejected before application exposure.
 * Applications can select any payload format by providing serializer and deserializer implementations.
 * The same serializer can target an owned buffer or a zero-copy transmit loan.
 * Typed deserialization rejects incompatible payload encoding metadata.

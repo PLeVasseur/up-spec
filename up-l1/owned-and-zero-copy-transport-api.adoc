@@ -62,6 +62,19 @@ Native-frame transport libraries *MUST* document which transport class they impl
 A zero-copy transport capability *MUST NOT* be interpreted as a claim that every helper operation using that transport is zero-copy. Serializing an existing object into a transmit loan may still copy or transform from the source object. Direct true-zero-copy transmit requires constructing or writing the application payload directly in the transport loan. Direct true-zero-copy receive requires borrowing from the receive lease without allocation, coalescing, or copied fallback storage.
 --
 
+== Wire-Bound Transport Capabilities
+
+A wire-bound transport is a concrete native-frame transport value initialized with one xref:wire-format-and-frame-api.adoc[wire format]. The selected wire format defines metadata codec behavior, payload codec family compatibility, and typed payload support for helper operations exposed by that transport value.
+
+Native-frame transport libraries SHOULD structure transport cores so that any core can be paired with any wire format satisfying the transport's physical mapping requirements. A transport library *MUST* document selected wire compatibility constraints that arise from physical metadata size, payload placement, alignment, contiguity, delivery mode, or unavailable loan mechanics.
+
+Wire-bound helper operations *MUST NOT* advertise loan-backed typed borrow, initialized loan transmit, uninitialized loan transmit, or direct true-zero-copy behavior unless both the selected wire format and the transport capability satisfy the relevant storage, alignment, lifetime, provenance, and initialization requirements.
+
+[.specitem,oft-sid="dsn~utransport-wire-bound-compatibility~1",oft-needs="impl,utest,uman",oft-tags="TransportLayerImpl"]
+--
+Native-frame transport libraries that expose wire-bound transports *MUST* document selected wire compatibility constraints and *MUST NOT* claim direct true-zero-copy or loan-backed typed payload support unless the selected wire format and transport storage semantics satisfy the documented requirements for that operation.
+--
+
 == Owned Native-Frame Transport
 
 An owned send transfers an owned frame into the transport implementation. The transport may copy the payload into protocol buffers, broker client buffers, sockets, files, middleware-owned buffers, or other owned storage as needed. Implementing the owned API alone makes no zero-copy claim.
