@@ -51,6 +51,18 @@ A language library
 * *MUST* contain a `README` file that explains how to build and use the library.
 --
 
+Language libraries that expose public APIs for the Transport and Communication Layers
+
+[.specitem,oft-sid="dsn~up-language-public-api-surface-model~1",oft-needs="impl,uman",oft-title="Public API surfaces are explained as one coherent model",oft-tags="LanguageLibrary"]
+--
+* *MUST* maintain a concise whole-stack public API explanation for every exposed API plane, including ordinary application and service Communication Layer entry points, compatibility message transport APIs, native-frame or owned transport capability APIs, zero-copy transport capability APIs, wire-format or wire-profile APIs, metadata and payload codec boundaries, transport binding APIs, caller-obligation or safety-sensitive APIs, and test, proof, or fixture support APIs when those surfaces are present.
+* *MUST* identify which entry points are the ordinary application and service starting points and which entry points are direct Transport Layer capability APIs. Presenting an ordinary Communication Layer entry point *MUST NOT* make direct Transport Layer capability APIs hard to find or imply that direct Transport Layer usage is unsupported.
+* *MUST* document how binding-level native-frame or zero-copy representations preserve abstract uProtocol message metadata, payload bytes, payload encoding metadata, filtering rules, and delivery semantics defined by the {up-l1-ref}.
+* *MUST* document wire-format or wire-profile identity, metadata encoding, payload-family checks, and whole-frame envelope handling as Transport Layer representation or profile concerns. Communication Layer APIs consume configured transport endpoints through messaging roles; they do not own wire identity, metadata encoding, or payload-family semantics.
+* *MUST* document adapter or bridge APIs that copy between owned-buffer, native-frame, zero-copy, whole-frame, or compatibility message surfaces, including the copy boundary and whether the adapter is intended for routing, compatibility, or end-to-end capability preservation.
+* *SHOULD* use a small surface map, table, or equivalent cross-reference so readers can find the ordinary Communication Layer path, each direct Transport Layer capability path, and each expert or proof-only path without reading implementation internals.
+--
+
 === Build
 
 A language library
