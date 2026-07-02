@@ -76,6 +76,7 @@ Language libraries that expose multiple public API planes from one package or na
 --
 * *MUST* document which entry points are the ordinary application/service Communication Layer APIs, compatibility message transport APIs, native frame, wire-format, or zero-copy transport capability APIs, expert caller-obligation APIs, and test/proof/fixture support APIs.
 * *MUST* keep compatibility message transport APIs documented as valid APIs unless the language library explicitly removes or replaces them through a versioned migration.
+* *MUST* keep documented direct access paths for exposed Transport Layer capability APIs, including compatibility message transport, native frame, wire-format, and zero-copy capability surfaces. Presenting an ordinary Communication Layer entry point *MUST NOT* make those direct Transport Layer APIs hard to find or imply that direct Transport Layer usage is unsupported.
 * *MUST NOT* describe wire-format identity, selected-wire profile identity, metadata encoding, or payload-family checks as owned by Communication Layer roles. Communication Layer APIs consume configured transport endpoints through messaging roles.
 * *SHOULD* present expert caller-obligation APIs and test/proof/fixture support separately from ordinary application/service examples.
 --
