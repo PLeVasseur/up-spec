@@ -94,4 +94,13 @@ Something that can be manipulated/controlled/exposed by a service. Resources are
 |*uP-L1* |uProtocol Transport & Session Layer
 |*uP-L2* |uProtocol Communication Layer
 |*uP-L3* |uProtocol Application Layer
+|*Compatibility Message Transport* |A uP-L1 transport surface that sends and receives complete `UMessage` values through the abstract transport API. It is the common interoperability baseline and remains valid even when a binding also exposes lower-copy or transport-native capability surfaces.
+|*Native Frame* |A transport-specific frame representation that preserves uProtocol metadata, payload bytes, payload encoding information, filtering information, and delivery semantics without first materializing a complete compatibility `UMessage` at every boundary.
+|*Loan-backed Transport* |A uP-L1 transport capability where the transport lends storage for transmit or receive data and the caller obeys the loan lifetime and initialization rules defined by that transport binding.
+|*Wire Profile* |The selected uP-L1 representation profile that identifies how metadata, payload-family information, payload bytes, and whole-frame envelopes are encoded for a transport path.
+|*Metadata Codec* |The encoder and decoder for uProtocol message metadata within a wire profile or transport-native frame.
+|*Payload Codec* |The encoder and decoder for the application payload bytes and payload encoding information carried by a uProtocol message.
+|*Transport Core* |The transport-specific send, receive, listener, filtering, and resource-management mechanics below a language library adapter surface.
+|*Transport Adapter* |A binding component that translates between compatibility messages, native frames, loan-backed frames, wire profiles, or whole-frame envelopes while preserving the semantics required by uP-L1.
+|*Whole-frame Envelope* |A representation that carries both metadata and payload as one transport frame, event envelope, sample, packet, or equivalent protocol unit.
 |===

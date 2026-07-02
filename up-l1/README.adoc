@@ -25,6 +25,130 @@ The purpose of this layer of uProtocol is to define a common API for sending and
 
 This specification defines the transport layer's abstract API which is mapped to supported programming languages by means of uProtocol's xref:../languages.adoc[language specific libraries]. The API is _implemented_ for particular transport protocols and programming languages by _uProtocol Transport Libraries_.
 
+[#transport-capability-model]
+== Transport Capability Model
+
+uP-L1 defines the transport and representation responsibilities below the Communication Layer. A transport library may expose more than one public capability surface when the underlying transport can preserve uProtocol semantics with different cost, storage, or representation properties.
+
+[#compatibility-message-transport]
+=== Compatibility Message Transport
+
+The compatibility message transport surface sends and receives complete xref:../basics/umessage.adoc[UMessage] values through <<UTransport>>. This surface is the common interoperability baseline for language libraries and transport libraries.
+
+Compatibility message transport implementations:
+
+* *MUST* preserve all uProtocol metadata and payload semantics required by this document.
+* *MUST* apply the send, receive, listener, filtering, validation, and error behavior defined by <<UTransport>>.
+* *MUST NOT* be treated as deprecated solely because a binding also exposes native-frame, loan-backed, selected-wire, or whole-frame capability surfaces.
+
+[#native-frame-owned-transport]
+=== Native-frame and Owned Transport Capability
+
+A native-frame capability exposes a transport-specific frame representation while preserving uProtocol metadata, payload bytes, payload encoding information, filtering information, and delivery semantics. An owned native frame is a native frame whose storage is owned by the caller or adapter rather than borrowed from the transport runtime.
+
+Native-frame and owned transport capabilities:
+
+* *MUST* define which metadata fields are present in the native frame and how malformed, unsupported, or incomplete metadata is rejected.
+* *MUST* define whether payload bytes are copied, moved, referenced, or loaned at each adapter boundary.
+* *MUST* define how source and sink filters are applied when the transport can prefilter, when an adapter must filter after decode, and when unmatched frames can remain queued.
+* *MUST* provide a compatibility path or adapter when applications need complete `UMessage` values.
+
+[#loan-backed-zero-copy-transport]
+=== Loan-backed Zero-copy Transport Capability
+
+A loan-backed capability allows a transport to lend storage for transmit or receive data. Such a capability is zero-copy only for the storage and direction that the transport actually lends.
+
+Loan-backed transport capabilities:
+
+* *MUST* state the loan lifetime, initialization, send, receive, release, and cancellation rules.
+* *MUST* state which metadata and payload bytes can be written or read without copying, and which metadata or envelope bytes are copied by the transport or adapter.
+* *MUST* reject unsupported payload representations, wrong wire profiles, malformed metadata, and payload-family mismatches before exposing the frame as valid for that capability.
+* *MUST NOT* claim full Communication Layer zero-copy parity unless publish, receive, listener, notification, request, and response roles all preserve loan-backed semantics for the claimed direction.
+
+[#wire-representation-profile]
+=== Wire Profiles, Metadata Codecs, and Payload Codecs
+
+A wire profile is the selected uP-L1 representation profile used on a transport path. It identifies the metadata codec, payload codec, payload-family checks, and any whole-frame envelope rules needed to interoperate on that path.
+
+[#metadata-codec]
+Metadata codecs:
+
+* *MUST* encode and decode all uProtocol metadata required by the selected wire profile.
+* *MUST* reject malformed metadata bytes, trailing bytes that are not part of the profile, unsupported profile versions, wrong wire identities, and payload-family mismatches.
+
+[#payload-codec]
+Payload codecs:
+
+* *MUST* preserve payload bytes and payload encoding metadata as required by the selected wire profile.
+* *MUST* state whether the codec serializes typed payload data, forwards opaque bytes, or carries an already encoded payload.
+
+[#whole-frame-envelope]
+=== Whole-frame Envelopes
+
+A whole-frame envelope carries metadata and payload together as one transport frame, event envelope, sample, packet, or equivalent protocol unit.
+
+Whole-frame envelope handling:
+
+* *MUST* identify where metadata bytes, payload bytes, payload encoding metadata, and protocol-version information are stored.
+* *MUST* define how a receiver validates the envelope before delivering a compatibility message, native frame, or loan-backed frame to the caller.
+* *MUST* keep envelope representation responsibilities in uP-L1. Communication Layer APIs consume configured transport endpoints; they do not own whole-frame serialization.
+
+[#transport-core-adapter]
+=== Transport Cores and Adapters
+
+A transport core owns transport-specific mechanics such as publishing, receiving, listening, local filtering, remote subscription or service setup, queue behavior, loan allocation, and protocol-specific headers. A transport adapter translates between the core and the public uP-L1 capability surface.
+
+Adapters:
+
+* *MUST* state whether they preserve capability semantics end-to-end or copy into a compatibility representation.
+* *MUST* preserve source and sink filtering semantics when adapting between compatibility messages, native frames, selected-wire frames, loan-backed frames, and whole-frame envelopes.
+* *MUST* make copy boundaries explicit when a transport-native capability is adapted to or from a compatibility message surface.
+
+[#capability-preservation]
+=== Capability Preservation
+
+Language libraries and transport libraries that expose multiple uP-L1 capability surfaces:
+
+* *MUST* document direct access paths for each public capability surface.
+* *MUST NOT* hide or imply removal of direct Transport Layer capability APIs merely because ordinary applications often start from Communication Layer roles.
+* *MUST* preserve compatibility message transport access unless a future revision explicitly defines a migration or deprecation path.
+
+[#safety-proof-test-surfaces]
+=== Safety, Proof, and Test Surfaces
+
+Some language libraries and transport libraries expose APIs for caller-obligation-sensitive operations, test fixtures, fake transports, conformance proofs, or benchmark support.
+
+These surfaces:
+
+* *MUST* be documented as expert, proof, test, fake, fixture, benchmark, or support surfaces rather than ordinary application entry points.
+* *MUST* state any caller obligations needed to preserve initialized storage, loan lifetimes, frame validity, metadata validity, or payload validity.
+* *MUST NOT* be used as evidence that ordinary Communication Layer APIs expose the same zero-copy, native-frame, or selected-wire capability unless the ordinary API preserves those semantics directly.
+
+[#implementation-profile-status]
+=== Implementation Profile Status
+
+Some implementation repositories may exist before a dedicated upstream transport-profile document is standardized. Such implementations still need to be explainable against the capability model above.
+
+[#lola-transport-capability-profile]
+==== LoLa shared-memory transport profile status
+
+The LoLa transport implementation is an implementation-only, fresh-entirely uP-L1 shared-memory transport surface at the time of this revision. Until a dedicated LoLa transport-profile document exists, LoLa documentation and bindings:
+
+* *MUST* describe the fixed frame prefix, metadata length, payload length, payload offset, and selected-wire metadata bytes carried by each sample.
+* *MUST* distinguish native transport samples, selected-wire frames, compatibility `UMessage` adapters, and any benchmark-only owned-frame support.
+* *MUST* state whether filtering is performed by the transport runtime, by local frame matching, or by an adapter after metadata decode.
+* *MUST* state which metadata and payload bytes are copied into or out of shared-memory samples and which bytes remain loan-backed.
+* *MUST NOT* claim upstream LoLa interoperability until a dedicated upstream transport-profile document defines the interoperable mapping.
+
+[#xcdrv2-wire-profile]
+==== External XCDRv2 wire profile status
+
+An external XCDRv2 wire implementation is a fresh-entirely wire-profile surface at the time of this revision. It is not itself a transport runtime. Until a dedicated upstream wire-profile document exists, XCDRv2 documentation and bindings:
+
+* *MUST* identify the wire profile, payload-family identifier, metadata codec, payload codec, endian/version policy, and supported payload schemas.
+* *MUST* reject unsupported payload schemas, wrong wire identities, malformed metadata, and payload-family mismatches before exposing a frame as valid for that wire profile.
+* *MUST* be consumed through uP-L1 transport capability surfaces rather than by embedding XCDRv2-specific behavior in unrelated transport profiles.
+
 The Transport Layer API is defined using UML2 notation.
 
 [mermaid]
