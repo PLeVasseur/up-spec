@@ -24,20 +24,6 @@ https://iceoryx.io[Eclipse iceoryx2&trade;] is an efficient, and ultra-low laten
 
 This document defines how uProtocol messages can be exchanged by means of iceoryx2 _Services_.
 
-[#iceoryx2-transport-capability-profile]
-== Transport Capability Profile
-
-The iceoryx2 binding is a uP-L1 transport profile for shared-memory service communication. It can support compatibility message transport and loan-backed native-frame capability when the binding preserves the metadata, payload, filtering, and delivery semantics defined by uP-L1.
-
-The iceoryx2 profile:
-
-* *MUST* preserve uProtocol metadata using the service user-header mapping in <<UAttributes>>.
-* *MUST* preserve payload bytes using <<Payload Mapping>> and reject payload representations that cannot satisfy the declared shared-memory requirements.
-* *MUST* state which bytes are placed in the service user header, which bytes are in the sample payload, and which adapter boundaries copy metadata or payload data.
-* *MUST* treat service names as transport-local routing and filtering representation, not as Communication Layer ownership of wire identity.
-* *MAY* expose loan-backed transmit or receive capability only for directions and storage that are actually loaned by the transport runtime.
-* *MUST* provide or document a compatibility adapter when complete `UMessage` values are required.
-
 == iceoryx2 Version
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-protocol-version~1",oft-needs="impl",oft-tags="TransportLayerImpl"]
@@ -52,6 +38,7 @@ Each transport implementing this specification **MUST** use version `0.6.1` of t
 All types of uProtocol messages *MUST* be transferred using iceoryx2's PublishSubscribe MessagingPattern only. iceoryx2's RequestResponse API *MUST NOT* be used.
 --
 
+[#iceoryx2-existing-umessage-mapping]
 == UMessage Mapping
 
 A uProtocol message consists of _UAttributes_ and optional payload. The following sections define how these are mapped to/from iceoryx2 Services.

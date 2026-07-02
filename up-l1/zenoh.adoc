@@ -24,19 +24,6 @@ https://zenoh.io[Eclipse Zenoh&trade;] (/zeno/) is a pub/sub/query protocol unif
 
 This document defines how uProtocol messages can be exchanged by means of Zenoh _Resources_.
 
-[#zenoh-transport-capability-profile]
-== Transport Capability Profile
-
-The Zenoh binding is a uP-L1 transport profile that maps uProtocol metadata to Zenoh attachments, payload bytes to the Zenoh payload, and routing/filtering information to Zenoh key expressions.
-
-The Zenoh profile:
-
-* *MUST* support the xref:README.adoc#compatibility-message-transport[compatibility message transport] semantics defined by uP-L1.
-* *MUST* preserve uProtocol metadata using the attachment mapping in <<UAttributes>> and payload bytes using <<Payload Mapping>>.
-* *MUST* treat key expressions as transport-local routing and filtering representation, not as Communication Layer ownership of wire identity.
-* *MAY* expose native-frame, shared-memory, or loan-backed capabilities when a concrete transport library can preserve the selected wire profile, filtering behavior, payload-family checks, and compatibility adaptation rules defined by uP-L1.
-* *MUST* document any copy boundary between Zenoh attachments, Zenoh payload storage, native frames, loan-backed storage, and complete `UMessage` values.
-
 == Zenoh Version
 
 [.specitem,oft-sid="dsn~up-transport-zenoh-protocol-version~1",oft-needs="impl",oft-tags="TransportLayerImpl"]
@@ -44,6 +31,7 @@ The Zenoh profile:
 Each transport implementing this specification **MUST** use major version `1` of the Zenoh protocol in order to ensure interoperability of different language libraries.
 --
 
+[#zenoh-existing-umessage-mapping]
 == UMessage Mapping
 
 A uProtocol message consists of _UAttributes_ and optional payload. The following sections define how these are mapped to/from Zenoh Resources.

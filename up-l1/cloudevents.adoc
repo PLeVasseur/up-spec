@@ -47,19 +47,7 @@ The https://cloudevents.io/[CloudEvents] project has defined a set of *Formats* 
 
 The accompanying *Bindings* describe how events can be sent via well-known transport protocols like https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/http-protocol-binding.md[HTTP], https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/mqtt-protocol-binding.md[MQTT] etc.
 
-[#cloudevents-transport-profile]
-== Transport Profile Role
-
-CloudEvents is a whole-frame envelope profile for carrying uProtocol message metadata and payload through CloudEvents formats and bindings. It is not itself a transport runtime, but a uP-L1 representation profile that transport libraries can use when binding uProtocol messages to CloudEvents-compatible transports.
-
-The CloudEvents profile:
-
-* *MUST* preserve uProtocol metadata using the attribute mapping in <<uAttributes Mapping>>.
-* *MUST* preserve payload bytes and payload encoding information using <<uPayload Mapping>>.
-* *MUST* treat the CloudEvents event as a whole-frame envelope that carries uProtocol metadata and payload together.
-* *MUST* document which CloudEvents binding supplies the actual transport send, receive, listener, filtering, and delivery behavior.
-* *MUST NOT* claim native-frame or loan-backed zero-copy capability unless a concrete transport binding documents a separate capability surface and its copy boundaries.
-
+[#cloudevents-existing-umessage-mapping]
 [.specitem,oft-sid="dsn~cloudevents-umessage-mapping~2",oft-needs="impl,utest",oft-title="Mapping of UMessages to CloudEvents"]
 == uMessage Mapping
 
