@@ -94,4 +94,10 @@ Something that can be manipulated/controlled/exposed by a service. Resources are
 |*uP-L1* |uProtocol Transport & Session Layer
 |*uP-L2* |uProtocol Communication Layer
 |*uP-L3* |uProtocol Application Layer
+|*Transport profile* |A language-neutral description of how a transport binding carries uProtocol messages, attributes, payload bytes, filtering information, and delivery errors over a concrete communication protocol or local transport mechanism.
+|*Wire representation profile* |A language-neutral description of the message/frame representation used at uP-L1, including the identity of the selected representation, metadata encoding rules, payload encoding rules, and rejection behavior for unsupported or mismatched representations.
+|*Selected wire* |The wire representation profile chosen for a uP-L1 endpoint, route, or frame. The selected wire belongs to transport-layer representation semantics and is separate from uP-L2 publish, notification, and RPC roles.
+|*Metadata codec* |The binding-specific or profile-specific mechanism that encodes and decodes uProtocol attributes and representation metadata for a wire representation profile.
+|*Payload codec* |The binding-specific or profile-specific mechanism that encodes, decodes, loans, or borrows payload data for a wire representation profile.
+|*Whole-frame envelope* |A transport-layer frame shape that carries both uProtocol metadata and payload representation information as one unit, rather than exposing only a `UMessage` object to the transport implementation.
 |===

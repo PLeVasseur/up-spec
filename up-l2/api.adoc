@@ -22,6 +22,9 @@ SPDX-License-Identifier: Apache-2.0
 
 The Communication Layer APIs provide the common language specific interfaces for the pub/sub, notification, and RPC patterns supported by uProtocol implementations. The interfaces are declared in the xref:../languages.adoc[language-specific uProtocol libraries] and as such are merely described at a high level in this document to allow the language-specific libraries to declare the interface signatures using appropriate programming language constructs.
 
+[#communication-roles]
+The Communication Layer owns publish, subscribe, notification, and RPC roles. It consumes uP-L1 transport endpoints and does not own selected wire identity, metadata codec choice, payload codec choice, or whole-frame envelope layout. A language library can offer direct uP-L1 capability APIs alongside the Communication Layer APIs when applications or transport implementations need transport-layer representation control.
+
 == Interfaces
 
 .Communication Layer Interfaces

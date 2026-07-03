@@ -30,6 +30,10 @@ image:up_libraries.drawio.svg[width=100%]
 
 uProtocol _Transport Libraries_ are written for specific programming languages to provide the binding of uProtocol to concrete transport protocols like MQTT, Eclipse Zenoh or SOME/IP.
 
+Language libraries can expose uP-L1 capabilities at different levels of abstraction. A library can expose the ordinary `UTransport` interface, owned/native-frame transport capabilities, zero-copy transport capabilities, and selected wire representation profiles as separate API surfaces when the language can make those capabilities understandable and safe. The specification describes those surfaces in language-neutral terms; each library chooses the appropriate language constructs for static validation, generated validation, runtime validation, or other binding-time checks.
+
+When a language library supports typed zero-copy payload access, the type relationship between a selected wire representation profile and the payload representation belongs to the language binding. The binding can prove that relationship with static type checking, generated code, schema registration, or another language-appropriate validation mechanism. These checks do not make selected wire identity a uP-L2 communication role.
+
 == Requirements
 
 === Content

@@ -57,6 +57,60 @@ UTransport ..> UListener
 
 NOTE: The data types used in the following sections are defined in xref:../basics/README.adoc[uProtocol Basic Types].
 
+== Transport Capabilities and Wire Representation
+
+The `UTransport` API remains the compatibility surface for sending and receiving complete xref:../basics/umessage.adoc[UMessage] values. Transport libraries can also expose additional uP-L1 capability surfaces when a binding can model them safely. These surfaces describe how a transport carries message metadata and payload data; they do not replace the Communication Layer APIs.
+
+[#compatibility-message-transport]
+=== Compatibility Message Transport
+
+The compatibility message transport surface accepts and produces complete `UMessage` values. It is the common denominator across transport libraries and remains valid even when a transport library also exposes owned/native-frame or zero-copy capabilities.
+
+[#native-frame-owned-transport]
+=== Native-Frame Owned Transport
+
+An owned/native-frame transport surface can carry a transport-layer frame that already separates uProtocol metadata from payload representation details. This surface is useful when a binding wants to preserve metadata and payload bytes without requiring the caller to allocate or decode a full `UMessage` for every hop.
+
+[#loan-backed-zero-copy-transport]
+=== Loan-Backed Zero-Copy Transport
+
+A loan-backed zero-copy transport surface can provide payload storage that is borrowed or loaned by the transport implementation. A language binding can expose typed payload loan, transmit, receive, or borrow operations when it can validate the selected wire representation profile and the payload representation relationship.
+
+[#wire-representation-profile]
+=== Wire Representation Profile
+
+A wire representation profile identifies how a uP-L1 frame represents metadata and payload data. The selected wire is part of this uP-L1 representation model. It is not a publish, notification, or RPC role owned by uP-L2.
+
+[#metadata-codec]
+=== Metadata Codec
+
+The metadata codec for a wire representation profile encodes and decodes uProtocol attributes and representation metadata. Transport bindings can store this metadata in protocol headers, attachments, frame prefixes, user headers, or another profile-specific location.
+
+[#payload-codec]
+=== Payload Codec
+
+The payload codec for a wire representation profile encodes, decodes, loans, or borrows payload data. Some payload codecs support typed zero-copy access for a given payload representation. Others support only owned bytes or decoded message payloads.
+
+[#transport-core-adapter]
+=== Transport Core Adapter
+
+A transport core adapter connects a concrete transport mechanism to a wire representation profile. It validates selected wire identity, metadata layout, payload-family compatibility, and filter behavior before exposing a received frame through an ordinary or zero-copy capability surface.
+
+[#whole-frame-envelope]
+=== Whole-Frame Envelope
+
+A whole-frame envelope carries uProtocol metadata and payload representation information together. Whole-frame envelopes are a uP-L1 representation concern. They can be used by direct transport APIs or by higher layers, but they do not make the Communication Layer responsible for selected wire identity.
+
+[#safety-proof-test-surfaces]
+=== Safety, Proof, and Test Surfaces
+
+Transport libraries can contain implementation-only proof, test, fixture, or service-provider surfaces that expose lower-level metadata codec, payload codec, loan, or frame mechanics. Those surfaces help validate bindings and are separate from ordinary application-facing capability surfaces.
+
+[#capability-preservation]
+=== Capability Preservation
+
+Adding selected wire, owned/native-frame, or zero-copy capability surfaces does not remove the compatibility `UTransport` API. A transport library can expose multiple capability surfaces for the same underlying transport when each surface has clear validation and error behavior.
+
 == UListener
 
 A uEntity registers a `UListener` with the transport in order to process (incoming) messages that are of interest to the uEntity.
