@@ -128,6 +128,13 @@ enum UPriority {
 }
 
 // The format for the data stored in the UMessage.
+//
+// Values 1..=8 are permanently reserved as the legacy-compatible numeric
+// range for UFrame payload-encoding registry ids. New UFrame-native encodings
+// are registered in the open UFrame payload-encoding registry instead of being
+// added to this enum. A UFrame semantic metadata model MUST NOT embed
+// UPayloadFormat; this enum is a legacy projection surface for UMessage and
+// UAttributes compatibility.
 enum UPayloadFormat {
     // Payload format is unknown.
     UPAYLOAD_FORMAT_UNSPECIFIED = 0;

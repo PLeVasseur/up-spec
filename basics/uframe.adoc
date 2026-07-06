@@ -1,0 +1,201 @@
+= uProtocol Frame (UFrame)
+:toc:
+:sectnums:
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
+
+----
+SPDX-FileCopyrightText: 2026 Contributors to the Eclipse Foundation
+
+See the NOTICE file(s) distributed with this work for additional
+information regarding copyright ownership.
+
+This program and the accompanying materials are made available under
+the terms of the Apache License Version 2.0 which is available at
+https://www.apache.org/licenses/LICENSE-2.0
+
+SPDX-FileType: DOCUMENTATION
+SPDX-License-Identifier: Apache-2.0
+----
+
+== Overview
+
+A `UFrame` is the uProtocol frame abstraction used by native, selected-wire,
+owned-frame, and zero-copy transports. It consists of semantic frame metadata
+(`UFrameMetadata`) plus optional payload bytes carried by the frame carrier.
+
+`UFrameMetadata` is a language-neutral semantic model. It is not a protobuf
+message, does not contain `UAttributes`, and does not contain `UPayloadFormat`.
+`UAttributes` and `UPayloadFormat` remain compatibility surfaces for `UMessage`
+and legacy projections. Conversions between `UFrameMetadata` and `UAttributes`
+are explicit, fallible projections at compatibility edges.
+
+== Semantic Metadata
+
+`UFrameMetadata` describes the purpose, routing, quality, correlation, and
+payload encoding of a frame. A language library *MUST* model at least the
+following semantic fields:
+
+[%autowidth]
+|===
+| Field | Required semantics
+
+| `id`
+| Frame identifier.
+
+| `kind`
+| One of Publish, Request, Response, or Notification.
+
+| `source`
+| Source `UUri`.
+
+| `sink`
+| Optional destination `UUri`; required for Request, Response, and Notification.
+
+| `priority`
+| Optional service-class priority.
+
+| `ttl`
+| Optional time-to-live duration.
+
+| `commstatus`
+| Optional `UCode` for RPC response status.
+
+| `reqid`
+| Optional request identifier for RPC correlation.
+
+| `permission_level`
+| Optional permission level.
+
+| `token`
+| Optional authorization token.
+
+| `traceparent`
+| Optional trace correlation value.
+
+| `payload_encoding`
+| Optional open payload-encoding identity. If payload bytes are present, the frame metadata *MUST* declare a payload encoding. A present empty payload is distinct from an absent payload.
+|===
+
+The message-kind wire codes deliberately match the legacy `UMessageType` values:
+
+[%autowidth]
+|===
+| Code | UFrame kind | Legacy projection
+
+| 0 | reserved | none
+| 1 | Publish | `UMESSAGE_TYPE_PUBLISH`
+| 2 | Request | `UMESSAGE_TYPE_REQUEST`
+| 3 | Response | `UMESSAGE_TYPE_RESPONSE`
+| 4 | Notification | `UMESSAGE_TYPE_NOTIFICATION`
+| 5..=255 | reserved | none
+|===
+
+Priority wire codes `1..=7` correspond to `CS0..=CS6`. Code `0` means absent
+in wire and ABI profiles only. Other values are reserved.
+
+== Payload Encoding Registry
+
+Payload encoding is an open identity with up to three components:
+
+* an optional numeric registry id,
+* an optional literal id, and
+* an optional RFC 6838 media type.
+
+At least one component *MUST* be present when `payload_encoding` is present.
+
+Numeric ids `1..=8` are permanently reserved and value-compatible with the
+legacy `UPayloadFormat` enum:
+
+[%autowidth]
+|===
+| Id | Literal id | Media type | Legacy `UPayloadFormat`
+
+| 0 | reserved | - | `UNSPECIFIED` has no encoding; absence expresses it
+| 1 | `up.protobuf-wrapped-in-any` | `application/x-protobuf` | `PROTOBUF_WRAPPED_IN_ANY`
+| 2 | `up.protobuf` | `application/protobuf` | `PROTOBUF`
+| 3 | `up.json` | `application/json` | `JSON`
+| 4 | `up.someip` | `application/x-someip` | `SOMEIP`
+| 5 | `up.someip-tlv` | `application/x-someip_tlv` | `SOMEIP_TLV`
+| 6 | `up.raw` | `application/octet-stream` | `RAW`
+| 7 | `up.text` | `text/plain` | `TEXT`
+| 8 | `up.shm` | `application/x-shm` | `SHM`
+| 9..=0x7FFF_FFFF | future registered encodings | - | none
+| 0x8000_0000.. | vendor/private use | - | none
+|===
+
+Encodings such as `up.stable-container` and `up.xcdr-v2` are valid literal-id
+identities and may later receive numeric ids without changing existing SDK enum
+values.
+
+== Metadata Profiles
+
+Multiple byte profiles may carry the same semantic metadata. A receiver *MUST*
+know which profile is accepted by a transport binding before decoding bytes.
+Using the wrong profile *MUST* fail as an unknown or unsupported metadata
+profile, not as a silent semantic conversion.
+
+=== Canonical metadata field block v1
+
+The canonical UFrame metadata profile is the variable-length metadata field
+block, version 1. It is presence-driven: absent optional fields cost zero bytes.
+Multi-byte integers are little-endian. Encoders *MUST NOT* truncate; values that
+do not fit a length field are encode-time errors.
+
+The fixed header is:
+
+[source,text]
+----
+offset  size  field
+0       1     block_version = 1
+1       1     kind
+2       1     priority: 0 absent, 1..=7 CS0..=CS6
+3       1     reserved, MUST be 0
+4       4     presence bitmask; unknown bits MUST be 0
+8       8     id.msb
+16      8     id.lsb
+----
+
+Present fields then follow in the order defined by the profile: `reqid`, `ttl`,
+`commstatus`, `permission_level`, source `UUri`, optional sink `UUri`, token,
+traceparent, and payload encoding. Decoders *MUST* consume the entire input and
+reject unknown versions, unknown presence bits, nonzero reserved bytes, unknown
+kind/priority codes, non-UTF-8 strings, and semantic metadata that violates the
+per-kind validity rules.
+
+=== Legacy protobuf metadata profile
+
+The legacy protobuf metadata profile is the existing projection through
+`UAttributes`. It is explicitly a compatibility profile. It is not the semantic
+definition of `UFrameMetadata`, and new UFrame-native code *SHOULD* use the
+canonical metadata field block unless a transport binding explicitly selects the
+legacy protobuf profile.
+
+=== Fixed ABI profile
+
+`UFrameMetadataAbiV1` is an opt-in fixed-layout ABI profile for explicitly
+agreed interop boundaries. It is derived from the semantic model and *MUST NOT*
+be treated as the universal or default metadata carrier.
+
+=== UPFE whole-frame envelope
+
+`UPFE` is an optional native whole-frame envelope for carrying a complete UFrame
+over classic byte channels. Its content type is:
+
+`application/vnd.uprotocol.uframe;version=1`
+
+A binding that uses `UPFE` *MUST* declare the physical placement of the envelope
+and the accepted metadata profile inside it.
+
+== Transport Bindings
+
+Each transport binding that carries UFrame metadata *MUST* declare:
+
+* where metadata bytes are physically placed,
+* which metadata profile or profiles are accepted,
+* how source/sink routing mirrors are validated against transport-native routing fields,
+* how malformed metadata bytes and unsupported profiles are reported, and
+* whether payload bytes are carried separately, inside `UPFE`, or by a transport-native payload mechanism.
+
+A transport binding *MUST NOT* redefine semantic metadata. It selects a carrier
+profile and placement for the language-neutral semantic model defined here.

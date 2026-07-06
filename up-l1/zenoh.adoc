@@ -267,3 +267,20 @@ The examples below assume that the local entity's authority name is `device1`.
 |`up/+++*+++/+++*+++/+++*+++/+++*+++/+++*+++/device1/+++*+++/+++*+++/+++*+++/+++*+++`
 |===
 --
+
+== UFrame Binding Requirements
+
+An implementation that carries xref:../basics/uframe.adoc[UFrames] over Zenoh
+*MUST* define a binding profile. The `zenoh.uframe.metadata-attachment.v1`
+binding places UFrame metadata bytes in the Zenoh attachment area and carries
+payload bytes in the Zenoh payload.
+
+The binding *MUST* declare the accepted metadata profile or profiles. New native
+selected-wire use *SHOULD* accept the canonical metadata field block v1. A
+legacy protobuf metadata profile *MAY* be accepted only when the binding names
+that profile explicitly.
+
+Receivers *MUST* reject unsupported metadata profiles, malformed metadata bytes,
+and routing mirrors that do not match the Zenoh key expression derived from the
+frame source and sink. These failures *MUST NOT* be interpreted as ordinary
+payload decode failures.

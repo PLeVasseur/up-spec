@@ -271,3 +271,21 @@ means that we **MUST** determine the source in order to send Response messages.
 
 The source UUri **MUST** be determined by deserializing the `uatributes_serialized` in the UProtocolHeader
 and then creating the appropriate fully-qualified ServiceName.
+
+== UFrame Binding Requirements
+
+An implementation that carries xref:../basics/uframe.adoc[UFrames] over
+iceoryx2 *MUST* define a binding profile. The `iceoryx2.uframe.prefix.v1`
+binding places a transport placement header before variable-length UFrame
+metadata bytes and then carries the application payload in the existing
+iceoryx2 payload area. The binding *MUST* preserve payload offset and alignment
+requirements.
+
+The binding *MUST* declare the accepted metadata profile or profiles. New native
+selected-wire use *SHOULD* accept the canonical metadata field block v1. A fixed
+`UFrameMetadataAbiV1` user-header profile is a separate opt-in binding and
+*MUST NOT* be assumed by default.
+
+Receivers *MUST* reject unsupported metadata profiles, malformed metadata bytes,
+and service-name routing mirrors that do not match the frame source and sink.
+These failures *MUST NOT* be interpreted as ordinary payload decode failures.
