@@ -135,6 +135,82 @@ know which profile is accepted by a transport binding before decoding bytes.
 Using the wrong profile *MUST* fail as an unknown or unsupported metadata
 profile, not as a silent semantic conversion.
 
+=== Metadata envelope and identity registry
+
+Every selected-wire metadata profile is carried behind a common envelope that
+names the profile before any profile bytes are decoded. The envelope makes
+profiles selectable and rejectable: a receiver that does not support the
+declared metadata layout *MUST* fail with an unknown-metadata-layout error
+before exposing any frame, never by attempting the wrong profile.
+
+Multi-byte integers are little-endian.
+
+[source,text]
+----
+offset  size  field
+0       4     magic = "UPWM" (0x55 0x50 0x57 0x4D)
+4       3     metadata layout identity reference
+7       2     format version
+9       3     selected-wire identity reference
+12      3     payload family identity reference
+15      2     reserved flags, MUST be 0
+17      ...   profile bytes (defined by the metadata layout identity)
+----
+
+An identity reference is encoded as:
+
+[source,text]
+----
+offset  size  field
+0       1     reference kind: 0x00 = compact
+1       2     compact identity code
+----
+
+Reference kinds other than compact are reserved. Decoders *MUST* reject unknown
+reference kinds, wrong magic, unknown format versions, nonzero reserved flags,
+incompatible selected-wire identities, and incompatible payload family
+identities, each as its distinct error class.
+
+Each registered identity has a canonical string name and a compact code. The
+string name is the stable registry key; the compact code is what appears on the
+wire.
+
+.Selected-wire identities
+[cols="3,1"]
+|===
+|Identity |Compact
+
+|`org.eclipse.uprotocol.wire.native` |`0x0001`
+|`org.eclipse.uprotocol.wire.protobuf` |`0x0002`
+|`org.eclipse.uprotocol.wire.xcdr-v2` |`0x0003`
+|`org.eclipse.uprotocol.wire.stable-container` |`0x0004`
+|===
+
+.Metadata layout identities
+[cols="3,1,3"]
+|===
+|Identity |Compact |Profile
+
+|`org.eclipse.uprotocol.metadata.native-prefix` |`0x0001` |Legacy protobuf metadata profile
+|`org.eclipse.uprotocol.metadata.uframe-fields` |`0x0002` |Canonical metadata field block v1
+|===
+
+.Payload family identities
+[cols="3,1"]
+|===
+|Identity |Compact
+
+|`native-explicit` |`0x0001`
+|`xcdr-v2` |`0x0003`
+|`stable-container` |`0x0004`
+|===
+
+New identities are registered by adding a row with a previously unused compact
+code; compact codes are never reused or repurposed. Transport bindings declare
+which metadata layout identities they accept; the canonical field block is the
+default for new bindings, and the legacy protobuf layout *MUST* be selected
+explicitly where a binding still allows it.
+
 === Canonical metadata field block v1
 
 The canonical UFrame metadata profile is the variable-length metadata field
