@@ -128,6 +128,15 @@ Encodings such as `up.stable-container` and `up.xcdr-v2` are valid literal-id
 identities and may later receive numeric ids without changing existing SDK enum
 values.
 
+Legacy `UAttributes` carries payload encodings in two mutually exclusive ways.
+Encodings in the numeric range `1..=8` *MUST* use `payload_format` and *MUST
+NOT* also populate the open payload-encoding identity fields. Encodings outside
+that range *MUST* use the open identity fields
+`payload_encoding_registry_id`, `payload_encoding`, and/or
+`payload_content_type`; at least one identity component *MUST* be present. A
+receiver that does not understand an open identity *MUST* reject the payload as
+not decodable by that receiver and *MUST NOT* reinterpret it as raw bytes.
+
 == Metadata Profiles
 
 Multiple byte profiles may carry the same semantic metadata. A receiver *MUST*
