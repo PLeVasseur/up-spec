@@ -25,6 +25,18 @@ The purpose of this layer of uProtocol is to define a common API for sending and
 
 This specification defines the transport layer's abstract API which is mapped to supported programming languages by means of uProtocol's xref:../languages.adoc[language specific libraries]. The API is _implemented_ for particular transport protocols and programming languages by _uProtocol Transport Libraries_.
 
+The `UTransport` API specified in this document exchanges fully serialized
+`UMessage`s and is the *classic transport family*. uProtocol additionally
+defines two frame-oriented access models — the *owned-frame* and *zero-copy*
+families — together with the *transport core* layering that lets one native
+transport implementation serve all families and all
+xref:../basics/uframe.adoc[UFrame] wire formats. Those families, the
+selected-wire operating rules, and the constraints that keep diverse
+transport technologies interoperable are specified in
+xref:transport_families.adoc[Transport Families and Transport Cores]. Nothing
+in that document changes the conformance requirements for the classic API
+specified here.
+
 The Transport Layer API is defined using UML2 notation.
 
 [mermaid]

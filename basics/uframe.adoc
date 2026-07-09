@@ -137,6 +137,13 @@ that range *MUST* use the open identity fields
 receiver that does not understand an open identity *MUST* reject the payload as
 not decodable by that receiver and *MUST NOT* reinterpret it as raw bytes.
 
+Registered identities have exactly one legacy-compatible spelling. A message
+*MUST NOT* express a registry row `1..=8` through the open identity fields
+(for example, by carrying the literal id `up.raw` or registry id `6` in the
+open fields instead of `UPAYLOAD_FORMAT_RAW`): implementations *MUST* reject
+such aliasing rather than normalize it silently, so that any given encoding
+identity has a single observable representation on the classic surface.
+
 == Metadata Profiles
 
 Multiple byte profiles may carry the same semantic metadata. A receiver *MUST*
@@ -271,6 +278,15 @@ over classic byte channels. Its content type is:
 
 A binding that uses `UPFE` *MUST* declare the physical placement of the envelope
 and the accepted metadata profile inside it.
+
+== Transport Families
+
+How frames move — by serialized message, by ownership transfer, or by loaned
+storage — is a property of the transport family in use, not of the frame
+model defined here. The families, the transport-core layering beneath them,
+and the bridging rules between them are specified in
+xref:../up-l1/transport_families.adoc[Transport Families and Transport
+Cores]. The registry and profile rules in this document are family-invariant.
 
 == Transport Bindings
 

@@ -1,0 +1,405 @@
+= Transport Families and Transport Cores (uP-L1)
+:toc:
+:sectnums:
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
+
+----
+SPDX-FileCopyrightText: 2026 Contributors to the Eclipse Foundation
+
+See the NOTICE file(s) distributed with this work for additional
+information regarding copyright ownership.
+
+This program and the accompanying materials are made available under
+the terms of the Apache License Version 2.0 which is available at
+https://www.apache.org/licenses/LICENSE-2.0
+
+SPDX-FileType: DOCUMENTATION
+SPDX-License-Identifier: Apache-2.0
+----
+
+== Overview
+
+uProtocol has one message model and, historically, one access model: a
+xref:README.adoc#utransport[UTransport] moves a fully serialized
+xref:../basics/umessage.adoc[UMessage] between uEntities. That access model
+remains fully supported and unchanged. This document specifies two additional
+access models — *owned-frame* and *zero-copy* — and the layering concept, the
+*transport core*, that lets one native transport implementation serve every
+access model and every xref:../basics/uframe.adoc[UFrame] wire format without
+reimplementing uProtocol semantics per combination.
+
+The three access models are called *transport families*:
+
+[%autowidth]
+|===
+|Family |Unit of exchange |Ownership model |Primary motivation
+
+|Classic
+|Serialized `UMessage`
+|Value semantics; every hop may copy
+|Universal interoperability; the compatibility baseline
+
+|Owned-frame
+|Complete `UFrame` (metadata + payload)
+|Ownership transfer between peer and transport
+|Avoid re-serialization between stages that share a frame representation
+
+|Zero-copy
+|Transport-loaned buffer regions
+|Loan (transmit) and lease (receive) of transport-owned storage
+|Avoid payload copies entirely on transports with shareable storage
+|===
+
+The families are *access models over the same messages*, not different
+message models. A notification is a notification in every family; the
+xref:../basics/uattributes.adoc[attribute semantics], addressing rules, and
+xref:../basics/uframe.adoc#_payload_encoding_registry[payload-encoding
+identity] are family-invariant.
+
+=== Why a "core" concept exists
+
+Before this layering, each additional capability multiplied implementation
+work: a transport supporting two wire formats and two access models faced four
+hand-written combinations, each independently re-deciding uProtocol semantics
+(validation, encoding identity, metadata carriage). Implementations diverged
+exactly where conformance matters most.
+
+The transport core inverts this. A *transport core* is the minimal,
+technology-specific contract a native transport implements: move addressed
+byte regions, and surface received byte regions. Everything semantic — frame
+metadata encoding and decoding, wire-format framing, validation, encoding
+identity handling — is layered *above* the core by generic, reusable
+machinery that is written once per uProtocol library, not once per transport.
+A transport implementer writes one core; every wire format and both
+frame-oriented families come from composition. Conformance is testable at the
+core seam, and the semantic layer is shared, so it cannot diverge per
+transport.
+
+[.specitem,oft-sid="req~transport-family-invariance~1",oft-needs="dsn",oft-tags="TransportLayerImpl"]
+--
+The semantics of a uProtocol message — its type, addressing rules, attribute
+validation rules, and payload-encoding identity — *MUST NOT* depend on the
+transport family used to exchange it.
+--
+
+== The Transport Core contract
+
+A transport core is deliberately small and deliberately ignorant. It provides
+mechanical delivery; it *does not* provide meaning.
+
+[.specitem,oft-sid="req~transport-core-byte-transparency~1",oft-needs="dsn",oft-tags="TransportLayerImpl"]
+--
+A transport core *MUST* deliver the byte regions given to it for
+transmission, unmodified and complete, to receivers matching the addressed
+destination. This is the frame-oriented analogue of
+`req~utransport-send-preserve-data~1`.
+--
+
+[.specitem,oft-sid="req~transport-core-no-semantic-interpretation~1",oft-needs="dsn",oft-tags="TransportLayerImpl"]
+--
+A transport core *MUST NOT* alter, reinterpret, or act upon the semantic
+content of frame metadata or payload bytes. In particular a core *MUST NOT*
+change or substitute the payload-encoding identity of a frame ("relabeling"),
+*MUST NOT* re-encode metadata into a different metadata profile, and *MUST
+NOT* silently truncate or pad payloads.
+--
+
+[.specitem,oft-sid="req~transport-core-addressing~1",oft-needs="dsn",oft-tags="TransportLayerImpl"]
+--
+A transport core *MUST* provide addressing sufficient for the registration
+semantics of xref:README.adoc#utransport[UTransport]: delivery of a frame
+addressed by source (and optional sink) filters to all registered matching
+receivers, using the transport technology's native discovery and routing.
+--
+
+A core *MAY* expose additional, technology-specific capabilities (for
+example, loanable transmit storage, or contiguous receive regions); the
+zero-copy family (<<Zero-copy family>>) is specified in terms of such
+capabilities.
+
+=== Layered composition
+
+Above a core, a uProtocol library composes:
+
+* a *wire format* — the byte encoding of frame payload for a selected wire
+  (see <<Selected-wire operation>>), and
+* a *metadata codec* — the byte encoding of `UFrameMetadata` under a metadata
+  profile (see
+  xref:../basics/uframe.adoc#_metadata_profiles[UFrame Metadata Profiles]).
+
+[.specitem,oft-sid="req~transport-core-composition~1",oft-needs="dsn",oft-tags="LanguageLibrary"]
+--
+A uProtocol language library that offers frame-oriented families *MUST*
+implement wire framing and metadata encoding generically over the transport
+core contract, such that a conforming core obtains those behaviors by
+composition and not by transport-specific reimplementation.
+--
+
+This is the load-bearing economy of the design: for `N` cores and `M` wire
+formats the ecosystem carries `N + M` implementations, not `N × M`, and every
+`(core, wire)` pair inherits the same validation and identity behavior.
+
+== Classic family
+
+The classic family is xref:README.adoc[UTransport] as already specified:
+`send` accepts a valid serialized `UMessage`; listeners receive `UMessage`s
+matching registered filters. Nothing in this document changes classic
+conformance. How a classic binding carries attributes on its native
+technology varies by binding and is specified per binding
+(xref:zenoh.adoc[Zenoh], xref:mqtt_5.adoc[MQTT 5], xref:someip.adoc[SOME/IP],
+xref:iceoryx2.adoc[iceoryx2]); <<Transport diversity>> constrains what any
+such carriage is allowed to do.
+
+== Owned-frame family
+
+The owned-frame family exchanges complete frames by *ownership transfer*: the
+sender relinquishes the frame to the transport; the receiver obtains it whole.
+No serialization format is mandated between peers that share a frame
+representation, which is precisely the case this family exists for
+(for example, staged pipelines and streamer hops inside one process or one
+shared-memory domain).
+
+[.specitem,oft-sid="req~owned-frame-validate-before-send~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+An owned-frame transport *MUST NOT* accept a frame for transmission whose
+metadata fails the attribute validation rules for its message type as
+specified in xref:../basics/uattributes.adoc[UAttributes]. Validation *MUST*
+occur before ownership transfer completes, and rejection *MUST* be reported
+to the sender as an error.
+--
+
+[.specitem,oft-sid="req~owned-frame-integrity~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+The frame delivered to an owned-frame receiver *MUST* be semantically
+identical to the frame accepted from the sender: same metadata field values,
+same payload-encoding identity, same payload bytes.
+--
+
+[.specitem,oft-sid="dsn~owned-frame-projection~1",oft-needs="impl,utest",oft-tags="LanguageLibrary"]
+--
+A language library *MUST* provide explicit, fallible projections between
+`UMessage` and owned frames. Projection failures (for example, an attribute
+combination not expressible in the target model) *MUST* be reported as
+errors; a projection *MUST NOT* drop or substitute metadata silently.
+--
+
+== Zero-copy family
+
+The zero-copy family removes payload copies by exchanging *transport-owned
+storage*. Its behavior is specified as two lifecycles.
+
+=== Transmit lifecycle: loan, populate, commit
+
+. The sender requests a transmit *loan* for a frame, declaring the encoded
+  metadata and the payload length and alignment it requires.
+. The transport returns loaned storage satisfying the declaration.
+. The sender populates the payload region.
+. The sender *commits* the loan; the transport transmits and reclaims the
+  storage. After commit, the sender holds no access to the storage.
+
+[.specitem,oft-sid="req~zero-copy-loan-isolation~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+Between loan and commit, the loaned storage *MUST* be exclusively writable by
+the borrowing sender. The transport *MUST NOT* transmit, expose, or reclaim a
+loan before it is committed or released.
+--
+
+[.specitem,oft-sid="req~zero-copy-alignment~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+A zero-copy transport *MUST* honor the payload alignment declared at loan
+time, and *MUST* reject loan requests whose declared layout it cannot satisfy
+rather than degrade alignment silently.
+--
+
+==== Uninitialized loans
+
+Transports whose native storage is handed out uninitialized *MAY* offer
+uninitialized transmit loans. Because exposing uninitialized storage is the
+canonical source of undefined behavior in systems languages, the contract is
+deliberately strict and language-neutral:
+
+[.specitem,oft-sid="req~zero-copy-uninit-two-phase~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+An uninitialized transmit loan *MUST* follow a two-phase protocol: the
+storage is first exposed only through a write-only initialization interface,
+and becomes readable (and committable) only after the initializer has
+produced an explicit *initialization witness* covering every transported
+byte of the payload region, including any padding bytes the layout implies.
+A transport *MUST NOT* transmit an uninitialized loan for which no complete
+initialization witness exists.
+--
+
+NOTE: "Initialization witness" is a specification term: any mechanism by
+which the library statically or dynamically establishes that initialization
+completed — a type-state transition, a completion token, or an equivalent
+checked handoff. The mechanism is a language-library concern; the obligation
+(no transmission of unwitnessed bytes) is not.
+
+=== Receive lifecycle: lease, view, release
+
+. The transport delivers a received frame as a *lease* of transport-owned
+  storage together with decoded frame metadata.
+. The receiver reads payload bytes through a *view* of the leased region.
+. The receiver *releases* the lease; the transport reclaims the storage.
+
+[.specitem,oft-sid="req~zero-copy-lease-immutability~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+Leased receive storage *MUST* be immutable for the duration of the lease:
+neither the transport nor other receivers may modify bytes visible through an
+outstanding lease, and the receiver *MUST NOT* be given write access through
+the view.
+--
+
+[.specitem,oft-sid="req~zero-copy-lease-lifetime~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+Access to leased storage *MUST NOT* outlive the lease. A library *MUST* make
+release explicit or scope-bound, and *MUST* prevent (statically or
+dynamically) reads through a view after release.
+--
+
+== Selected-wire operation
+
+Frame-oriented families carry payloads in a *wire format* and metadata in a
+*metadata profile*, both drawn from the identity registries defined in
+xref:../basics/uframe.adoc[UFrame]. *Selected-wire* names the operating rule
+for how those identities are chosen:
+
+[.specitem,oft-sid="req~selected-wire-configuration~1",oft-needs="dsn",oft-tags="TransportLayerImpl"]
+--
+The wire format and metadata profile in effect on a link *MUST* be selected
+by configuration or out-of-band agreement between the peers, per link (or per
+route). They are *not* negotiated per message, and a frame *MUST NOT* be
+interpreted under any identity other than the selected one.
+--
+
+[.specitem,oft-sid="req~selected-wire-explicit-rejection~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+A receiver presented with bytes whose declared identities (see the
+xref:../basics/uframe.adoc#_metadata_profiles[metadata envelope]) do not
+match the selected wire format or a supported metadata profile *MUST* reject
+the frame with an explicit unknown-identity error before exposing any frame
+content, and *MUST NOT* fall back to decoding under a different identity.
+--
+
+The envelope exists so that this rejection is cheap, early, and
+implementation-independent: identity is declared before any profile bytes are
+decoded. Selection being configuration rather than wire data is what keeps
+per-frame overhead to a fixed-size identity reference and keeps the security
+surface small — a peer cannot steer a receiver into an unexpected decoder by
+crafting a frame.
+
+== Family interoperability
+
+Deployments mix families: a classic uEntity publishes; a zero-copy consumer
+subscribes through a streamer. The bridging rules keep such mixtures honest.
+
+[.specitem,oft-sid="req~family-bridge-projection~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+A component bridging between families (for example, a streamer) *MUST* use
+the explicit projections of `dsn~owned-frame-projection~1`. If a message or
+frame cannot be projected, the bridge *MUST* drop it with a diagnostic and
+*MUST NOT* forward a partially projected result.
+--
+
+[.specitem,oft-sid="req~family-bridge-no-relabel~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+A bridge *MUST* preserve the payload-encoding identity across families. In
+particular, a bridge *MUST NOT* relabel a payload whose encoding identity it
+does not recognize as `up.raw` (or any other identity): unknown identities
+are forwarded intact where the destination family can carry them, and
+rejected loudly where it cannot (see the
+xref:../basics/uframe.adoc#_payload_encoding_registry[registry rules]).
+--
+
+[.specitem,oft-sid="req~family-bridge-classic-carriage~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+When a frame is bridged into the classic family, its payload-encoding
+identity *MUST* ride the classic surface losslessly, using `payload_format`
+for registry ids `1..=8` and the open payload-encoding identity fields
+otherwise, exactly as specified in
+xref:../basics/uattributes.adoc#_payload_encoding_identity[UAttributes];
+bridging back *MUST* reconstruct the identical identity.
+--
+
+== Transport diversity
+
+uProtocol deliberately does not homogenize transports. A binding carries
+uProtocol metadata using whatever its native technology does best. Four
+carriage patterns are recognized; a binding *MUST* document which it uses.
+
+[%autowidth]
+|===
+|Pattern |Description |Example binding
+
+|Native attachment
+|Metadata rides a native side-channel as an opaque, complete encoding
+|xref:zenoh.adoc[Zenoh] (attachment)
+
+|Mapped fields
+|Individual attributes map to named native fields
+|xref:mqtt_5.adoc[MQTT 5] (user properties keyed by protobuf field number)
+
+|Header mapping
+|Attributes derive from and reconstruct out of fixed native header fields
+|xref:someip.adoc[SOME/IP] (MessageID/RequestID mapping)
+
+|Assumed encoding
+|No per-message side-channel exists; identity is fixed by per-topic
+ convention
+|payload-only channels
+|===
+
+[.specitem,oft-sid="req~carriage-lossless-or-documented~1",oft-needs="dsn",oft-tags="TransportLayerImpl"]
+--
+A binding's metadata carriage *MUST* either round-trip every attribute it
+claims to carry, or explicitly document each lossy field together with the
+reconstruction convention receivers apply (as the
+xref:someip.adoc[SOME/IP binding] does in its mapping notes). Undocumented
+lossiness is non-conformant.
+--
+
+=== Assumed-encoding channels
+
+Where a channel has no per-message identity carriage at all, the
+payload-encoding identity is fixed by configuration per topic or per channel:
+
+[.specitem,oft-sid="req~assumed-encoding-send-guard~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+A transport operating an assumed-encoding channel *MUST* reject, with an
+explicit error before transmission, any message whose declared
+payload-encoding identity differs from the channel's configured assumption.
+It *MUST NOT* transmit the payload under the assumed identity.
+--
+
+[.specitem,oft-sid="req~assumed-encoding-receive-stamp~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+On receive, such a transport *MUST* stamp delivered messages with the
+configured identity, so that downstream consumers and bridges observe a
+complete identity, indistinguishable in form from natively carried identity.
+--
+
+[.specitem,oft-sid="req~assumed-encoding-documented~1",oft-needs="dsn",oft-tags="TransportLayerImpl"]
+--
+The assumption mechanism (its scope, configuration surface, and defaults)
+*MUST* be documented by the binding.
+--
+
+== Conformance
+
+[.specitem,oft-sid="req~family-support-declaration~1",oft-needs="dsn",oft-tags="TransportLayerImpl"]
+--
+A transport binding *MUST* declare which families it supports and, for
+frame-oriented families, which wire formats and metadata profiles. Operations
+outside the declared support *MUST* fail with an explicit, typed
+unsupported-operation status; they *MUST NOT* fail silently, hang, or degrade
+to a different family.
+--
+
+Interoperability of family and wire combinations *SHOULD* be demonstrated by
+matrix-style testing: for each ordered pair of endpoint profiles
+(transport, family, wire) and each supported payload encoding, an end-to-end
+row proves either delivery with intact identity and payload, or an explicit,
+reasoned unsupported classification. Rows where source and sink profiles are
+identical exercise no bridge boundary and are structurally out of scope for
+bridge conformance.

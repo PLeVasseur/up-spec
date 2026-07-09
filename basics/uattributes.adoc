@@ -448,6 +448,64 @@ a|The outcome of the RPC. No value or `UCode.OK` indicate successful invocation 
 [#payload-format]
 == Payload Format
 
+[#_payload_encoding_identity]
+=== Payload Encoding Identity
+
+`UAttributes` identifies the encoding of a message's payload through exactly
+one of two mutually exclusive mechanisms, both drawn from the
+xref:uframe.adoc#_payload_encoding_registry[UFrame payload-encoding registry]:
+
+* `payload_format` (field 12) — the legacy-compatible enum covering registry
+  ids `1..=8`, unchanged in meaning and serialization; or
+* the *open payload-encoding identity* fields, for encodings outside that
+  range:
+** `payload_encoding_registry_id` (field 13, `uint32`) — a numeric registry
+   id,
+** `payload_encoding` (field 14, `string`) — a literal id (for example
+   `up.xcdr-v2`),
+** `payload_content_type` (field 15, `string`) — an RFC 6838 media type.
+
+These three fields were added to `uattributes.proto` as `optional` fields;
+absence of all encoding fields continues to mean an unspecified encoding, so
+existing serialized messages are unaffected byte-for-byte.
+
+[.specitem,oft-sid="dsn~up-attributes-payload-encoding-exclusive~1",oft-needs="impl,utest",oft-tags="LanguageLibrary"]
+--
+* A payload-bearing message *MUST* populate exactly one encoding mechanism.
+* An encoding with a registry id in `1..=8` *MUST* be expressed via
+  `payload_format` and *MUST NOT* also populate any open identity field.
+* An encoding outside that range *MUST* be expressed via the open identity
+  fields, of which at least one *MUST* be present; `payload_format` *MUST*
+  be left unset (`UPAYLOAD_FORMAT_UNSPECIFIED`).
+--
+
+[.specitem,oft-sid="dsn~up-attributes-payload-encoding-no-alias~1",oft-needs="impl,utest",oft-tags="LanguageLibrary"]
+--
+* Open identity fields *MUST NOT* alias a registered row `1..=8` (for
+  example, literal `up.raw` or registry id `6` in the open fields).
+  Validators *MUST* reject such messages rather than normalize them, so
+  every identity has one observable classic-surface representation.
+--
+
+[.specitem,oft-sid="dsn~up-attributes-payload-encoding-preserve~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+* Transports and bridges *MUST* carry the open identity fields with the same
+  fidelity as `payload_format`. A receiver that does not recognize an open
+  identity *MUST* reject the payload as not decodable and *MUST NOT*
+  reinterpret it under another identity (see the
+  xref:uframe.adoc#_payload_encoding_registry[registry rules] and
+  xref:../up-l1/transport_families.adoc[Transport Families] for the
+  bridge-level consequences).
+--
+
+Transports without a per-message metadata side-channel satisfy carriage of
+these fields through the assumed-encoding rules of
+xref:../up-l1/transport_families.adoc#_assumed_encoding_channels[Transport
+Families]: identity is fixed per channel by configuration, enforced loudly on
+send, and stamped on receive.
+
+=== Legacy Payload Format Table
+
 The following table provides an overview of the payload formats supported by uProtocol.
 
 `UPayloadFormat` is the legacy-compatible projection of UFrame payload-encoding
