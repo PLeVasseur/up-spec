@@ -272,6 +272,81 @@ means that we **MUST** determine the source in order to send Response messages.
 The source UUri **MUST** be determined by deserializing the `uatributes_serialized` in the UProtocolHeader
 and then creating the appropriate fully-qualified ServiceName.
 
+== Transport Families Instantiation
+
+This section instantiates the contracts of
+xref:transport_families.adoc[Transport Families and Transport Cores] for
+iceoryx2, per `req~family-support-declaration~1`.
+
+[%autowidth]
+|===
+|Capability |Support
+
+|Classic (`UTransport`)
+|Supported (the mapping specified above)
+
+|Owned-frame
+|Supported over the frame binding below
+
+|Zero-copy
+|Supported natively, including uninitialized transmit loans
+
+|Metadata carriage pattern
+|In-sample prefix: a fixed placement user header, then metadata bytes, then
+ the aligned payload, in one loaned iceoryx2 sample
+
+|Metadata profiles
+|Declared by configuration; canonical metadata field block v1 *SHOULD* be
+ accepted for new use; the fixed `UFrameMetadataAbiV1` user-header profile
+ remains a separate opt-in binding
+|===
+
+=== Transport Core and Placement Header
+
+iceoryx2 exchanges loaned samples with an application-defined user header.
+This binding restricts the user header to *physical placement facts only* —
+no uProtocol semantics ride the header, keeping the core semantically
+ignorant (`req~transport-core-no-semantic-interpretation~1`):
+
+[source,text]
+----
+user header (fixed layout, native representation):
+  uprotocol_major_version : u8
+  metadata_len            : u64
+  payload_offset          : u64
+  payload_len             : u64
+  payload_alignment       : u64
+----
+
+[.specitem,oft-sid="dsn~up-transport-iceoryx2-placement~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+* The loaned sample carries metadata bytes (a complete
+  xref:../basics/uframe.adoc#_metadata_profiles[metadata envelope] with
+  profile bytes) at the start of the payload area, followed by the
+  application payload at `payload_offset`.
+* `payload_offset` *MUST* satisfy `payload_alignment`; a sender *MUST*
+  reject layouts it cannot satisfy rather than degrade alignment
+  (`req~zero-copy-alignment~1`).
+* Receivers *MUST* honor the header's placement facts and *MUST* reject
+  samples whose declared placement is inconsistent with the sample extent
+  (offset/length overflow) as malformed frames before exposing content.
+--
+
+=== Zero-copy Operation
+
+[.specitem,oft-sid="dsn~up-transport-iceoryx2-zero-copy~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+* Transmit loans allocate one iceoryx2 sample sized for metadata + aligned
+  payload; the binding writes header and metadata, then exposes exactly the
+  payload region to the sender.
+* Uninitialized transmit loans use iceoryx2's uninitialized slice loans; the
+  payload region is exposed write-only until the initialization witness of
+  `req~zero-copy-uninit-two-phase~1` is produced. Header and metadata are
+  never part of the uninitialized region.
+* Receive leases wrap delivered samples; payload views are bounded by the
+  header's placement facts and *MUST NOT* outlive the lease.
+--
+
 == UFrame Binding Requirements
 
 An implementation that carries xref:../basics/uframe.adoc[UFrames] over

@@ -344,3 +344,38 @@ The following examples are using the CloudEvent JSON Format.
     "data_base64": "... base64 encoded serialization of google.rpc.Status ..."
 }
 ----
+
+== Family Support Declaration
+
+Per xref:transport_families.adoc[`req~family-support-declaration~1`], the
+CloudEvents binding supports the *classic* transport family only.
+Frame-oriented family operations *MUST* fail with an explicit, typed
+unsupported-operation status. Metadata carriage pattern — mapped fields:
+attributes ride CloudEvents context attributes and extension attributes as
+specified in <<uMessage Mapping>>, with the payload encoding carried as the
+custom `pformat` integer extension rather than `datacontenttype`.
+
+=== Open Payload-Encoding Identity
+
+This mapping revision defines carriage for `payload_format` (registry ids
+`1..=8`) only. The open payload-encoding identity fields of
+xref:../basics/uattributes.adoc#_payload_encoding_identity[UAttributes]
+(`payload_encoding_registry_id`, `payload_encoding`,
+`payload_content_type`) have no defined CloudEvents representation in this
+revision.
+
+[.specitem,oft-sid="dsn~up-cloudevents-open-identity-unrepresentable~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+A producer mapping a uProtocol message that carries open payload-encoding
+identity fields to a CloudEvent under this revision *MUST* fail the mapping
+with an explicit error. It *MUST NOT* drop the identity fields, substitute a
+`pformat` value, or emit the payload without its encoding identity — the
+identity-preservation rules of
+xref:../basics/uframe.adoc#_payload_encoding_registry[the registry] and
+xref:transport_families.adoc[`req~family-bridge-no-relabel~1`] apply to
+message-format mappings exactly as to transports.
+--
+
+A future revision of this mapping *MAY* define dedicated extension
+attributes mirroring the three fields; until then, unrepresentability is
+explicit by design rather than lossy by accident.

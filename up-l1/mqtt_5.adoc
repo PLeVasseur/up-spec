@@ -406,3 +406,12 @@ The following table provides some guidance for implementation:
 | Backoff (ms)      | `500` | `1000` | `2000` | `4000` | `10000`
 |===
 --
+
+== Family Support Declaration
+
+Per xref:transport_families.adoc[`req~family-support-declaration~1`], the
+MQTT 5 binding supports the *classic* transport family only. Frame-oriented
+family operations *MUST* fail with an explicit, typed unsupported-operation
+status. Metadata carriage pattern — Mapped fields: attributes ride MQTT 5
+user properties keyed by protobuf field number, including the open
+payload-encoding identity fields (13, 14, 15).

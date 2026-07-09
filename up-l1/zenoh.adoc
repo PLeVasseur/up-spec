@@ -268,6 +268,68 @@ The examples below assume that the local entity's authority name is `device1`.
 |===
 --
 
+== Transport Families Instantiation
+
+This section instantiates the contracts of
+xref:transport_families.adoc[Transport Families and Transport Cores] for
+Zenoh, per `req~family-support-declaration~1`.
+
+[%autowidth]
+|===
+|Capability |Support
+
+|Classic (`UTransport`)
+|Supported (the mapping specified above)
+
+|Owned-frame
+|Supported over the frame binding below
+
+|Zero-copy
+|Supported via Zenoh shared memory, including uninitialized transmit loans
+
+|Metadata carriage pattern
+|Native attachment: selected-wire metadata bytes ride the Zenoh attachment;
+ payload bytes ride the Zenoh payload
+
+|Metadata profiles
+|Declared by configuration; canonical metadata field block v1 *SHOULD* be
+ accepted for new use
+|===
+
+=== Transport Core
+
+[.specitem,oft-sid="dsn~up-transport-zenoh-core~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+The Zenoh transport core carries one frame per Zenoh sample: the complete
+xref:../basics/uframe.adoc#_metadata_profiles[metadata envelope] with profile
+bytes as the sample's *attachment*, and payload bytes as the sample's
+*payload*. Addressing uses the key-expression mapping specified in
+<<Zenoh Key Structure>>; the core performs no interpretation of metadata or
+payload bytes (`req~transport-core-no-semantic-interpretation~1`).
+--
+
+=== Zero-copy Operation
+
+[.specitem,oft-sid="dsn~up-transport-zenoh-zero-copy~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+* Transmit loans allocate payload storage from a Zenoh shared-memory
+  provider using a layout that satisfies the declared payload length and
+  alignment; a loan whose layout the provider cannot satisfy *MUST* be
+  refused (`req~zero-copy-alignment~1`), not degraded.
+* The shared-memory segment size is deployment configuration and *MUST* be
+  strictly positive; loans exceeding available segment capacity *MUST* fail
+  with an explicit resource error.
+* Uninitialized transmit loans expose the shared-memory payload region
+  write-only until the initialization witness of
+  `req~zero-copy-uninit-two-phase~1` is produced. Metadata (the attachment)
+  is never part of the uninitialized region.
+* An empty payload is represented without any shared-memory allocation.
+* Receive leases expose the received payload region immutably for the
+  lease's duration; where the deployment does not provide shared memory
+  end-to-end, the received region MAY be transport-buffered bytes — the
+  lease contract is unchanged.
+--
+
 == UFrame Binding Requirements
 
 An implementation that carries xref:../basics/uframe.adoc[UFrames] over Zenoh

@@ -387,6 +387,12 @@ The assumption mechanism (its scope, configuration surface, and defaults)
 
 == Conformance
 
+The family contracts of this document are instantiated per binding:
+xref:zenoh.adoc[Zenoh] and xref:iceoryx2.adoc[iceoryx2] specify all three
+families, xref:lola.adoc[LoLa] specifies a statically-deployed shared-memory
+instantiation, and xref:mqtt_5.adoc[MQTT 5], xref:someip.adoc[SOME/IP], and
+xref:cloudevents.adoc[CloudEvents] declare classic-only support.
+
 [.specitem,oft-sid="req~family-support-declaration~1",oft-needs="dsn",oft-tags="TransportLayerImpl"]
 --
 A transport binding *MUST* declare which families it supports and, for

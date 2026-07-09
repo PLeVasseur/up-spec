@@ -331,3 +331,13 @@ NOTE: handled by underlying SOME/IP library.
 
 *TODO:* _Pending uDiscovery v3 redesign_
 
+== Family Support Declaration
+
+Per xref:transport_families.adoc[`req~family-support-declaration~1`], the
+SOME/IP binding supports the *classic* transport family only. Frame-oriented
+family operations *MUST* fail with an explicit, typed unsupported-operation
+status. Metadata carriage pattern — Header mapping: attributes derive from
+and reconstruct out of SOME/IP header fields, with the reconstruction
+conventions documented in the mapping notes of this document; deployments
+without metadata carriage use the assumed-encoding rules of
+xref:transport_families.adoc#_assumed_encoding_channels[Transport Families].

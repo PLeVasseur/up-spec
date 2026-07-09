@@ -1,0 +1,164 @@
+= Eclipse S-CORE LoLa
+:toc:
+:sectnums:
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
+
+----
+SPDX-FileCopyrightText: 2026 Contributors to the Eclipse Foundation
+
+See the NOTICE file(s) distributed with this work for additional
+information regarding copyright ownership.
+
+This program and the accompanying materials are made available under
+the terms of the Apache License Version 2.0 which is available at
+https://www.apache.org/licenses/LICENSE-2.0
+
+SPDX-FileType: DOCUMENTATION
+SPDX-License-Identifier: Apache-2.0
+----
+
+== Overview
+
+This document specifies the binding of uProtocol to Eclipse S-CORE
+communication middleware ("LoLa", `mw_com`), a shared-memory IPC technology
+for safety-oriented in-vehicle software. LoLa differs from the other bindings
+in a way this specification treats as a feature, per
+xref:transport_families.adoc#_transport_diversity[Transport Diversity]: its
+services, events, and shared-memory segments are *statically deployed* by a
+manifest, not created dynamically from message addressing. The binding
+therefore separates concerns explicitly: LoLa carries frames between
+deployment-configured endpoints; uProtocol addressing and filter matching are
+evaluated by the uProtocol layer above the transport core.
+
+== Family Support Declaration
+
+Per xref:transport_families.adoc[`req~family-support-declaration~1`]:
+
+[%autowidth]
+|===
+|Capability |Support
+
+|Classic (`UTransport`)
+|Supported, bridged over the frame binding below
+
+|Owned-frame
+|Supported
+
+|Zero-copy
+|Supported, including uninitialized transmit loans
+
+|Metadata carriage pattern
+|In-sample framing (see <<Frame Layout>>); no per-message side-channel
+ outside the sample
+
+|Metadata profiles
+|Declared by configuration; canonical metadata field block v1 *SHOULD* be
+ accepted for new use (envelope rules per
+ xref:../basics/uframe.adoc#_metadata_profiles[UFrame])
+|===
+
+== Deployment Model
+
+[.specitem,oft-sid="dsn~up-transport-lola-deployment~1",oft-needs="impl,uman",oft-tags="TransportLayerImpl"]
+--
+A LoLa binding instance *MUST* be configured with a deployment manifest
+(`mw_com_config.json`) or equivalent that defines the LoLa service ids,
+instance specifiers, service type names, and event names it uses. The binding
+*MUST NOT* invent LoLa-level names from uProtocol URIs at runtime; the
+mapping from uProtocol endpoints to deployed LoLa events is configuration.
+--
+
+[.specitem,oft-sid="dsn~up-transport-lola-channels~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+The binding uses two deployment-configured event channels per instance: a
+*primary* event carrying request-oriented traffic (publish, notification,
+RPC request frames) and a *response* event carrying RPC response frames.
+A frame *MUST* be transmitted on the channel matching its message type, and
+receivers *MUST* subscribe to the channel(s) implied by their registered
+filters.
+--
+
+Because LoLa endpoints are deployment-scoped rather than address-derived, a
+receiver may observe frames on a channel that do not match its registered
+uProtocol filters.
+
+[.specitem,oft-sid="req~up-transport-lola-filter-above-core~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+uProtocol source and sink filter matching *MUST* be applied by the binding
+above the LoLa core, after metadata decode. Non-matching frames *MUST* be
+skipped without being delivered to listeners and *SHOULD* be surfaced through
+diagnostics (for example, a pull-mismatch counter); they *MUST NOT* be
+treated as decode errors.
+--
+
+== Frame Layout
+
+LoLa exchanges fixed shared-memory samples. All uProtocol content of one
+frame — placement header, encoded metadata, payload — is carried *inside a
+single sample* ("in-sample framing"). Multi-byte integers are little-endian.
+
+[source,text]
+----
+offset  size  field
+0       4     magic = "ULOL" (0x55 0x4C 0x4F 0x4C)
+4       1     frame layout version = 1
+5       3     reserved, MUST be 0
+8       4     metadata_len   (u32)
+12      4     payload_offset (u32)
+16      4     payload_len    (u32)
+20      ...   metadata bytes (metadata envelope + profile bytes)
+payload_offset ... payload bytes
+----
+
+[.specitem,oft-sid="dsn~up-transport-lola-frame-layout~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+* A sender *MUST* write the header exactly as laid out above and *MUST*
+  reject frames whose metadata length, payload length, or computed layout
+  exceeds the sample or the `u32` field ranges.
+* Metadata bytes *MUST* immediately follow the header and *MUST* be a
+  complete xref:../basics/uframe.adoc#_metadata_profiles[metadata envelope]
+  with profile bytes.
+* `payload_offset` *MUST* place the payload at the alignment declared in the
+  transmit loan. Because samples are mapped shared memory, alignment is
+  satisfied *relative to the mapped sample address*, so `payload_offset` for
+  the same lengths *MAY* differ between samples; receivers *MUST* use
+  `payload_offset` and *MUST NOT* assume a fixed gap after the metadata.
+* A receiver *MUST* reject a sample whose magic or version it does not
+  recognize as an unknown-frame-layout error before exposing any content.
+--
+
+== Zero-copy Operation
+
+The binding instantiates the
+xref:transport_families.adoc#_zero_copy_family[zero-copy family lifecycles]
+on LoLa samples:
+
+[.specitem,oft-sid="dsn~up-transport-lola-zero-copy~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+* A transmit loan allocates one LoLa sample sized for header + metadata +
+  aligned payload, writes header and metadata, and exposes exactly the
+  payload region `[payload_offset, payload_offset + payload_len)` to the
+  sender. Commit hands the sample to LoLa; the sender's access ends.
+* Uninitialized transmit loans expose the payload region write-only until the
+  initialization witness required by
+  xref:transport_families.adoc[`req~zero-copy-uninit-two-phase~1`] is
+  produced. Header and metadata bytes are written by the binding before the
+  region is exposed and are never part of the uninitialized region.
+* A receive lease wraps one LoLa sample; the payload view is the
+  `payload_offset`-addressed region. The sample is returned to LoLa on
+  release, and views *MUST NOT* outlive the lease.
+--
+
+== Classic Operation
+
+Classic `UTransport` operation is bridged over the same frame binding: a
+serialized-message send is projected to a frame (metadata via the explicit
+projection of
+xref:transport_families.adoc[`dsn~owned-frame-projection~1`], payload bytes
+copied into the loaned sample), and received frames are projected back before
+listener delivery. All xref:README.adoc[UTransport] conformance requirements
+apply unchanged; the assumed-encoding rules of
+xref:transport_families.adoc#_assumed_encoding_channels[Transport Families]
+apply only if a deployment disables metadata carriage, which this binding
+does not define.
