@@ -151,6 +151,15 @@ technology varies by binding and is specified per binding
 xref:iceoryx2.adoc[iceoryx2]); <<Transport diversity>> constrains what any
 such carriage is allowed to do.
 
+The classic preservation obligation is already normative in
+xref:README.adoc[`req~utransport-send-preserve-data~1`]. It is the classic
+family counterpart of the byte-transparency and no-semantic-interpretation
+rules at the frame-oriented transport-core seam: a binding may map metadata
+onto native carrier fields, but it must not change the message's semantic
+content, substitute its payload-encoding identity, or re-encode its payload as
+another format. This paragraph clarifies the relationship between the two
+contracts; it does not make classic `UTransport` itself a frame-oriented core.
+
 == Owned-frame family
 
 The owned-frame family exchanges complete frames by *ownership transfer*: the
@@ -384,6 +393,88 @@ complete identity, indistinguishable in form from natively carried identity.
 The assumption mechanism (its scope, configuration surface, and defaults)
 *MUST* be documented by the binding.
 --
+
+== Language Mapping Notes (informative)
+
+This section is *informative*. The normative contracts above specify behavior,
+not one language's type system or memory model. The examples below illustrate
+possible enforcement shapes; conforming libraries may choose different shapes
+that preserve the same behavior.
+
+The load-bearing properties are:
+
+* an uninitialized loan cannot be committed until complete initialization has
+  produced a witness (`req~zero-copy-uninit-two-phase~1`);
+* a transmit loan remains exclusive until commit or release
+  (`req~zero-copy-loan-isolation~1`);
+* receive storage is read-only and inaccessible after its lease ends
+  (`req~zero-copy-lease-immutability~1` and
+  `req~zero-copy-lease-lifetime~1`);
+* owned frames are validated before ownership transfer completes
+  (`req~owned-frame-validate-before-send~1`).
+
+Compile-time enforcement can make invalid states unrepresentable. Run-time
+enforcement can also conform when it reliably detects and rejects invalid
+states. An unenforced convention or documentation-only lifetime rule does not
+satisfy the behavior.
+
+[%autowidth]
+|===
+|Concept |Rust reference library |C++14 example |Java example |Python example
+
+|Initialization witness
+|A typestate initializer returns a completion proof inside a higher-ranked
+ closure, preventing an incomplete or escaped proof in safe code
+|A move-only completion token records coverage, is bound to one loan, and is
+ consumed by commit after checked loan identity/coverage validation
+|A capability object with a non-public constructor is returned by builder
+ completion and checked against the loan when commit is requested
+|A completion object records coverage and loan identity; completion invalidates
+ the writable view and commit rejects any mismatched object
+
+|Transmit loan
+|An exclusive borrow provides the writable region until commit
+|An owning RAII loan exposes a pointer-and-length or span-like writable view;
+ copies of the owner are disabled and commit invalidates access
+|A loan object owns a writable slice of a direct `ByteBuffer`; implementations
+ on suitable newer runtimes may instead use a bounded foreign-memory segment
+|A context-managed writable `memoryview` is released on commit or scope exit
+
+|Receive lease
+|Lifetime-bound immutable views cannot outlive the lease
+|An RAII lease exposes const pointer-and-length/span-like views and invalidates
+ them when the lease is destroyed or released
+|A closeable lease exposes read-only direct-buffer views and checks that the
+ lease remains open on access
+|A context manager exposes a read-only `memoryview`; exit releases the view so
+ later access fails
+
+|Validate before owned send
+|Only a validated-frame type with no unchecked public constructor reaches the
+ implementation send boundary
+|A validated-frame wrapper is created only by a validating factory and moved
+ into send
+|A final wrapper with a non-public constructor is minted by the validator
+|A validator mints the wrapper accepted by transport send; construction and
+ mutation paths remain encapsulated
+
+|In-place typed initialization
+|Generated setters write checked fields and arrays directly into loaned storage
+|Placement-style checked writes or `memcpy` fill the declared layout in the
+ loaned byte region
+|Absolute-index direct-buffer writes and bulk copies fill the declared layout
+|`struct.pack_into` or typed-memoryview assignments fill the declared layout
+|===
+
+Two cautions apply to all mappings:
+
+* A language that cannot make use-after-release structurally impossible still
+  must detect it through invalidated views, checked state, or equivalent
+  enforcement.
+* A binding that must copy a payload into runtime-managed storage in order to
+  present it cannot claim the zero-copy family for that path. It should declare
+  classic or owned support honestly under
+  `req~family-support-declaration~1`.
 
 == Conformance
 
