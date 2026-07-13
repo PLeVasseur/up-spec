@@ -28,4 +28,5 @@ The following are the foundational requirements for uProtocol specifications:
 * *xref:qos.adoc[Quality of Service & Priority (UPriority)]*
 * *xref:uattributes.adoc[uProtocol Attributes (UAttributes)]*
 * *xref:umessage.adoc[uProtocol Message (UMessage)]*
+* *xref:uframe.adoc[uProtocol Frame (UFrame)]*
 * *xref:permissions.adoc[Permissions]*

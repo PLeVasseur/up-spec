@@ -57,6 +57,13 @@ xref:../basics/uattributes.adoc[attribute semantics], addressing rules, and
 xref:../basics/uframe.adoc#_payload_encoding_registry[payload-encoding
 identity] are family-invariant.
 
+Family support is declared independently. Supporting classic transport does
+not imply owned-frame support, and supporting owned-frame delivery does not
+imply zero-copy support. A zero-copy declaration applies only to paths that
+actually exchange transport-owned storage through the loan/lease lifecycles
+below. It does not by itself claim native shared memory, typed borrowing, or
+end-to-end no-copy behavior for every operation.
+
 === Why a "core" concept exists
 
 Before this layering, each additional capability multiplied implementation
@@ -298,6 +305,33 @@ per-frame overhead to a fixed-size identity reference and keeps the security
 surface small — a peer cannot steer a receiver into an unexpected decoder by
 crafting a frame.
 
+=== Representation conformance
+
+A selected-wire identity denotes a specific representation contract, not merely
+a data model. Its definition *MUST* identify the governing specification and
+version, supported representation subset, byte order, framing or representation
+markers, required options, padding rules, and whether the encoded value consumes
+the complete selected-wire payload.
+
+[.specitem,oft-sid="req~selected-wire-representation-conformance~1",oft-needs="dsn,utest",oft-tags="LanguageLibrary"]
+--
+An encoder claiming a selected-wire identity *MUST* produce bytes conforming to
+that identity's declared representation contract. A decoder *MUST* validate the
+declared markers and options, byte order, padding, subset restrictions, and full
+input consumption. It *MUST* reject unsupported representations and trailing
+bytes instead of accepting them as the selected representation.
+
+Conformance evidence *MUST* include independently produced positive vectors,
+byte-equal encoding checks where a canonical representation is claimed, and
+negative vectors for each excluded representation mode. Round trips in which
+the same implementation produces and consumes the bytes are useful tests but
+are not sufficient independent evidence.
+--
+
+A library MAY expose a separately named tolerant decoder, but bytes accepted
+only by that decoder do not establish conformance with the strict selected-wire
+identity.
+
 == Family interoperability
 
 Deployments mix families: a classic uEntity publishes; a zero-copy consumer
@@ -491,6 +525,17 @@ frame-oriented families, which wire formats and metadata profiles. Operations
 outside the declared support *MUST* fail with an explicit, typed
 unsupported-operation status; they *MUST NOT* fail silently, hang, or degrade
 to a different family.
+--
+
+[.specitem,oft-sid="req~transport-matrix-cartesian-derivation~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
+--
+A conformance matrix *MUST* derive its expected row set as the Cartesian product
+of its independently declared source endpoint profiles, sink endpoint profiles,
+communication roles, and selected-wire identities. The matrix definition *MUST*
+publish those inventories and the resulting denominator. Every generated row
+*MUST* produce either a passing supported result or an explicit unsupported
+classification from a predeclared structural allowlist. Missing rows and unknown
+unsupported reasons *MUST* fail matrix acceptance.
 --
 
 Interoperability of family and wire combinations *SHOULD* be demonstrated by

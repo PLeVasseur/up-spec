@@ -227,6 +227,27 @@ which metadata layout identities they accept; the canonical field block is the
 default for new bindings, and the legacy protobuf layout *MUST* be selected
 explicitly where a binding still allows it.
 
+=== Compact identity allocation
+
+Selected-wire, metadata-layout, and payload-family compact codes are separate
+16-bit registry namespaces. A compact code *MUST* be unique within its namespace;
+the same numeric value *MAY* appear in another namespace because the envelope
+field identifies which registry applies.
+
+[.specitem,oft-sid="req~uframe-identity-experimental-range~1",oft-needs="dsn",oft-tags="LanguageLibrary"]
+--
+Compact codes from `0x8000` through `0xFFFE`, inclusive, are experimental. An
+experimental code *MUST* be unique within its deployment and registry namespace,
+*MUST* be accompanied by its literal identity in documentation and deployment
+configuration, and *MUST NOT* be described as registered or stable. Code
+`0xFFFF` is reserved and *MUST NOT* be allocated.
+
+Moving an identity from the experimental range into the registered range
+requires an assigned registry owner, a permanent unused code, a versioned
+identity definition, and explicit publication authorization. Implementations
+*MUST NOT* infer or perform that transition automatically.
+--
+
 === Canonical metadata field block v1
 
 The canonical UFrame metadata profile is the variable-length metadata field
