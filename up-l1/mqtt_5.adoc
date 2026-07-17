@@ -30,22 +30,6 @@ This document defines how MQTT 5 PUBLISH packets can be used to transfer uProtoc
 1. *uEntity-2-uEntity* (E2E): Communication between uEntities within the same vehicle by means of an _in-vehicle_ MQTT broker.
 2. *Device-2-Device* (D2D): Communication between uEntities in vehicles and a (cloud) back end system by means of an _off-vehicle_ MQTT broker, e.g. running in the back end. MQTT brokers running on cloud infrastructure often have limitations regarding the number of topics that can be subscribed and the number of segments those topics may contain. The mapping for this use case therefore uses a coarser grained topic structure than the one for in-vehicle only communication.
 
-== UFrame Binding Requirements
-
-An implementation that carries xref:../basics/uframe.adoc[UFrames] over MQTT 5
-*MUST* define a binding profile. The binding *MUST* declare whether UFrame
-metadata is carried in MQTT user properties, inside a `UPFE` whole-frame
-envelope payload, or by another explicitly named placement.
-
-The binding *MUST* declare the accepted metadata profile or profiles. New native
-selected-wire use *SHOULD* accept the canonical metadata field block v1. The
-legacy protobuf metadata profile *MAY* be accepted only when the binding names
-that profile explicitly.
-
-Receivers *MUST* reject unsupported metadata profiles, malformed metadata bytes,
-and routing mirrors that do not match the MQTT topic selected by the binding.
-These failures *MUST NOT* be interpreted as ordinary payload decode failures.
-
 == UMessage Mapping
 
 A uProtocol message consists of _UAttributes_ and optional payload. The following sections define how these are mapped to/from an MQTT 5 PUBLISH packet.
@@ -415,3 +399,19 @@ family operations *MUST* fail with an explicit, typed unsupported-operation
 status. Metadata carriage pattern — Mapped fields: attributes ride MQTT 5
 user properties keyed by protobuf field number, including the open
 payload-encoding identity fields (13, 14, 15).
+
+=== UFrame Binding Requirements
+
+An implementation that carries xref:../basics/uframe.adoc[UFrames] over MQTT 5
+*MUST* define a binding profile. The binding *MUST* declare whether UFrame
+metadata is carried in MQTT user properties, inside a `UPFE` whole-frame
+envelope payload, or by another explicitly named placement.
+
+The binding *MUST* declare the accepted metadata profile or profiles. New native
+selected-wire use *SHOULD* accept the canonical metadata field block v1. The
+legacy protobuf metadata profile *MAY* be accepted only when the binding names
+that profile explicitly.
+
+Receivers *MUST* reject unsupported metadata profiles, malformed metadata bytes,
+and routing mirrors that do not match the MQTT topic selected by the binding.
+These failures *MUST NOT* be interpreted as ordinary payload decode failures.

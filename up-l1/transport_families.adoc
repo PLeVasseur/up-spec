@@ -147,11 +147,11 @@ This is the load-bearing economy of the design: for `N` cores and `M` wire
 formats the ecosystem carries `N + M` implementations, not `N × M`, and every
 `(core, wire)` pair inherits the same validation and identity behavior.
 
-== Classic family
+== UTransport family
 
-The classic family is xref:README.adoc[UTransport] as already specified:
+The UTransport family is xref:README.adoc[UTransport] as already specified:
 `send` accepts a valid serialized `UMessage`; listeners receive `UMessage`s
-matching registered filters. Nothing in this document changes classic
+matching registered filters. Nothing in this document changes UTransport
 conformance. How a classic binding carries attributes on its native
 technology varies by binding and is specified per binding
 (xref:zenoh.adoc[Zenoh], xref:mqtt_5.adoc[MQTT 5], xref:someip.adoc[SOME/IP],
@@ -357,7 +357,7 @@ xref:../basics/uframe.adoc#_payload_encoding_registry[registry rules]).
 
 [.specitem,oft-sid="req~family-bridge-classic-carriage~1",oft-needs="dsn,utest",oft-tags="TransportLayerImpl"]
 --
-When a frame is bridged into the classic family, its payload-encoding
+When a frame is bridged into the UTransport family, its payload-encoding
 identity *MUST* ride the classic surface losslessly, using `payload_format`
 for registry ids `1..=8` and the open payload-encoding identity fields
 otherwise, exactly as specified in

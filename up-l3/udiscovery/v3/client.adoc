@@ -53,7 +53,7 @@ Each link:../languages.adoc[uProtocol Language Library] *MUST* implement the cli
 
 The FindServices() API is used to find service instances matching search criteria like authority, instance ID and (major) version. The only mandatory part of the provided (search) URI is the uEntity ID (`ue_id`), the rest can be discovered. The `recursive` flag can be used to include the uDiscovery service instance's parent nodes in the search.
 
-[.specitem,oft-sid="dsn~discovery-findservices-error-notfound~1",oft-needs="impl,test"]
+[.specitem,oft-sid="dsn~discovery-client-findservices-error-notfound~1",oft-needs="impl,test"]
 --
 * *MUST* return a `UCode.NOT_FOUND` if no service matching the passed URI was found. 
 --
@@ -92,7 +92,7 @@ The FindServices() API is used to find service instances matching search criteri
 
 The GetServiceTopics() API is used to fetch metadata about one or more topics (depending on what is passed in the UUri) so clients can know more metadata about the topic(s). Wildcard ue_id and/or resource_id can be used to fetch multiple `UServiceTopic` information. The `UServiceTopic` contains topic metadata such as the minimum permission level required to read from the topic, message name, payload format (how the message is encoded) and more.
 
-[.specitem,oft-sid="dsn~discovery-getservicetopics-error-notfound~1",oft-needs="impl,test"]
+[.specitem,oft-sid="dsn~discovery-client-getservicetopics-error-notfound~1",oft-needs="impl,test"]
 --
 * *MUST* return a `UCode.NOT_FOUND` if no topic matching the URI was found.
 --

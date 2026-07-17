@@ -34,41 +34,6 @@ Overall, SOME/IP plays a crucial role in facilitating efficient and standardized
 
 The following specification will elaborate on how uProtocol shall be mapped to SOME/IP protocol so that mechatronics applications and services can be connected to non-mechatronics and cloud based applications and services.
 
-== UFrame Binding Requirements
-
-An implementation that carries xref:../basics/uframe.adoc[UFrames] over
-SOME/IP *MUST* define a binding profile. The binding *MUST* declare whether
-UFrame metadata is carried in a native SOME/IP placement, inside a
-`UPFE` whole-frame envelope, or by another explicitly named transport-specific
-placement.
-
-The binding *MUST* declare the accepted metadata profile or profiles. New native
-selected-wire use *SHOULD* accept the canonical metadata field block v1. The
-legacy protobuf metadata profile *MAY* be accepted only when the binding names
-that profile explicitly.
-
-Receivers *MUST* reject unsupported metadata profiles, malformed metadata bytes,
-and routing mirrors that do not match the SOME/IP service, instance, method, and
-event routing fields selected by the binding. These failures *MUST NOT* be
-interpreted as ordinary payload decode failures.
-
-=== Open Source Libraries
-
-As of the time of writing, there are two open source projects that are available for SOME/IP:
-
-1. *https://github.com/COVESA/vsomeip[COVESA-vsomeip]:* C++ solution based on the original specifications developed by BMW prior to contribution to AUTOSAR
-2. *https://projects.eclipse.org/projects/automotive.sommr[Eclipse-SommR]:*  Rust implementation based on the latest AUTOSAR SOME/IP specifications.
-
-NOTE: Given the latest version of SOME/IP specifications from AUTOSAR is not open source, we cannot share or implement uProtocol using Eclipse-SommR.
-
-=== AUTOSAR References
-All references below to:
-
-- `[PRS_SOMEIP_XXXXX]` refer to link:https://some-ip.com/standards.shtml[AUTOSAR SOME/IP specification].
-- `[PRS_SOMEIP_SD_XXXXX]` refer to link:https://some-ip.com/standards.shtml[SOME/IP Service Discovery Protocol Specification].
-
-A search engine usually finds the correct document based on the reference number.
-
 == Transport Layer Translation
 
 xref:./README.adoc#utransport[Transport layer (uP-L1)] specifies how xref:../basics/umessage.adoc[uMessages] are sent and received over a _wire_ between *uEntities* or between devices. In this section we will cover the SOME/IP communication protocol binding and event mapping.
@@ -341,3 +306,38 @@ and reconstruct out of SOME/IP header fields, with the reconstruction
 conventions documented in the mapping notes of this document; deployments
 without metadata carriage use the assumed-encoding rules of
 xref:transport_families.adoc#_assumed_encoding_channels[Transport Families].
+
+=== UFrame Binding Requirements
+
+An implementation that carries xref:../basics/uframe.adoc[UFrames] over
+SOME/IP *MUST* define a binding profile. The binding *MUST* declare whether
+UFrame metadata is carried in a native SOME/IP placement, inside a
+`UPFE` whole-frame envelope, or by another explicitly named transport-specific
+placement.
+
+The binding *MUST* declare the accepted metadata profile or profiles. New native
+selected-wire use *SHOULD* accept the canonical metadata field block v1. The
+legacy protobuf metadata profile *MAY* be accepted only when the binding names
+that profile explicitly.
+
+Receivers *MUST* reject unsupported metadata profiles, malformed metadata bytes,
+and routing mirrors that do not match the SOME/IP service, instance, method, and
+event routing fields selected by the binding. These failures *MUST NOT* be
+interpreted as ordinary payload decode failures.
+
+=== Open Source Libraries
+
+As of the time of writing, there are two open source projects that are available for SOME/IP:
+
+1. *https://github.com/COVESA/vsomeip[COVESA-vsomeip]:* C++ solution based on the original specifications developed by BMW prior to contribution to AUTOSAR
+2. *https://projects.eclipse.org/projects/automotive.sommr[Eclipse-SommR]:*  Rust implementation based on the latest AUTOSAR SOME/IP specifications.
+
+NOTE: Given the latest version of SOME/IP specifications from AUTOSAR is not open source, we cannot share or implement uProtocol using Eclipse-SommR.
+
+=== AUTOSAR References
+All references below to:
+
+- `[PRS_SOMEIP_XXXXX]` refer to link:https://some-ip.com/standards.shtml[AUTOSAR SOME/IP specification].
+- `[PRS_SOMEIP_SD_XXXXX]` refer to link:https://some-ip.com/standards.shtml[SOME/IP Service Discovery Protocol Specification].
+
+A search engine usually finds the correct document based on the reference number.

@@ -347,7 +347,7 @@ user header (fixed layout, native representation):
   header's placement facts and *MUST NOT* outlive the lease.
 --
 
-== UFrame Binding Requirements
+=== UFrame Binding Requirements
 
 An implementation that carries xref:../basics/uframe.adoc[UFrames] over
 iceoryx2 *MUST* define a binding profile. The `iceoryx2.uframe.prefix.v1`

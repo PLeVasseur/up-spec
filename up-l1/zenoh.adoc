@@ -330,7 +330,7 @@ payload bytes (`req~transport-core-no-semantic-interpretation~1`).
   lease contract is unchanged.
 --
 
-== UFrame Binding Requirements
+=== UFrame Binding Requirements
 
 An implementation that carries xref:../basics/uframe.adoc[UFrames] over Zenoh
 *MUST* define a binding profile. The `zenoh.uframe.metadata-attachment.v1`
