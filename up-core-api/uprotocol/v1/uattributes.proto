@@ -66,11 +66,10 @@ message UAttributes {
     optional string traceparent = 11;
 
     // The payload encoding, given as an entry identifier in the uProtocol
-    // payload-encoding registry. Absent when the message carries no payload.
-    // Identifiers 1-8 preserve the numeric values of the retired
-    // UPayloadFormat enum. Identifiers at or above 0x1000_0000 are private use:
-    // valid on the wire, never registered, and meaningful only by
-    // deployment-level agreement.
+    // payload-encoding registry. This field is absent when the message carries
+    // no payload or when the transport binding defines the encoding out of
+    // band. Identifier 0 is reserved. Identifiers at or above 0x1000_0000 are
+    // private use and carry meaning only by deployment-level agreement.
     optional uint32 payload_encoding_id = 12;
 }
 
@@ -79,10 +78,8 @@ message UAttributes {
 // Using the message type, validation can be performed to ensure transport
 // validity of the data in the {@link UAttributes}.
 //
-// The "up-" prefix used in the uprotocol.ce_name options has been introduced
-// to allow distinguishing between existing CloudEvents being exchanged by
-// legacy systems using a predecessor of Eclipse uProtocol and CloudEvents
-// conforming to the mapping rules defined in the Eclipse uProtocol specification.
+// The "up-" prefix in each uprotocol.ce_name value identifies the event as an
+// Eclipse uProtocol CloudEvent.
 enum UMessageType {
     // Unspecified message type
     UMESSAGE_TYPE_UNSPECIFIED = 0;
