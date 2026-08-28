@@ -65,11 +65,13 @@ message UAttributes {
     // Intended to be compatible with https://github.com/cloudevents/spec/blob/main/cloudevents/extensions/distributed-tracing.md
     optional string traceparent = 11;
 
-    // The payload encoding, given as an entry identifier in the uProtocol
-    // payload-encoding registry. This field is absent when the message carries
-    // no payload or when the transport binding defines the encoding out of
-    // band. Identifier 0 is reserved. Identifiers at or above 0x1000_0000 are
-    // private use and carry meaning only by deployment-level agreement.
+    // The payload encoding, given as a 16-bit identifier. This field and the
+    // UMessage payload field are either both present or both absent. Identifier
+    // 0 means that an applicable binding, service, or schema contract defines
+    // the encoding. Values from 0x0001 to 0xDFFF are registry assignments,
+    // 0xE000 to 0xEFFF are reserved and invalid on the wire, and 0xF000 to
+    // 0xFFFF are private use. The uint32 type is used because protobuf has no
+    // uint16 type; values greater than 0xFFFF are invalid.
     optional uint32 payload_encoding_id = 12;
 }
 

@@ -155,12 +155,17 @@ a|A code indicating an error that has occurred during the delivery of either an 
 |`payload_encoding_id`
 |`pformat`
 |Integer
-a|The xref:../basics/uattributes.adoc#payload-encoding-registry[payload-encoding
-registry] entry identifier.
+a|The identifier defined in the
+xref:../basics/uattributes.adoc#payload-encoding-registry[payload-encoding
+registry].
 
-* If the CloudEvent contains payload data, `pformat` *MUST* contain the
-  payload-encoding identifier.
-* If the CloudEvent does not contain payload data, `pformat` *MUST* be absent.
+* `pformat` *MUST* be present if and only if the CloudEvent payload data field
+  is present. A payload data field representing a zero-length byte sequence is
+  present.
+* When present, `pformat` *MUST* contain the payload-encoding identifier as an
+  integer, including `0` for an implicit encoding.
+* A receiver *MUST* reject a `pformat` value outside the valid identifier ranges
+  defined by the payload-encoding registry.
 
 |===
 
@@ -171,7 +176,9 @@ The sections below define the mapping of uPayload to CloudEvent attributes.
 
 The `pformat` property carries the numeric payload-encoding identifier.
 CloudEvents `datacontenttype` does not carry uProtocol payload-encoding
-identity. Using the numeric identifier avoids transmitting a media-type string.
+identity. It *MAY* be set to the registered media type for a registry entry when
+that media type accurately describes the payload, but it *MUST NOT* replace
+`pformat`. Using the numeric identifier avoids requiring a media-type string.
 
 ==== Mapping to CloudEvent Protobuf Format
 
@@ -187,6 +194,11 @@ This mapping *MUST* be used by uProtocol Transport Libraries which use the Proto
 |(absent)
 |(absent)
 |No payload data property
+
+|`0` (implicit)
+|`0`
+|*MAY* be set to a URI-Reference identifying the schema that the data adheres to
+|`binary_data`
 
 |`1` (Protobuf in `Any`)
 |`1`
@@ -244,6 +256,11 @@ This mapping *MUST* be used by uProtocol Transport Libraries which use the JSON 
 |(absent)
 |(absent)
 |No payload data property
+
+|`0` (implicit)
+|`0`
+|*MAY* be set to a URI-Reference identifying the schema that the data adheres to
+|`data_base64`
 
 |`1` (Protobuf in `Any`)
 |`1`
