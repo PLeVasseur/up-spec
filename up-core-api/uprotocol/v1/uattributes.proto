@@ -30,7 +30,7 @@ message UAttributes {
     // A unique message identifier.
     UUID id = 1;
 
-    // This message's type which also indicates its purpose and determines contraints on the other properties.
+    // This message's type which also indicates its purpose and determines constraints on the other properties.
     UMessageType type = 2;
 
     // The origin (address) of this message.
@@ -43,27 +43,36 @@ message UAttributes {
     UPriority priority = 5;
 
     // The amount of time (in milliseconds) after which this message MUST NOT be delivered/processed anymore.
-    optional uint32 ttl = 6;
+    uint32 ttl = 6;
 
     // The service consumer's permission level.
+    // Declared as optional because only RPC Request messages may carry it.
     optional uint32 permission_level = 7;
 
-    // A UCode indicating an error that has occurred
-    // during the delivery of either an RPC Request or Response message.
+    // A code indicating an error that has occurred during a remote procedure call.
+    // This is mandatory for RPC Response messages only.
     optional UCode commstatus = 8;
 
-    // The identifier that a service consumer can use to correlate an RPC Repsonse message with its RPC Request.
-    UUID reqid = 9;
+    // The identifier that a service consumer can use to correlate an RPC Response message with its RPC Request.
+    // This is mandatory for RPC Request messages only.
+    optional UUID reqid = 9;
 
     // The service consumer's access token.
+    // Declared as optional because only RPC Request messages may carry it.
     optional string token = 10;
 
     // A tracing identifier to use for correlating messages across the system.
     // Intended to be compatible with https://github.com/cloudevents/spec/blob/main/cloudevents/extensions/distributed-tracing.md
     optional string traceparent = 11;
 
-    // The format for the data stored in the UMessage.
-    UPayloadFormat payload_format = 12;
+    // The payload encoding, given as a 16-bit identifier. This field and the
+    // UMessage payload field are either both present or both absent. Identifier
+    // 0 means that an applicable binding, service, or schema contract defines
+    // the encoding. Values from 0x0001 to 0xDFFF are registry assignments,
+    // 0xE000 to 0xEFFF are reserved and invalid on the wire, and 0xF000 to
+    // 0xFFFF are private use. The uint32 type is used because protobuf has no
+    // uint16 type; values greater than 0xFFFF are invalid.
+    optional uint32 payload_encoding_id = 12;
 }
 
 
@@ -71,10 +80,8 @@ message UAttributes {
 // Using the message type, validation can be performed to ensure transport
 // validity of the data in the {@link UAttributes}.
 //
-// The "up-" prefix used in the uprotocol.ce_name options has been introduced
-// to allow distinguishing between existing CloudEvents being exchanged by
-// legacy systems using a predecessor of Eclipse uProtocol and CloudEvents
-// conforming to the mapping rules defined in the Eclipse uProtocol specification.
+// The "up-" prefix in each uprotocol.ce_name value identifies the event as an
+// Eclipse uProtocol CloudEvent.
 enum UMessageType {
     // Unspecified message type
     UMESSAGE_TYPE_UNSPECIFIED = 0;
@@ -124,34 +131,4 @@ enum UPriority {
 
     // Network control such as Safety Critical
     UPRIORITY_CS6 = 7 [(uprotocol.ce_name) = "CS6"];
-}
-
-// The format for the data stored in the UMessage.
-enum UPayloadFormat {
-    // Payload format is unknown.
-    UPAYLOAD_FORMAT_UNSPECIFIED = 0;
-
-    // Payload is an Any protobuf message that contains the packed payload
-    UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY = 1 [ (uprotocol.mime_type) = "application/x-protobuf" ];
-
-    // Protobuf serialization format
-    UPAYLOAD_FORMAT_PROTOBUF = 2 [ (uprotocol.mime_type) = "application/protobuf" ];
-
-    // JSON serialization format
-    UPAYLOAD_FORMAT_JSON = 3 [ (uprotocol.mime_type) = "application/json" ];
-
-    // Basic SOME/IP serialization format
-    UPAYLOAD_FORMAT_SOMEIP = 4 [ (uprotocol.mime_type) = "application/x-someip" ];
-
-    // SOME/IP TLV format
-    UPAYLOAD_FORMAT_SOMEIP_TLV = 5 [ (uprotocol.mime_type) = "application/x-someip_tlv" ];
-
-    // RAW (binary) format
-    UPAYLOAD_FORMAT_RAW = 6 [ (uprotocol.mime_type) = "application/octet-stream" ];
-
-    // Text format
-    UPAYLOAD_FORMAT_TEXT = 7 [ (uprotocol.mime_type) = "text/plain" ];
-
-    // Shared memory format
-    UPAYLOAD_FORMAT_SHM = 8 [ (uprotocol.mime_type) = "application/x-shm" ];
 }

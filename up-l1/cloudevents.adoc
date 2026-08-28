@@ -152,10 +152,20 @@ a|A code indicating an error that has occurred during the delivery of either an 
 |String
 |A tracing identifier to use for correlating messages across the system.
 
-|`payload_format`
+|`payload_encoding_id`
 |`pformat`
 |Integer
-|The value of the UPayloadFormat that is used to indicate the encoding of the payload (if any). The concrete mapping rules are defined in <<ce-formats>>.
+a|The identifier defined in the
+xref:../basics/uattributes.adoc#payload-encoding-registry[payload-encoding
+registry].
+
+* `pformat` *MUST* be present if and only if the CloudEvent payload data field
+  is present. A payload data field representing a zero-length byte sequence is
+  present.
+* When present, `pformat` *MUST* contain the payload-encoding identifier as an
+  integer, including `0` for an implicit encoding.
+* A receiver *MUST* reject a `pformat` value outside the valid identifier ranges
+  defined by the payload-encoding registry.
 
 |===
 
@@ -164,7 +174,11 @@ a|A code indicating an error that has occurred during the delivery of either an 
 
 The sections below define the mapping of uPayload to CloudEvent attributes.
 
-NOTE: The custom `pformat` property is used to indicate the payload type instead of the standard `datacontenttype` property defined by CloudEvents. Its value is set to the integer value assigned to the link:../up-core-api/uprotocol/uattributes.proto[UPayloadFormat]. This helps to reduce the size of the resulting data structure.
+The `pformat` property carries the numeric payload-encoding identifier.
+CloudEvents `datacontenttype` does not carry uProtocol payload-encoding
+identity. It *MAY* be set to the registered media type for a registry entry when
+that media type accurately describes the payload, but it *MUST NOT* replace
+`pformat`. Using the numeric identifier avoids requiring a media-type string.
 
 ==== Mapping to CloudEvent Protobuf Format
 
@@ -174,47 +188,57 @@ This mapping *MUST* be used by uProtocol Transport Libraries which use the Proto
 
 [%autowidth]
 |===
-|UPayloadFormat |CE `pformat` |CE `dataschema` |CE Property to map Payload Data to
+|Payload-encoding ID |CE `pformat` |CE `dataschema` |CE Property to map Payload Data to
 
-|`UPAYLOAD_FORMAT_UNSPECIFIED`
-|`-`
+|(absent)
+|(absent)
+|(absent)
+|No payload data property
+
+|`0` (implicit)
+|`0`
 |*MAY* be set to a URI-Reference identifying the schema that the data adheres to
 |`binary_data`
 
-|`UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY`
-|`0x01`
+|`1` (Protobuf in `Any`)
+|`1`
 |*MAY* be set to `type.googleapis.com/google.protobuf.Any`
 |`proto_data`
 
-|`UPAYLOAD_FORMAT_PROTOBUF`
-|`0x02`
+|`2` (Protobuf)
+|`2`
 |*SHOULD* be set to the protobuf's type URL
 |`proto_data`
 
-|`UPAYLOAD_FORMAT_JSON`
-|`0x03`
+|`3` (JSON)
+|`3`
 |*MAY* be set to a URI-Reference identifying the schema that the data adheres to
 |`text_data`
 
-|`UPAYLOAD_FORMAT_SOMEIP`
-|`0x04`
+|`4` (SOME/IP)
+|`4`
 |*MAY* be set to a URI-Reference identifying the schema that the data adheres to
 |`binary_data`
 
-|`UPAYLOAD_FORMAT_SOMEIP_TLV`
-|`0x05`
+|`5` (SOME/IP TLV)
+|`5`
 |*MAY* be set to a URI-Reference identifying the schema that the data adheres to
 |`binary_data`
 
-|`UPAYLOAD_FORMAT_RAW`
-|`0x06`
+|`6` (raw bytes)
+|`6`
 |*MAY* be set to a URI-Reference identifying the schema that the data adheres to
 |`binary_data`
 
-|`UPAYLOAD_FORMAT_TEXT`
-|`0x07`
+|`7` (UTF-8 text)
+|`7`
 |*MAY* be set to a URI-Reference identifying the schema that the data adheres to
 |`text_data`
+
+|Any other valid identifier
+|The payload-encoding identifier
+|*MAY* be set to a URI-Reference identifying the schema that the data adheres to
+|`binary_data`
 
 |===
 
@@ -226,47 +250,57 @@ This mapping *MUST* be used by uProtocol Transport Libraries which use the JSON 
 
 [%autowidth]
 |===
-|UPayloadFormat |CE `pformat` |CE `dataschema` |CE Property to map Payload to
+|Payload-encoding ID |CE `pformat` |CE `dataschema` |CE Property to map Payload to
 
-|`UPAYLOAD_FORMAT_UNSPECIFIED`
-|`-`
+|(absent)
+|(absent)
+|(absent)
+|No payload data property
+
+|`0` (implicit)
+|`0`
 |*MAY* be set to a URI-Reference identifying the schema that the data adheres to
 |`data_base64`
 
-|`UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY`
-|`0x01`
+|`1` (Protobuf in `Any`)
+|`1`
 |*MAY* be set to `type.googleapis.com/google.protobuf.Any`
 |`data_base64`
 
-|`UPAYLOAD_FORMAT_PROTOBUF`
-|`0x02`
+|`2` (Protobuf)
+|`2`
 |*SHOULD* be set to the protobuf's type URL
 |`data_base64`
 
-|`UPAYLOAD_FORMAT_JSON`
-|`0x03`
+|`3` (JSON)
+|`3`
 |*MAY* be set to a URI-Reference identifying the schema that the data adheres to
 |`data`
 
-|`UPAYLOAD_FORMAT_SOMEIP`
-|`0x04`
+|`4` (SOME/IP)
+|`4`
 |*MAY* be set to a URI-Reference identifying the schema that the data adheres to
 |`data_base64`
 
-|`UPAYLOAD_FORMAT_SOMEIP_TLV`
-|`0x05`
+|`5` (SOME/IP TLV)
+|`5`
 |*MAY* be set to a URI-Reference identifying the schema that the data adheres to
 |`data_base64`
 
-|`UPAYLOAD_FORMAT_RAW`
-|`0x06`
+|`6` (raw bytes)
+|`6`
 |*MAY* be set to a URI-Reference identifying the schema that the data adheres to
 |`data_base64`
 
-|`UPAYLOAD_FORMAT_TEXT`
-|`0x07`
+|`7` (UTF-8 text)
+|`7`
 |*MAY* be set to a URI-Reference identifying the schema that the data adheres to
 |`data`
+
+|Any other valid identifier
+|The payload-encoding identifier
+|*MAY* be set to a URI-Reference identifying the schema that the data adheres to
+|`data_base64`
 
 |===
 
