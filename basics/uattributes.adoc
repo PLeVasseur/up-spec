@@ -47,7 +47,7 @@ class UAttributes {
   requestId: UUID [0..1]
   token: String [0..1]
   traceparent: String [0..1]
-  payloadEncodingId: UInt32 [0..1]
+  payloadEncodingId: UInt16 [0..1]
 }
 
 class UMessageType {
@@ -173,26 +173,33 @@ The traceparent *MUST* either be empty or contain a value as defined by https://
 
 
 |`payloadEncodingId`
-|`UInt32`
+|`UInt16`
 |no
 |none
-a|The encoding of the message payload, represented by an entry identifier in the
-xref:#payload-encoding-registry[payload-encoding registry].
+a|The encoding of the message payload, represented by an identifier defined in
+the xref:#payload-encoding-registry[payload-encoding registry].
 
 [.specitem,oft-sid="dsn~up-attributes-payload-encoding-id~1",oft-needs="impl,utest",oft-tags="LanguageLibrary"]
 --
-The property
+The property and the UMessage's `payload` field *MUST* either both be present or
+both be absent. A present zero-length `payload` field is a present payload.
 
-* *MUST NOT* contain a value if the message has no payload;
-* *MUST NOT* contain the reserved identifier `0`; and
-* if the message has a payload, *MUST* contain the registry entry identifier of
-  the payload's encoding unless the applicable transport binding defines the
-  encoding out of band.
+If present, the property
 
-If a message has a payload and does not contain this property, the applicable
-transport binding *MUST* define the payload encoding. A receiver *MUST* reject a
-payload if its encoding cannot be determined or if the receiver does not
-recognize the declared identifier.
+* *MUST* contain a value in the range `0x0000` to `0xDFFF` or `0xF000` to
+  `0xFFFF`; and
+* *MUST NOT* contain a value greater than `0xFFFF` or in the reserved range
+  `0xE000` to `0xEFFF`.
+
+Identifier `0x0000` indicates that a binding, service, or schema contract
+defines the concrete payload encoding. A component that needs to interpret such
+a payload *MUST* have that contract and *MUST NOT* infer the encoding from the
+payload data.
+
+Structural validation *MUST NOT* reject an otherwise valid identifier in the
+registry-assignment or private-use range merely because the component does not
+recognize or support it. A component that needs to interpret a payload *MUST*
+reject the payload if its encoding cannot be determined or is not supported.
 --
 
 |===
@@ -464,34 +471,83 @@ a|The outcome of the RPC. `UCode.Ok` indicates successful invocation of the oper
 [#payload-encoding-registry]
 == Payload-Encoding Registry
 
-The payload-encoding registry assigns an unsigned 32-bit identifier to each
-payload encoding. A `payloadEncodingId` value is an entry identifier from this
-registry.
+The payload-encoding registry defines an unsigned 16-bit identifier space for
+payload encoding identity. The identifier space is partitioned as follows:
 
-[.specitem,oft-sid="dsn~payload-encoding-registry~1",oft-needs="impl,utest",oft-tags="LanguageLibrary"]
---
-* Identifier `0` is reserved and *MUST NOT* be used on the wire.
-* Identifiers `1`-`11` are assigned and *MUST NOT* be reassigned.
-* Identifiers `12` to `0x0FFF_FFFF` are available for registry assignments.
-* Identifiers `0x1000_0000` and above are private use: they are valid on the
-  wire, are never registered, and carry meaning only by deployment-level
-  agreement.
---
+* `0x0000` denotes an implicit encoding defined by an applicable binding,
+  service, or schema contract.
+* `0x0001` to `0xDFFF` are available for registry assignments.
+* `0xE000` to `0xEFFF` are reserved for future use and invalid on the wire.
+* `0xF000` to `0xFFFF` are private use. They are valid on the wire, are never
+  registered, and carry meaning only by deployment-level agreement.
+
+This is an independent uProtocol registry. Its identifiers do not reuse the
+numeric values of the IANA CoAP Content-Formats registry.
+
+A registry assignment is permanent and *MUST NOT* be reassigned. New
+assignments are made by changing the table below through the normal up-spec
+review process; changing the identifier-space partition is not required. Each
+assignment *MUST* provide a stable name, a precise description, a formal public
+specification, and a registered media type when one accurately identifies the
+encoding. Producers *MUST NOT* use an unassigned identifier.
+
+An identifier in the registry-assignment range remains structurally valid when
+a receiver's local copy of the registry does not contain it. This permits
+intermediaries and older implementations to preserve identifiers assigned by a
+newer specification without claiming support for decoding their payloads.
 
 .Payload-encoding registry
-[cols="1,3,3", options="header"]
+[cols="1,2,5,3,5", options="header"]
 |===
-|ID |Encoding |Media type
+|ID |Name |Description |Media type |Specification
 
-|1 |Protobuf, wrapped in `google.protobuf.Any` |`application/x-protobuf`
-|2 |Protobuf |`application/protobuf`
-|3 |JSON |`application/json`
-|4 |SOME/IP |`application/x-someip`
-|5 |SOME/IP TLV |`application/x-someip_tlv`
-|6 |Raw bytes |`application/octet-stream`
-|7 |UTF-8 text |`text/plain`
-|8 |Shared-memory reference |`application/x-shm`
-|9 |XCDR v2 (DDS serialization) |`application/vnd.uprotocol.xcdr-v2`
-|10 |Arrow IPC |`application/vnd.apache.arrow.stream`
-|11 |OMG IDL CDR |`application/vnd.uprotocol.omg-idl-cdr`
+|1
+|Protobuf Any
+|The Protobuf wire-format serialization of a `google.protobuf.Any`, including
+its type URL and serialized embedded message.
+|https://www.iana.org/assignments/media-types/application/protobuf[`application/protobuf`]
+|https://protobuf.dev/programming-guides/encoding/[Protobuf wire format] and
+https://protobuf.dev/reference/protobuf/google.protobuf/#any[`google.protobuf.Any`]
+
+|2
+|Protobuf
+|The Protobuf wire-format serialization of a message whose type is defined by
+the applicable service or schema contract.
+|https://www.iana.org/assignments/media-types/application/protobuf[`application/protobuf`]
+|https://protobuf.dev/programming-guides/encoding/[Protobuf wire format]
+
+|3
+|JSON
+|A JSON text encoded as UTF-8.
+|https://www.iana.org/assignments/media-types/application/json[`application/json`]
+|https://www.rfc-editor.org/rfc/rfc8259[RFC 8259]
+
+|4
+|SOME/IP
+|The SOME/IP serialization of parameters and data structures defined by the
+applicable service-interface contract.
+|None registered
+|https://some-ip.com/open-someip-specification/open_someip_specification_2025-12.pdf[Open SOME/IP Specification 2025-12, Section 5.4]
+
+|5
+|SOME/IP TLV
+|The SOME/IP serialization of parameters and data structures using the optional
+TLV encoding defined by the applicable service-interface contract.
+|None registered
+|https://www.autosar.org/fileadmin/standards/R25-11/FO/AUTOSAR_FO_PRS_SOMEIPProtocol.pdf[AUTOSAR SOME/IP Protocol Specification R25-11, Section 5.1.3.3]
+
+|6
+|Raw bytes
+|An arbitrary sequence of octets with semantics defined by the applicable
+service or schema contract.
+|https://www.iana.org/assignments/media-types/application/octet-stream[`application/octet-stream`]
+|https://www.rfc-editor.org/rfc/rfc2046#section-4.5.1[RFC 2046, Section 4.5.1]
+
+|7
+|UTF-8 text
+|A linear sequence of Unicode characters encoded as UTF-8, without content
+markup or format-specific interpretation.
+|https://www.iana.org/assignments/media-types/text/plain[`text/plain; charset=utf-8`]
+|https://www.rfc-editor.org/rfc/rfc3629[RFC 3629] and
+https://www.rfc-editor.org/rfc/rfc2046#section-4.1.3[RFC 2046, Section 4.1.3]
 |===

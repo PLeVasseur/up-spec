@@ -38,7 +38,10 @@ A uProtocol message consists of _UAttributes_ and optional payload. The followin
 
 [.specitem,oft-sid="dsn~up-transport-mqtt5-attributes-mapping~1",oft-covers="req~utransport-send-preserve-data~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-An MQTT 5 PUBLISH packet that is used to convey a uProtocol message *MUST* contain properties as defined in <<uAttributes Mapping to MQTT 5 PUBLISH Properties>> for those and only those of the UMessage's attributes which have a non-empty value.
+An MQTT 5 PUBLISH packet that is used to convey a uProtocol message *MUST*
+contain properties as defined in <<uAttributes Mapping to MQTT 5 PUBLISH Properties>>.
+Unless a mapping row defines presence explicitly, a property *MUST* be present
+if and only if the corresponding UMessage attribute has a non-empty value.
 --
 
 .uAttributes Mapping to MQTT 5 PUBLISH Properties
@@ -136,13 +139,22 @@ a| A tracing identifier to use for correlating messages across the system
 
 | _payload_encoding_id_
 | _Content Type_
-a| The xref:../basics/uattributes.adoc#payload-encoding-registry[payload-encoding
-registry] entry identifier
+a| The identifier defined in the
+xref:../basics/uattributes.adoc#payload-encoding-registry[payload-encoding
+registry]
 
-* If `_payload_encoding_id_` is present, _Content Type_ *MUST* be set to its
-  decimal string representation.
-* If `_payload_encoding_id_` is absent, _Content Type_ *MUST NOT* be set by this
-  mapping.
+* _Content Type_ *MUST* be present if and only if the PUBLISH packet represents
+  a present UMessage `payload` field. This includes a present zero-length
+  payload.
+* When present, _Content Type_ *MUST* be set to the identifier's decimal string
+  representation, including `0` for an implicit encoding.
+* When reconstructing a UMessage, the presence of _Content Type_ determines the
+  presence of its `payload` and `_payload_encoding_id_` fields. A receiver
+  *MUST* reject a _Content Type_ value that is not a decimal unsigned integer,
+  is greater than `65535`, or is in the reserved range `57344` to `61439`
+  (`0xE000` to `0xEFFF`).
+* If _Content Type_ is absent, the PUBLISH packet payload *MUST* be empty and
+  both UMessage fields *MUST* be absent.
 
 The numeric identifier minimizes the size of the PUBLISH packet.
 

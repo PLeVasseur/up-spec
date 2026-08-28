@@ -129,9 +129,17 @@ Check `ttl` xref:#note-ttl[NOTE] below.
 
 | payload_encoding_id | SOME/IP does not provide a field for the xref:../basics/uattributes.adoc#payload-encoding-registry[payload-encoding identifier].
 
-The SOME/IP service/interface contract *MUST* define the payload encoding. A
-UMessage transported over SOME/IP *MUST NOT* contain `payload_encoding_id`. The
-binding *MUST* validate the payload against the configured encoding.
+The SOME/IP service/interface contract *MUST* define the payload encoding and,
+when available, its corresponding uProtocol registry or private-use identifier.
+When mapping a payload-bearing UMessage to SOME/IP, the binding *MUST* verify
+that `payload_encoding_id` matches that contract.
+
+When reconstructing a payload-bearing UMessage from SOME/IP, the binding *MUST*
+set `payload_encoding_id` to the registered or private-use identifier defined by
+the contract. It *MUST* use `0` if the contract defines the concrete encoding
+without assigning it a registry or private-use identifier. The binding *MUST*
+reject the payload if its configured encoding cannot be established or does not
+match the message contract.
 |===
 
 
