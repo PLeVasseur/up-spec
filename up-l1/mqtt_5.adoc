@@ -94,9 +94,14 @@ link:../up-core-api/uprotocol/uattributes.proto[UPriority enum].
 | User Property [key: _6_] +
 _Message Expiry Interval_
 
-a| The amount of time after which this message must no be delivered/processed anymore
-    
-The _Message Expiry Interval_ property *MUST* be set to
+a| The amount of time after which this message must no longer be delivered/processed.
+
+If _ttl_ is `0`, the message has no expiration. The _Message Expiry Interval_
+and TTL User Property *MUST NOT* be set in this case. An omitted message expiry
+interval does not impose an MQTT expiration, whereas a zero interval is not
+an unlimited lifetime.
+
+If _ttl_ is greater than `0`, the _Message Expiry Interval_ property *MUST* be set to
 
 stem:[expiry := ceil(ttl/1000)].
 
@@ -140,21 +145,20 @@ a| A tracing identifier to use for correlating messages across the system
 | _payload_encoding_id_
 | _Content Type_
 a| The identifier defined in the
-xref:../basics/uattributes.adoc#payload-encoding-registry[payload-encoding
-registry]
+xref:../basics/payload_encoding_registry.adoc[payload-encoding registry]
 
-* _Content Type_ *MUST* be present if and only if the PUBLISH packet represents
-  a present UMessage `payload` field. This includes a present zero-length
-  payload.
-* When present, _Content Type_ *MUST* be set to the identifier's decimal string
-  representation, including `0` for an implicit encoding.
-* When reconstructing a UMessage, the presence of _Content Type_ determines the
-  presence of its `payload` and `_payload_encoding_id_` fields. A receiver
-  *MUST* reject a _Content Type_ value that is not a decimal unsigned integer,
-  is greater than `65535`, or is in the reserved range `57344` to `61439`
-  (`0xE000` to `0xEFFF`).
-* If _Content Type_ is absent, the PUBLISH packet payload *MUST* be empty and
-  both UMessage fields *MUST* be absent.
+* _Content Type_ *MUST* be present if and only if the UMessage `payload` field
+  is present, including a present zero-length payload.
+* When present, _Content Type_ *MUST* be the identifier's decimal string
+  representation.
+* When reconstructing a UMessage, a present _Content Type_ yields a present
+  `payload` (the PUBLISH packet payload, possibly zero-length) and a present
+  `_payload_encoding_id_`; an absent _Content Type_ yields both fields absent
+  and requires an empty PUBLISH packet payload.
+* A receiver *MUST* reject a _Content Type_ value that is not a decimal
+  unsigned integer or is greater than `65535`. All other validity and
+  interpretation rules are those of the `payloadEncodingId` attribute; this
+  binding does not add or restate them.
 
 The numeric identifier minimizes the size of the PUBLISH packet.
 
