@@ -26,6 +26,8 @@ identity. A UMessage carries the identity of its payload's encoding as the
 xref:uattributes.adoc[uProtocol Attributes (UAttributes)]. That attribute holds
 a 16-bit identifier; this registry defines what the identifiers mean, how the
 identifier space is partitioned, and how new identifiers are assigned.
+This document is authoritative for registry assignments; contract-defined and
+private-use meanings come from their applicable contracts.
 
 The registry answers one question: _how are these payload bytes encoded?_ It
 deliberately does not answer three neighbouring questions, which are governed
@@ -34,7 +36,7 @@ elsewhere:
 * whether a particular producer is permitted to put a given identifier on the
   wire (xref:#allocation[allocation and origination]);
 * whether a particular component supports decoding a given encoding
-  (xref:#acceptance[structural acceptance versus decoding support]); and
+  (xref:#acceptance[carrying a payload versus reading it]); and
 * which concrete message type, schema, or memory layout a payload conforms to
   (xref:#type-identity[encoding identity versus type identity]).
 
@@ -82,31 +84,27 @@ numeric values of the IANA CoAP Content-Formats registry, and identifiers
 enumeration that this registry replaces.
 
 [#acceptance]
-== Structural Acceptance versus Decoding Support
+== Carrying a Payload versus Reading It
 
-Every identifier in the range `0x0000` to `0xFFFF` is structurally valid. A
-component that validates a message *MUST NOT* reject it because the identifier
-is reserved, unassigned, private, or unrecognized. The static validity rules
-that a language library enforces are defined once, on the `payloadEncodingId`
-attribute in xref:uattributes.adoc[UAttributes]; this document does not restate
-them.
+A component that only carries, routes, stores, or forwards a message *MUST*
+preserve its identifier and payload bytes unchanged. It *MUST NOT* require a
+decoder or reject carriage because the identifier is reserved, unassigned,
+private, or unknown to it. Recognizing an identifier does not require reading
+the payload; learning an identifier's meaning later *MUST NOT* invalidate
+previously acceptable carriage. The message-validation rules are defined once,
+on `payloadEncodingId` in xref:uattributes.adoc[UAttributes].
 
-Structural acceptance is distinct from decoding support. A component that needs
-to interpret a payload *MUST* reject the payload if its encoding cannot be
-determined or is not supported by that component. A component that only
-carries, routes, stores, or forwards a message *MUST* preserve the identifier
-and the payload bytes unchanged and *MUST NOT* require the ability to decode
-the payload in order to carry it. Recognizing an identifier never obliges a
-carrying component to interpret the payload, and learning the meaning of a
-previously unrecognized identifier *MUST NOT* cause previously acceptable
-carriage to be rejected.
+A component that reads a payload must first determine its encoding. It *MUST*
+reject the payload if it cannot determine or does not support that encoding.
+This is a decoding decision, not a restriction on which valid identifiers a
+message can carry.
 
 [#allocation]
 == Allocation and Origination
 
-Allocation is a property of this registry, not of a message. The following
-rules govern who may originate which identifiers; they are obligations on
-producers and deployments, not validation rules for receivers.
+This section says who may put which identifiers on the wire. These are
+obligations on producers and deployments, not checks a receiver performs.
+A component that forwards a message it did not create is not its producer.
 
 * A producer *MUST NOT* originate an identifier in the registry-assignment
   range that this registry has not assigned.
@@ -123,7 +121,7 @@ Forwarding, relaying, storing, or re-encoding the envelope of an existing
 message is not origination: a component that carries a message it did not
 create does not originate its identifier and is not subject to the origination
 rules above, only to the preservation rules in
-xref:#acceptance[Structural Acceptance versus Decoding Support].
+xref:#acceptance[Carrying a Payload versus Reading It].
 
 A registry assignment is permanent and *MUST NOT* be reassigned or withdrawn.
 New assignments are made by changing the table in xref:#assignments[Registry
@@ -150,22 +148,15 @@ carries a payload because it recognizes the identifier's category.
 [#type-identity]
 == Encoding Identity versus Type Identity
 
-A payload-encoding identifier identifies an encoding, not a particular message
-type, schema, or memory layout within that encoding. Several encodings in this
-registry are defined relative to a contract: Protobuf (`2`) requires knowing
-the message type, SOME/IP (`4`, `5`) requires the service-interface
-definition, and contract-defined (`0`) delegates the encoding itself. The
-identifier therefore does not by itself establish application schema
-compatibility or, for encodings whose payload is the direct in-memory
-representation of a typed value, native ABI compatibility.
-
-A component that interprets a payload requires the applicable type, layout, or
-schema context in addition to the identifier. That context is established by
-the applicable service or schema contract, by a schema reference such as a
-CloudEvents `dataschema`, or by a separately defined mechanism of the relevant
-binding or profile. How any separate native type or layout identity is
-conveyed and preserved across a route is defined by that contract or profile;
-this registry does not introduce such a mechanism.
+The identifier says how a payload is encoded, not which type, schema, or memory
+layout it uses. Protobuf (`2`) still needs a message type, and SOME/IP (`4`, `5`)
+still needs a service-interface definition. Contract-defined (`0`) delegates the
+encoding itself to an applicable contract. A reader gets the required type,
+schema, or layout from that contract, a schema reference such as CloudEvents
+`dataschema`, or a binding/profile mechanism. The identifier alone establishes
+neither application-schema compatibility nor native ABI compatibility.
+This registry defines no mechanism for conveying a separate type or layout
+identity; the applicable contract or profile defines how to carry and preserve it.
 
 [#assignments]
 == Registry Assignments

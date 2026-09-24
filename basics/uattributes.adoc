@@ -182,20 +182,18 @@ xref:payload_encoding_registry.adoc[payload-encoding registry].
 
 [.specitem,oft-sid="dsn~up-attributes-payload-encoding-id~1",oft-needs="impl,utest",oft-tags="LanguageLibrary"]
 --
-The property and the UMessage's `payload` field *MUST* either both be present or
+*Presence:* This property and the UMessage's `payload` field *MUST* either both be present or
 both be absent. A present zero-length `payload` field is a present payload.
 
-If present, the property *MUST* contain a value in the range `0x0000` to
-`0xFFFF`. Every value in that range is structurally valid: a component *MUST
-NOT* reject a message because the value is reserved, unassigned, private, or
-not recognized by that component.
+*Range:* If present, the value *MUST* be between `0x0000` and `0xFFFF`.
+Message validation *MUST NOT* reject it because the identifier is reserved,
+unassigned, private, or unknown to the component.
 
-A component that needs to interpret the payload *MUST* reject it if the
-encoding cannot be determined or is not supported by that component. A value of
-`0x0000` indicates that an applicable binding, service, or schema contract
-defines the concrete encoding; a component that interprets such a payload
-*MUST* have that contract and *MUST NOT* infer the encoding from the payload
-data.
+*Interpretation:* A component that reads the payload *MUST* reject the payload
+if it cannot determine or does not support the encoding. The identifier `0x0000`
+means an applicable binding, service, or schema contract names the encoding.
+A component that reads such a payload *MUST* have that contract and *MUST NOT*
+guess the encoding from the payload bytes.
 --
 
 Which identifiers a producer may originate is an allocation policy of the

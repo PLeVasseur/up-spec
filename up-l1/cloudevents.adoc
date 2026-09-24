@@ -187,59 +187,62 @@ xref:#ce-projection-note[Application-Aware Projection].
 [#ce-opaque-carriage]
 ==== Opaque Carriage
 
-A CloudEvent carries a UMessage payload as the payload's original serialized
-octets, unchanged, together with the original payload-encoding identifier. The
-binding does not decode, transcode, re-wrap, or otherwise interpret the payload
-in order to carry it, and it does not need registry knowledge of the identifier
-to do so. This applies to every identifier, including identifiers the binding
-recognizes.
+A CloudEvent carries the original payload bytes and the original identifier in
+`pformat`. When sending an opaque payload, `datacontenttype` is
+`application/octet-stream`: it describes the carriage form, while `pformat`
+identifies the encoding. The carriage form does not change with the encoding.
+
+The following tables preserve payload presence, bytes, and identity without
+requiring the binding to read the payload.
 
 [.specitem,oft-sid="dsn~ce-payload-opaque-carriage~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-When mapping a UMessage to a CloudEvent:
+.UMessage to CloudEvent
+[cols="2,5", options="header"]
+|===
+|Condition |Required result
 
-* If the UMessage `payload` field is absent, the CloudEvent *MUST NOT* contain a
-  payload data property, *MUST NOT* contain `pformat`, and *MUST NOT* contain
-  payload-specific `datacontenttype` or `dataschema` values.
-* If the UMessage `payload` field is present, including a present zero-length
-  payload, the CloudEvent *MUST* contain the payload's octets unchanged in the
-  binary payload data property of the event format in use (`binary_data` in
-  the Protobuf Event Format, `data_base64` in the JSON Event Format), *MUST*
-  carry the identifier unchanged in `pformat`, and *MUST* set
-  `datacontenttype` to `application/octet-stream`.
-* `dataschema` *MAY* be set to a non-empty absolute URI identifying the schema
-  that the payload adheres to, as defined by the CloudEvents specification. It
-  *MUST NOT* be used to infer the payload encoding, and no schema lookup is
-  required to carry the payload.
-* The binding *MUST NOT* change `pformat`, relabel the payload under a
-  different identifier, wrap or unwrap Protobuf `Any` messages, convert
-  character encodings, or inspect the payload octets in order to select the
-  payload data property.
+|`payload` absent
+|The CloudEvent *MUST NOT* contain a payload data property, `pformat`, or
+payload-specific `datacontenttype` or `dataschema` values.
 
-When mapping a CloudEvent to a UMessage:
+|`payload` present, including zero bytes
+|The CloudEvent *MUST* carry those octets unchanged in `binary_data` (Protobuf
+Event Format) or `data_base64` (JSON Event Format), keep the identifier unchanged
+in `pformat`, and set `datacontenttype` to `application/octet-stream`.
+|===
 
-* If the CloudEvent contains no payload data property, the UMessage `payload`
-  and `payload_encoding_id` fields *MUST* both be absent.
-* If the CloudEvent contains a binary payload data property (`binary_data` or
-  `data_base64`), the UMessage `payload` *MUST* be exactly those octets and
-  `payload_encoding_id` *MUST* be the `pformat` value. This applies regardless
-  of whether `datacontenttype` is absent or carries a value other than
-  `application/octet-stream`; the octets and `pformat` are authoritative.
-* If the CloudEvent contains a typed payload data property, the binding *MUST*
-  apply xref:#ce-legacy-input[Legacy Typed Input].
-* `datacontenttype` *MUST NOT* be used to derive or override
-  `payload_encoding_id`, and recognizing the identifier *MUST NOT* cause the
-  binding to decode the payload.
+For a present payload, `dataschema` *MAY* name its schema with a non-empty
+absolute URI as defined by CloudEvents. It *MUST NOT* determine the encoding;
+carriage requires no schema lookup.
+
+The binding *MUST NOT* change `pformat`, relabel the payload, wrap or unwrap
+Protobuf `Any` messages, convert character encodings, or inspect the payload
+bytes to choose a data property.
+
+.CloudEvent to UMessage
+[cols="2,5", options="header"]
+|===
+|Condition |Required result
+
+|No payload data property
+|Both `payload` and `payload_encoding_id` *MUST* be absent.
+
+|Binary payload (`binary_data` or `data_base64`)
+|`payload` *MUST* contain exactly those octets and `payload_encoding_id` *MUST*
+equal `pformat`, even when `datacontenttype` is absent or is not
+`application/octet-stream`.
+
+|Typed payload data property
+|The binding *MUST* apply xref:#ce-legacy-input[Legacy Typed Input].
+|===
+
+`datacontenttype` *MUST NOT* determine or override `payload_encoding_id`.
+Recognizing the identifier *MUST NOT* cause the binding to decode the payload.
 --
 
-The `application/octet-stream` media type describes the carriage form, a
-sequence of serialized octets, while `pformat` retains the application-level
-encoding identity. A registry entry's own media type describes the application
-encoding, not the carriage form, and is not attached to opaque carriage:
-inspected CloudEvents SDK implementations select `Any` wrapping and text
-handling based on the media type, so attaching an application media type to
-opaque octets risks media-type-dependent transformations that the opaque
-mapping is defined to avoid.
+An encoding's registered media type describes its application representation;
+it is not the media type used to carry its opaque bytes in this mapping.
 
 This preservation guarantee applies to the defined UMessage data and attributes,
 not to every additional CloudEvents attribute. In particular, UMessage has no
@@ -250,12 +253,8 @@ must provide it; this mapping does not require network schema resolution.
 [#ce-legacy-input]
 ==== Legacy Typed Input
 
-Earlier revisions of this binding mapped some payload encodings to typed
-CloudEvents data properties. A receiver *MUST* continue to accept those forms
-so that events produced by earlier implementations remain readable. The
-accepted forms are exact and closed; the reconstruction rules below define
-which forms are accepted and what they yield. No other typed input is part of
-this binding.
+Earlier versions put some payloads in typed fields. Receivers *MUST* keep
+accepting the exact forms below; no other typed input is accepted by this mapping.
 
 Guarantees differ by form. Opaque carriage preserves the payload's octets
 exactly. The Protobuf Event Format legacy forms preserve octets exactly. The
@@ -269,28 +268,35 @@ UMessage, the binding *MUST* reconstruct the payload as follows, and *MUST*
 reject any other combination of `pformat`, event format, and typed payload
 data property:
 
-Protobuf Event Format:
+.Legacy Protobuf Event Format
+[cols="2,5", options="header"]
+|===
+|Form |What is preserved
 
-* `pformat` `1` or `2` with `proto_data`: the payload is the `value` octets of
-  the `proto_data` `Any` message, unchanged. The `type_url` of that `Any`
-  *MAY* be empty and *MUST NOT* be used to reconstruct or validate the
-  payload. For `pformat` `1` the `value` octets are themselves the serialized
-  `google.protobuf.Any` that is the payload; the binding *MUST NOT* serialize
-  the outer `proto_data` message.
-* `pformat` `3` or `7` with `text_data`: the payload is the UTF-8 encoding of
-  the `text_data` string.
+|`pformat` `1` or `2` with `proto_data`
+|The `value` octets of the `proto_data` `Any` message, unchanged. Its `type_url`
+*MAY* be empty and *MUST NOT* be used to reconstruct or validate the payload. For `pformat`
+`1`, those octets are already the serialized payload `google.protobuf.Any`;
+the binding *MUST NOT* serialize the outer `proto_data` message.
 
-JSON Event Format, `data` member present:
+|`pformat` `3` or `7` with `text_data`
+|The UTF-8 bytes of the `text_data` string.
+|===
 
-* `pformat` `3`, with `datacontenttype` absent or declaring JSON-formatted
-  content: the `data` member is a JSON value, as required by the JSON Event
-  Format, and the payload is the UTF-8 JSON serialization of that value. A
-  JSON string value therefore yields a quoted JSON string, `null` yields the
-  four octets `null` as a present payload, and the `data` member *MUST NOT* be
-  further parsed as a JSON document. The original byte spelling of the value
-  is not recoverable.
-* `pformat` `7`, with the `data` member a JSON string: the payload is the UTF-8
-  encoding of that string's characters.
+.Legacy JSON Event Format (`data` member present)
+[cols="2,5", options="header"]
+|===
+|Form |What is preserved
+
+|`pformat` `3`; `datacontenttype` absent or declaring JSON-formatted content
+|The JSON value, serialized as UTF-8 JSON. A string becomes a quoted JSON string;
+`null` becomes the four octets `null` as a present payload. The `data` member
+*MUST NOT* be further parsed as a JSON document. Its original byte spelling
+cannot be recovered.
+
+|`pformat` `7`; `data` is a JSON string
+|The UTF-8 bytes of the string's characters.
+|===
 --
 
 These rules cover the forms defined by earlier revisions of this binding and
