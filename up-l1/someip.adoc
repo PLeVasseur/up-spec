@@ -127,7 +127,7 @@ The following sections highlight the mapping of xref:../basics/uattributes.adoc[
 
 Check `ttl` xref:#note-ttl[NOTE] below.
 
-| payload_encoding_id | SOME/IP does not provide a field for the xref:../basics/uattributes.adoc#payload-encoding-registry[payload-encoding identifier].
+| payload_encoding_id | SOME/IP does not provide a field for the xref:../basics/payload_encoding_registry.adoc[payload-encoding identifier].
 
 The SOME/IP service/interface contract *MUST* define the payload encoding and,
 when available, its corresponding uProtocol registry or private-use identifier.
