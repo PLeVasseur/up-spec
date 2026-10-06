@@ -233,6 +233,9 @@ bytes to choose a data property.
 equal `pformat`, even when `datacontenttype` is absent or is not
 `application/octet-stream`.
 
+|Payload data property present and `pformat` absent
+|The binding *MUST* reject the event, regardless of the data property's type.
+
 |Typed payload data property
 |The binding *MUST* apply xref:#ce-legacy-input[Legacy Typed Input].
 |===
@@ -276,8 +279,8 @@ data property:
 |`pformat` `1` or `2` with `proto_data`
 |The `value` octets of the `proto_data` `Any` message, unchanged. Its `type_url`
 *MAY* be empty and *MUST NOT* be used to reconstruct or validate the payload. For `pformat`
-`1`, those octets are already the serialized payload `google.protobuf.Any`;
-the binding *MUST NOT* serialize the outer `proto_data` message.
+`1`, those octets are already the serialized payload `google.protobuf.Any`.
+The binding *MUST NOT* serialize the outer `proto_data` message.
 
 |`pformat` `3` or `7` with `text_data`
 |The UTF-8 bytes of the `text_data` string.
@@ -371,6 +374,13 @@ This mapping *MUST* be used by uProtocol Transport Libraries which use the JSON 
 The JSON Event Format carries every payload, including JSON and UTF-8 text
 payloads, as `data_base64`. This preserves the exact octets at the cost of
 Base64 expansion and readability.
+
+Consumers written against the previous mapping read JSON payloads from `data`
+as a JSON value. Under this mapping the same payload arrives as `data_base64`
+with `pformat` `3` and `datacontenttype` `application/octet-stream`; such consumers
+decode `data_base64` and parse the result, or apply the application-aware
+projection described in the NOTE above. The payload bytes are unchanged; only
+their carriage in the event changed.
 
 ==== Additional Recommendations
 

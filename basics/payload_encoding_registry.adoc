@@ -122,10 +122,10 @@ The number, sizes and ownership of these blocks are choices made by the parties
 to the agreement. They can allocate additional or differently sized blocks as
 their production formats require. Such private reservations are distinct from
 the registry's Reserved category and are not public registry assignments.
-This example adds no restriction on carriage. A library's built-in private value has meaning
-only through the applicable agreement; a deployment with a conflicting
-allocation can select its own codec identity and coordinate that meaning with
-its interpreting peers.
+This example adds no restriction on carriage. A library's built-in private value
+has meaning only through the applicable agreement. A deployment with a
+conflicting allocation can select its own codec identity and coordinate that
+meaning with its interpreting peers.
 
 If an encoding later receives a public registry assignment, implementations and
 deployments coordinate migration to the assigned identifier. An earlier private
@@ -170,6 +170,11 @@ A component that forwards a message it did not create is not its producer.
   party that will interpret the payload. A component that interprets such a
   payload *MUST* have that contract and *MUST NOT* infer the encoding from the
   payload data.
+
+A library *MAY* refuse to construct a message that would originate a reserved
+identifier. This is a producer-side convenience, not message validation: a
+received or forwarded message carrying a reserved identifier is still preserved
+unchanged.
 
 Forwarding, relaying, storing, or re-encoding the envelope of an existing
 message is not origination: a component that carries a message it did not
