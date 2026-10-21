@@ -45,6 +45,21 @@ understand, lets deployments extend the space privately, and lets decoders
 reject what they cannot process without making the protocol reject what it can
 carry.
 
+[#obligations]
+=== Requirement Ownership
+
+Obligations on applications and deployments are _assumptions of use_, identified
+by specification items with an `aou~` prefix and expressed with *SHALL* or
+*SHALL NOT*. Requirements on uProtocol components remain in their respective
+specifications, using *MUST* or *MUST NOT*. Registry-governance requirements apply
+to the maintainers of this registry.
+
+*MUST* and *SHALL* both retain their BCP14 meaning of an absolute requirement.
+The convention distinguishes the responsible party, not the obligation's strength.
+For example, application-level preservation is an assumption of use here, while
+the Transport Layer's xref:../up-l1/README.adoc#send[Send() contract]
+defines preservation requirements for transport implementations.
+
 [#partition]
 == Identifier Space
 
@@ -64,13 +79,14 @@ present; its meaning is delegated.
 |`0x0001` to `0xDFFF`
 |Registry assignments
 |Identifiers assigned by this registry. Unassigned identifiers in this range
-are structurally valid but *MUST NOT* be originated.
+are structurally valid; producer restrictions are defined in
+xref:#allocation[Allocation and Origination].
 
 |`0xE000` to `0xEFFF`
 |Reserved
 |Not available for assignment or private use. Reserved identifiers are
-structurally valid so that they can be preserved by intermediaries, but they
-*MUST NOT* be originated until this registry assigns them a meaning.
+structurally valid so that they can be preserved by intermediaries; producer
+restrictions are defined in xref:#allocation[Allocation and Origination].
 
 |`0xF000` to `0xFFFF`
 |Private use
@@ -87,7 +103,7 @@ enumeration that this registry replaces.
 
 Private use is a normative part of the identifier model. Identifiers in
 `0xF000` to `0xFFFF` are valid on the wire, are never assigned by this registry,
-and have meanings defined by deployment-level agreement. The requirements in
+and have meanings defined by deployment-level agreement. The assumptions of use in
 xref:#allocation[Allocation and Origination] and
 xref:#acceptance[Carrying a Payload versus Reading It] govern their origination,
 preservation and interpretation.
@@ -140,16 +156,25 @@ defined by the wire and native profile specification.
 [#acceptance]
 == Carrying a Payload versus Reading It
 
-A component that only carries, routes, stores, or forwards a message *MUST*
-preserve its identifier and payload bytes unchanged. It *MUST NOT* require a
+[.specitem,oft-sid="aou~payload-encoding-opaque-carriage~1",oft-title="Opaque payload carriage"]
+--
+A component that only carries, routes, stores, or forwards a message *SHALL*
+preserve its identifier and payload bytes unchanged. It *SHALL NOT* require a
 decoder or reject carriage because the identifier is reserved, unassigned,
 private, or unknown to it. Recognizing an identifier does not require reading
-the payload; learning an identifier's meaning later *MUST NOT* invalidate
-previously acceptable carriage. The message-validation rules are defined once,
+the payload; learning an identifier's meaning later *SHALL NOT* invalidate
+previously acceptable carriage.
+--
+
+The message-validation rules are defined once,
 on `payloadEncodingId` in xref:uattributes.adoc[UAttributes].
 
-A component that reads a payload must first determine its encoding. It *MUST*
+[.specitem,oft-sid="aou~payload-encoding-supported-decoding~1",oft-title="Supported payload decoding"]
+--
+A component that reads a payload *SHALL* first determine its encoding. It *SHALL*
 reject the payload if it cannot determine or does not support that encoding.
+--
+
 This is a decoding decision, not a restriction on which valid identifiers a
 message can carry.
 
@@ -160,16 +185,28 @@ This section says who may put which identifiers on the wire. These are
 obligations on producers and deployments, not checks a receiver performs.
 A component that forwards a message it did not create is not its producer.
 
-* A producer *MUST NOT* originate an identifier in the registry-assignment
+[.specitem,oft-sid="aou~payload-encoding-origination~1",oft-title="Payload identifier origination"]
+--
+* A producer *SHALL NOT* originate an identifier in the registry-assignment
   range that this registry has not assigned.
-* A producer *MUST NOT* originate an identifier in the reserved range.
-* A producer *MAY* originate a private-use identifier only under a deployment
-  agreement that defines its meaning for every party that will interpret it.
-* A producer *MAY* originate `0x0000` only where an applicable binding,
-  service contract, or schema contract defines the concrete encoding for every
-  party that will interpret the payload. A component that interprets such a
-  payload *MUST* have that contract and *MUST NOT* infer the encoding from the
-  payload data.
+* A producer *SHALL NOT* originate an identifier in the reserved range.
+--
+
+[.specitem,oft-sid="aou~payload-encoding-private-agreement~1",oft-title="Private payload encoding agreement"]
+--
+A producer *MAY* originate a private-use identifier. When doing so, it *SHALL*
+use a deployment agreement that defines its meaning for every party that will
+interpret it.
+--
+
+[.specitem,oft-sid="aou~payload-encoding-contract-defined~1",oft-title="Contract-defined payload encoding"]
+--
+A producer *MAY* originate `0x0000` only where an applicable binding,
+service contract, or schema contract defines the concrete encoding for every
+party that will interpret the payload. A component that interprets such a
+payload *SHALL* have that contract and *SHALL NOT* infer the encoding from the
+payload data.
+--
 
 A library *MAY* refuse to construct a message that would originate a reserved
 identifier. This is a producer-side convenience, not message validation: a
@@ -181,6 +218,8 @@ message is not origination: a component that carries a message it did not
 create does not originate its identifier and is not subject to the origination
 rules above, only to the preservation rules in
 xref:#acceptance[Carrying a Payload versus Reading It].
+
+=== Registry Governance
 
 A registry assignment is permanent and *MUST NOT* be reassigned or withdrawn.
 New assignments are made by changing the table in xref:#assignments[Registry
@@ -200,9 +239,14 @@ Each assignment *MUST* provide:
 
 The representation category and media type are semantic descriptions of the
 encoding. They support explicit, application-aware operations such as
-projecting a payload into another format's native data model. They are not
-carriage admission criteria, and a carrying component *MUST NOT* change how it
+projecting a payload into another format's native data model.
+
+[.specitem,oft-sid="aou~payload-encoding-category-independent-carriage~1",oft-title="Category-independent payload carriage"]
+--
+Representation category and media type are not carriage admission criteria.
+A carrying component *SHALL NOT* change how it
 carries a payload because it recognizes the identifier's category.
+--
 
 [#type-identity]
 == Encoding Identity versus Type Identity
