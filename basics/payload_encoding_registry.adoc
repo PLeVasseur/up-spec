@@ -88,11 +88,22 @@ xref:#allocation[Allocation and Origination].
 structurally valid so that they can be preserved by intermediaries; producer
 restrictions are defined in xref:#allocation[Allocation and Origination].
 
-|`0xF000` to `0xFFFF`
+|`0xF000` to `0xFFFE`
 |Private use
 |Never assigned by this registry. Valid on the wire and carry meaning only by
 deployment-level agreement.
+
+|`0xFFFF`
+|Reserved
+|Reserved for possible future matching on payload-encoding identity. Not
+available for assignment or private use. Structurally valid for preservation;
+producer restrictions are defined in xref:#allocation[Allocation and Origination].
 |===
+
+This revision defines no wildcard matching behavior. A carrying component
+preserves `0xFFFF` as an opaque reserved identifier, not a match-all value.
+Moving an existing private use of `0xFFFF` to another agreed identifier is a
+deployment-level migration, not a relabeling performed by intermediaries.
 
 This is an independent uProtocol registry. Its identifiers do not reuse the
 numeric values of the IANA CoAP Content-Formats registry, and identifiers
@@ -102,7 +113,7 @@ enumeration that this registry replaces.
 === Private-use Identifiers
 
 Private use is a normative part of the identifier model. Identifiers in
-`0xF000` to `0xFFFF` are valid on the wire, are never assigned by this registry,
+`0xF000` to `0xFFFE` are valid on the wire, are never assigned by this registry,
 and have meanings defined by deployment-level agreement. The assumptions of use in
 xref:#allocation[Allocation and Origination] and
 xref:#acceptance[Carrying a Payload versus Reading It] govern their origination,
@@ -130,7 +141,7 @@ following allocation:
 |`0xF800` to `0xFBFF`
 |Non-public formats managed by one organization or vendor.
 
-|`0xFC00` to `0xFFFF`
+|`0xFC00` to `0xFFFE`
 |Non-public formats managed by another organization or vendor.
 |===
 
@@ -189,7 +200,7 @@ A component that forwards a message it did not create is not its producer.
 --
 * A producer *SHALL NOT* originate an identifier in the registry-assignment
   range that this registry has not assigned.
-* A producer *SHALL NOT* originate an identifier in the reserved range.
+* A producer *SHALL NOT* originate any reserved identifier.
 --
 
 [.specitem,oft-sid="aou~payload-encoding-private-agreement~1",oft-title="Private payload encoding agreement"]
