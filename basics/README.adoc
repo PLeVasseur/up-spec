@@ -30,10 +30,3 @@ The following are the foundational requirements for uProtocol specifications:
 * *xref:payload_encoding_registry.adoc[Payload-Encoding Registry]*
 * *xref:umessage.adoc[uProtocol Message (UMessage)]*
 * *xref:permissions.adoc[Permissions]*
-
-The payload-encoding registry distinguishes component validation requirements
-from xref:payload_encoding_registry.adoc#obligations[application assumptions of use]
-for originating, carrying and interpreting payloads.
-Its xref:payload_encoding_registry.adoc#partition[identifier-space partition]
-also reserves a value for possible future payload-encoding matching; this
-reservation does not define wildcard matching behavior.

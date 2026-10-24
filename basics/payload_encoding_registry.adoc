@@ -160,9 +160,9 @@ value retains only its agreed private meaning; it does not automatically become
 an alias of the registered identifier. Proprietary encodings can continue using
 an agreed private allocation without seeking public registration.
 
-This partition applies to payload-encoding identifiers only. Identities of
-selected wires, payload families, and metadata layouts are separate namespaces
-defined by the wire and native profile specification.
+This partition applies to payload-encoding identifiers only. Selected-wire,
+payload-family, and metadata-layout identities are outside the scope of this
+registry.
 
 [#acceptance]
 == Carrying a Payload versus Reading It
