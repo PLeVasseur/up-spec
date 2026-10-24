@@ -174,15 +174,9 @@ xref:../basics/payload_encoding_registry.adoc[payload-encoding registry].
 [#ce-formats]
 === uPayload Mapping
 
-The sections below define the mapping of uPayload to CloudEvent attributes.
-The opaque-carriage mapping preserves a UMessage payload's serialized octets,
-encoding identifier, and presence without requiring the binding to interpret
-the payload. The xref:#ce-legacy-input[legacy typed-input rules] describe the
-limited reconstruction of older representations; JSON-value reconstruction
-preserves the value but cannot recover its original byte spelling.
-Application-aware operations that interpret a payload, such as projecting it
-into an event format's native data model, are outside this mapping; see
-xref:#ce-projection-note[Application-Aware Projection].
+This binding supports opaque carriage only. It preserves a UMessage payload's
+serialized octets, encoding identifier, and presence without requiring the
+binding to interpret the payload.
 
 [#ce-opaque-carriage]
 ==== Opaque Carriage
@@ -236,8 +230,9 @@ equal `pformat`, even when `datacontenttype` is absent or is not
 |Payload data property present and `pformat` absent
 |The binding *MUST* reject the event, regardless of the data property's type.
 
-|Typed payload data property
-|The binding *MUST* apply xref:#ce-legacy-input[Legacy Typed Input].
+|Typed payload (`text_data` or `proto_data` in the Protobuf Event Format,
+or `data` in the JSON Event Format)
+|The binding *MUST* reject the event, even if `pformat` names a recognized encoding.
 |===
 
 `datacontenttype` *MUST NOT* determine or override `payload_encoding_id`.
@@ -252,78 +247,6 @@ not to every additional CloudEvents attribute. In particular, UMessage has no
 general field for retaining an arbitrary `dataschema` URI. Where schema context
 is needed after conversion, the applicable service or representation contract
 must provide it; this mapping does not require network schema resolution.
-
-[#ce-legacy-input]
-==== Legacy Typed Input
-
-Earlier versions put some payloads in typed fields. Receivers *MUST* keep
-accepting the exact forms below; no other typed input is accepted by this mapping.
-
-Guarantees differ by form. Opaque carriage preserves the payload's octets
-exactly. The Protobuf Event Format legacy forms preserve octets exactly. The
-JSON Event Format legacy form for identifier `3` preserves the JSON value but
-cannot recover the original byte spelling of the JSON text.
-
-[.specitem,oft-sid="dsn~ce-payload-legacy-input~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
---
-When mapping a CloudEvent that contains a typed payload data property to a
-UMessage, the binding *MUST* reconstruct the payload as follows, and *MUST*
-reject any other combination of `pformat`, event format, and typed payload
-data property:
-
-.Legacy Protobuf Event Format
-[cols="2,5", options="header"]
-|===
-|Form |What is preserved
-
-|`pformat` `1` or `2` with `proto_data`
-|The `value` octets of the `proto_data` `Any` message, unchanged. Its `type_url`
-*MAY* be empty and *MUST NOT* be used to reconstruct or validate the payload. For `pformat`
-`1`, those octets are already the serialized payload `google.protobuf.Any`.
-The binding *MUST NOT* serialize the outer `proto_data` message.
-
-|`pformat` `3` or `7` with `text_data`
-|The UTF-8 bytes of the `text_data` string.
-|===
-
-.Legacy JSON Event Format (`data` member present)
-[cols="2,5", options="header"]
-|===
-|Form |What is preserved
-
-|`pformat` `3`; `datacontenttype` absent or declaring JSON-formatted content
-|The JSON value, serialized as UTF-8 JSON. A string becomes a quoted JSON string;
-`null` becomes the four octets `null` as a present payload. The `data` member
-*MUST NOT* be further parsed as a JSON document. Its original byte spelling
-cannot be recovered.
-
-|`pformat` `7`; `data` is a JSON string
-|The UTF-8 bytes of the string's characters.
-|===
---
-
-These rules cover the forms defined by earlier revisions of this binding and
-the historical uProtocol Rust profile, whose Protobuf Event Format writer stores
-the payload octets in `proto_data.value` with an empty `type_url` for both
-identifiers `1` and `2`. An implementation that used a different convention,
-such as placing the payload `Any` directly in `proto_data` or placing a
-serialized JSON document inside a JSON string, is not covered by these rules.
-Such a convention requires its own evidenced compatibility contract and an
-explicit selection mechanism; the binding *MUST NOT* infer which convention
-applies by inspecting payload bytes.
-
-[#ce-projection-note]
-==== Application-Aware Projection
-
-NOTE: A component that owns a payload's contract may choose to represent that
-payload in an event format's native data model, for example as a JSON value or
-as a typed `proto_data` message, for consumers outside uProtocol. Such a
-projection interprets the payload and is an application-level operation
-performed at an endpoint, not part of this binding's carriage mapping. It is
-never selected by recognizing an identifier, it does not change how the binding
-carries the message, and this specification does not define its selection,
-its output, or any receiver support for it. Deployments that need readable
-JSON event data would do so through such an operation.
 
 ==== Mapping to CloudEvent Protobuf Format
 
@@ -374,13 +297,6 @@ This mapping *MUST* be used by uProtocol Transport Libraries which use the JSON 
 The JSON Event Format carries every payload, including JSON and UTF-8 text
 payloads, as `data_base64`. This preserves the exact octets at the cost of
 Base64 expansion and readability.
-
-Consumers written against the previous mapping read JSON payloads from `data`
-as a JSON value. Under this mapping the same payload arrives as `data_base64`
-with `pformat` `3` and `datacontenttype` `application/octet-stream`; such consumers
-decode `data_base64` and parse the result, or apply the application-aware
-projection described in the NOTE above. The payload bytes are unchanged; only
-their carriage in the event changed.
 
 ==== Additional Recommendations
 
