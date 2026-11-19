@@ -263,9 +263,8 @@ ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 A way back would reopen setup, which runtime code never reaches (<<req-ssr-mode-no-setup-at-runtime,Setup is impossible in runtime mode>>).
 Every guarantee that rests on setup being over would then need a run-time check.
 
-Comparable systems make the change of phase one-way too:
+A comparable system makes the change of phase one-way too:
 
-* the first call to AUTOSAR's `+StartOS+` does not return (https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_OS.pdf[AUTOSAR CP SWS OS]);
 * an RTIC application's `+idle+` task, which runs after `+init+`, never returns (https://rtic.rs/2/book/en/by-example/app_idle.html[the RTIC book]).
 
 So a transport that started cannot be taken back out of runtime mode, and a refusal means the process exits and is restarted.

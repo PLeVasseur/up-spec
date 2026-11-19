@@ -320,7 +320,7 @@ applicable service-interface contract.
 TLV encoding defined by the applicable service-interface contract.
 |Binary
 |None registered
-|https://www.autosar.org/fileadmin/standards/R25-11/FO/AUTOSAR_FO_PRS_SOMEIPProtocol.pdf[AUTOSAR SOME/IP Protocol Specification R25-11, Section 5.1.3.3]
+|
 
 |6
 |Raw bytes

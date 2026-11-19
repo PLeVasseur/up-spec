@@ -23,7 +23,7 @@ A system that needs end-to-end protection supplies and justifies its own, as tha
 *Design notes.*
 
 * The restart design is the full version, with both sender kinds.
-* An RPC route's responses are protected as AUTOSAR's E2E client-server profiles protect theirs: the server answers with the request's own counter, the client accepts only an exact match, and the message type, the result and the caller's identity are all protected (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>).
+* An RPC route's responses are protected: the server answers with the request's own counter, the client accepts only an exact match, and the message type, the result and the caller's identity are all protected (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>).
 * A request the wire refuses is answered, final or advisory, except a corrupt one (<<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>), and a sliding window judges each reference's counters (<<req-ssr-e2e-replay-window,A sliding window judges a reference's counters>>).
 * Setup makes no deadline check for this wire.
 Declaring a deadline on a route that selects it is the integrator's duty (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
@@ -78,7 +78,7 @@ Wrapping preserves the inner wire as a separate choice, and the wrapper can clai
 The E2E wire's headers *MUST* have two fixed formats, each with a 64-bit CRC, documented with the crate:
 
 * a 32-byte data header for topics;
-* a 48-byte method header for RPC routes, which adds a Source ID, a message type, a result and a status, as AUTOSAR's method profiles carry them.
+* a 48-byte method header for RPC routes, which adds a Source ID, a message type, a result and a status.
 
 The record covers:
 
