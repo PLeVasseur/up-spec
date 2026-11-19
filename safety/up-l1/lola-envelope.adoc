@@ -109,7 +109,7 @@ Verification:: test, fault-injection
 * *fault-injection*: truncated samples, and samples with each field of the header set to its largest value, sent on a route by a faulty peer: each refused and counted, with no panic.
 
 *Rationale.*
-A peer writes the whole sample, header included (xref:../README.adoc#faulty-peer[the faulty-peer model]), so every field is input that has to be checked before it is trusted as a bound.
+A peer writes the whole sample, header included (xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]), so every field is input that has to be checked before it is trusted as a bound.
 
 [[req-ssr-binding-lola-envelope-presence]]
 == On LoLa, an absent payload and a present empty payload stay apart

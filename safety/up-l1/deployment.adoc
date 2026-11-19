@@ -19,7 +19,7 @@ Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assu
 == Which part each clause concerns
 
 Each assumption below is one item, and its duty concerns this layer.
-The clauses in this table name a rule or a definition that another part states.
+The clauses in this table name a rule that another part states.
 Each stays in its item because it qualifies that item's own duty, and the item governs.
 The table classifies and links, and adds no duty.
 
@@ -27,10 +27,10 @@ The table classifies and links, and adds no duty.
 |===
 | Assumption and clause | Part it concerns | Who acts | Where that part states it
 
-| <<aou-seooc-peer-access,Only authorized processes reach the transport, and peers are faulty, never malicious>>, "The fault model" | Shared: the faulty-peer model, a normative definition | The integrator keeps access to the deployed processes, and treats deliberate exploitation as security | xref:../README.adoc#faulty-peer[The faulty-peer model]
-| <<aou-seooc-peer-access,Only authorized processes reach the transport, and peers are faulty, never malicious>>, "Two-way shared state", the refusal, by name | This layer: the element's integrity rules, and the element's initialization errors | The element refuses, and names the refusal, as both requirements are allocated | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] in xref:integrity.adoc[integrity levels] for the refusal; xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure] in xref:../seooc-up-rust/runtime-modes.adoc[runtime modes] for naming its cause, the route where there is one, and the setter to change
-| <<aou-seooc-peer-access,Only authorized processes reach the transport, and peers are faulty, never malicious>>, "Message IDs" | uP-L2: message identity | The integrator and the application | xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique] in xref:../up-l2/interaction.adoc[interaction]
-| <<aou-seooc-peer-access,Only authorized processes reach the transport, and peers are faulty, never malicious>>, "Strict mode" | The element: strict mode | The element reports, where strict mode is used | xref:../seooc-up-rust/build.adoc#req-ssr-strict-report[Strict mode reports on every run] in xref:../seooc-up-rust/build.adoc[build and shipped content]
+| <<aou-seooc-peer-access,Only authorized processes reach the transport>>, "The fault model" | Shared: the faulty-peer model | Each part, as the requirement is allocated; the integrator keeps access to the deployed processes, and treats deliberate exploitation as security | xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]
+| <<aou-seooc-peer-access,Only authorized processes reach the transport>>, "Two-way shared state", the refusal, by name | This layer: the element's integrity rules, and the element's initialization errors | The element refuses, and names the refusal, as both requirements are allocated | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] in xref:integrity.adoc[integrity levels] for the refusal; xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure] in xref:../seooc-up-rust/runtime-modes.adoc[runtime modes] for naming its cause, the route where there is one, and the setter to change
+| <<aou-seooc-peer-access,Only authorized processes reach the transport>>, "Message IDs" | uP-L2: message identity | The integrator and the application | xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique] in xref:../up-l2/interaction.adoc[interaction]
+| <<aou-seooc-peer-access,Only authorized processes reach the transport>>, "Strict mode" | The element: strict mode | The element reports, where strict mode is used | xref:../seooc-up-rust/build.adoc#req-ssr-strict-report[Strict mode reports on every run] in xref:../seooc-up-rust/build.adoc[build and shipped content]
 | <<aou-seooc-integrity-levels,Each transport's integrity level is assigned correctly>>, opening paragraph, second sentence | This layer: one integrity level per transport | The integrator assigns the level; the element keeps it on every route | xref:integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level] in xref:integrity.adoc[integrity levels]
 | <<aou-seooc-integrity-levels,Each transport's integrity level is assigned correctly>>, "Above ASIL B" | The element: its capability ceiling | The integrator | xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element] in xref:../seooc-up-rust/assumptions-of-use.adoc[the element's assumptions of use]
 | <<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>, "Pull bindings and deadlines" | The element: the deadline of a route | The integrator uses only a binding that reports arrivals so; the element monitors the deadline | xref:../seooc-up-rust/qos.adoc#req-ssr-qos-deadline[Deadlines are monitored] in xref:../seooc-up-rust/qos.adoc[QoS, TTL and deadlines]
@@ -49,28 +49,30 @@ The software's side of the clauses that concern this layer:
 * the contracts a binding and a wire pass: xref:bindings.adoc[allocated to each binding] and xref:wires.adoc[allocated to each wire].
 
 [[aou-seooc-peer-access]]
-== Only authorized processes reach the transport, and peers are faulty, never malicious
+== Only authorized processes reach the transport
 
-[.specitem,oft-sid="aou~seooc-peer-access~5",oft-title="Only authorized processes reach the transport, and peers are faulty, never malicious",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-peer-access~6",oft-title="Only authorized processes reach the transport",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
 The integrator *SHALL* restrict access to every transport's resources (shared-memory segments, sockets, service names) to the processes deployed to use them, with OS permissions or equivalent.
 
-* *The fault model.* Within that, this SEooC treats every peer as faulty, never malicious. What a faulty peer may do is defined once, for every part, as the faulty-peer model of the safety area's shared concepts. Only deliberate exploitation, such as engineering a peer-ID hash collision, is out of scope, as security.
-* *Two-way shared state.* On a binding whose ports write shared state both ways, every process on one service runs at one integrity level; a lower-integrity consumer takes a copy route, and any other is refused at setup, by name (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]). What one such binding adds is stated with that binding.
+* *The fault model.* What a faulty peer within that restriction may do, and the boundary between safety and security, are stated once, for every part, in xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer].
+* *Two-way shared state.* On a binding whose ports write shared state both ways, every process on one service runs at one integrity level, and a lower-integrity consumer takes a copy route.
+The refusal of any other at setup, by name, is stated in xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] and xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure].
+What one such binding adds is stated with that binding.
 * *Zero-copy routes.* On a zero-copy route, the element relies on the writer, developed to at least the reader's level, never writing a sample it has sent.
 * *Message IDs.* Message IDs are unique only to a stated residual (xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]), and they are not secret, so nothing may rely on them for authentication.
-* *Strict mode.* In strict mode, the report lists each route's declared peers and the shared-memory permissions its binding requests, and warns of an ASIL receive route that admits undeclared peers.
+* *Strict mode.* What strict mode's report lists of each route's declared peers and of the shared-memory permissions that its binding requests, and its warning of an ASIL receive route that admits undeclared peers, are stated in xref:../seooc-up-rust/build.adoc#req-ssr-strict-report[Strict mode reports on every run].
 --
 
 *Violation:*
 
-* Malformed or undeclared frames are refused and *counted* (xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones]).
+* A malformed frame is refused, and its refusal returned or *counted*; on a route that declares its peers, a frame from an undeclared peer is refused and *counted* (xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones]).
 * A racing write on a zero-copy route is undefined behaviour and *undetectable*.
 * A peer at another level that the deployment lets onto a two-way service can crash or corrupt its peers' memory: *undetectable* by the element.
 * A well-formed frame from a process that should have had no access, and a deliberate exploit, are *undetectable*.
 
 [horizontal]
-ID:: `+aou~seooc-peer-access~5+`
+ID:: `+aou~seooc-peer-access~6+`
 ASIL:: B
 ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 
@@ -82,10 +84,10 @@ A shared reference cannot remain valid against an uncontrolled concurrent writer
 _What this assumption leaves to other items._
 It states the integrator's duties and no one else's.
 
-* What a faulty peer may do is defined once, as xref:../README.adoc#faulty-peer[the faulty-peer model], because requirements of several parts rest on it.
+* What a faulty peer may do is stated once, for every part, because requirements of several parts rest on it.
 * A restriction that only one binding has is stated with that binding.
-* The refusal of a port at another level than its service is the element's, and its requirement says so (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
-It is a refusal by name because every refusal at setup names its cause, the route where there is one, and the setter to change (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure]).
+* The refusal of a port at another level than its service, and what strict mode reports, are acts of the element, so the element's requirements state them.
+The refusal is by name because every refusal at setup names its cause, the route where there is one, and the setter to change.
 
 [[aou-seooc-integrity-levels]]
 == Each transport's integrity level is assigned correctly

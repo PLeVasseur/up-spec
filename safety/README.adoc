@@ -70,44 +70,10 @@ Several parts of this area rely on the concepts below.
 Each entry says what the concept is, where it applies, and which items state it.
 
 [[shared-definitions]]
-=== Summaries and normative definitions
+=== Summaries
 
 Most entries are summaries.
 A summary names the items that state its concept and adds no duty: the items govern.
-
-An entry that says it is a normative definition is different.
-
-* It defines words that items of several parts use, and it is the one place that states the definition.
-* It is outside an item block, so it has no ID, revision or coverage of its own.
-It obliges no one by itself: each item that relies on it carries its own obligation.
-
-*What relies on a definition.*
-An item relies on a normative definition in any of these ways, and it need not name the definition to do so:
-
-* its statement uses the defined words;
-* its page states its items under the definition;
-* its rule, or the argument for its rule, depends on what the definition says.
-The argument includes the item's rationale, its verification entry and its "Violation" text.
-
-*The index of dependents.*
-A normative definition lists the items known to rely on it.
-
-* The list is an index, which helps a reader find them.
-* It is not asserted to be complete.
-An item that relies on the definition does so whether or not the list names it.
-
-*A change to a definition's meaning.*
-Such a change alters the contract, although no ID shows it.
-It is made only together with a review of its effect on every item that relies on the definition, listed or not.
-
-* The review covers each such item's statement, and the rationale, verification entry, "Violation" text and safety-manual entry that go with it.
-* An item whose meaning changes gets a raised revision, as any change of meaning does.
-* An item whose meaning stays the same keeps its revision, and any text beside it that the change makes wrong is corrected.
-* The change brings the index up to date.
-
-Rewording a definition without changing its meaning raises no revision.
-
-At this revision <<faulty-peer>> is the one normative definition here.
 
 === Software obligations and deployment duties
 
@@ -173,56 +139,97 @@ xref:up-l1/integrity.adoc#req-ssr-integrity-declared[Each transport declares one
 [[faulty-peer]]
 === The faulty-peer model
 
-This entry is a normative definition (<<shared-definitions>>).
-Requirements and assumptions of several parts rely on it, so it is stated here once.
+Requirements and assumptions of several parts rely on this model, and one item states it: <<req-ssr-peer-fault-model,The requirements hold against a faulty peer>>.
 
-*Definition.*
-Every peer is treated as faulty, never malicious.
-
-* A peer may send any content, at any time and in any volume, and may choose any source URI, and the requirements hold against all of it.
-* A faulty peer includes one that writes values its own middleware never writes, into shared memory it can write.
-* A peer below a reader's level may write its own shared memory at any moment: the reader then takes the copy route (xref:up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]), and the requirements hold.
-
-*Scope and limits.*
-
-* *Scope.*
-The peers of the up-rust SEooC, on every transport.
-The model applies within the access restriction that the integrator provides: only the processes deployed to use a transport's resources reach them.
-* *What it excludes.*
-Only deliberate exploitation, such as engineering a peer-ID hash collision, is out of scope, as security.
-* *What it does not relax.*
-The model bounds the safety argument and nothing else.
-It lifts no security requirement of the protocol: a transport still provides the means against address spoofing and unauthorized access that xref:../up-l1/README.adoc[uP-L1] requires.
-It also does not make a lower-assurance process harmless because it runs apart: the rules for lending and copying cover what such a process can write into shared memory.
-
-*Items that rely on it.*
-The requirements hold against everything the model allows.
-So an item relies on the model wherever its rule, or the argument for its rule, is stated against what a peer may send, write or do.
-
-The list below is the index of its known dependents (<<shared-definitions>>).
-It is not asserted to be complete, and a change to the model is reviewed against every item that relies on it, listed or not.
+The list below indexes items known to rely on it.
+It is navigation and adds no duty, and it is not asserted to be complete.
 
 * *The integrator's side.*
-** xref:up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious], for the access restriction and for treating deliberate exploitation as security.
-** xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated], for a process that shares memory through a binding.
-** xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-peer-rates[Peer rates on shared routes are the integrator's], for what one faulty peer can do to a route that several peers share.
-** xref:up-l1/iceoryx2.adoc#aou-seooc-iceoryx2-level-separation[On iceoryx2, each integrity level has its own processes, domain and OS user] and xref:up-l1/iceoryx2.adoc#aou-seooc-iceoryx2-limits[A deployment on iceoryx2 accepts that binding's limits, and no known failure as one], for a deployment on iceoryx2.
+** xref:up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport].
+** xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated].
+** xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-peer-rates[Peer rates on shared routes are the integrator's].
+** xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports].
+** xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection].
+** xref:up-l1/iceoryx2.adoc#aou-seooc-iceoryx2-level-separation[On iceoryx2, each integrity level has its own processes, domain and OS user] and xref:up-l1/iceoryx2.adoc#aou-seooc-iceoryx2-limits[A deployment on iceoryx2 accepts that binding's limits, and no known failure as one].
 * *The element, for the peers of a transport.*
-The four items of xref:up-l1/peers.adoc[peers of a transport], which that page states against a faulty peer: xref:up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]; xref:up-l1/peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:up-l1/peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected] and xref:up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones].
+The four items of xref:up-l1/peers.adoc[peers of a transport]: xref:up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]; xref:up-l1/peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:up-l1/peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected] and xref:up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones].
 * *The element, for memory safety and shared memory.*
-** xref:seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour], whose rationale applies its promise to safe callers under this model: a peer that writes values its own middleware never writes must not let a safe call reach undefined behaviour.
-** xref:up-l1/integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]; xref:up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]; xref:up-l1/integrity.adoc#req-ssr-integrity-any-bits[In-place types accept every bit pattern]; xref:up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission] and xref:up-l1/integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused], for lending and copying between levels.
+** xref:seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour].
+** xref:up-l1/integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]; xref:up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]; xref:up-l1/integrity.adoc#req-ssr-integrity-any-bits[In-place types accept every bit pattern]; xref:up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission] and xref:up-l1/integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused].
+** xref:up-l1/native-wire.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout] and xref:up-l1/native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout, apart from the encoding identifier].
+* *The element, for bounded work.*
+xref:seooc-up-rust/bounded-work.adoc#req-ssr-bound-work[Work per call is bounded by setup data].
 * *The element, for refusal.*
 xref:seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths].
 * *A binding.*
-** xref:up-l1/bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input].
-** xref:up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-panic-paths[iceoryx2's allowed panic paths are named, bounded and disclosed], whose allowed paths no peer input, sequence, death or restart may reach, and through it the named instance that xref:up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] allows on a frame's drop.
-** xref:up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-static-segments[On iceoryx2, every publisher has a static data segment], a setup check under the first of these rules.
-** xref:up-l1/bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it], for what the record discloses about shared memory.
+** xref:up-l1/bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input] and xref:up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
+** xref:up-l1/bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits].
+** xref:up-l1/bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held] and xref:up-l1/bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state].
+** xref:up-l1/bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it].
+** xref:up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-panic-paths[iceoryx2's allowed panic paths are named, bounded and disclosed] and xref:up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-static-segments[On iceoryx2, every publisher has a static data segment].
+** xref:up-l1/lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path].
+** xref:up-l1/lola-envelope.adoc#req-ssr-binding-lola-envelope-checks[On LoLa, a sample that is not a well-formed envelope is refused before any of it is used]; xref:up-l1/lola-envelope.adoc#req-ssr-binding-lola-envelope-routing-hint[On LoLa, the routing hint is untrusted, and the metadata decides] and xref:up-l1/lola-envelope.adoc#req-ssr-binding-lola-envelope-metadata[On LoLa, the metadata is the selected wire's, and is checked before delivery].
 * *A wire.*
 xref:up-l1/wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic].
 * *The Streamer.*
-xref:up-l2/streamer.adoc#req-ssr-config-exact-addresses[ASIL Streamer routes name exact source addresses], whose filter a faulty process can pass, and xref:up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route].
+xref:up-l2/streamer.adoc#req-ssr-config-exact-addresses[ASIL Streamer routes name exact source addresses] and xref:up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route].
+
+[[req-ssr-peer-fault-model]]
+=== The requirements hold against a faulty peer
+
+[.specitem,oft-sid="req~ssr-peer-fault-model~1",oft-title="The requirements hold against a faulty peer",oft-needs="impl,utest,uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
+--
+*The faulty-peer model.*
+Every peer is treated as faulty, never malicious.
+
+* A peer may send any content, at any time and in any volume, and may choose any source URI.
+* A faulty peer includes one that writes values its own middleware never writes, into shared memory it can write.
+* A peer below a reader's level may write its own shared memory at any moment, and the requirements hold against that: the route that its reader then takes is stated in xref:up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader].
+
+*The requirements hold against all of it.*
+Every requirement of this area holds against everything that the model allows.
+Each part *MUST* meet, against all of it, each requirement of this area that binds it: the element, each platform backend, each binding, each wire, the Streamer, and any other part that such a requirement names.
+
+*The model's scope.*
+The peers of the up-rust SEooC, on every transport.
+The model applies within the access restriction that the integrator provides: only the processes deployed to use a transport's resources reach them (xref:up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]).
+
+*The boundary between safety and security.*
+Only deliberate exploitation, such as engineering a peer-ID hash collision, is out of scope, as security.
+That exclusion is the model's boundary between safety and security: it does not say that a peer that exploits deliberately is harmless, or that the requirements hold against it.
+
+*What the model does not relax.*
+The model bounds the safety argument and nothing else.
+It lifts no security requirement of the protocol: a transport still provides the means against address spoofing and unauthorized access that xref:../up-l1/README.adoc[uP-L1] requires.
+It also does not make a lower-assurance process harmless because it runs apart: the rules for lending and copying cover what such a process can write into shared memory.
+The sentence on the protocol's security requirements and the sentence on a lower-assurance process say what the model leaves as it is, and give no part a duty of their own.
+--
+
+[horizontal]
+ID:: `+req~ssr-peer-fault-model~1+`
+ASIL:: B
+Allocated to:: the element; each platform backend; each binding; each wire; the Streamer; any other part that a requirement of this area names
+Verification:: fault-injection, review
+* *fault-injection*
+** Malformed and truncated frames, and frames with any bytes in their header, their envelope and their payload.
+** Arbitrary byte strings, decoded by each wire.
+** A flood on every receive kind, and one peer that fills a route's depth, its slots or its peer table.
+** Frames at any time, frames that carry an earlier incarnation of their peer included.
+** Frames from undeclared sources, and from any source URI.
+** A peer process that writes values its own middleware never writes, into shared memory that it can write.
+** A peer process below the reader's level that writes its shared memory while it is read.
+* *review*
+** For each part, that the verification of each requirement that binds it covers the faults of this item that bear on that requirement.
+** That the safety manual of each repository that covers this item states the model, its scope and the boundary between safety and security.
+ISO 26262:: 6-Annex D.2.2, 6-Annex D.2.3, 6-Annex D.2.4 (part-clause numbers only)
+
+*Rationale.*
+Peers run in other processes, often over middleware this project does not control.
+A requirement that held only for well-formed input would leave a process open to every peer that fails.
+
+The element, the bindings, the wires and the Streamer handle the same frames and the same shared memory, so a fault that one of them does not withstand reaches the others.
+
+Deliberate exploitation is a matter of security, and the safety argument does not answer it.
 
 [[process-failure]]
 === Process failure and restart
@@ -241,7 +248,7 @@ xref:seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-shutdown[No shutdown in ru
 === Memory separation
 
 The requirements assume that a faulty process cannot write another process's private memory.
-Shared memory exists only where a binding maps it, and the faulty-peer model covers what a peer writes there.
+Shared memory exists only where a binding maps it, and what a peer may write there is stated in <<req-ssr-peer-fault-model,The requirements hold against a faulty peer>>.
 
 * *Scope.*
 Every process or partition that uses the up-rust SEooC.
@@ -249,7 +256,7 @@ Every process or partition that uses the up-rust SEooC.
 The integrator, through the memory protection of the OS or, on an MCU, the partition boundary its configuration states.
 The element can neither provide nor check it.
 * *Stated in.*
-xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated].
+xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated], and <<req-ssr-peer-fault-model,The requirements hold against a faulty peer>> for what a peer may write in shared memory.
 
 [[violation]]
 === How a violated assumption shows up
@@ -373,13 +380,13 @@ The column "Items allocated to" summarizes the allocations of the items that car
 |===
 | Tag | Items allocated to | Covered in | Parts that hold its items
 
-| `SafetyUpRustCore` | the element in `up-rust-core`: its runtime path, carrier routes and startup memory; and each platform backend | `up-rust`, for the element and the platform backends that it ships | `seooc-up-rust/`, `up-l1/`, `up-l2/`
-| `SafetyStreamer` | the Streamer's data plane and its binary | `up-streamer-rust` | `up-l2/`, `seooc-up-rust/`
-| `SafetyBinding` | every binding: the duties of the binding contract | each binding's repository | `up-l1/`
+| `SafetyUpRustCore` | the element in `up-rust-core`: its runtime path, carrier routes and startup memory; and each platform backend | `up-rust`, for the element and the platform backends that it ships | `seooc-up-rust/`, `up-l1/`, `up-l2/`, this page
+| `SafetyStreamer` | the Streamer's data plane and its binary | `up-streamer-rust` | `up-l2/`, `seooc-up-rust/`, this page
+| `SafetyBinding` | every binding: the duties of the binding contract | each binding's repository | `up-l1/`, this page
 | `SafetyBindingPull` | with `SafetyBinding`, an item whose statement holds a duty of pull bindings only | each pull binding's repository | `up-l1/`
 | `SafetyIceoryx2` | the iceoryx2 binding alone. A binding or a wire gets a tag of its own with the first item that is allocated to it alone | `up-transport-iceoryx2-rust` | `up-l1/iceoryx2.adoc`
 | `SafetyLola` | the LoLa binding alone | `up-transport-lola-rust` | `up-l1/lola.adoc` and `up-l1/lola-envelope.adoc`
-| `SafetyWire` | every wire | each wire's repository | `up-l1/`
+| `SafetyWire` | every wire | each wire's repository | `up-l1/`, this page
 | `SafetyWireSerialized` | every serialized wire: the duties that only a wire with an encoding has | each serialized wire's repository | `up-l1/serialized-wires.adoc`
 | `SafetyXcdr2` | each wire of the fixed-layout XCDR2 profile | the repository of each such wire | `up-l1/xcdrv2.adoc`
 | `SafetyE2eWire` | the end-to-end protection wire | `up-rust`, its `up-wire-e2e` member | `seooc-up-rust/`

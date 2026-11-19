@@ -314,7 +314,7 @@ Rust code and C++ code unwind in different ways, and an unwind that crosses from
 So nothing unwinds across the boundary at all: an exception becomes an error value where it is still C++, and the element sees an ordinary refusal.
 
 _Termination._
-A process that LoLa ends is as lost as one that panicked, and a faulty peer must be able to cause neither (xref:../README.adoc#faulty-peer[the faulty-peer model]).
+A process that LoLa ends is as lost as one that panicked, and a faulty peer must be able to cause neither (xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
 One binding has named instances of accepted middleware panic paths, each with its bounds.
 The LoLa binding has none, so the general rule stands whole for it, and a path it cannot yet exclude is recorded as a failure, never as a limit that a deployment accepts.
 
@@ -603,7 +603,7 @@ Where safe code forgets a lease, nothing ends it: what it holds stays charged fo
 | LoLa, and the receivers it reaches
 | From the send, until LoLa takes the storage back
 | The sender never writes it again
-| xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious], "Zero-copy routes"
+| xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], "Zero-copy routes"
 
 | A received sample on a native route
 | The receiver, through the lease of its frame
@@ -775,7 +775,7 @@ The name of the refusal or of the counter is the binding's to state, and no name
 |===
 | Rule | On LoLa | Who acts
 
-| xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious]
+| xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]
 | Only the processes deployed to use a LoLa service reach its shared memory, and a writer never writes a sample it has sent. Until the binding states otherwise, "Two-way shared state" binds every LoLa service (<<lola-cell-4>>)
 | The integrator
 
@@ -930,7 +930,7 @@ Whether a deployment on LoLa keeps its integrity levels apart by more than the r
 That would be an assumption of use of a LoLa deployment, and it follows the two facts above.
 It is the specification's maintainers' to decide, with the binding's maintainers.
 * *Until then.*
-LoLa is treated as a binding with two-way shared state: every process on one LoLa service runs at one level, a lower consumer takes the copy route, and any other is refused at setup (xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious], "Two-way shared state").
+LoLa is treated as a binding with two-way shared state: every process on one LoLa service runs at one level, a lower consumer takes the copy route, and any other is refused at setup (xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], "Two-way shared state").
 
 [[lola-cell-5]]
 === 5. Process exit

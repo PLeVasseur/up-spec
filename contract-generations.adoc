@@ -84,7 +84,7 @@ An implementation of the redesigned stack that follows the successor contract de
 From that declaration follow, with no further choice:
 ** every item allocated to its part that states no condition;
 ** every item allocated to its part whose stated condition its configuration meets;
-** every item that one of those items relies on, through a link in its statement or through a shared definition (xref:safety/README.adoc#shared-definitions[summaries and normative definitions]).
+** every item that one of those items relies on, through a link in its statement or through a shared definition (xref:safety/README.adoc#shared-definitions[summaries]).
 * *No item is declined.*
 An implementation does not follow one successor item and decline another that its declaration brings in.
 What holds whatever a route requires is selected by nothing and waived by nothing (xref:safety/seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).

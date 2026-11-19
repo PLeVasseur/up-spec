@@ -401,11 +401,11 @@ These are in xref:../up-l2/README.adoc[the communication layer's part].
 
 === Filed in the area's README
 
-This is in xref:../README.adoc[the safety area's README].
+These are in xref:../README.adoc[the safety area's README].
 
 [cols="4,1,3",options="header"]
 |===
 | File | Items | Tags
 
-| xref:../README.adoc[Safety requirements for traceability] | 1 | `SafetyUpRustCore`, `SafetyStreamer`, `SafetyBinding`, `SafetyWire`
+| xref:../README.adoc[Safety requirements for traceability] | 2 | `SafetyUpRustCore`, `SafetyStreamer`, `SafetyBinding`, `SafetyWire`
 |===

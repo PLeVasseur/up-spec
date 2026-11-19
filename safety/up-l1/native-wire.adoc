@@ -458,7 +458,7 @@ The items govern, and this table adds no duty.
 | A write that races a view
 | Not made defined by anything on this page
 | Excluded by the conditions under which a view is allowed, and by what a deployment provides
-| xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "When a view is allowed"; xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious], "Zero-copy routes"
+| xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "When a view is allowed"; xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], "Zero-copy routes"
 |===
 
 [[boundary]]

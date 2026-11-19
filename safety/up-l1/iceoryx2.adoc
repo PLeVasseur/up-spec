@@ -217,14 +217,14 @@ So the binding handles that failure on each port itself, and a deployment on ice
 For a deployment that uses iceoryx2, the integrator provides the following.
 
 * *The process's level.* On iceoryx2 a transport runs at its process's level.
-* *One level per service.* iceoryx2 is a binding whose ports write shared state both ways, so xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious], "Two-way shared state", binds every iceoryx2 service.
+* *One level per service.* iceoryx2 is a binding whose ports write shared state both ways, so xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], "Two-way shared state", binds every iceoryx2 service.
 * *Domains and OS users.* Each level runs in its own iceoryx2 domain, and its processes under their own OS user, so that a faulty lower process cannot open, map or remove a higher level's shared memory.
 --
 
 *Violation:*
 
 * A port whose level differs from its service's recorded level is *refused at setup* (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
-* A peer at another level that the deployment lets onto a service can crash or corrupt its peers' memory: *undetectable* by the element (xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious]).
+* A peer at another level that the deployment lets onto a service can crash or corrupt its peers' memory: *undetectable* by the element (xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]).
 * This contract requires no check of a domain or an OS user: no requirement has the element or the binding make one.
 So it guarantees no detection of two levels that share a domain or an OS user, and this text gives that violation none of the three classes.
 The integrator validates the separation itself, as it validates every assumption (xref:../seooc-up-rust/assumptions-of-use.adoc[the element's assumptions of use]), and relies on no automatic check.
@@ -323,7 +323,7 @@ This section says what each of them meets on iceoryx2, so that the binding's mai
 
 | <<aou-seooc-iceoryx2-level-separation,On iceoryx2, each integrity level has its own processes, domain and OS user>> | A transport runs at its process's level; one level per service; each level in its own domain, under its own OS user | The integrator
 | <<aou-seooc-iceoryx2-limits,A deployment on iceoryx2 accepts that binding's limits, and no known failure as one>> | No 32-bit target; the limits and known anomalies that the integrator accepts, each by its record; the known failures, which are not accepted limits | The integrator
-| xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious], "Two-way shared state" | iceoryx2's ports write shared state both ways. So every process on one service runs at one integrity level, and a lower-integrity consumer takes a copy route | The integrator
+| xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], "Two-way shared state" | iceoryx2's ports write shared state both ways. So every process on one service runs at one integrity level, and a lower-integrity consumer takes a copy route | The integrator
 | xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument] | The permit `+UPW-iceoryx2-1+` needs an approved waiver, and the heap it draws on is sized for its bound. An allocation under it that fails during a peer change aborts the process. iceoryx2's port-mutex panic (`+UPD-IOX2-0001+`) is a known anomaly, not a waiver, and is never filed as one | The deployment's owner
 | xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected] | The service depths are part of the deployment data | The integrator
 | xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's], "Priority inversion through middleware locks" | iceoryx2 holds its port lock for up to a wait's bound, and takes it briefly when a frame is dropped (the binding's qualification record). Allowing for that lock accepts no frame drop that waits for it, which stays the known failure `+UPF-IOX2-0001+` of <<aou-seooc-iceoryx2-limits,A deployment on iceoryx2 accepts that binding's limits, and no known failure as one>> | The integrator

@@ -32,7 +32,7 @@ Undefined behaviour can corrupt memory in ways that no later check can see, whic
 In Rust, `+unsafe+` marks only code whose memory safety the compiler cannot check.
 So safe callers rely on the element to keep that promise for them, hidden items included.
 
-The promise holds under the faulty-peer model too: a peer that writes values its own middleware never writes must not let a safe call reach undefined behaviour.
+The promise holds under the faulty-peer model too (xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
 
 Miri, tests and target builds are evidence at their own scope.
 None replaces the source-level argument for each obligation.

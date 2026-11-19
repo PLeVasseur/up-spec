@@ -73,7 +73,7 @@ A route that needs exhaustion to be a refusal requires that guarantee by name (x
 [[req-ssr-refuse-no-panic]]
 == No panic on runtime paths
 
-[.specitem,oft-sid="req~ssr-refuse-no-panic~1",oft-title="No panic on runtime paths",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-refuse-no-panic~2",oft-title="No panic on runtime paths",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 Element code reachable in runtime mode *MUST NOT* panic or abort:
 
@@ -82,10 +82,13 @@ Element code reachable in runtime mode *MUST NOT* panic or abort:
 * not for any sequence of calls through the public API.
 
 Arithmetic on runtime paths *MUST* be checked, saturating or wrapping by intent, and *MUST NOT* reach an overflow panic.
+
+*Malformed frames.*
+A frame whose header or envelope the element cannot parse, a frame that lacks them included, *MUST* be refused, and its refusal returned or counted as <<req-ssr-error-no-silent-loss,No silent loss, and each loss counted once>> states.
 --
 
 [horizontal]
-ID:: `+req~ssr-refuse-no-panic~1+`
+ID:: `+req~ssr-refuse-no-panic~2+`
 ASIL:: B
 Allocated to:: the element
 Verification:: gate, fault-injection, test
@@ -93,12 +96,14 @@ Verification:: gate, fault-injection, test
 ** The panic-link check over the runtime path on both compilers.
 The inbound metadata, payload, peer reference and TTL are fed as opaque inputs, so that no panic branch can be proven dead from constant inputs.
 ** The workspace lints.
-* *fault-injection*: malformed and truncated frames.
+* *fault-injection*: malformed and truncated frames, each refused, and its refusal returned or counted.
 ISO 26262:: 6-Table 1 (part-clause numbers only)
 
 *Rationale.*
 In the build that ships, a panic aborts the process (xref:build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]).
 So a panic reachable in runtime mode is a crash that a peer's bytes or a clock reading could set off.
+
+A frame whose header or envelope cannot be parsed gives the element nothing it can act on, so it is refused, and the refusal is reported as every loss is.
 
 No waiver can cover a panic: a waiver covers allocation inside middleware only (xref:waivers.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
 

@@ -415,7 +415,7 @@ The report also holds:
 * for each E2E route, its senders, data IDs, `+resync_frames+`, start declarations with their duty, and thread duties (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
 * for each route, the counters the application reads and what each means, the E2E figures included (xref:assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]);
 * every route's capacities (xref:assumptions-of-use.adoc#aou-seooc-capacity-sizing[Capacities are sized for the worst case]);
-* each route's declared peers and the shared-memory permissions its binding requests (xref:../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious]);
+* each route's declared peers and the shared-memory permissions its binding requests (xref:../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]);
 * each shared route, with what one faulty peer can starve there (xref:assumptions-of-use.adoc#aou-seooc-peer-rates[Peer rates on shared routes are the integrator's]);
 * which ASIL routes an operator can disable (xref:../up-l2/streamer.adoc#aou-seooc-operator-access[Only authorized operators reach the Streamer's operator interface]);
 * every route that a Streamer monitor trips and that only a Streamer restart clears (xref:../up-l2/streamer.adoc#aou-seooc-monitor-thresholds[Monitor thresholds allow for peers' restarts]).
@@ -446,7 +446,7 @@ The report also holds:
 * a warning when the wall clock at setup reads earlier than the element's release date, a sign that it is not yet synchronised (xref:assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]);
 * a warning of each transport that the integrator has not classified, as a black channel or not (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
 * a warning of each ASIL route with several declared senders and no declared per-peer rate (xref:assumptions-of-use.adoc#aou-seooc-peer-rates[Peer rates on shared routes are the integrator's]);
-* a warning of each ASIL receive route that admits undeclared peers (xref:../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious]).
+* a warning of each ASIL receive route that admits undeclared peers (xref:../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]).
 
 In the Enforce state every finding is still reported, so one run shows everything to fix.
 

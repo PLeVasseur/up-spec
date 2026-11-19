@@ -419,7 +419,7 @@ No row of the table asks for an end that a forgotten lease cannot have.
 | The frame once it is sent
 | The transport's. The sender never writes it again
 | The same
-| xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious]
+| xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]
 
 | The frame at the receiver
 | The receiver's lease holds it for as long as a view of it lives

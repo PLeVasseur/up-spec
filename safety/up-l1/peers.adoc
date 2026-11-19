@@ -10,7 +10,8 @@ Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC'
 These items say how the element treats the peers of a transport.
 They are allocated to the element (tag `SafetyUpRustCore`), and one of them also to each binding that carries native frames between processes (tag `SafetyBinding`).
 
-* They hold against a faulty peer, as xref:../README.adoc#faulty-peer[the faulty-peer model] describes it.
+* Where they concern what a peer sends or writes, the faults that they hold against are stated in xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer].
+A peer's death and restart, and a peer of another ABI, are stated in the items themselves.
 * RPC calls and message identity are in xref:../up-l2/interaction.adoc[the communication layer's part].
 
 [[req-ssr-peer-failure-normal]]

@@ -444,7 +444,7 @@ For as long as a frame is held, the binding *MUST* keep its storage:
 * unwritten by the binding and by its middleware in this process.
 
 What another process writes there is not the binding's to prevent.
-xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] and xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious] cover it.
+xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] and xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport] cover it.
 
 *How a loan and a frame end.*
 Three transitions end a held loan or frame.
@@ -532,7 +532,7 @@ A lending binding *MUST* state, for each kind of port that it opens, whether tha
 Where it is not established which way a kind of port writes, the binding *MUST* state that its ports write both ways.
 
 *What rests on it.*
-The element applies the refusals for two-way shared state from this statement (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]), and a deployment applies its rule for such a binding from it (xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious]).
+The element applies the refusals for two-way shared state from this statement (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]), and a deployment applies its rule for such a binding from it (xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]).
 --
 
 [horizontal]
