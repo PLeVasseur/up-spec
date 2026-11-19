@@ -174,14 +174,14 @@ So this rule of every binding names no middleware, and a binding without such an
 [[req-ssr-binding-no-panic]]
 == No panic on any peer input
 
-[.specitem,oft-sid="req~ssr-binding-no-panic~6",oft-title="No panic on any peer input",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+[.specitem,oft-sid="req~ssr-binding-no-panic~7",oft-title="No panic on any peer input",oft-needs="impl,utest",oft-tags="SafetyBinding"]
 --
 *The rule.*
 Binding code *MUST NOT* panic on any frame, length or sequence a peer produces, or when a peer dies or restarts.
 A panic path inside the middleware is made unreachable by a setup check or by sizing.
 
 *Allowed paths.*
-A path is allowed only as a named instance, stated in an item that is allocated to its binding alone, and disclosed as a known anomaly in that binding's README.
+A path is allowed only as a named instance, stated in an item that is allocated to its binding alone, and disclosed as a known anomaly in that binding's qualification record (<<req-ssr-binding-readme,A binding's qualification record states its limits and its failures, and its README points at it>>).
 None is a waiver.
 A binding that has no such item has no allowed path.
 
@@ -190,7 +190,7 @@ Any other middleware panic path, including another one that only a broken OS can
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-no-panic~6+`
+ID:: `+req~ssr-binding-no-panic~7+`
 ASIL:: B
 Allocated to:: each binding
 Verification:: fault-injection, test, gate
@@ -323,25 +323,40 @@ So the binding contract places that recovery in the binding's construction, befo
 How one middleware recovers a predecessor's resources is described with its binding.
 
 [[req-ssr-binding-readme]]
-== The README says what the middleware cannot guarantee
+== A binding's qualification record states its limits and its failures, and its README points at it
 
-[.specitem,oft-sid="req~ssr-binding-readme~1",oft-title="The README says what the middleware cannot guarantee",oft-needs="uman",oft-tags="SafetyBinding"]
+[.specitem,oft-sid="req~ssr-binding-readme~2",oft-title="A binding's qualification record states its limits and its failures, and its README points at it",oft-needs="uman",oft-tags="SafetyBinding"]
 --
-Each binding's README *MUST* list every runtime guarantee its middleware cannot make, with measured figures where they exist and the permit a deployment *MUST* waive.
+*The record.*
+Each binding *MUST* keep a qualification record, versioned with the binding, that states for each revision of the binding:
 
-For shared memory, it discloses that:
+* every runtime guarantee that its middleware cannot make, with measured figures where they exist;
+* the permits that a deployment *MUST* waive;
+* its known anomalies and its other deviations, each with an identifier and a revision;
+* its known failures, apart from its limits and its known anomalies;
+* the revision of its middleware, and of every other source that an entry relies on;
+* the evidence of the runs that its entries rest on, and the history of each entry.
+
+The record is the authoritative statement of each of these.
+
+*Shared memory.*
+For shared memory, the record discloses that:
 
 * a write racing a zero-copy read is undefined behaviour even for a type that accepts every bit pattern;
 * the setup integrity check catches misdeployment, not a peer that lies about its level;
 * a private payload copy does not validate middleware-owned offsets, lengths or other shared state;
 * end-to-end protection, OS partitioning and timing budgets remain the integrator's duties.
+
+*The README.*
+The binding's README is a concise profile and index of the binding, and it *MAY* link to the record.
+Where the README speaks of a matter that the record states, the record governs.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-readme~1+`
+ID:: `+req~ssr-binding-readme~2+`
 ASIL:: B
 Allocated to:: each binding
-Verification:: review (checks every README)
+Verification:: review (every binding's record, and what its README says of the matters that the record states)
 
 *Rationale.*
 A deployment decision needs the limits of the middleware underneath the binding, including limits that setup declarations cannot remove.
@@ -511,7 +526,7 @@ The duty is every lending binding's, and the means are each binding's.
 A lending binding *MUST* state, for each kind of port that it opens, whether that port writes shared state that another process of the same service reads.
 
 * A binding on which a receiving port writes such state is a binding whose ports write shared state both ways.
-* The binding states it to the element at setup, and its README repeats it (<<req-ssr-binding-readme,The README says what the middleware cannot guarantee>>).
+* The binding states it to the element at setup, and its README repeats it (<<req-ssr-binding-readme,A binding's qualification record states its limits and its failures, and its README points at it>>).
 
 *Where it is not established.*
 Where it is not established which way a kind of port writes, the binding *MUST* state that its ports write both ways.

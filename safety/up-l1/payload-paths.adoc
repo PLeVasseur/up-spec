@@ -477,7 +477,7 @@ No row of the table asks for an end that a forgotten lease cannot have.
 | The middleware
 | Nothing is asked of it here
 | Nothing is asked of it here
-| What it cannot guarantee is stated in the binding's README (xref:bindings.adoc#req-ssr-binding-readme[The README says what the middleware cannot guarantee])
+| What it cannot guarantee is stated in the binding's qualification record (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it])
 
 | The integrator
 | The agreement as deployment data, the integrity levels, and writers that never write a sample they have sent

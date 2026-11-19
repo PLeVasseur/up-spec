@@ -156,7 +156,7 @@ Verification:: review (the README against the wire's declarations and against th
 *Rationale.*
 An integrator chooses a wire for a message, and decides which routes need end-to-end protection (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 Both choices need to know what the wire's format can and cannot show, and what the wire costs.
-A binding's README already says what its middleware cannot guarantee (xref:bindings.adoc#req-ssr-binding-readme[The README says what the middleware cannot guarantee]).
+A binding's qualification record already says what its middleware cannot guarantee (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
 This item asks the same of a wire.
 
 [[one-wire]]

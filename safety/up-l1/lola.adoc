@@ -50,7 +50,7 @@ A choice about the product that this specification has not made.
 Each one is named in <<cells>>, with whose it is, and the duties are written so that they hold under every answer.
 
 No LoLa binding has been accepted against this page.
-What a binding's code does at a given revision is stated by its README, not here (xref:bindings.adoc#req-ssr-binding-readme[The README says what the middleware cannot guarantee]).
+What a binding's code does at a given revision is stated by its qualification record, not here (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
 
 [[lola]]
 == LoLa, as this page uses the word
@@ -60,7 +60,7 @@ LoLa is the `mw::com` communication middleware of Eclipse S-CORE, in the reposit
 * *One revision.*
 The facts on this page are LoLa's own published statements at commit `72fe936e4d1e091181134ebdb8dbfed7f6574dc9` of that repository.
 They describe that revision.
-The binding's README states the revision of LoLa that the binding is built against, and governs for it (xref:bindings.adoc#req-ssr-binding-readme[The README says what the middleware cannot guarantee]).
+The binding's qualification record states the revision of LoLa that the binding is built against, and governs for it (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
 * *Words.*
 LoLa's assumptions of use speak of a producer that obtains the storage for an event's sample with `+Allocate()+`, holds it through an `+AllocateePtr+` and sends it.
 They speak of a proxy event that a consumer subscribes to, and that provides each received sample through a `+SamplePtr+` (https://github.com/eclipse-score/communication/blob/72fe936e4d1e091181134ebdb8dbfed7f6574dc9/score/mw/com/dependability/safety_analysis/aou.trlc[`+aou.trlc+` at that commit]).
@@ -117,7 +117,7 @@ The table is no list of all that LoLa publishes: <<req-ssr-binding-lola-assumpti
 [[req-ssr-binding-lola-profiles]]
 == The LoLa binding carries native and serialized routes, each as itself
 
-[.specitem,oft-sid="req~ssr-binding-lola-profiles~1",oft-title="The LoLa binding carries native and serialized routes, each as itself",oft-needs="impl,utest",oft-tags="SafetyLola"]
+[.specitem,oft-sid="req~ssr-binding-lola-profiles~2",oft-title="The LoLa binding carries native and serialized routes, each as itself",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
 *Two kinds of route.*
 The LoLa binding *MUST* be able to carry both kinds of route, and it *MUST* lend LoLa's storage for both:
@@ -131,6 +131,9 @@ For each declared route the binding *MUST* compare what the route declares with 
 * Where its capability serves all of it, the binding *MUST* prepare the route as it is declared.
 The element then admits the route if every other setup check passes (xref:payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]).
 * The binding declares its own heap class for the route, and the element compares it with what the route declares (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
+* The binding *MUST* declare the class none for a route only where accepted evidence in its qualification record covers both the binding's and LoLa's runtime paths that the route uses, and shows that neither acquires or releases heap memory on them (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
+Without that evidence it *MUST* declare allocation inside LoLa under a named permit, and the route is admitted only under its waiver (xref:../seooc-up-rust/waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]).
+Binding code still acquires and releases no heap memory on a native path (xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode]), and a serialized route keeps the allocation that it declares and that setup admits.
 * Where the route needs a capability that the binding or LoLa does not have, the binding *MUST* refuse the route in route preparation, naming the route and that capability.
 
 *What is a reason to refuse.*
@@ -164,7 +167,7 @@ A refusal is reported with the capability that it names.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-lola-profiles~1+`
+ID:: `+req~ssr-binding-lola-profiles~2+`
 ASIL:: B
 Allocated to:: the LoLa binding
 Verification:: test, heap-window, review
@@ -174,6 +177,8 @@ Verification:: test, heap-window, review
 ** A native route and a serialized route that each need a capability that the binding lacks, in turn a payload bound, an alignment, a count and a QoS setting: each refused in route preparation, with that capability named.
 ** A serialized route whose wire declares allocation, which the route declares too: prepared, and not refused for it.
 ** A second wire with the same declarations under another name: prepared in the same way.
+** A native route and a serialized route with no accepted evidence about LoLa's allocation: each declared with the permit, refused at the transition without its waiver and admitted with it.
+** A route declared with the class none: only where the record holds the evidence for the binding and for LoLa.
 ** Each route's report of the form it got, and each refusal's report of its reason.
 * *heap-window*: native traffic on LoLa, with errors, cancellation and returns, while a serialized route on the same transport allocates (xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode]).
 * *review*: no path on which a native route's payload is encoded, staged or copied by the binding, and no branch on the name of a wire or of an encoding.
@@ -259,7 +264,7 @@ So this item makes the binding state what it serves, and fixes nothing more.
 [[req-ssr-binding-lola-foreign-boundary]]
 == Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path
 
-[.specitem,oft-sid="req~ssr-binding-lola-foreign-boundary~1",oft-title="Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path",oft-needs="impl,utest",oft-tags="SafetyLola"]
+[.specitem,oft-sid="req~ssr-binding-lola-foreign-boundary~2",oft-title="Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
 *The boundary.*
 LoLa is C++ code, and the LoLa binding calls it, and is called back by it, across a language boundary.
@@ -272,6 +277,7 @@ The binding *MUST NOT* let a call across that boundary, in either direction, be 
 An error that crosses the boundary is a fixed-size value.
 The binding *MUST* return it as the refusal of the operation that met it, or count it on its route (xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 It *MUST NOT* turn it into a panic, and *MUST NOT* drop it.
+A result of LoLa that the binding cannot classify *MUST* be reported as a failure, and never as the more favourable reading.
 
 *Termination.*
 A path on which LoLa, or the binding's own C++ code, ends the process is a panic path under xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input] and xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]: a call to terminate or to abort, and an exception that nothing catches.
@@ -279,23 +285,24 @@ This page names no allowed instance of one.
 So the LoLa binding has no allowed panic path, and each such path that a peer's input, death or restart can reach is a known failure until the binding makes it unreachable.
 
 *Where it holds.*
-The binding's README *MUST* state the builds of its C++ code, and the ways of loading it, for which the first two clauses are established.
+The binding's qualification record *MUST* state the builds of its C++ code, and the ways of loading it, for which the first two clauses are established (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
 A binding that is built or loaded in another way claims neither.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-lola-foreign-boundary~1+`
+ID:: `+req~ssr-binding-lola-foreign-boundary~2+`
 ASIL:: B
 Allocated to:: the LoLa binding
 Verification:: test, fault-injection, review
 * *test*
 ** An exception raised behind each entry of the boundary that the binding uses, returned as that operation's error and counted.
 ** An error value of each kind that the boundary can return, reported under its own cause.
+** A result of LoLa that the binding cannot classify, injected behind the boundary: reported as a failure.
 * *fault-injection*: malformed frames, and peers killed and restarted, with no termination of a process that stays up.
 * *review*
 ** Each function of the boundary, at source level: what it catches, what it returns, and that nothing it calls back can unwind.
 ** The termination paths that the binding's calls into LoLa can reach, listed for the revision of LoLa that the binding is built against.
-** The README's statement of builds and ways of loading.
+** The qualification record's statement of builds and ways of loading.
 
 *Rationale.*
 The rule of every binding speaks of a panic.
@@ -464,7 +471,7 @@ It *MUST NOT* retry it out of the caller's sight, and *MUST NOT* report it as a 
 This page names no assumption that the binding may leave without a keeper, and none that it may break.
 
 *The README.*
-The README *MUST* list each such assumption under LoLa's own name for it, with who keeps it and by what means (xref:bindings.adoc#req-ssr-binding-readme[The README says what the middleware cannot guarantee]).
+The README *MUST* list each such assumption under LoLa's own name for it, with who keeps it and by what means (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
 --
 
 [horizontal]
@@ -635,7 +642,7 @@ Where safe code forgets a lease, nothing ends it: what it holds stays charged fo
 Each row keeps three things apart: the duty, what the binding declares or discloses for it, and the evidence.
 
 * The second column is a duty. It holds whether or not a LoLa binding meets it yet.
-* The third column is what the binding states to the element or in its README. A declaration is a statement that has to be true, and it is no evidence.
+* The third column is what the binding states to the element or in its qualification record. A declaration is a statement that has to be true, and it is no evidence.
 * The last column is the same in every row: no evidence has been accepted for a LoLa binding.
 That withholds the claim that a row is met, and it withholds no duty.
 
@@ -704,7 +711,7 @@ That withholds the claim that a row is met, and it withholds no duty.
 | None accepted (<<lola-cell-4>>)
 
 | What LoLa cannot guarantee
-| The README lists each of LoLa's assumptions of use with its keeper, the revision of LoLa, and every runtime guarantee that LoLa cannot make (xref:bindings.adoc#req-ssr-binding-readme[The README says what the middleware cannot guarantee]; <<req-ssr-binding-lola-assumptions,The LoLa binding keeps each of LoLa's assumptions of use, or names who does>>)
+| The README lists each of LoLa's assumptions of use with its keeper, and the qualification record the revision of LoLa and every runtime guarantee that LoLa cannot make (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]; <<req-ssr-binding-lola-assumptions,The LoLa binding keeps each of LoLa's assumptions of use, or names who does>>)
 | The README
 | None accepted (<<lola-cell-2>>)
 
@@ -718,7 +725,7 @@ That withholds the claim that a row is met, and it withholds no duty.
 === What a result of LoLa becomes
 
 The outcome that each row requires is settled.
-The name of the refusal or of the counter is the binding's to state, in its README, and no name is fixed here (<<lola-cell-8>>).
+The name of the refusal or of the counter is the binding's to state, and no name is fixed here (<<lola-cell-8>>).
 
 [cols="3,5,3",options="header"]
 |===
