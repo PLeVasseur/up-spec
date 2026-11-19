@@ -1,16 +1,15 @@
 = Safety requirements for traceability
 :toc: preamble
 
-This area holds the proposed requirements of the redesigned up-rust stack, which its repositories trace with OpenFastTrace (OFT): the up-rust SEooC, and the transports, wires and Streamer that work with it.
+This area holds the requirements of the up-rust SEooC, and of the transports, wires and Streamer that work with it, which their repositories trace with OpenFastTrace (OFT).
 It is laid out like the protocol specification: what is shared comes first, then a part for each protocol layer, then a part for each SDK element.
 
 * *Not only safety material.*
 The area is named for its safety requirements and assumptions of use.
-It also holds what they rest on: the redesigned SDK's ordinary functional contract, and its resource and fault obligations.
-Those bind every use of that SDK, with or without a safety claim (xref:seooc-up-rust/README.adoc#claims[the SEooC's claims]).
-* *A second generation of some rules.*
+It also holds what they rest on: the up-rust SEooC's ordinary functional contract, and its resource and fault obligations.
+* *Beside the protocol chapters.*
 Most items add to the protocol chapters, and some differ from them on purpose.
-xref:../contract-generations.adoc[Contract generations] lists where the two meet, and says which contract an implementation follows.
+How an item and a rule of the protocol chapters meet: <<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>.
 
 [[layout]]
 == How this area is laid out
@@ -51,18 +50,14 @@ Where an item is filed says which protocol responsibility it concerns.
 Whom it binds is a separate matter, which the item itself states: for a requirement, <<req-ssr-requirements-bind,A requirement binds the parts that it names>>; for an assumption of use, xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 
 * *Neither a tag nor a tracing run decides it.*
-Which items an implementation follows comes from what it is and what it declares, never from the tags that a tracing run keeps (xref:../contract-generations.adoc#selection[which contract an implementation follows]).
+Which items bind a part comes from their statements and allocations, and the revision that its claims rest on from its declaration, never from the tags that a tracing run keeps (<<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>).
 * *Every item here was written for the up-rust SEooC* and for the parts that work with it.
 The items name that element and those parts, so an item in `up-l1/` or `up-l2/` is no requirement on every transport, or on the SDK of another language.
-Another SDK or transport is bound by one only once it declares that it follows the successor contract (xref:../contract-generations.adoc#selection[which contract an implementation follows]), whose items its repository then covers under their tags.
+An SDK or a transport that no requirement of this area names is bound by one only once it declares that it follows the items of this area, which its repository then covers under their tags.
 * *An assumption of use keeps `seooc` in its ID wherever it is filed.*
 It is that element's assumption (xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
 * *A language-agnostic safety requirement*, if one is added, gets a tag of its own and says whom it binds.
-* *The protocol chapters stay in force for whoever follows them.*
-No item here lifts a requirement of the protocol chapters, a security requirement included, from an implementation that follows that requirement.
-* *Where an item differs from a protocol chapter.*
-xref:../contract-generations.adoc#transition[The transition table] names both rules for that behaviour and gives their relation.
-xref:../contract-generations.adoc#selection[Which contract an implementation follows] says what holds until a replacement has landed: the existing rule stays the accepted one, and an implementation built against the successor rule says so and claims no conformance to the existing rule for that behaviour.
+* *The protocol chapters stay in force for what they cover*: <<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>.
 
 [[concepts]]
 == Shared concepts and fault models
@@ -121,6 +116,53 @@ Verification:: review (each requirement's statement and "Allocated to" line name
 *Rationale.*
 A requirement is read on its own, so whom it binds has to be read from it.
 Pages, tags, tracing runs and repositories change as the specification is organized and traced, and such a change must not move a duty to another part or leave it with none.
+
+[[req-ssr-contract-transition]]
+=== What a part declares and claims, and when a replacement takes effect
+
+[.specitem,oft-sid="req~ssr-contract-transition~1",oft-title="What a part declares and claims, and when a replacement takes effect",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
+--
+*The declaration.*
+A part that a requirement of this area names is bound by it as <<req-ssr-requirements-bind,A requirement binds the parts that it names>> states, at the revision in force for that part, whether or not it has declared; a claim of a safety-assurance scope changes whom a requirement binds only where the requirement's own stated condition names such a claim.
+Each such part *MUST* declare which part it is, the adopted revision of this repository that its claims rest on, and each named profile that it follows.
+What a part declares adds no requirement to those that bind it and takes none away.
+A named profile is one that an item of this repository names, with each of its items by identifier or link, and a declaration names no other; the profile's own statement of its version is read at the declared revision.
+The dependency closure of an item is each item that its statement names or links, and each item that those name or link in turn; that of a named profile is that of its items.
+For the part's claims, the declared revision fixes the revision of each item and of its closure, and the closure adds no duty.
+
+*Claims.*
+A claim of conformance to the items of this area *MUST* name the part's declaration and each item that it rests on, at the revision that the declared revision of this repository states.
+A claim that rests on an item rests on its dependency closure too, and a claim that rests on fewer than all the requirements that bind the part rests on a named profile that the part declares.
+Its evidence is evidence for those revisions only.
+A tracing or coverage run adds no item of this area to those that bind a part and takes none away.
+
+*Replacement.*
+A rule of the protocol chapters, or an item of this area at a revision, stays in force for the implementations and the behaviour that it covers until an adopted replacement takes effect for them.
+A replacement is an item of this area, or a change of a protocol chapter, that names the rule that it replaces or retires, and the implementations and the behaviour for which it does, and it takes effect only for those.
+A new revision of an item replaces its earlier revision for each part that both revisions name; for a part that only the earlier revision names, the earlier revision stays in force until a text retires it for that part.
+A text is adopted when it is stated in a revision of this repository that normal adoption produced; that is no status of its adoption in the sense of <<req-ssr-requirements-bind,A requirement binds the parts that it names>>, and no status that a record keeps decides it.
+No item of this area that is not such a replacement lifts a rule of the protocol chapters, a security requirement included.
+A rule of the protocol chapters keeps its own reach, whether or not an implementation that it covers also follows the items of this area.
+
+*Where an item meets a chapter's rule.*
+An item and a chapter's rule meet in one of three ways.
+
+* Where one implementation can meet both, both hold.
+* Where one implementation cannot meet both for a behaviour, a part that the item binds *MUST* say so, naming the item at its revision, and *MUST NOT* claim conformance to the chapter's rule for that behaviour.
+A claim of conformance *MUST NOT* name both rules for that behaviour.
+* Where the two texts do not settle whether one implementation can meet both, a claim of conformance to one is no claim about the other and *MUST NOT* rest on an answer to that question.
+--
+
+[horizontal]
+ID:: `+req~ssr-contract-transition~1+`
+ASIL:: B
+Allocated to:: each part that a requirement of this area names
+Verification:: review (each part's declaration names the part, the revision of this repository and each named profile that it follows; each claim of conformance names the declaration and each item that it rests on, with their dependency closure, at their revisions, and rests on a named profile where it rests on fewer than all the requirements that bind the part; where one implementation cannot meet an item and a chapter's rule, the part says so with the item's revision and claims no conformance to the chapter's rule, and no claim names both rules; no claim rests on an answer that the two texts do not settle)
+
+*Rationale.*
+A claim is read against an exact text, so it names that text and the part that it is made for.
+The protocol chapters cover implementations that the items of this area do not name, so only a text that names a rule, and those for whom it replaces it, can lift that rule.
+A tracing run is arranged for coverage, and arranging it differently must not change what binds a part.
 
 [[integrity-level]]
 === Integrity levels
@@ -361,7 +403,7 @@ Statements use the key words of BCP 14 as up-spec does (xref:../basics/payload_e
 * *SHALL* and *SHALL NOT* for an assumption of use, whose duty falls on the integrator.
 
 Both keep BCP 14's meaning of an absolute requirement.
-An item not yet rewritten for publication states its duties without key words, and binds just the same.
+An item whose statement uses no key word binds just the same; a new or revised statement states each duty with a key word.
 
 === Needs
 

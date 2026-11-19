@@ -7,7 +7,7 @@ The software safety requirements and assumptions of use of one safety element ou
 * No item is known yet, so the requirements are assumed ones, and the assumptions of use say what an integrator has to provide (10-9).
 
 The conventions and tags are in xref:../README.adoc[the safety area's README].
-How these items relate to the protocol chapters, rule by rule, is in xref:../../contract-generations.adoc[contract generations].
+xref:../../contract-generations.adoc[Which requirements an implementation follows] says how these items relate to the protocol chapters.
 
 This directory holds what is specific to the element: its scope and boundary, its claims, its modes, memory, build and platform rules, and the index of its assumptions of use.
 The items that concern a protocol layer are filed with that layer, in xref:../up-l1/README.adoc[the transport layer's part] and xref:../up-l2/README.adoc[the communication layer's part].
@@ -409,5 +409,5 @@ These are in xref:../README.adoc[the safety area's README].
 |===
 | File | Items | Tags
 
-| xref:../README.adoc[Safety requirements for traceability] | 2 | `SafetyUpRustCore`, `SafetyStreamer`, `SafetyBinding`, `SafetyWire`
+| xref:../README.adoc[Safety requirements for traceability] | 3 | `SafetyUpRustCore`, `SafetyStreamer`, `SafetyBinding`, `SafetyWire`
 |===

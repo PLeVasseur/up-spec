@@ -227,7 +227,7 @@ A wire that declares allocation in a direction is bound by <<req-ssr-wire-heap-c
 
 Whatever a wire carries, the identifier that says how its payload is encoded is one of xref:../../basics/payload_encoding_registry.adoc[the payload encoding registry].
 This area assigns no identifier and has no registry of its own.
-The sentences below point to the existing contract, which governs, and they add no duty to a wire.
+The sentences below point to the protocol chapters, which govern, and they add no duty to a wire.
 
 * *Originating.*
 The registry's rules for whoever originates an identifier apply to a message sent through a wire: an identifier that the registry has assigned, a private-use one whose meaning a deployment agreement defines, or `0` where an applicable contract defines the encoding (xref:../../basics/payload_encoding_registry.adoc#allocation[the payload encoding registry, "Allocation and Origination"]).
@@ -243,5 +243,3 @@ A route's heap class, and each stronger guarantee that a route requires, are dec
 A component that reads a payload first determines its encoding, and rejects a payload whose encoding it cannot determine or does not support.
 A component that only carries a payload keeps it, whatever its identifier (xref:../../basics/payload_encoding_registry.adoc#acceptance[the payload encoding registry, "Carrying a Payload versus Reading It"]).
 For the element, the check before a wire reads is xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding].
-
-Where the items of this area meet these rules is in xref:../../contract-generations.adoc#transition[the transition table].

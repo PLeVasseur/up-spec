@@ -22,7 +22,6 @@ It holds what is specific to one transport:
 They are the up-rust SEooC's assumptions, as `seooc` in their IDs says. Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 * Nothing here binds an iceoryx2 transport written for another SDK, or changes the protocol's iceoryx2 chapter.
 That chapter names version 0.6.1 of the iceoryx2 protocol, and the items here target iceoryx2 0.9.3.
-How the two relate is open (xref:../../contract-generations.adoc#transition[the transition table]).
 * An entry of <<index>> binds whoever its own item binds.
 
 The assumptions of every transport bind a deployment on iceoryx2 as well: xref:deployment.adoc[what a deployment provides for its transports].

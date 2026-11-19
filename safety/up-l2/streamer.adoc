@@ -99,7 +99,7 @@ The Streamer's own code *MUST NOT* acquire or release heap memory in runtime mod
 ID:: `+req~ssr-streamer-heap-free~1+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: heap-window (Rust guard and C-level observer, on Linux and macOS; QNX once a target exists), fault-injection
+Verification:: heap-window (Rust guard and C-level observer, on Linux and macOS), fault-injection
 ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
 *Rationale.*
@@ -318,7 +318,7 @@ A refused frame is then a deployment's recorded choice, and an identifier that a
 _A filter and up-spec's rule._
 up-spec's rule keeps a component that only carries from refusing carriage because an identifier is reserved, unassigned, private or unknown to it.
 It does not say whether a deployment's own choice of what a route forwards is such a refusal.
-So this item does not claim that a route with a filter meets that rule, and xref:../../contract-generations.adoc#transition[the transition table] records the question as open.
+So this item does not claim that a route with a filter meets that rule.
 A route with no filter refuses no serialized payload for its identifier.
 
 _What becomes of a refused frame._

@@ -25,13 +25,11 @@ Its tags say which repositories cover it (xref:../README.adoc#tags[the tags]).
 * *Assumptions of use.*
 The two assumptions of use filed here are that element's, about operating its Streamer.
 Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
-* *The protocol chapter stays in force for whoever follows it.*
-No item here lifts a requirement of uP-L2 or of its dispatchers from an implementation that follows it.
+* *The protocol chapter stays in force for what it covers*: xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
 * *Five items meet rules of the dispatcher chapter.*
 For a Streamer in ASIL mode, xref:streamer.adoc#req-ssr-streamer-dispatch-obligations[Undeliverable messages are counted, never sent as dead letters] differs from that chapter's rule for a message that cannot be delivered.
 xref:streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate]; xref:streamer.adoc#req-ssr-streamer-qos-per-leg[Both legs are checked, at setup and per frame] and xref:streamer.adoc#req-ssr-config-exact-addresses[ASIL Streamer routes name exact source addresses] each have a frame refused for a reason that the chapter's rule on when a message may be discarded does not name.
 xref:streamer.adoc#req-ssr-streamer-rpc-error-response[An RPC request that cannot be dispatched is answered, best effort] sets conditions on the error response to an RPC request, which that chapter makes the dispatcher's responsibility.
-xref:../../contract-generations.adoc#transition[The transition table] states both rules of each pair and what is open, with the other places where this part meets the protocol chapters.
 
 == Files
 

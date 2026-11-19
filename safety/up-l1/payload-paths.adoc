@@ -505,6 +505,5 @@ A carrier admits a frame that names a native representation under the rules for 
 
 * The rules for an RPC request that cannot be decoded, and for a response, are those of xref:../up-l2/interaction.adoc[the interaction rules].
 This page changes none of them.
-* What a transport or an SDK that is not written against the element's contract carries, and how, is stated only in xref:../../contract-generations.adoc#transition[the transition table].
 * End-to-end protection is deferred.
 It is part of neither path here, and its items bind once that wire is delivered (xref:../seooc-up-rust/e2e-wire.adoc[the end-to-end protection wire]).

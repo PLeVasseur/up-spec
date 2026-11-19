@@ -26,9 +26,7 @@ Its tags say which repositories cover it (xref:../README.adoc#tags[the tags]).
 * *Assumptions of use.*
 The five assumptions of use filed here are that element's: three about every transport, and two about one transport, iceoryx2.
 Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
-* *The protocol chapter stays in force for whoever follows it.*
-No item here lifts a requirement of uP-L1, its security requirements included, from an implementation that follows it.
-Where an item here differs from that chapter, or stands beside it with no stated relation, xref:../../contract-generations.adoc#transition[the transition table] says so: for an empty payload, for a native representation, for the iceoryx2 version, for a transport on LoLa and for the interface between an SDK and a transport.
+* *The protocol chapter stays in force for what it covers*: xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
 
 == Words used in this part
 
