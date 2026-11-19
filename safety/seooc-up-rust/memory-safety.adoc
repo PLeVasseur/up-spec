@@ -64,7 +64,7 @@ Only a wire or binding from elsewhere with `+unsafe+` code of its own, such as a
 ID:: `+req~ssr-unsafe-inventory~3+`
 ASIL:: B
 Allocated to:: the element
-Verification:: gate (the `+unsafe+` inventory check; the workspace lints), compile-fail (a derive under `+forbid(unsafe_code)+`)
+Verification:: gate (the `+unsafe+` inventory check; a lint that denies an `+unsafe+` block or function without the documentation of its obligations), compile-fail (a derive under `+forbid(unsafe_code)+`)
 Status:: Draft
 
 *Rationale.*

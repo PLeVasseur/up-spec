@@ -119,7 +119,7 @@ The E2E wire *MUST* live in its own crate:
 ID:: `+req~ssr-e2e-crate-isolated~2+`
 ASIL:: B
 Allocated to:: the E2E wire
-Verification:: gate (manifest; restricted sysroot; `+forbid(unsafe_code)+`; a build for `+thumbv7m-none-eabi+`)
+Verification:: gate (manifest; restricted sysroot; `+forbid(unsafe_code)+`; a build for a bare-metal 32-bit target without 64-bit atomics)
 Status:: Draft
 
 *Rationale.*

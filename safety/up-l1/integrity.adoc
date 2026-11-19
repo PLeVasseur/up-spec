@@ -88,11 +88,11 @@ It does not contain corrupt middleware offsets, lengths, free lists or ownership
 ID:: `+req~ssr-integrity-zero-copy~4+`
 ASIL:: B
 Allocated to:: the element
-Verification:: fault-injection, miri[miri-sb, miri-tb, miri-strict-provenance], heap-window, review
+Verification:: fault-injection, miri, heap-window, review
 * *fault-injection*
 ** A faulty publisher writing to a sample while it is read, with real processes.
 ** On a two-way binding, a port above and a port below the service's recorded level, on every port kind and on the paired event service.
-* *miri[miri-sb, miri-tb, miri-strict-provenance]*: a racing writer thread, with a plain-read copy as the negative control, which must be reported as a data race.
+* *miri*, under Stacked Borrows, under Tree Borrows and with strict provenance: a racing writer thread, with a plain-read copy as the negative control, which must be reported as a data race.
 * *review*: the source-access mechanism of each copy route, and the tenure and synchronization of each view, at source level.
 Status:: Draft
 ISO 26262:: 6-Annex D.2.3, 6-Table 3 1h (part-clause numbers only)

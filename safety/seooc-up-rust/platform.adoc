@@ -186,10 +186,10 @@ ASIL:: B
 Allocated to:: the element; each platform backend, for its mechanism
 Verification:: gate, test, review
 * *gate*
-** Core builds for `+thumbv7m-none-eabi+`.
+** Core builds for a bare-metal 32-bit target without 64-bit atomics.
 ** No `+core::sync::atomic+` or `+std::sync::atomic+` import in core outside the facade and the platform layer.
 * *test*
-** The suite under Miri, both models, on `+armv5te-unknown-linux-gnueabi+` and `+powerpc-unknown-linux-gnu+`.
+** The suite under Miri, both models, for a little-endian and for a big-endian 32-bit target without 64-bit atomics.
 ** Each backend's mechanism on the targets its configuration names.
 * *review*: each mechanism's source-level safety argument, against every participant that can reach its storage.
 Status:: Draft

@@ -93,7 +93,7 @@ ID:: `+req~ssr-no-test-hooks~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: gate
-* The source scan refuses a hidden `+pub fn __+` that is neither under the configuration nor one of the seam's names.
+* The source scan refuses a hidden public function that is neither under the configuration nor one of the seam's names.
 * Built without the configuration, a probe naming each test hook fails to resolve.
 Status:: Draft
 

@@ -143,7 +143,7 @@ Bindings and wires are linked by the binary that uses the crate, not by the crat
 ID:: `+req~ssr-crate-streamer-isolated~3+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: gate (the same gates as `+up-rust-core+`: manifest, restricted sysroot, token scan, and its own panic-link fixture; a build for `+thumbv7m-none-eabi+`)
+Verification:: gate (the same gates as `+up-rust-core+`: manifest, restricted sysroot, token scan, and its own panic-link fixture; a build for a bare-metal 32-bit target without 64-bit atomics)
 Status:: Draft
 
 *Rationale.*

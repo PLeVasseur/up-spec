@@ -123,7 +123,7 @@ On the ASIL path an application links only its claimed safety dependency graph (
 * An optional layer joins a claimed graph only where a configuration admits it with its own allocated requirements and evidence (xref:crate-isolation.adoc#req-ssr-crate-core-only-binary[An ASIL binary needs no crate outside its claimed graph at run time]).
 At this revision none does.
 * `up-rust-core` itself has no dependencies, no Cargo features and no `alloc`.
-The optional `alloc`, `std` and application layers are separate crates, the `alloc` layer experimental on Rust 1.100 while the others keep the 1.88 minimum supported version.
+The optional `alloc`, `std` and application layers are separate crates.
 
 === Other things outside the element
 
@@ -301,34 +301,30 @@ The Streamer's "degraded" is a reported state: its safe state is fail-silent per
 
 Each item's "Verification" names methods from this table.
 
-* A method runs on its default lanes unless brackets after it name others, for example `+heap-window[linux-stable, macos-stable]+`.
+* A method named alone asks for what the last column says.
+A line that asks for another platform, compiler, model or target says so in words, after the method or in the list below it.
 * Where an item's methods need detail, the line names the methods and a list below it says what each one covers.
 
 [cols="2,5,3",options="header"]
 |===
-| Method | Meaning | Default lanes
+| Method | Meaning | By default
 
-| `compile-fail` | A trybuild case that must not compile, with its `.stderr` checked. It shows that an operation is absent from a type | `stable`, `1.88`
-| `heap-window` | A test that counts every allocation and every free on all threads, with the Rust allocation guard and the C-level observer. The window opens when that transport's own transition returns, and a positive control shows that the gate fires | `linux-stable`, `linux-1.88`, `macos-stable`, each with both observers
-| `miri` | The test run under Miri | `miri-sb`, `miri-tb`: Stacked Borrows and Tree Borrows, on Linux, with nightly as a tool only
-| `fault-injection` | A test that injects the fault the item covers: a peer process killed or restarted, a malformed or hostile frame, a flood, a publisher writing to a sample while it is read, a primitive left lazy on purpose | `linux-stable`
-| `test` | A requirements-based test of behaviour, with boundary values | `linux-stable`, `linux-1.88`
-| `gate` | A static check in CI over source or build output: a sysroot without `alloc` or `std`, the panic-link check, a symbols check, the `unsafe` inventory, a token scan, manifest checks, compile-time assertions, workspace lints | `stable`, `1.88`
+| `compile-fail` | A case that must not compile, with the compiler's diagnostic checked against the one expected. It shows that an operation is absent from a type | With the current stable compiler, and with the minimum supported version
+| `heap-window` | A test that counts every allocation and every free on all threads, with the Rust allocation guard and the C-level observer. The window opens when that transport's own transition returns, and a positive control shows that the gate fires | On Linux, with the current stable compiler and with the minimum supported version. On macOS, with the current stable compiler. Each with both observers
+| `miri` | The test run under Miri | Under Stacked Borrows and under Tree Borrows, on Linux. The toolchain that Miri needs is a tool only
+| `fault-injection` | A test that injects the fault the item covers: a peer process killed or restarted, a malformed or hostile frame, a flood, a publisher writing to a sample while it is read, a primitive left lazy on purpose | On Linux, with the current stable compiler
+| `test` | A requirements-based test of behaviour, with boundary values | On Linux, with the current stable compiler and with the minimum supported version
+| `gate` | A static check in CI over source or build output: a sysroot without `alloc` or `std`, the panic-link check, a symbols check, the `unsafe` inventory, a token scan, manifest checks, compile-time assertions, workspace lints | With the current stable compiler, and with the minimum supported version
 | `review` | An inspection, recorded in a review log | a record
 |===
 
-The lane names are `linux-stable`, `linux-1.88`, `macos-stable`, `miri-sb`, `miri-tb`, `miri-strict-provenance`, `stable` and `1.88`.
+A heap window on macOS is pthread evidence: it catches lazy first-use allocation that Linux futexes hide.
 
 === The shipped profile
 
 Evidence lanes (heap windows, fault injection and the panic-link gate) run the ASIL profile: `panic = "abort"` and `overflow-checks = true`.
 
 Contract suites that rely on catching a panic run on an unwinding test profile, for diagnosis only, and their evidence counts only as part of an item's evidence.
-
-=== macOS
-
-macOS has functional support, and, like every profile today, no configuration that claims assurance.
-Its lanes are pthread evidence: they catch lazy first-use allocation that Linux futexes hide.
 
 === When an item is verified
 
