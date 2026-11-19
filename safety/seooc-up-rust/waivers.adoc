@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-waiver-required]]
@@ -21,7 +21,6 @@ ID:: `+req~ssr-waiver-required~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (refused without the waiver, admitted with it)
-Status:: Draft
 
 *Rationale.*
 Allocation inside middleware is outside the element's control.
@@ -48,7 +47,6 @@ ID:: `+req~ssr-waiver-scope~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (a wire that declares allocation on a native route is refused even with a waiver), review
-Status:: Draft
 
 *Rationale.*
 The element can answer only for its own code.
@@ -80,7 +78,6 @@ ID:: `+req~ssr-waiver-record~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (the runtime lists the waiver; a record that names its author as approver is refused), review (findable)
-Status:: Draft
 ISO 26262:: 9-7 (part-clause numbers only)
 
 *Rationale.*

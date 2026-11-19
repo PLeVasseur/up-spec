@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 The two kinds of wire: xref:native-wire.adoc[the native wire] and xref:serialized-wires.adoc[serialized wires, and the values they own].
 The duties of every binding: xref:bindings.adoc[allocated to each binding].
@@ -74,7 +74,6 @@ Verification:: test, heap-window, review
 ** On a receive route: the address that a view or a decoder reads is the address at which the frame arrived, and on the copy route it is the one copy.
 * *heap-window*: sending and receiving on a native route, and on a serialized route whose class is none.
 * *review*: no buffer between a sender or a wire and the storage that carries the frame, and none between an arrived frame and its reader.
-Status:: Draft
 
 *Rationale.*
 A copy of a payload costs time in proportion to its size, and a staged one also needs a place to stand.
@@ -156,7 +155,6 @@ Verification:: test, review
 ** A native route whose alignment the binding does not carry: refused in route preparation, with the alignment named.
 ** A binding double that is renamed, and a wire double that is renamed, with no change in what setup admits.
 * *review*: no branch of setup or of a runtime path on the name of a wire, of an encoding or of a middleware.
-Status:: Draft
 
 *Rationale.*
 A message's wire is chosen where the message is declared, and a route's transport is chosen in a deployment.
@@ -227,7 +225,6 @@ Verification:: test, fault-injection, review
 ** The same frames on a carrier route with no filter: forwarded unchanged.
 * *fault-injection*: frames with arbitrary identifiers, with no panic and each one refused or decoded by the right wire.
 * *review*: no path on which a payload's bytes reach a wire before the comparison.
-Status:: Draft
 
 *Rationale.*
 A wire decodes bytes of one format.

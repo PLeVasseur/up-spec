@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, layout, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions, layout and tags: xref:../README.adoc[the safety area's README].
 
 This part is the safety counterpart of xref:../../up-l1/README.adoc[the Transport & Session Layer (uP-L1)].
 It holds three things:
@@ -11,8 +11,6 @@ It holds three things:
 * what a transport and a wire guarantee;
 * how shared memory is lent or copied between integrity levels;
 * what a deployment provides for its transports.
-
-Every item is still Draft.
 
 == Whom this part binds
 

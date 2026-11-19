@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 The exact addresses that an ASIL Streamer route names are a forwarding rule, filed with the Streamer: xref:../up-l2/streamer.adoc#req-ssr-config-exact-addresses[ASIL Streamer routes name exact source addresses] in xref:../up-l2/streamer.adoc[the Streamer's page].
@@ -25,7 +25,6 @@ ID:: `+req~ssr-config-validated~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (a negative configuration suite, run on both construction paths)
-Status:: Draft
 ISO 26262:: 6-C.4.6 (part-clause numbers only)
 
 *Rationale.*
@@ -46,7 +45,6 @@ ID:: `+req~ssr-config-one-path~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (the same refusals on both paths)
-Status:: Draft
 
 *Rationale.*
 Checks that lived only in a loader would leave a program built in code unchecked, and two sets of checks could drift apart.
@@ -68,7 +66,6 @@ ID:: `+req~ssr-config-no-code~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: review (of the schema)
-Status:: Draft
 ISO 26262:: 1-3.15 (part-clause numbers only)
 
 *Rationale.*
@@ -95,7 +92,6 @@ ID:: `+req~ssr-config-resource-ranges~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (each boundary value, on each role)
-Status:: Draft
 
 *Rationale.*
 up-spec fixes these ranges in its message attributes (`+dsn~up-attributes-publish-source~2+`, `+dsn~up-attributes-notification-source~2+`, `+dsn~up-attributes-notification-sink~2+`, `+dsn~up-attributes-request-sink~2+`, `+dsn~up-attributes-request-source~2+`).

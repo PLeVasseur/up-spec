@@ -6,8 +6,7 @@ The software safety requirements and assumptions of use of one safety element ou
 * The element is developed for ASIL B capability, and claims it only for a supported configuration whose evidence establishes it (<<claims>>).
 * No item is known yet, so the requirements are assumed ones, and the assumptions of use say what an integrator has to provide (10-9).
 
-The conventions, tags and status words are in xref:../README.adoc[the safety area's README].
-Every item is still Draft.
+The conventions and tags are in xref:../README.adoc[the safety area's README].
 How these items relate to the protocol chapters, rule by rule, is in xref:../../contract-generations.adoc[contract generations].
 
 This directory holds what is specific to the element: its scope and boundary, its claims, its modes, memory, build and platform rules, and the index of its assumptions of use.

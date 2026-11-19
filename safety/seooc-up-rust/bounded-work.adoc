@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-bound-work]]
@@ -30,7 +30,6 @@ ID:: `+req~ssr-bound-work~2+`
 ASIL:: B
 Allocated to:: the element
 Verification:: fault-injection (a flood on every receive kind, through the documented read and drain calls alone), review (every loop on the runtime path and in the documented usage)
-Status:: Draft
 ISO 26262:: 6-Annex D.2.2, 6-7.4.13 (part-clause numbers only)
 
 *Rationale.*
@@ -149,7 +148,6 @@ Verification:: test, heap-window, fault-injection
 ** No wait inside an allocation domain in native or shared work.
 * *heap-window*: the failure path of a QoS wait.
 * *fault-injection*: a peer killed while a sender waits.
-Status:: Draft
 ISO 26262:: 6-Annex D.2.2 (part-clause numbers only)
 
 *Rationale.*
@@ -199,7 +197,6 @@ ID:: `+req~ssr-bound-no-cross-process-lock~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: review (an inventory of synchronization primitives), fault-injection (a peer killed at arbitrary points never hangs a survivor)
-Status:: Draft
 
 *Rationale.*
 A process can die at any instruction (xref:../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).

@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-crate-isolated]]
@@ -22,7 +22,6 @@ ID:: `+req~ssr-crate-isolated~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: gate (the manifest has no `+[features]+` and no `+[dependencies]+`; the crate builds on a sysroot with neither `+alloc+` nor `+std+`)
-Status:: Draft
 
 *Rationale.*
 Cargo turns a crate's feature on for the whole build once any crate asks for it.
@@ -46,7 +45,6 @@ ID:: `+req~ssr-crate-sync-path~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: gate (a token scan for `+async+`, `+.await+`, `+Future+`, `+Pin+`, `+Poll+`, `+Waker+` and `+Context+`, and for grouped `+use core::{…}+` paths, with a negative control for each)
-Status:: Draft
 
 *Rationale.*
 The runtime path keeps to a smaller part of `+core+`, with no futures, tasks or pinning, and leaves async scheduling to a layer above it.
@@ -96,7 +94,6 @@ Verification:: gate, test
 * *test*
 ** A link fixture that uses only the safety crate and a qualified binding and wire.
 ** A fixture whose image brings in code from a crate outside its graph is refused.
-Status:: Draft
 
 *Rationale.*
 A crate outside the claimed graph in the final image would run beside the element without meeting its requirements.
@@ -144,7 +141,6 @@ ID:: `+req~ssr-crate-streamer-isolated~3+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: gate (the same gates as `+up-rust-core+`: manifest, restricted sysroot, token scan, and its own panic-link fixture; a build for a bare-metal 32-bit target without 64-bit atomics)
-Status:: Draft
 
 *Rationale.*
 Separating the data plane prevents convenience dependencies or feature unification from introducing heap use into the safety path.

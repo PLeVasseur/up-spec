@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-release-none]]
@@ -23,7 +23,6 @@ ID:: `+req~ssr-release-none~2+`
 ASIL:: B
 Allocated to:: the element
 Verification:: compile-fail (for the Streamer, a delete after activation), review
-Status:: Draft
 ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
 *Rationale.*
@@ -51,7 +50,6 @@ ID:: `+req~ssr-release-inert-drop~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: gate (the const assertion for each handle type)
-Status:: Draft
 
 *Rationale.*
 A handle that held a reference count, such as an `+Arc+`, could free memory when the last one is dropped, which runtime mode forbids (xref:heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
@@ -183,7 +181,6 @@ Verification:: heap-window, test, miri, review
 ** Where a route requires a guarantee, each admitted type's destruction chain against its evidence, at once and on the service.
 ** The service's waits, each with its named dependency, and their transitive isolation.
 ** Capacity and heap use.
-Status:: Draft
 
 *Rationale.*
 Returning a slot permits reuse within the fixed reservation.

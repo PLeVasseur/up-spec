@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-qos-declared]]
@@ -21,7 +21,6 @@ ID:: `+req~ssr-qos-declared~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, compile-fail (QoS set after runtime)
-Status:: Draft
 
 [[req-ssr-qos-no-downgrade]]
 == QoS is honored or refused, never weakened
@@ -61,7 +60,6 @@ Verification:: test
 * The native lanes.
 * A route that requires a timing bound or an assurance scope its configuration does not establish is refused by name.
 * The same route without that requirement is admitted on a configuration that has no timing or assurance package.
-Status:: Draft
 
 *Rationale.*
 Silently substituting a supported policy would leave the application relying on a guarantee the route does not provide.
@@ -115,7 +113,6 @@ Verification:: test, heap-window
 * *heap-window*
 ** Every overflow policy inside the window.
 ** On a serialized route, only the declared release of the ownership a discard ends.
-Status:: Draft
 
 *Rationale.*
 Counting observable discards gives the application a local congestion signal.
@@ -216,7 +213,6 @@ Verification:: test, miri, fault-injection
 ** The report's bound with and without an established J.
 * *miri*: an arrival racing a refresh.
 * *fault-injection*: the publisher killed.
-Status:: Draft
 
 *Rationale.*
 Arrival-based monitoring observes communication independently of application reads.
@@ -274,7 +270,6 @@ Verification:: test
 * At the bound, for sub-millisecond and whole-millisecond TTLs.
 * With the clock unavailable.
 * An expired frame refused when it reaches its route, never decoded, with no end-to-end state changed.
-Status:: Draft
 
 *Rationale.*
 The check also reads the current time in whole milliseconds, so it can see up to one millisecond less than has passed.
@@ -307,7 +302,6 @@ ID:: `+req~ssr-qos-invalid-refused~2+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (each of the six refusals)
-Status:: Draft
 
 *Rationale.*
 A declaration outside the monitor or binding capability must be diagnosed before activation instead of becoming a different policy at runtime.
@@ -330,7 +324,6 @@ ID:: `+req~ssr-qos-consistent-declarations~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test
-Status:: Draft
 
 *Rationale.*
 Two declarations of one route that disagree cannot both be honored, and choosing one would silently weaken the other (<<req-ssr-qos-no-downgrade,QoS is honored or refused, never weakened>>).

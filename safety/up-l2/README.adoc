@@ -3,15 +3,13 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, layout, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions, layout and tags: xref:../README.adoc[the safety area's README].
 
 This part is the safety counterpart of xref:../../up-l2/README.adoc[the Communication Layer (uP-L2)] and of xref:../../up-l2/dispatchers/README.adoc[its dispatchers].
 It holds two things:
 
 * interaction: what the element guarantees for an RPC call and for the identity of a message;
 * forwarding: what the Streamer guarantees when it carries messages between transports, and what a deployment provides to operate it.
-
-Every item is still Draft.
 
 == Whom this part binds
 

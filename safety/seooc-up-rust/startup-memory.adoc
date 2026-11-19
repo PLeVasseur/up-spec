@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-memory-static]]
@@ -46,7 +46,6 @@ Verification:: test, gate, review
 ** Refused placements, zero-length and over-aligned requests, exposing no object.
 * *gate*: the crate builds on a sysroot without `+alloc+`.
 * *review*: the live ownership and lifetime of each region a source or provider supplies.
-Status:: Draft
 ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
 *Rationale.*
@@ -83,7 +82,6 @@ ID:: `+req~ssr-memory-sealed~3+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (including a setup kept alive with `+mem::forget+`), heap-window
-Status:: Draft
 
 *Rationale.*
 A shared startup allocator must stop serving new requests once initialization ends, including failure paths that leave some transports active.
@@ -126,7 +124,6 @@ Verification:: test, review
 ** The computation against what placement used, for each route kind and for whole deployments, including registration and deferred backlogs.
 ** Repeated refused setups, growth histories and lost races that leave backing claimed, against what the report states.
 * *review*: each reported figure's stated measure.
-Status:: Draft
 ISO 26262:: 6-7.4.13 (part-clause numbers only)
 
 *Rationale.*

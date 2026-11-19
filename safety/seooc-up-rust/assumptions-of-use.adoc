@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 Each assumption of use is something the integrator must provide or guarantee.
@@ -187,7 +187,6 @@ On a route with no deadline, silence is *undetectable*.
 [horizontal]
 ID:: `+aou~seooc-supervisor-restart~4+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 10-9.2.4 (part-clause numbers only)
 
 *Rationale.*
@@ -217,7 +216,6 @@ Each process using the element *SHALL* run in its own address space, under an OS
 [horizontal]
 ID:: `+aou~seooc-process-isolation~3+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 6-7.4.9, 6-7.4.8, 9-6 (part-clause numbers only)
 
 *Rationale.*
@@ -256,7 +254,6 @@ A level is assigned, and is a label, as xref:../up-l1/deployment.adoc#aou-seooc-
 [horizontal]
 ID:: `+aou~seooc-capability-ceiling~1+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 9-5, 9-6, 6-7.4.8 (part-clause numbers only)
 
 *Rationale.*
@@ -325,7 +322,6 @@ The report lists each route's detection bound, with J where its configuration es
 [horizontal]
 ID:: `+aou~seooc-timing-budgets~7+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 10-4.4.1, 6-7.4.13 (part-clause numbers only)
 
 *Rationale.*
@@ -374,7 +370,6 @@ The platform *SHALL* provide a monotonic clock and a wall clock through a time p
 [horizontal]
 ID:: `+aou~seooc-clock~3+`
 ASIL:: B
-Status:: Draft
 
 *Rationale.*
 Clock reads and clock correctness are separate obligations: a readable but incorrect wall clock can make both expiration and correlation misleading.
@@ -409,7 +404,6 @@ What that failure then does is stated with the binding that ships the permit.
 [horizontal]
 ID:: `+aou~seooc-waiver-approval~3+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 6-7.4.7, 8-12, 9-7 (part-clause numbers only)
 
 *Rationale.*
@@ -447,7 +441,6 @@ That is *undetectable* by the element, whose report shows the guarantee as not r
 [horizontal]
 ID:: `+aou~seooc-resource-guarantees~1+`
 ASIL:: B
-Status:: Draft
 
 *Rationale.*
 The element admits ordinary owning wires and gives a stronger resource guarantee only where a route requires it (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
@@ -525,7 +518,6 @@ The refusals that follow it are *counted*, and the deadline shows the silence.
 [horizontal]
 ID:: `+aou~seooc-e2e-protection~7+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 6-Annex D.2.4, 6-Annex E.3.2 (part-clause numbers only)
 
 *Rationale.*
@@ -573,7 +565,6 @@ The target *SHALL* be one that a supported configuration's package names, with t
 [horizontal]
 ID:: `+aou~seooc-target-environment~4+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 6-9.4.5, 6-10.4.7 (part-clause numbers only)
 
 *Rationale.*
@@ -615,7 +606,6 @@ Without it, a build with unwinding or without overflow checks is *undetectable*,
 [horizontal]
 ID:: `+aou~seooc-build-configuration~5+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 1-3.22 (part-clause numbers only)
 
 *Rationale.*
@@ -664,7 +654,6 @@ In strict mode, the Enforce state refuses deployment data without a matching int
 [horizontal]
 ID:: `+aou~seooc-deployment-data~7+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 6-Annex C, 6-C.4.6, 6-Table C.1 (part-clause numbers only)
 
 *Rationale.*
@@ -697,7 +686,6 @@ The integrator *SHALL* declare the item's worst-case semantic load for each rout
 [horizontal]
 ID:: `+aou~seooc-capacity-sizing~3+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 6-7.4.13 (part-clause numbers only)
 
 *Rationale.*
@@ -735,7 +723,6 @@ Without servicing, that is 0.54 s at the shortest admitted threshold (1.024 µs)
 [horizontal]
 ID:: `+aou~seooc-application-reacts~4+`
 ASIL:: B
-Status:: Draft
 
 *Rationale.*
 Reporting a fault cannot itself restore the application function.
@@ -776,7 +763,6 @@ Message IDs can also repeat across restarts (xref:../up-l2/interaction.adoc#req-
 [horizontal]
 ID:: `+aou~seooc-integrator-platform~4+`
 ASIL:: B
-Status:: Draft
 
 *Rationale.*
 A custom backend is responsible for the same clock, waiting and initialization contracts as a shipped backend.
@@ -806,7 +792,6 @@ On routes that several peers share, the integrator *SHALL* bound each peer's mes
 [horizontal]
 ID:: `+aou~seooc-peer-rates~2+`
 ASIL:: B
-Status:: Draft
 
 *Rationale.*
 The route aggregates arrivals from its peers.
@@ -837,7 +822,6 @@ In strict mode, the Enforce state refuses a setup still alive and not entered wh
 [horizontal]
 ID:: `+aou~seooc-build-order~2+`
 ASIL:: B
-Status:: Draft
 
 *Rationale.*
 Once a transport that shares startup memory enters runtime mode, the caller's handle places nothing more.

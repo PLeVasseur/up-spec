@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-heap-none]]
@@ -73,7 +73,6 @@ Verification:: heap-window, gate
 ** On a serialized route, its declared allocation and the release of what it admitted, including each release that a release service performs, are reported, never hidden.
 ** On a serialized route, no heap use in deciding, reporting or counting a refusal, a discard or a peer's failure.
 * *gate*: the crate builds without `+alloc+`.
-Status:: Draft
 ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
 *Rationale.*
@@ -119,7 +118,6 @@ Allocated to:: the element
 Verification:: heap-window, fault-injection
 * *heap-window*: on a pthread target (macOS) over first traffic.
 * *fault-injection*: a control that leaves one primitive lazy must make the window fail, on every target.
-Status:: Draft
 ISO 26262:: 6-9.4.5, 6-10.4.7 (part-clause numbers only)
 
 *Rationale.*
@@ -221,7 +219,6 @@ Verification:: test, review
 ** Each declared policy against its allocator's stated contract on every reachable path.
 ** A stated panic, process end or wait refusing a route that requires the guarantee it violates, and reported, not refused, on a route that does not.
 ** A waiting release's named dependency and any claimed deadline against the allocator's own mechanism.
-Status:: Draft
 
 *Rationale.*
 A claim of no heap use can be checked only if it is stated.
@@ -382,7 +379,6 @@ Verification:: test, review
 ** Each admitted guarantee's evidence against the exact type, wires, directions, binding, provider, dependencies, build and contexts that it names.
 ** No path on which the element states, reports or relies on a guarantee as held for a route for which it is not established, and none on which it reports as admitted a guarantee that is not both required and established.
 ** No path on which a report drops or changes what is established because the route does not require it, or shows a guarantee as required because it is established.
-Status:: Draft
 
 *Rationale.*
 Most wire formats decode into values that own what they hold: strings, sequences and nested messages.
@@ -547,7 +543,6 @@ Verification:: test, heap-window, review
 ** Where a route requires a guarantee, each admitted type's, wire's, binding's and provider's destruction chain and its evidence in every context that runs it.
 ** Each waiting destruction's named dependency and, where it is pending cleanup, its isolation.
 ** Unwind, forget, partial-initialization and reentrancy paths of every admitted type, whatever its route requires.
-Status:: Draft
 
 *Rationale.*
 A destructor is code that runs when a value ends, and nothing more can be read from its presence.

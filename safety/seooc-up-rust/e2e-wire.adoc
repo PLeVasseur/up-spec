@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 Allocated to the E2E wire, `up-wire-e2e` (tag `SafetyE2eWire`), except where an item says otherwise: core's error variant and route counter are the element's.
@@ -65,7 +65,6 @@ Verification:: test, heap-window
 ** A byte comparison showing the inner encoding unchanged inside the frame.
 ** The wire's stated identity, payload encoding, maximum encoded length and its exactness.
 ** The XCDR2 wire and the test wire passing the ordinary wire contract suite.
-Status:: Draft
 
 *Rationale.*
 Wrapping preserves the inner wire as a separate choice, and the wrapper can claim only the heap behavior and size guarantees that the combined encoding supports.
@@ -94,7 +93,6 @@ ID:: `+req~ssr-e2e-header-format~3+`
 ASIL:: B
 Allocated to:: the E2E wire
 Verification:: test (the known-answer vectors, encoded and decoded), review (the stated Hamming distance, against the CRC's published properties)
-Status:: Draft
 
 *Rationale.*
 A fixed, documented header permits independent implementations to check the same protected bytes.
@@ -120,7 +118,6 @@ ID:: `+req~ssr-e2e-crate-isolated~2+`
 ASIL:: B
 Allocated to:: the E2E wire
 Verification:: gate (manifest; restricted sysroot; `+forbid(unsafe_code)+`; a build for a bare-metal 32-bit target without 64-bit atomics)
-Status:: Draft
 
 *Rationale.*
 A separate wire crate keeps protection optional while maintaining the same dependency and heap restrictions as the runtime element.
@@ -179,7 +176,6 @@ Verification:: test, fault-injection, heap-window
 ** A frame that passes and then fails the inner decode advances the reference, and a later copy of it is refused as a repeat.
 ** With the receiver's last counter at exactly `+resync_frames+`, a restart is not refused as a repeat.
 * *fault-injection*: a byte corrupted between hops; a torn copy on copy route.
-Status:: Draft
 ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 
 *Rationale.*
@@ -257,7 +253,6 @@ Default mode refuses the first two A frames and adopts A on the third, retaining
 ** Strict retired-B requests and never-adopted incarnations between B and C get final answers only under the proof conditions of <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>.
 ** `+resync_frames+` of 0, refused at construction.
 * *heap-window*: the restart.
-Status:: Draft
 
 *Rationale.*
 Per-hop peer identity cannot establish end-to-end restart order.
@@ -307,7 +302,6 @@ Verification:: test, miri, heap-window
 ** Each case at its boundary: the window's two edges, the floor, a late request delivered and a late sample refused, a repeat inside the window.
 ** The window across a restart and an adoption, with its open counters counted lost.
 * *miri*: the window's words under the slot's try-lock.
-Status:: Draft
 
 *Rationale.*
 A bounded window can admit reordered requests once without accepting repeats.
@@ -362,7 +356,6 @@ Verification:: test, heap-window
 ** A copy that another server answers.
 ** A response with no E2E header.
 ** A response naming another payload encoding, refused on an E2E route.
-Status:: Draft
 
 *Rationale.*
 A response sequence alone does not identify the outstanding call.
@@ -402,7 +395,6 @@ Verification:: test
 * A response delivered to another client, refused as misaddressed.
 * The function's test vectors.
 * A wildcard in the declared list, refused at construction.
-Status:: Draft
 
 *Rationale.*
 A route-only identity would merge different senders, and omitting the destination would admit a misaddressed frame.
@@ -452,7 +444,6 @@ Verification:: compile-fail, test, heap-window
 ** Encodes across 2^31^ and 2^32^, from senders built at those counters.
 ** A contended encode refused before the counter moves.
 ** A supplied start value used as given.
-Status:: Draft
 
 *Rationale.*
 Sharing one sequence between independent senders would manufacture apparent loss and reordering.
@@ -491,7 +482,6 @@ Verification:: test, miri, heap-window
 ** Concurrent decoders' reordering is refused and counted, not corrupted, including from a push-binding test double that delivers one route's frames from two threads.
 ** Reading the figures in a loop on another thread causes no refusal.
 * *miri*: the try-lock under threads.
-Status:: Draft
 
 *Rationale.*
 Receiver state is larger than a single atomic word.
@@ -531,7 +521,6 @@ Verification:: test, heap-window
 ** An `+unprotected+` response counted in its own counter and not in the E2E counter.
 ** A call whose responses were all refused ending at its TTL, naming the last refusal.
 ** A refused request's frame released at once.
-Status:: Draft
 
 *Rationale.*
 A response rejected before completion still needs a visible cause, and an unprotected operator response must not appear as corrupt protected traffic.
@@ -587,7 +576,6 @@ Verification:: test, heap-window
 ** An answer the route cannot take, dropped and counted.
 ** The server's counts by kind.
 ** A client locked out by a false strict declaration told on every call, and counted at the server.
-Status:: Draft
 
 *Rationale.*
 A final refusal is safe only when this server instance cannot also deliver the request.
@@ -651,7 +639,6 @@ Verification:: test, heap-window
 ** A resync.
 ** Each figure saturating.
 ** A frame that drop-oldest evicts after decode, which appears in `+dropped_oldest+` and not in the figures.
-Status:: Draft
 
 *Rationale.*
 Sequence observations establish only certain losses, while holes remain pending until the window passes them.
@@ -677,7 +664,6 @@ ID:: `+req~ssr-e2e-survives-hops~1+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: test (a carriage test through the test forwarder; a full hop test)
-Status:: Draft
 
 *Rationale.*
 A carrier forwards a frame's identifiers and payload bytes unchanged (xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).

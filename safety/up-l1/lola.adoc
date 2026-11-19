@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 The duties of every binding, which the LoLa binding meets too: xref:bindings.adoc[allocated to each binding].
 How a payload travels on either kind of route: xref:payload-paths.adoc[payload paths, end to end].
@@ -176,7 +176,6 @@ Verification:: test, heap-window, review
 ** Each route's report of the form it got, and each refusal's report of its reason.
 * *heap-window*: native traffic on LoLa, with errors, cancellation and returns, while a serialized route on the same transport allocates (xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode]).
 * *review*: no path on which a native route's payload is encoded, staged or copied by the binding, and no branch on the name of a wire or of an encoding.
-Status:: Draft
 
 *Rationale.*
 A deployment on shared memory mostly sends values as they lie in memory, and it also carries serialized messages on the same transport.
@@ -240,7 +239,6 @@ Verification:: test, review
 ** A route at each of its counts: one request more is a returned error, with no heap use and no panic. A loan that is given back, and a frame that is returned, make room again. One whose lease safe code forgot never does.
 ** Each declared count compared with what the route in fact holds, for each meaning that the binding states.
 * *review*: how the binding establishes LoLa's storage for a route, at source level.
-Status:: Draft
 
 *Rationale.*
 A route that runs out of storage in runtime mode cannot get more there, so the storage is settled before the transition (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
@@ -297,7 +295,6 @@ Verification:: test, fault-injection, review
 ** Each function of the boundary, at source level: what it catches, what it returns, and that nothing it calls back can unwind.
 ** The termination paths that the binding's calls into LoLa can reach, listed for the revision of LoLa that the binding is built against.
 ** The README's statement of builds and ways of loading.
-Status:: Draft
 
 *Rationale.*
 The rule of every binding speaks of a panic.
@@ -351,7 +348,6 @@ Verification:: test, review
 ** A forgotten lease, with its subscription still active and its sample never reused.
 ** In initialization, a sequence that would end a subscription while a frame is held, which does not compile or is refused.
 * *review*: every path of the binding that unsubscribes a proxy event or destroys one or its proxy, at source level, against every way a sample can still be held.
-Status:: Draft
 
 *Rationale.*
 LoLa publishes that a proxy event is not unsubscribed, and its proxy not destroyed, while a sample it provided is still held, because unsubscribing invalidates the memory that the sample points to (<<lola-assumptions>>, `+EventSubscriptionActiveWhileHoldingSamplePtr+`).
@@ -409,7 +405,6 @@ Verification:: test, review
 ** For each callable and each address that the binding gives LoLa, at source level: the no-use point that LoLa's documentation names for it, quoted with its source, or else the process lifetime.
 ** That no argument takes a minimum for a no-use point.
 ** Each way the process can end, against what LoLa's threads can still reach.
-Status:: Draft
 
 *Rationale.*
 A callable that LoLa holds is a pointer into the binding that only LoLa decides when to follow.
@@ -484,7 +479,6 @@ Verification:: test, review
 ** The README's list against LoLa's published assumptions at the revision that the binding is built against, one by one.
 ** For each assumption that the binding keeps itself, the code that keeps it, at source level.
 ** That no assumption is passed on as a rule for an application.
-Status:: Draft
 
 *Rationale.*
 LoLa addresses its assumptions of use to whoever uses it, as conditions for using it safely.

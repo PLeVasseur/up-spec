@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 The element whose wire contract these duties belong to: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
@@ -55,7 +55,6 @@ Verification:: test, fault-injection
 ** Controls on the suite itself, each a wire that the suite must fail: one whose decoder returns a default for an empty input that the format does not define; one whose decoder refuses an empty input that the format defines; one whose decoder and encoder agree with each other against the format.
 ** A control that the suite must pass: a wire that decodes the empty input which its format defines, and whose encoder writes the same value with a non-empty encoding that the format also allows.
 ** A property test over arbitrary byte strings, run under `+catch_unwind+` on the unwinding diagnostic profile and inside the heap guard.
-Status:: Draft
 
 *Rationale.*
 Decoding reads bytes a peer sent.
@@ -117,7 +116,6 @@ Verification:: heap-window, test
 ** A wire whose decoded value runs a destructor that uses no heap passes it.
 ** Once the deferred E2E wire is delivered, it fails the ordinary check.
 ** The sequenced check's interface: a sender factory that is given a start value, a receiver factory and the restart bound, with receivers' slot storage made outside the heap windows.
-Status:: Draft
 
 *Rationale.*
 A sequenced wire deliberately changes its encoding.
@@ -154,7 +152,6 @@ ID:: `+req~ssr-wire-readme~1+`
 ASIL:: B
 Allocated to:: each wire
 Verification:: review (the README against the wire's declarations and against the format's specification), test (the declared identifier, sizes and heap classes compared with the README's, by the wire contract suite)
-Status:: Draft
 
 *Rationale.*
 An integrator chooses a wire for a message, and decides which routes need end-to-end protection (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).

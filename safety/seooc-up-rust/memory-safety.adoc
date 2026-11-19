@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-unsafe-sound]]
@@ -24,7 +24,6 @@ ID:: `+req~ssr-unsafe-sound~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: miri (Stacked Borrows and Tree Borrows, over the tests and proof programs), compile-fail (each closed misuse), review (a sweep of each defect class)
-Status:: Draft
 ISO 26262:: 6-Annex D.2.3 (part-clause numbers only)
 
 *Rationale.*
@@ -65,7 +64,6 @@ ID:: `+req~ssr-unsafe-inventory~3+`
 ASIL:: B
 Allocated to:: the element
 Verification:: gate (the `+unsafe+` inventory check; a lint that denies an `+unsafe+` block or function without the documentation of its obligations), compile-fail (a derive under `+forbid(unsafe_code)+`)
-Status:: Draft
 
 *Rationale.*
 An `+unsafe+` operation requires its author to establish the memory-safety obligations that the compiler cannot prove.
@@ -94,7 +92,6 @@ ID:: `+req~ssr-unsafe-wire-untrusted~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (a replaced writer is refused), miri
-Status:: Draft
 
 *Rationale.*
 A wire is written in safe code against a safe interface.
@@ -121,7 +118,6 @@ Allocated to:: the element
 Verification:: review, miri
 * *review*: every value taken from a safe binding method into `+unsafe+` code.
 * *miri*: adversarial safe doubles: a frame whose lengths or slices change between calls, a route handle out of range, a reused peer reference.
-Status:: Draft
 
 *Rationale.*
 A safe trait's implementation can return any value without breaking Rust's rules.

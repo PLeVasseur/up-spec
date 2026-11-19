@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 The duties of every wire: xref:wires.adoc[allocated to each wire].
 The other kind of wire: xref:native-wire.adoc[the native wire].
@@ -78,7 +78,6 @@ Verification:: test, review
 ** Encodings that the format allows and the wire's own encoder never writes, decoded by the wire.
 ** The identifier that the wire declares, compared with the registry's for its format.
 * *review*: the wire's statement of its format and version, and of what agrees a payload's type.
-Status:: Draft
 
 *Rationale.*
 A receiver can decode a sender's bytes only if both mean the same format.
@@ -150,7 +149,6 @@ Verification:: test, heap-window, review
 ** A decoded value used after its frame was returned and its storage reused.
 * *heap-window*: each direction in which the wire claims a class of none; and, where it declares allocation, the allocation points against the declaration.
 * *review*: no storage of the wire's own between the value and the element's writer.
-Status:: Draft
 
 *Rationale.*
 The element gives a wire a writer over the storage that carries the frame, and a slot for the value that it decodes.

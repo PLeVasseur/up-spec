@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 The element whose contract these duties belong to: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
@@ -41,7 +41,6 @@ Allocated to:: each binding
 Verification:: heap-window
 * For each binding, over native traffic with errors, cancellation, retirement and deferred release, with middleware allocation reported apart under its permit.
 * On a serialized route, the binding's declared allocation reported, never hidden.
-Status:: Draft
 
 *Rationale.*
 Binding code runs inside the process on every runtime path.
@@ -68,7 +67,6 @@ ID:: `+req~ssr-binding-lazy-forced~1+`
 ASIL:: B
 Allocated to:: each binding
 Verification:: heap-window (first traffic, through the binding contract suite), fault-injection
-Status:: Draft
 
 *Rationale.*
 The element's own rule (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]) would not hold if a binding left a lock or a thread to set itself up on first traffic, inside runtime mode.
@@ -139,7 +137,6 @@ Verification:: test, heap-window, fault-injection, review
 * *review*
 ** The binding's lock use, for every call sequence the element allows.
 ** For a binding with a named instance on this path, the README's known-anomaly row.
-Status:: Draft
 
 *Rationale.*
 _What the destructor releases._
@@ -200,7 +197,6 @@ Verification:: fault-injection, test, gate
 * *fault-injection*: malformed frames; peers killed and restarted.
 * *test*: the binding contract suite.
 * *gate*: for a binding with named instances, the gate that its own item states.
-Status:: Draft
 
 *Rationale.*
 A heap waiver cannot excuse a panic.
@@ -228,7 +224,6 @@ ID:: `+req~ssr-binding-peer-identity~1+`
 ASIL:: B
 Allocated to:: each binding
 Verification:: test (a test double that restarts; a real restart)
-Status:: Draft
 
 *Rationale.*
 A stable identity with a rising incarnation lets the element tell a restarted peer from its earlier self, and refuse a frame from the earlier one as stale (xref:peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected]).
@@ -252,7 +247,6 @@ Allocated to:: each binding
 Verification:: test
 * The QoS contract suite and the binding contract suite on each binding, observing what an application receives from the documented read call alone.
 * A handoff binding that does not apply the route's policy in its own queue must fail it.
-Status:: Draft
 
 [[req-ssr-binding-bounded]]
 == A binding bounds its own work and its waits
@@ -289,7 +283,6 @@ Verification:: fault-injection, test
 * *test*
 ** No binding call waits for a deferred return.
 ** On a route that requires non-waiting acquisition, a binding whose allocation can wait refused at setup by name.
-Status:: Draft
 
 *Rationale.*
 A receive that gave up any number of frames per call could hold its caller for as long as a peer keeps sending.
@@ -322,7 +315,6 @@ ID:: `+req~ssr-binding-predecessor-cleanup~1+`
 ASIL:: B
 Allocated to:: each binding
 Verification:: fault-injection (a peer killed; a restart with its leftovers present)
-Status:: Draft
 
 *Rationale.*
 Cleanup in runtime mode would put work of unknown size, and perhaps the heap, on a survivor's runtime path, while initialization may do both (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-restart[A restart is an initialization]).
@@ -350,7 +342,6 @@ ID:: `+req~ssr-binding-readme~1+`
 ASIL:: B
 Allocated to:: each binding
 Verification:: review (checks every README)
-Status:: Draft
 
 *Rationale.*
 A deployment decision needs the limits of the middleware underneath the binding, including limits that setup declarations cannot remove.
@@ -382,7 +373,6 @@ ID:: `+req~ssr-binding-integrity-level~1+`
 ASIL:: B
 Allocated to:: each binding
 Verification:: test (the binding contract suite), fault-injection (a publisher below the recorded level, with real processes)
-Status:: Draft
 
 *Rationale.*
 The element can compare levels only if each binding records them where every process of a service can read them.
@@ -403,7 +393,6 @@ ID:: `+req~ssr-binding-unsafe-inventory~1+`
 ASIL:: B
 Allocated to:: each binding this project ships
 Verification:: gate (the binding's copy of the inventory check, with a negative control)
-Status:: Draft
 
 *Rationale.*
 A binding's `+unsafe+` code runs on the same runtime paths as the element's.
@@ -489,7 +478,6 @@ Verification:: test, miri, review
 ** A middleware that could enlarge or map again its storage in runtime mode: turned off, or the route refused.
 * *miri*: the lending test double, under the same suite, forgotten leases included.
 * *review*: each site of the binding that makes the claim, at source level; each path that ends a loan or returns a frame; and that no property rests on a destructor running.
-Status:: Draft
 
 *Rationale.*
 The element builds a writer on a loan and a typed view on a received frame.
@@ -541,7 +529,6 @@ Verification:: test, review
 ** The binding contract suite: a binding that states two-way shared state has a port of another level refused at setup, on every port kind.
 ** A binding that states one-way shared state: a receiving port of the suite's double that writes shared state fails the suite.
 * *review*: the middleware's shared state, by kind of port, at the revision that the binding is built against.
-Status:: Draft
 
 *Rationale.*
 A process that writes shared state which a higher process reads can corrupt that process, whatever the payload rules say.

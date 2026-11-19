@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 The duties of every binding, which the iceoryx2 binding meets too: xref:bindings.adoc[allocated to each binding].
 
@@ -43,7 +43,6 @@ ID:: `+req~ssr-binding-depth-from-deployment~1+`
 ASIL:: B
 Allocated to:: the iceoryx2 binding
 Verification:: test (services created in both start orders; a stale depth refused)
-Status:: Draft
 
 [[req-ssr-binding-iceoryx2-panic-paths]]
 == iceoryx2's allowed panic paths are named, bounded and disclosed
@@ -93,7 +92,6 @@ A new runtime panic site holds the change until it is decided.
 * *review*
 ** The binding's lock use, for every call sequence the element allows.
 ** The README's known-anomaly rows.
-Status:: Draft
 
 *Rationale.*
 The upstream record to track for these paths is https://github.com/eclipse-iceoryx/iceoryx2/issues/763[iceoryx2 issue #763].
@@ -120,7 +118,6 @@ ID:: `+req~ssr-binding-iceoryx2-static-segments~1+`
 ASIL:: B
 Allocated to:: the iceoryx2 binding
 Verification:: test (the requirement recorded on a service the binding creates; a peer of the binding's own that requires it when it opens the service; the check of the publishers present at setup)
-Status:: Draft
 
 *Rationale.*
 A panic path inside the middleware is made unreachable by a setup check or by sizing (xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input]).
@@ -151,7 +148,6 @@ This states what the contract guarantees, not what an implementation can or cann
 [horizontal]
 ID:: `+aou~seooc-iceoryx2-level-separation~1+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 6-7.4.8, 9-6, 6-Annex D.2.4 (part-clause numbers only)
 
 *Rationale.*
@@ -212,7 +208,6 @@ In strict mode, the Enforce state refuses any known failure, whatever is acknowl
 [horizontal]
 ID:: `+aou~seooc-iceoryx2-limits~1+`
 ASIL:: B
-Status:: Draft
 
 *Rationale.*
 An accepted anomaly has a bounded justification, whereas an open known failure remains a failure.

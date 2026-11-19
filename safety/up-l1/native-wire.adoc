@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 The duties of every wire: xref:wires.adoc[allocated to each wire].
 The other kind of wire: xref:serialized-wires.adoc[serialized wires, and the values they own].
@@ -107,7 +107,6 @@ Verification:: test, review, gate
 ** Two values of a type with padding that differ only in their padding bytes: every comparison and every view that the element makes gives the same result for both.
 * *review*: each `+unsafe+` declaration of a native type, against the obligations of this item.
 * *gate*: the inventory check, which refuses a new or changed declaration until it is reviewed.
-Status:: Draft
 
 *Rationale.*
 A view lets a reader use bytes that another process wrote as a value of a type.
@@ -216,7 +215,6 @@ Verification:: test, fault-injection, review
 ** A frame with the route's layout identity and another payload encoding identifier: refused (xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
 * *fault-injection*: a peer that is built for another layout of a type, on real processes.
 * *review*: the comparison and its argument: that it covers every part of a layout identity, that it is made before a view for every writer whose frames a reader can get, and, where a computed value is compared, why two different layout identities do not share it.
-Status:: Draft
 
 *Rationale.*
 Two processes can read one block of memory as the same value only if they agree on its layout exactly.
@@ -307,7 +305,6 @@ Verification:: test, heap-window, miri, review
 * *heap-window*: native sending, receiving, refusal, cancellation and return.
 * *miri*: the view, on a lending test double, with a forgotten lease.
 * *review*: no path from a native route into an encoder, a decoder or a staging buffer, and no property of this item that holds only if a destructor runs.
-Status:: Draft
 
 *Rationale.*
 A native route exists so that a value crosses between processes with no copy, no allocation and no code that could fail on its contents.

@@ -4,9 +4,6 @@
 This area holds the proposed requirements of the redesigned up-rust stack, which its repositories trace with OpenFastTrace (OFT): the up-rust SEooC, and the transports, wires and Streamer that work with it.
 It is laid out like the protocol specification: what is shared comes first, then a part for each protocol layer, then a part for each SDK element.
 
-* *A proposal.*
-It is published as a draft on a feature branch.
-Every item in it is still Draft, and none has replaced a rule of the protocol chapters.
 * *Not only safety material.*
 The area is named for its safety requirements and assumptions of use.
 It also holds what they rest on: the redesigned SDK's ordinary functional contract, and its resource and fault obligations.
@@ -295,7 +292,7 @@ As in the protocol chapters: a block attribute line that gives the item its `spe
 
 * Inside the block, a statement may use short paragraphs, labels in bold and lists.
 All of it is the statement.
-* Text after the block is not part of the item: the `ID` row, which repeats the item's identifier for readers, the ASIL, the allocation, the verification methods, the status, the ISO 26262 references and the rationale.
+* Text after the block is not part of the item: the `ID` row, which repeats the item's identifier for readers, the ASIL, the allocation, the verification methods, the ISO 26262 references and the rationale.
 * A rationale gives the reason for the rule as it stands.
 It does not recount earlier revisions: an item's history is kept outside these pages (<<source>>).
 * A rationale cites only public sources: up-spec, public standards by part and clause number, and the published documents and code of other projects, each at a fixed version.
@@ -331,11 +328,6 @@ An item not yet rewritten for publication states its duties without key words, a
 * A requirement met in code that also makes the element state something for integrators needs `impl,utest,uman`.
 * An assumption of use needs `uman`: the safety manual states it.
 A document covers it with an item of its own that covers the assumption, because OFT reads no coverage tag in a Markdown file.
-
-=== Status
-
-"Draft" until the requirements are signed off.
-Every item is Draft at this revision.
 
 [[tags]]
 == Tags

@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
@@ -37,7 +37,6 @@ ID:: `+req~ssr-integrity-declared~3+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, fault-injection
-Status:: Draft
 ISO 26262:: 6-7.4.8, 9-6 (part-clause numbers only)
 
 *Rationale.*
@@ -94,7 +93,6 @@ Verification:: fault-injection, miri, heap-window, review
 ** On a two-way binding, a port above and a port below the service's recorded level, on every port kind and on the paired event service.
 * *miri*, under Stacked Borrows, under Tree Borrows and with strict provenance: a racing writer thread, with a plain-read copy as the negative control, which must be reported as a data race.
 * *review*: the source-access mechanism of each copy route, and the tenure and synchronization of each view, at source level.
-Status:: Draft
 ISO 26262:: 6-Annex D.2.3, 6-Table 3 1h (part-clause numbers only)
 
 *Rationale.*
@@ -131,7 +129,6 @@ ID:: `+req~ssr-integrity-any-bits~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: compile-fail (the derive refuses such fields), test
-Status:: Draft
 
 *Rationale.*
 A typed view of in-place bytes may exist only once every invalid bit pattern has been rejected.
@@ -160,7 +157,6 @@ ID:: `+req~ssr-integrity-checked-at-admission~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (a malformed in-place frame is refused at admission and counted)
-Status:: Draft
 
 *Rationale.*
 In-place frames are borrowed through a checked typed view.
@@ -198,7 +194,6 @@ ID:: `+req~ssr-integrity-carrier-crossing~2+`
 ASIL:: B
 Allocated to:: the element (carrier routes)
 Verification:: fault-injection (a writer changing a frame while it is forwarded), test (refusal of a route whose ingress has no valid source-access mechanism), heap-window, review (each ingress's source-access mechanism, at source level)
-Status:: Draft
 
 *Rationale.*
 A carrier keeps a frame's bytes unchanged and makes at most one copy, into a lending egress's loan.

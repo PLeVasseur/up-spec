@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
@@ -72,7 +72,6 @@ The integrator *SHALL* restrict access to every transport's resources (shared-me
 [horizontal]
 ID:: `+aou~seooc-peer-access~5+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 
 *Rationale.*
@@ -111,7 +110,6 @@ The integrator *SHALL* give each transport one integrity level in the deployment
 [horizontal]
 ID:: `+aou~seooc-integrity-levels~6+`
 ASIL:: B
-Status:: Draft
 ISO 26262:: 6-7.4.8, 9-6 (part-clause numbers only)
 
 *Rationale.*
@@ -154,7 +152,6 @@ In strict mode, the Enforce state refuses a binding or wire that is not on the i
 [horizontal]
 ID:: `+aou~seooc-qualified-bindings-and-wires~7+`
 ASIL:: B
-Status:: Draft
 
 *Rationale.*
 A declaration of capability needs target-specific contract evidence.

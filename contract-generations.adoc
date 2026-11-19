@@ -110,25 +110,6 @@ Until it is decided, a claim of conformance to one rule is no claim about the ot
 Whether a successor rule replaces an existing one is decided when its slice lands (<<cutover>>), and not before.
 This page decides none.
 
-[[status]]
-== What publication does and does not mean
-
-Five statuses are separate, and none implies the next.
-
-. *Published as a draft on a feature branch.*
-The text can be read and reviewed.
-. *Source accepted.*
-An implementation's source was accepted against an item at its exact revision.
-. *Integrated.*
-The consumers of that implementation have taken it.
-. *Adopted upstream.*
-The rule has joined or replaced the existing contract in the upstream specification.
-. *Assured.*
-A safety assessment covers it for a stated configuration.
-
-At this revision every successor item has the first status and no other.
-No successor rule has replaced an existing one, none is adopted upstream, and none is assured.
-
 [[transition]]
 == Where the two generations meet
 
@@ -259,7 +240,7 @@ It is a comparison of documents, and it claims nothing about whether two impleme
 A change of behaviour lands as one slice: the changed requirements with their revisions, the rule they replace and for whom, the implementation that meets them at that revision, its evidence, and the existing text that the slice retires or scopes.
 * *A proposal first.*
 A proposed rule can be published before its implementation is complete.
-It is then a proposal, as <<status>> describes, and it has replaced nothing.
+It is then a proposal, and it has replaced nothing.
 * *One authority after the cutover.*
 After a slice lands, one rule applies to each behaviour that it covers, for each implementation that it names.
 For every other implementation the existing rule stays as it was.

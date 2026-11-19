@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-mode-two-types]]
@@ -21,7 +21,6 @@ ID:: `+req~ssr-mode-two-types~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, review
-Status:: Draft
 ISO 26262:: 6-6.4.2 g, 6-7.4.5 (part-clause numbers only)
 
 *Rationale.*
@@ -44,7 +43,6 @@ ID:: `+req~ssr-mode-no-setup-at-runtime~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: compile-fail
-Status:: Draft
 ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
@@ -70,7 +68,6 @@ ID:: `+req~ssr-mode-no-traffic-before-runtime~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: compile-fail
-Status:: Draft
 ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
@@ -96,7 +93,6 @@ ID:: `+req~ssr-mode-backstop~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test
-Status:: Draft
 
 *Rationale.*
 Types keep the modes apart inside Rust, but they cannot follow a call through a C ABI.
@@ -146,7 +142,6 @@ Verification:: compile-fail, test
 ** A refused transition leaves no runtime-mode value for that transport and starts no traffic on it.
 ** One refusal for each condition.
 ** With several transports entering together, a later refusal leaves an entered transport in runtime mode under its own duties.
-Status:: Draft
 ISO 26262:: 6-6.4.2 g, 6-7.4.5 (part-clause numbers only)
 
 *Rationale.*
@@ -175,7 +170,6 @@ ID:: `+req~ssr-mode-entry-admission~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test
-Status:: Draft
 
 *Rationale.*
 The SDK owns admission, as it owns the mode state machine and the startup slots.
@@ -204,7 +198,6 @@ ID:: `+req~ssr-mode-entry-clock~2+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (an unreadable clock; a provider that supplies uptime as wall time; a provider that passes its check)
-Status:: Draft
 
 *Rationale.*
 Message IDs carry a timestamp (xref:../../basics/uuid.adoc[UUID]), and a message's expiry is judged against its creation time plus its TTL (`+dsn~up-attributes-ttl-timeout~1+`).
@@ -231,7 +224,6 @@ ID:: `+req~ssr-mode-entry-no-latent-refusal~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, review (each runtime refusal reason checked for whether setup could have known it)
-Status:: Draft
 
 *Rationale.*
 A route admitted only to refuse all its traffic looks healthy at setup and fails only in operation, where the cause is harder to see.
@@ -256,7 +248,6 @@ ID:: `+req~ssr-mode-one-way~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: compile-fail (the setup value is consumed), review (no such operation exists)
-Status:: Draft
 ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
@@ -342,7 +333,6 @@ Verification:: test, review, fault-injection
 ** Each relied-on source, helper and provider contract.
 ** Each destruction setup performs on refusal, including a dropped input, against its stated disposition and, where a guarantee is required, its evidence.
 * *fault-injection*: a kill at each startup step.
-Status:: Draft
 ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
@@ -404,7 +394,6 @@ ID:: `+req~ssr-mode-restart~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: fault-injection (a kill and restart at every startup step and during traffic)
-Status:: Draft
 ISO 26262:: 6-Table 15 (part-clause numbers only)
 
 *Rationale.*
@@ -434,7 +423,6 @@ ID:: `+req~ssr-mode-no-shutdown~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: review, fault-injection (peers survive a kill at representative points)
-Status:: Draft
 ISO 26262:: 6-7.4.5 (part-clause numbers only)
 
 *Rationale.*
@@ -460,7 +448,6 @@ ID:: `+req~ssr-mode-classic-excluded~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: compile-fail (a classic transport cannot stand where a two-mode setup is required), test (deployment data naming a classic endpoint)
-Status:: Draft
 ISO 26262:: 6-7.4.8 (part-clause numbers only)
 
 *Rationale.*
@@ -504,7 +491,6 @@ Verification:: test, fault-injection (a peer that never starts; a service that n
 * *test*
 ** A provider whose request can wait, reported on a route that does not require non-waiting acquisition, one that requires only non-waiting release included, and refused by name on a route that requires it.
 ** A refusal's destruction that can wait, performed and reported where nothing requires non-waiting release of the value, a route that requires only non-waiting acquisition included, and not performed where that guarantee is required of the value and not established.
-Status:: Draft
 
 *Rationale.*
 Processes start and restart in any order (<<req-ssr-mode-restart,A restart is an initialization>>), so a peer that is not up yet is normal input, not a fault (xref:../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).

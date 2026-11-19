@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-platform-contract]]
@@ -42,7 +42,6 @@ Verification:: test, review
 ** A platform contract test in `+test-util+`, run inside heap windows.
 ** A fault-injected backend whose clock read fails or steps back, ending a wait as expired, counted, and refusing a TTL check.
 * *review*: each backend's source and its package's stated contracts.
-Status:: Draft
 
 *Rationale.*
 Runtime code reaches the operating system only through a backend.
@@ -69,7 +68,6 @@ ID:: `+req~ssr-platform-init-only~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: compile-fail
-Status:: Draft
 
 *Rationale.*
 Both services belong to setup:
@@ -109,7 +107,6 @@ Verification:: test, review
 ** A failed read is reported and refuses setup, through a fault-injected backend.
 ** A source short of its stated contract is refused.
 * *review*: each backend's source, against its OS's documentation and its package's stated contract.
-Status:: Draft
 
 *Rationale.*
 Entropy is read once, to seed the message-ID generators.
@@ -137,7 +134,6 @@ ID:: `+req~ssr-platform-classified~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: review
-Status:: Draft
 
 *Rationale.*
 A behaviour that a platform mandates holds only where the platform keeps that rule.
@@ -192,7 +188,6 @@ Verification:: gate, test, review
 ** The suite under Miri, both models, for a little-endian and for a big-endian 32-bit target without 64-bit atomics.
 ** Each backend's mechanism on the targets its configuration names.
 * *review*: each mechanism's source-level safety argument, against every participant that can reach its storage.
-Status:: Draft
 
 *Rationale.*
 An earlier requirement made every protocol word a 32-bit atomic, in one implementation on every target.
@@ -271,7 +266,6 @@ Verification:: test, review
 * *review*
 ** The documented list against the code of every profile, host and MCU.
 ** The source argument of each full-width representation's exclusive step.
-Status:: Draft
 
 *Rationale.*
 Narrowed and wrapping state is correct only inside its reuse and observation windows.

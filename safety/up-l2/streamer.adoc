@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L2].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
@@ -41,7 +41,6 @@ ID:: `+req~ssr-streamer-route-lock~3+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: compile-fail (add or delete after activation; forward before activation; activate with a setup value), test (a live subscription source is refused)
-Status:: Draft
 ISO 26262:: 6-7.4.3, 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
@@ -70,7 +69,6 @@ ID:: `+req~ssr-config-exact-addresses~1+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: test
-Status:: Draft
 
 *Rationale.*
 An exact source filter bounds route matching and lets the Streamer refuse and count frames carrying an undeclared address.
@@ -102,7 +100,6 @@ ID:: `+req~ssr-streamer-heap-free~1+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: heap-window (Rust guard and C-level observer, on Linux and macOS; QNX once a target exists), fault-injection
-Status:: Draft
 ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
 *Rationale.*
@@ -155,7 +152,6 @@ Verification:: test
 ** An absent payload kept absent, and a present zero-length payload kept present with its identifier, between two different envelopes.
 ** The same frames carried the same way after a wire that reads their encoding is added to the route.
 ** A control: a carrier that refuses a frame because no wire of the route names its identifier fails.
-Status:: Draft
 
 *Rationale.*
 up-spec makes a component that only carries or forwards a message keep its identifier and payload bytes unchanged, with no decoder needed (xref:../../basics/payload_encoding_registry.adoc#acceptance[the payload encoding registry, "Carrying a Payload versus Reading It"]).
@@ -208,7 +204,6 @@ ID:: `+req~ssr-streamer-no-ingress-block~1+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: fault-injection (a slow egress; a dead egress), test
-Status:: Draft
 ISO 26262:: 6-Annex D.2.2 (part-clause numbers only)
 
 *Rationale.*
@@ -228,7 +223,6 @@ ID:: `+req~ssr-streamer-containment~1+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: fault-injection
-Status:: Draft
 ISO 26262:: 6-7.4.12, 6-Annex D (part-clause numbers only)
 
 *Rationale.*
@@ -295,7 +289,6 @@ Verification:: test
 ** On a route with an encoding filter, a frame that names a native representation: admitted or refused by the route's wires alone.
 ** The setup report of each route's filter, and of a route that has none.
 ** Controls: a filter refusal counted as an unknown or invalid encoding fails, and so does a filter derived from the route's wires.
-Status:: Draft
 
 *Rationale.*
 A limit checked on one forwarding path and not on another lets a frame through on the path that skips it, so every path checks.
@@ -352,7 +345,6 @@ ID:: `+req~ssr-streamer-startup-report~3+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: test, heap-window
-Status:: Draft
 
 *Rationale.*
 The integrity-code check is its own item, <<req-ssr-streamer-config-integrity,The deployment data is checked before it is applied>>, because it must run before any of the data is applied.
@@ -374,7 +366,6 @@ ID:: `+req~ssr-streamer-config-integrity~1+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: test (a mismatched code; a truncated file; a code computed over other content)
-Status:: Draft
 ISO 26262:: 6-C.4.10, 6-Table C.1 (part-clause numbers only)
 
 *Rationale.*
@@ -405,7 +396,6 @@ ID:: `+req~ssr-streamer-sync-data-plane~1+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: gate (the crate's dependency set, and the token scan of xref:../seooc-up-rust/crate-isolation.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled]), heap-window
-Status:: Draft
 
 *Rationale.*
 The Streamer is built from the element's carrier primitives, which offer traffic in synchronous or polled form with no futures, tasks or pinning (xref:../seooc-up-rust/crate-isolation.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled]).
@@ -434,7 +424,6 @@ ID:: `+req~ssr-streamer-workers~1+`
 ASIL:: B
 Allocated to:: the Streamer binary
 Verification:: test, review
-Status:: Draft
 
 *Rationale.*
 Creating or joining a thread in runtime mode would bring the heap and an unbounded wait into the data path (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]; xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded]).
@@ -471,7 +460,6 @@ ID:: `+req~ssr-streamer-route-gate~2+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: test, heap-window
-Status:: Draft
 
 *Rationale.*
 The Streamer's safe state is fail-silent per route, through its route gates (xref:../seooc-up-rust/README.adoc[the SEooC's README]).
@@ -501,7 +489,6 @@ ID:: `+req~ssr-streamer-operator-control~1+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: test, heap-window
-Status:: Draft
 
 *Rationale.*
 Disabling an ASIL route removes its function.
@@ -562,7 +549,6 @@ Verification:: fault-injection, test
 ** A tripped route that the operator interface does not name stays disabled.
 ** A trip keeps its routes' storage.
 ** The report without a reaction claim.
-Status:: Draft
 ISO 26262:: 6-7.4.12 (part-clause numbers only)
 
 *Rationale.*
@@ -598,7 +584,6 @@ ID:: `+req~ssr-streamer-mode-report~1+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: test, heap-window
-Status:: Draft
 
 *Rationale.*
 The incarnation lets a reader see that a restart has reset the counters it compares.
@@ -622,7 +607,6 @@ ID:: `+req~ssr-streamer-watchdog-hook~1+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: test (a stalled worker is seen through the hook), heap-window
-Status:: Draft
 ISO 26262:: 6-7.4.12 (part-clause numbers only)
 
 *Rationale.*
@@ -652,7 +636,6 @@ ID:: `+req~ssr-streamer-dispatch-obligations~2+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: test
-Status:: Draft
 
 *Rationale.*
 Fixed counters preserve bounded fault reporting.
@@ -689,7 +672,6 @@ ID:: `+req~ssr-streamer-rpc-error-response~4+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: test (each cause; a full egress; a full reverse route; a call whose error response was not sent ends as expired), heap-window
-Status:: Draft
 
 *Rationale.*
 The dispatcher can report a known delivery failure promptly without forwarding through a disabled route.
@@ -721,7 +703,6 @@ In strict mode, the Streamer's own checks refuse an operator interface that name
 [horizontal]
 ID:: `+aou~seooc-operator-access~2+`
 ASIL:: B
-Status:: Draft
 
 *Rationale.*
 The operator interface can switch an ASIL route off at run time (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>).
@@ -753,7 +734,6 @@ In strict mode, the deployment data *SHALL* also declare each peer's worst-case 
 [horizontal]
 ID:: `+aou~seooc-monitor-thresholds~2+`
 ASIL:: B
-Status:: Draft
 
 *Rationale.*
 A peer recovers from a fault by restarting, since the element has no recovery inside a process (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).

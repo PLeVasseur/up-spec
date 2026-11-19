@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L2].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
@@ -42,7 +42,6 @@ Verification:: test, fault-injection
 * *test*: a call ended by its TTL, by its cancellation and by a peer's failure while what it owned is pending release.
 Its outcome is reported at once, its storage is charged and not reused, and its slot is returned only once nothing it holds is pending.
 * *fault-injection*: a server killed during a call.
-Status:: Draft
 
 *Rationale.*
 A vanished server cannot release its client resources, so the client needs its own expiration path and a reusable call slot.
@@ -103,7 +102,6 @@ Verification:: test, review
 ** A response for an earlier tenure of a reused slot, refused with nothing recorded.
 ** A response from another peer, or from an older incarnation of the bound peer, refused.
 * *review*: the claim's source argument for each configuration's mechanism: the comparison and the claim in one exclusive step, or the recheck after the claim and its give-back.
-Status:: Draft
 ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 
 *Rationale.*
@@ -162,7 +160,6 @@ Verification:: test, miri, heap-window
 ** A refusal racing the call's drop, its TTL, a peer's loss and its restart.
 ** A final answer that completes its call at once, and an advisory one that leaves it open.
 * *miri*: the give-back and the delivering phases, with threads.
-Status:: Draft
 
 *Rationale.*
 Completing a call before checking its wire would let a corrupt first copy exclude a later intact response.
@@ -229,7 +226,6 @@ Verification:: test, heap-window
 ** A request that passes the end-to-end check and fails the inner decode is answered `+InvalidArgument+`.
 ** A refused request whose server never delivered its tag gets a final answer, and its call ends at once as rejected.
 * *heap-window*: producing each answer; on a serialized route, only the route's declared send-side allocation and release.
-Status:: Draft
 
 *Rationale.*
 A known decoding failure can be reported immediately.
@@ -259,7 +255,6 @@ ID:: `+req~ssr-peer-rpc-no-server~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (with and without the capability), heap-window
-Status:: Draft
 
 *Rationale.*
 Waiting out the TTL of a request that no server received only delays an error the binding already knows, and holds the call's slot until then.
@@ -318,7 +313,6 @@ Verification:: review, test, heap-window
 ** A clock step back.
 ** A route seeded at 0 whose clock is then set to the present.
 * *heap-window*: the first ID on a cold thread.
-Status:: Draft
 
 *Rationale.*
 up-spec `+dsn~uuid-spec~1+`.

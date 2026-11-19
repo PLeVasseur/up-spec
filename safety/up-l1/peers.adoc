@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
@@ -54,7 +54,6 @@ Verification:: fault-injection inside a heap-window
 * On a serialized route that admits owning values, a restart report that fails a call holding a decoded response, with that one release under the declared class and nothing else.
 * On such a route that requires non-waiting release, the call error reported while that release is held pending.
 * On one that does not, the call error recorded before that release starts.
-Status:: Draft
 ISO 26262:: 9-7.4.4 g, 6-Annex D.2.4 (part-clause numbers only)
 
 *Rationale.*
@@ -108,7 +107,6 @@ Verification:: test
 * The binding contract's refusal of an ABI mismatch at setup, on the test doubles and on iceoryx2 with two processes.
 * The fingerprint's unit tests.
 * Each Miri lane's logged fingerprint, on three targets with three values.
-Status:: Draft
 
 *Rationale.*
 Equal message identity does not imply equal in-memory layout.
@@ -157,7 +155,6 @@ Verification:: test, fault-injection, review
 ** A genuinely full table refused as full.
 * *fault-injection*: a restart on real iceoryx2, and a test double that restarts.
 * *review*: the exclusive step's source argument for each configuration's mechanism, against every participant that can reach the table.
-Status:: Draft
 
 *Rationale.*
 A restarted peer must not inherit frames or calls from its predecessor, and contention must not turn a stale incarnation into a current one.
@@ -187,7 +184,6 @@ ID:: `+req~ssr-peer-admission~2+`
 ASIL:: B
 Allocated to:: the element
 Verification:: fault-injection (strangers first, then declared clients; a lost peer racing its own last frame, on two threads), miri, test
-Status:: Draft
 
 *Rationale.*
 Undeclared sources must not consume the entries reserved for declared peers.

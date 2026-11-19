@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-build-panic-abort]]
@@ -35,7 +35,6 @@ Verification:: gate
 * The release profile's settings.
 * `+cargo test+` on the workspace still compiles.
 * `+cargo build+`, `+cargo clippy --all-targets+` and `+cargo doc+` on the workspace still compile.
-Status:: Draft
 
 *Rationale.*
 With `+panic = "abort"+`, a panic ends the process at once instead of unwinding through code that may hold half-changed state.
@@ -69,7 +68,6 @@ ID:: `+req~ssr-build-specified-functions-only~1+`
 ASIL:: B
 Allocated to:: the element; the Streamer
 Verification:: gate (a symbols check on a final ASIL image, for test and benchmark entry points), review
-Status:: Draft
 ISO 26262:: 6-10.4.6 (part-clause numbers only)
 
 *Rationale.*
@@ -95,7 +93,6 @@ Allocated to:: the element
 Verification:: gate
 * The source scan refuses a hidden public function that is neither under the configuration nor one of the seam's names.
 * Built without the configuration, a probe naming each test hook fails to resolve.
-Status:: Draft
 
 *Rationale.*
 A test hook that changes hidden protocol state must not become an operation available in a shipped build.
@@ -209,7 +206,6 @@ Verification:: test, miri, review
 ** Native paths inside heap windows.
 * *miri*: the seam's registration storage.
 * *review*: the contract against the code, and each scheduler's causal resource behaviour against its package.
-Status:: Draft
 
 *Rationale.*
 An asynchronous layer can miss a notification, overwrite another operation's, keep storage alive incorrectly or accept a late result unless registration, progress, abandonment, lifetime and deadline responsibilities are explicit.
@@ -276,7 +272,6 @@ Verification:: test, heap-window, review
 * *test*: each rule's finding at setup, with a negative control per rule.
 * *heap-window*: setup and the transition in the Enforce state.
 * *review*: no runtime path runs the policy checker or reads its policy; initialization-selected E2E behavior is distinguished from policy checking and retains the runtime bounds.
-Status:: Draft
 
 *Rationale.*
 Admission findings must be complete before runtime starts, so policy checking cannot add runtime allocation or configuration work.
@@ -321,7 +316,6 @@ Verification:: gate, test
 ** Deployment data naming another state is refused at setup.
 ** A transport without a policy is refused.
 ** An allocating wire is refused on a native route and admitted on a serialized route that declares its allocation.
-Status:: Draft
 
 *Rationale.*
 An integrator-selected build lock prevents a development setting or convenience dependency from silently restoring an unsupported runtime surface.
@@ -350,7 +344,6 @@ ID:: `+req~ssr-strict-ack-revision~1+`
 ASIL:: B
 Allocated to:: the element's strict mode
 Verification:: test (an acknowledgement of an earlier revision refuses again; one that names an unknown ID is refused; a known failure refuses whatever is acknowledged)
-Status:: Draft
 
 *Rationale.*
 Acknowledging an earlier deviation cannot establish acceptance of a later change to its scope or consequences.
@@ -388,7 +381,6 @@ Verification:: test, review
 ** A route's requested and admitted claims.
 ** An ASIL-labelled configuration with no assurance package, reported Draft and unassessed and not refused.
 * *review*: the report's fields against this item.
-Status:: Draft
 
 *Rationale.*
 A compliance report makes declarations, deviations and outstanding duties inspectable.

@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions, tags and status words: xref:../README.adoc[the safety area's README].
+Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-refuse-before-heap]]
@@ -50,7 +50,6 @@ Verification:: heap-window, test
 * *test*
 ** Each named refusal.
 ** A check after decode, a failed declared allocation and a response first accepted after its deadline, each ending the admitted ownership exactly once.
-Status:: Draft
 ISO 26262:: 6-7.4.12 (part-clause numbers only)
 
 *Rationale.*
@@ -95,7 +94,6 @@ Verification:: gate, fault-injection, test
 The inbound metadata, payload, peer reference and TTL are fed as opaque inputs, so that no panic branch can be proven dead from constant inputs.
 ** The workspace lints.
 * *fault-injection*: malformed and truncated frames.
-Status:: Draft
 ISO 26262:: 6-Table 1 (part-clause numbers only)
 
 *Rationale.*
@@ -131,7 +129,6 @@ ID:: `+req~ssr-error-fixed-size~1+`
 ASIL:: B
 Allocated to:: the element
 Verification:: gate (a compile-time `+Copy+` assertion for each runtime error type), heap-window (the error paths), review
-Status:: Draft
 ISO 26262:: 6-7.4.12 (part-clause numbers only)
 
 *Rationale.*
@@ -186,7 +183,6 @@ Verification:: test, heap-window
 ** Each observable loss counted once or returned as specified, under contention and under `+Wait+` too.
 ** Unobservable middleware losses disclosed rather than represented as complete counts.
 * *heap-window*: counters read inside the window.
-Status:: Draft
 ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 
 *Rationale.*
@@ -224,7 +220,6 @@ ID:: `+req~ssr-error-route-report~2+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (the send mode, QoS, reserved storage, heap class and permit, and the join to the waiver list, each asserted)
-Status:: Draft
 
 *Rationale.*
 Each report names its permit through its heap class, and the runtime keeps the waivers it recorded.
