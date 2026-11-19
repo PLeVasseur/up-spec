@@ -74,7 +74,7 @@ _Empty inputs._
 An empty input is not malformed by being empty.
 
 * The protocol treats an explicitly set zero-length payload as a present payload (xref:../../basics/umessage.adoc[UMessage]).
-* Its error model has an operation that returns no data answer with an empty message, which its consumer receives as an empty payload (xref:../../basics/error_model.adoc[the error model]).
+* Its error model asks an operation that returns no data to answer with an empty message, which its consumer receives as an empty payload (xref:../../basics/error_model.adoc[the error model]).
 * A format with a fixed layout of non-zero size has no empty encoding, and a wire of such a format refuses an empty input.
 
 So the rule follows the format.
@@ -124,7 +124,7 @@ So its contract tests must check that sequence rather than require identical byt
 
 The item binds the directions in which a wire claims no heap use.
 A serialized wire that declares allocation in a direction is not required to be heap-free there.
-Its declared class is checked when its route enters runtime mode (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), and a native route refuses it.
+Its declared class is checked when its route enters runtime mode, and a native route that uses the wire in that direction is refused there (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 
 _A value's whole life._
 A wire's class for its decode direction covers a decoded value's whole life (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
@@ -157,8 +157,8 @@ Verification:: review (the README against the wire's declarations and against th
 *Rationale.*
 An integrator chooses a wire for a message, and decides which routes need end-to-end protection (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 Both choices need to know what the wire's format can and cannot show, and what the wire costs.
-A binding's qualification record already says what its middleware cannot guarantee (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
-This item asks the same of a wire.
+A binding's qualification record states what its middleware cannot guarantee (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
+This item asks a wire for the same kind of statement, in its README.
 
 [[one-wire]]
 == What depends on the payload a wire carries

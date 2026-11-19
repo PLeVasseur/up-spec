@@ -156,11 +156,11 @@ Where the middleware's own release can wait, the binding defers it.
 The drop hands the retained owner over without waiting, and the binding's deferred return performs the release as pending cleanup.
 A lock-free queue whose capacity covers every admitted retained owner is one hand-off that meets this.
 The statement requires the outcome, and no particular mechanism.
-Whatever the mechanism, every clause of the statement and of xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] binds it: the hand-off does not wait, it has room for every retained owner that the route admits, ownership passes exactly once, and the owner stays charged until its return completes.
+Whatever the mechanism, every clause of the statement binds it, and so does every clause of xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] that binds pending cleanup, a binding's deferred return included: the hand-off does not wait, it has room for every retained owner that the route admits, ownership passes exactly once, and the owner stays charged until its return completes.
 
 _Isolation._
 A worker of its own is not by itself the isolation that pending cleanup needs.
-While a deferred return waits for a lock, it holds nothing that a binding call, an arrival report or the return of an owner that does not need that lock needs, and one stalled return does not stop the others.
+While a deferred return waits for a lock, it holds nothing that a binding call, an arrival report or the return of an owner that does not need that lock needs.
 
 _Not a second queue._
 The hand-off holds ownership awaiting return, never unread traffic, so it is not a second receive queue.
@@ -170,8 +170,7 @@ A measured lock delay is not an accepted wait.
 
 _Panics._
 The binding's own code has no exception.
-A panic path inside one middleware is that binding's to state, with its bounds, in an item of its own.
-So this rule of every binding names no middleware, and a binding without such an item is allowed nothing.
+A panic path inside one middleware is that binding's to state, with its bounds, in an item of its own, so this rule of every binding names no middleware.
 
 [[req-ssr-binding-no-panic]]
 == No panic on any peer input
@@ -219,7 +218,7 @@ A faulty peer's shared-memory writes that reach a middleware panic are known fai
 
 Each binding's account is stated in an item of its own, so that no binding's silence is read as an account.
 The paths of one middleware are stated with its binding, and this rule of every binding lists none.
-How one binding makes a panic path unreachable, by which setup check or by which sizing, is that binding's to state as well.
+A setup check or a sizing that makes one middleware's panic path unreachable is likewise stated with that binding.
 
 [[req-ssr-binding-peer-identity]]
 == Peer identity is stable, and incarnations rise
@@ -241,7 +240,7 @@ Verification:: test (a test double that restarts; a real restart)
 *Rationale.*
 A stable identity with a rising incarnation lets the element tell a restarted peer from its earlier self, and refuse a frame from the earlier one as stale (xref:peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected]).
 
-A binding with no peer identity reports the peer as unknown, and then only deadlines can show that a peer has gone.
+A binding that cannot identify peers cannot report a peer's loss or restart, so only deadlines can show that a peer has gone.
 
 [[req-ssr-binding-qos-capability]]
 == A binding honors or refuses each declared setting
@@ -303,7 +302,7 @@ A receive that gave up any number of frames per call could hold its caller for a
 The bound on a binding's waits is logical, as every wait of its own is (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded]).
 A physical bound on when the caller resumes is a timing claim of a supported configuration.
 
-A carrier ingress refuses a borrowed delivery, because its bytes live only for that call and a carrier may not stage a copy.
+A borrowed delivery's bytes live only for that call, so carrying them beyond it would need a staged copy, which a carrier may not make.
 
 _The two waits without a deadline._
 A deferred return of a retained owner can wait behind the middleware's own lock (<<req-ssr-binding-frame-drop,What a received frame's destructor may do>>), and a call that waits for a lock cannot observe a deadline from inside it.
@@ -333,7 +332,7 @@ Verification:: fault-injection (a peer killed; a restart with its leftovers pres
 Cleanup in runtime mode would put work of unknown size, and perhaps the heap, on a survivor's runtime path, while initialization may do both (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-restart[A restart is an initialization]).
 So the binding contract places that recovery in the binding's construction, before any route.
 
-How one middleware recovers a predecessor's resources is described with its binding.
+The rule names no means of recovery, because the means depend on the middleware.
 
 [[req-ssr-binding-readme]]
 == A binding's qualification record states its limits and its failures, and its README points at it
@@ -374,10 +373,10 @@ Verification:: review (every binding's record, and what its README says of the m
 *Rationale.*
 A deployment decision needs the limits of the middleware underneath the binding, including limits that setup declarations cannot remove.
 
-Timing budgets here are the system's allocation.
-Where a supported configuration offers a timing package, that package is its maintainers' (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+The timing budgets that the record discloses as the integrator's duty are the system's allocation.
+A timing package that a supported configuration offers is that configuration's maintainers' (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 
-End-to-end protection means whatever the system supplies.
+The end-to-end protection that the record discloses as the integrator's duty is whatever the system supplies.
 The SDK's E2E wire is deferred and not part of this delivery.
 
 [[req-ssr-binding-integrity-level]]

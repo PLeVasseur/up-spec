@@ -52,10 +52,10 @@ Verification:: test (a wire that declares allocation on a native route is refuse
 The element can answer only for its own code.
 So a waiver covers only what middleware does inside itself, for the operations and the bound its permit states.
 
-A known anomaly in middleware, such as a panic it can reach, is a defect and is never filed as a waiver.
+A known anomaly in middleware, such as a panic that it can reach, is outside what a permit names, so it is never filed as a waiver.
 
 Declared allocation on a serialized or owned route is admitted by that route's heap class (xref:heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), not by a waiver.
-So a waiver cannot carry native work into allocation, and a serialized route's permission is never a waiver for anything else.
+So no waiver lets SDK, binding or wire code allocate, and a serialized route's heap class is never a waiver for other allocation.
 
 [[req-ssr-waiver-record]]
 == Waivers are recorded and can be found

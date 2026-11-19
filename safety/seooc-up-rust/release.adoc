@@ -210,26 +210,25 @@ Catching an unwind cannot stand in for that evidence, since it cannot stop an ab
 _A release service is a mechanism, not a condition of ownership._
 The service exists to give non-waiting release over a dependency that can wait.
 A configuration that has none cannot offer that guarantee, and says so by refusing a route that requires it.
-It still carries ordinary owning routes, whose destructions run where their values end.
+It still carries ordinary owning routes, whose destructions run on a path of the route, as xref:heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors] states.
 
 _Deferred return of a retained owner._
-Where an underlying transport's own release of a retained sample can wait, the return is deferred.
+Where an underlying transport's own release of a retained owner can wait, the return is deferred.
 The drop hands the retained owner over without waiting and returns, and the binding's deferred return completes the release.
-A lock-free queue sized for every admitted retained owner, served by a worker of the binding, is one mechanism that meets this, and the statement requires no particular one.
-Whatever the mechanism, every clause of the statement binds it: hand-off capacity fixed at setup for every owner that the route can hold, ownership passed exactly once, the owner charged until its release completes, and isolation while that release waits.
-The hand-off holds ownership awaiting return, not unread traffic.
+A lock-free queue sized for every admitted retained owner, served by a worker of the binding, is one such mechanism, and the statement requires no particular one.
+Whatever the mechanism, the rest of the item binds it, as it binds every release service and all pending cleanup.
 A stalled return shows as counted capacity pressure, never as a drop that waits (xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 
 _Why no completion deadline._
 Moving a wait off the drop does not bound it.
 A release that waits for an allocator's or a middleware's own lock cannot observe a deadline from inside that call.
 So the element states when the ending operation's outcome is due, not when its cleanup completes.
-It keeps what the cleanup owns charged, and it keeps pending cleanup from holding anything that other work needs.
+It keeps what the cleanup owns charged, and keeps pending cleanup from holding what the element needs for other work.
 
 Two designs would not meet that:
 
-* a worker of its own that one stalled release could stop for every route;
-* a release that holds a lock which public allocation also needs while it waits.
+* a single worker that serves every route, which one stalled release could stop for all of them;
+* a release that, while it waits, holds a lock that an allocation for a bounded operation also needs.
 
 _What fixed capacity gives._
 Fixed capacity bounds what an unfinished release can consume, but it cannot keep throughput going while a release never completes.
@@ -237,5 +236,5 @@ So a claim of recovered capacity within a time rests on a package that establish
 A measured average delay is not such a bound.
 
 _Native routes._
-On a native route that return gives the retained owner back to the underlying transport through its own interface and frees no heap.
+On a native route, a retained owner's return gives it back to the underlying transport through the transport's own interface, and frees no heap.
 Returning a preallocated loan never frees the backing it lives in (xref:heap.adoc#req-ssr-heap-none[No heap in runtime mode]).

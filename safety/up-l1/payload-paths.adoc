@@ -239,7 +239,7 @@ So an absent payload never becomes an empty input.
 What a typed role then tells its application is not decided (xref:serialized-wires.adoc#open[what is not decided for serialized wires]).
 
 _Reading only._
-A carrier forwards a payload that it cannot read, whatever its identifier.
+A carrier forwards a serialized payload without reading it, as xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes] states.
 This item is about the point at which bytes become a typed value, and it leaves carriage as it is (<<carriage>>).
 
 [[independent]]

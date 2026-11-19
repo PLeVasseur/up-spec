@@ -170,7 +170,7 @@ The length is known before the input is read, so a wrong length can be refused b
 A boolean is the only kind whose byte can hold a pattern that is no value.
 
 _Padding._
-A reader that refused non-zero padding would refuse bytes that another reader of this page accepts.
+If each reader chose whether to refuse non-zero padding, two readers of this page could disagree on the same bytes.
 One rule for every reader keeps them the same.
 
 [[req-ssr-xcdr2-identity]]

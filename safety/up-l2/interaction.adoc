@@ -120,8 +120,7 @@ The item states the outcome and admits either form of mechanism.
 One that compares the full request ID and the bound peer, and claims the slot, in one exclusive step needs no recheck.
 One that claims before it compares keeps the recheck after the claim, and its give-back.
 
-The full width of the fields is a fact about a representation.
-The exclusion argument for the step is established by the review of each mechanism.
+Whether the request ID and the bound peer are kept at full width is a fact about a representation (xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window]).
 
 _Scope._
 The clauses about the E2E wire bind only a route that uses it, and that wire is deferred and not part of this delivery.
@@ -176,7 +175,7 @@ The identity can equally be bound in the step that claims the slot, as <<req-ssr
 
 Refusal answers come only from a wire that protects calls, which in this delivery means none: the E2E wire that would send them is deferred.
 
-A call that ends at its TTL ends logically, as <<req-ssr-peer-rpc-ends,RPC calls always end>> states.
+A call that ends at its TTL ends logically (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded]).
 
 Giving a claim back returns the call to waiting for another copy and releases nothing early.
 What the refused copy owns is released as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors] states, and storage that an unfinished release still holds is not reused (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
@@ -322,7 +321,7 @@ Verification:: review, test, heap-window
 * *heap-window*: the first ID on a cold thread.
 
 *Rationale.*
-up-spec `+dsn~uuid-spec~1+`.
+up-spec requires the UUIDs in UAttributes to be UUIDv7 (xref:../../basics/uuid.adoc[UUID], `+dsn~uuid-spec~1+`).
 
 Correlation depends on distinguishing requests across time and reuse.
 A finite generator needs explicit refusal bounds when its clock cannot advance.
@@ -334,5 +333,4 @@ A wider sequence moves them, and the rule that a generator refuses rather than r
 Random seeding gives a quantified collision probability, not a guarantee that two starts differ.
 So a claim of non-repetition across restarts needs a construction that can be checked.
 
-The 32-bit figures above belong to a generator with a 32-bit sequence.
-A generator that keeps a 64-bit counter and the full last good time has a period of 2^64^ IDs of one route, and the refusal bounds that this item requires of it are its configuration's to state.
+A generator that keeps a 64-bit counter and the full last good time has a period of 2^64^ IDs of one route (xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window]).

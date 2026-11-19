@@ -120,7 +120,7 @@ So a native type holds none, and no address travels in place of a payload.
 _No handle._
 A handle names a resource that someone owns and someone closes.
 For a handle to be useful in another process, a contract would have to say how it is represented for an ABI, how long it stays valid, who owns the resource and who closes it, and what a peer's death does to it.
-No item states that contract, so no handle is native.
+A native value is its bytes alone, and they carry none of that, so no handle is native.
 A ban of some handles only would leave a type's author to judge which ones are safe, and a rule that a derive cannot check is a rule that safe code is trusted to keep.
 
 _No invalid bit pattern, no destructor._
@@ -241,7 +241,7 @@ What makes the view sound is that the type accepts every bit pattern, that the f
 What agreement adds is that correct peers read the same fields.
 
 _Why no mechanism._
-How a layout identity is written down, where it is kept, and when two sides compare it are an implementation's choices.
+How a layout identity is written down, where it is kept, and when two sides compare it before a view are an implementation's choices.
 This item requires the outcome, and <<guidance>> describes one way among others.
 
 [[req-ssr-native-in-place]]
@@ -307,7 +307,7 @@ Verification:: test, heap-window, miri, review
 * *review*: no path from a native route into an encoder, a decoder or a staging buffer, and no property of this item that holds only if a destructor runs.
 
 *Rationale.*
-A native route exists so that a value crosses between processes with no copy, no allocation and no code that could fail on its contents.
+A native route exists so that a value crosses between processes with no allocation, no code that could fail on its contents, and no copy other than one that setup chose and reported.
 A deployment that chooses one relies on exactly that.
 
 _Written where it is carried._

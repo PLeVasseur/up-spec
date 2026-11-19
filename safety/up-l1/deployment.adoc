@@ -77,7 +77,8 @@ ASIL:: B
 ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 
 *Rationale.*
-A faulty publisher writing to a sample while it is read is the copy route's case, and a lying publisher is not caught at setup.
+A publisher below the reader's level, or of unknown level, may write a sample while it is read, so the reader takes the copy route.
+A zero-copy route relies on the writer instead, and a publisher that declares a level it was not built to is not caught at setup.
 
 A shared reference cannot remain valid against an uncontrolled concurrent writer, and bidirectional shared state also exposes a publisher to a faulty consumer.
 
@@ -121,7 +122,7 @@ A declared integrity level supports setup admission but cannot prove how a proce
 
 _What this assumption leaves to other items._
 The assignment of a level binds every transport, so it is filed with the transports.
-Two neighbouring duties bind other deployments, and each is an assumption of its own:
+Two neighbouring duties bind only some deployments, and each is an assumption of its own:
 
 * what one binding adds to the assignment, which binds only a deployment on that binding;
 * the element's capability ceiling and the duties that follow from it (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element]).
@@ -169,13 +170,13 @@ ASIL:: B
 
 *Rationale.*
 A declaration of capability needs target-specific contract evidence.
-An accepted anomaly has a bounded justification, whereas an open known failure remains a failure.
+An accepted anomaly has a bounded justification, whereas a known failure remains a failure.
 
 Evidence attaches to the exact pins and configuration it was produced on.
 A newer middleware release or a private variant does not inherit it, compiling is not running, and a source review is not a timing analysis.
 
 _What this assumption leaves to other items._
-The qualification duty binds every deployment.
+The qualification duty holds for the ASIL path of every deployment.
 Two neighbouring duties bind only some, and each is an assumption of its own:
 
 * requiring a stronger resource guarantee by name, which binds only an item that relies on one (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-resource-guarantees[A resource guarantee the item relies on is required by name]);

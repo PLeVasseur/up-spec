@@ -75,7 +75,7 @@ Both services belong to setup:
 * entropy seeds the message-ID generators once;
 * prefault makes memory resident before anything is placed in it, so that no write in runtime mode takes a page fault.
 
-Handing runtime code a platform value that cannot reach back makes a call to either service a compile error instead of a rule to remember.
+Because runtime code holds a platform value that offers neither service, a call to either is a compile error, not a rule that each author has to remember.
 
 [[req-ssr-platform-entropy]]
 == Initialization entropy comes from a declared source
@@ -109,7 +109,7 @@ Verification:: test, review
 * *review*: each backend's source, against its OS's documentation and its package's stated contract.
 
 *Rationale.*
-Entropy is read once, to seed the message-ID generators.
+Entropy seeds each route's message-ID generator once, in initialization.
 So a fixed or repeated seed could repeat IDs from one start to the next.
 
 An OS entropy source, such as `+getrandom+` on Linux, `+getentropy+` on macOS or `+/dev/urandom+` on QNX, gives a small, quantifiable collision probability.
@@ -119,7 +119,7 @@ So the previous statement that entropy "differs at each start" was stronger than
 Identity requirements keep their strength: where one demands non-repetition, this item forbids resting it on entropy.
 Two starts that read different values are a smoke check, not evidence of non-repetition.
 
-A platform that a custom configuration supplies carries the same duty under xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules].
+A platform that a custom configuration supplies is not a shipped backend: what its entropy has to meet is stated in xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules].
 
 [[req-ssr-platform-classified]]
 == Every runtime behaviour is classified
@@ -195,18 +195,15 @@ Verification:: gate, test, review
 ** The source where the element tells whether a target has 32-bit atomics with compare-and-swap: `+target_has_atomic+`, and no list of targets.
 
 *Rationale.*
-An earlier requirement made every protocol word a 32-bit atomic, in one implementation on every target.
-That avoided operations that some supported cores lack.
-But it also forbade a full-width deadline monitor on hosts, which uses 16-byte atomics where the CPU provides them and refuses setup where it does not.
-It also did not by itself keep identity full width.
+Some supported targets have no 64-bit atomics.
 
 The observable obligations are what the element's users rely on.
-A target mechanism is acceptable when it keeps them, states its contexts and is argued at source level for every participant.
+So the item fixes those obligations, and leaves each target's mechanism open under the conditions that its statement sets.
 
 Host execution does not show how a masked interrupt behaves on an MCU.
 So each mechanism is verified on the targets its configuration names.
 
-A list of targets can leave out a target that has 32-bit compare-and-swap, or name one that lacks it.
+The element tells by `+target_has_atomic+`, not by a list, because a list of targets can leave out a target that has 32-bit compare-and-swap, or name one that lacks it.
 
 [[req-ssr-atomic-windows]]
 == Every narrowed value states its window

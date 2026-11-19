@@ -99,17 +99,17 @@ ISO 26262:: 6-Annex D.2.3, 6-Table 3 1h (part-clause numbers only)
 A writer below the reader's level, or of unknown level, can change shared bytes while the reader uses them.
 So the reader works only on a copy in storage it owns, checked after the copy is made.
 
-The copy is made from storage reserved at setup, like every other runtime buffer, so it needs no heap (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
+The copy is held in storage reserved at setup, like every other runtime buffer, so it needs no heap (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
 
 A lending middleware can map its payload memory read-only for readers.
 So the copy reads it only through loads that are valid on a read-only mapping.
-Where one middleware does so is described with its binding.
+Where one middleware does so is stated on its binding's page (xref:iceoryx2.adoc#index[what the general rules meet on iceoryx2]).
 
 Copying raced bytes with ordinary references or a plain memory copy is itself a data race.
 So the copy is sound only through a mechanism defined for racing access, and a route without one has no sound form.
 
 The level rule protects what a reader borrows.
-Middleware control memory that a faulty peer can corrupt is a separate obligation, and running in a separate process does not make a lower-assurance writer harmless.
+Middleware control memory that a faulty peer can corrupt lies outside that rule and needs containment of its own, as the statement says, and running in a separate process does not make a lower-assurance writer harmless.
 
 [[req-ssr-integrity-any-bits]]
 == In-place types accept every bit pattern
@@ -131,13 +131,13 @@ Allocated to:: the element
 Verification:: compile-fail (the derive refuses such fields), test
 
 *Rationale.*
-A typed view of in-place bytes may exist only once every invalid bit pattern has been rejected.
+A typed view of in-place bytes is sound only once every invalid bit pattern has been rejected.
 A check made once cannot hold while a faulty writer can still change the bytes.
 
 With no invalid bit patterns, a later bad write can only leave a wrong value, which a checked getter or an end-to-end check can report.
 
 That prevents an invalid value from being constructed.
-It is no permission for a write that races a read through an ordinary Rust reference, which zero-copy excludes by the writer-at-or-above rule and the view's synchronization (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>).
+The rule is no permission for a write that races a read through an ordinary Rust reference, which zero-copy excludes by the writer-at-or-above rule and the view's synchronization (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>).
 
 The end-to-end check meant here is whatever protection the system supplies.
 The SDK's own E2E wire is deferred and not part of this delivery.
@@ -165,7 +165,7 @@ Checking once, before any reader sees the frame, makes a malformed frame one cou
 Because in-place types accept every bit pattern (<<req-ssr-integrity-any-bits,In-place types accept every bit pattern>>), the view needs no check of its bits after admission.
 
 Checking once is sound only for a frame that the reader's view keeps still.
-A frame whose writer could still change it takes the copy route and is validated on the copy (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>).
+A frame whose writer is below the reader's level, or of unknown level, could still be changed by that writer, so it takes the copy route and is validated on the copy (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>).
 The check replaces none of the view's alignment, tenure and synchronization obligations.
 
 [[req-ssr-integrity-carrier-crossing]]

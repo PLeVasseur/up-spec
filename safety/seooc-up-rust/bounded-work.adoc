@@ -161,12 +161,12 @@ ISO 26262:: 6-Annex D.2.2 (part-clause numbers only)
 A survivor that waited without a bound for a peer that has died would never return.
 One failed process would then stop those that stayed up (xref:../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
 
-_Waits that are bounded._
+_QoS waits and idle waiters._
 
 * A QoS wait gives up after its declared timeout and reports failure.
 * A carrier egress refuses a QoS wait at setup, because the carrier's worker would be the one waiting.
 * A route with nothing to report stays quiet.
-A service tick that woke waiters regardless would make idle waiters wake each other for ever.
+If waiters were woken whether or not anything was due, idle waiters would wake each other for ever.
 
 _Logical, not physical._
 A timeout is logical.
@@ -175,14 +175,14 @@ So the statement bounds what the element waits for and how it recovers, and leav
 An idle wait with nothing due needs no timeout, provided the wake that makes work due cannot be lost.
 
 _Waits the element does not own._
-An ordinary allocator takes a lock, in an acquisition as in a release.
+An ordinary allocator can take a lock, in an acquisition as in a release.
 The element can neither give that lock a deadline nor see inside it.
 Forbidding it would forbid ordinary serialized communication, and hiding it would misstate what a route does.
 So the wait is declared, reported and kept out of native work, and the element holds nothing of its own across it.
 A route that cannot accept it requires the guarantee that excludes it (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
 
 The element's own waits are a different matter.
-Each takes a logical deadline on every route, and an operation's outcome is decided by that deadline whatever an allocation domain did meanwhile.
+Each, apart from the idle wait, takes a logical deadline on every route, and an operation's outcome is decided by that deadline whatever an allocation domain did meanwhile.
 
 _Why pending cleanup has no deadline._
 A release that waits behind an allocator's or an underlying transport's own lock cannot observe a deadline from inside that call.

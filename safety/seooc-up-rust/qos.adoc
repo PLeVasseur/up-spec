@@ -218,7 +218,7 @@ The element's deadline monitor is the receiver's mechanism.
 ID:: `+req~ssr-qos-deadline~5+`
 ASIL:: B
 Allocated to:: the element; each binding, for its middleware's own event deadlines on an ASIL deployment
-Verification:: test, miri, fault-injection
+Verification:: test, miri, fault-injection, review
 * *test*
 ** A silent publisher.
 ** Hints with no frames.
@@ -237,6 +237,7 @@ Verification:: test, miri, fault-injection
 ** In the Enforce state, a declared servicing period at its transport's bound and one just longer.
 * *miri*: an arrival racing a refresh.
 * *fault-injection*: the publisher killed.
+* *review*: each monitor backend's argument that its properties hold however long a thread that records, checks or reports for the route is suspended, and its arithmetic.
 
 *Rationale.*
 Arrival-based monitoring observes communication independently of application reads.
@@ -247,17 +248,17 @@ Absence of a deadline miss is not evidence of that peer's progress (xref:assumpt
 
 _Full width._
 A monitor that keeps full-width origins and a saturating full-width count has no wrap window.
-That is why the statement requires its properties to hold however long a helper thread is suspended, with no watchdog and no servicing range.
+That is why the statement requires its properties to hold however long a thread that records, checks or reports for the route is suspended, with no watchdog and no servicing range.
 Full width removes the wrap window only.
-The exclusion, long-suspension and arithmetic argument of each monitor backend is established by its review, and neither argument bounds J.
+Neither full width nor a monitor backend's exclusion, long-suspension and arithmetic argument bounds J.
 
-Where a representation still needs a servicing range, the range is stated with its configuration instead of being assumed everywhere.
+Where a representation needs a servicing range, the range is stated with its configuration instead of being assumed everywhere.
 
 _Minimum deadline and resolution._
 The 1,024 ns minimum deadline and the 1/512 resolution stay until a separately proved representability and resolution contract replaces them.
 
 _The bound J._
-J depends on a configuration's scheduling, interrupts, servers and publication, which the monitor cannot establish alone.
+J depends on how a configuration schedules and interrupts the service, check and arrival paths, and on their contention and publication, which the monitor cannot establish alone.
 So the element states the detection bound only where a supported configuration establishes J, and otherwise says that it is not established.
 
 [[req-ssr-qos-ttl]]
@@ -335,7 +336,7 @@ A declaration outside the monitor or binding capability must be diagnosed before
 The 1,024 ns minimum follows from the monitor's threshold quantization.
 It stays until a separately proved resolution contract for the actual implementation replaces it.
 
-A binding that cannot report true arrivals stays refused whatever timing claim a route makes: no label can stand in for a missing arrival hook.
+A deadline on a pull route whose binding cannot report arrivals stays refused whatever timing claim the route makes: no label can stand in for the arrivals that the binding cannot report.
 
 [[req-ssr-qos-consistent-declarations]]
 == Two declarations of one route agree
@@ -352,5 +353,5 @@ Allocated to:: the element
 Verification:: test
 
 *Rationale.*
-Two declarations of one route that disagree cannot both be honored, and choosing one would silently weaken the other (<<req-ssr-qos-no-downgrade,QoS is honored or refused, never weakened>>).
+Two declarations of one route that differ in reliability, overflow or history cannot both be honored, and choosing one would silently weaken the other (<<req-ssr-qos-no-downgrade,QoS is honored or refused, never weakened>>).
 So setup refuses, and the refusal names the setting in conflict.

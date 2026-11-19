@@ -75,7 +75,7 @@ An exact source filter bounds route matching and lets the Streamer refuse and co
 
 It does not authenticate a sending process: a faulty process using a reserved address can pass the filter.
 Physical service selection does not establish that identity either.
-Access control, peer qualification and end-to-end protection retain their separate assumptions and limits.
+Restricting which processes reach a transport, the level that each peer process is developed to, and end-to-end protection are separate measures, each with its own assumptions and limits (xref:../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]; xref:../up-l1/deployment.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly]; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 The carrier primitives require the same of a lending leg.
 A lending route names one physical service, and a wildcard filter on one needs an explicit physical source or is refused.
@@ -109,7 +109,7 @@ So heap use on its path would break runtime mode for every route it carries (xre
 An ASIL route through the Streamer is only as sound as the Streamer, so it cannot be left as a QM carrier.
 
 A serialized leg's declared allocation belongs to that leg's wire or binding and is reported per route.
-It never reaches the Streamer's own forwarding, control or error paths, or a native leg.
+It never reaches the Streamer's own forwarding paths, or a native leg (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
 
 [[req-ssr-streamer-byte-identity]]
 == Carriage keeps the bytes
@@ -169,7 +169,7 @@ _The one refusal by identifier._
 A deployment can still decide which encodings one of its routes forwards.
 That is a choice about the route, and it is stated as one: an encoding filter in the route's deployment data, which <<req-ssr-streamer-qos-per-leg,Both legs are checked, at setup and per frame>> bounds.
 It is kept apart from what a carrier can read, so that no route starts to refuse an identifier because a wire or a decoder is missing.
-Whether a route with a filter still meets up-spec's rule for a component that only carries is not decided, and this item does not say that it does (xref:../../contract-generations.adoc#transition[the transition table]).
+This item does not say that a route with a filter still meets up-spec's rule for a component that only carries.
 
 _Presence._
 A payload and its identifier are present together or absent together (xref:../../basics/uattributes.adoc#common-attributes[UAttributes], `payloadEncodingId`).
@@ -177,7 +177,7 @@ So keeping the identifier unchanged keeps the presence too.
 The statement says so because a different egress envelope writes the metadata again, and an envelope that could not tell an absent payload from an empty one would lose the difference.
 
 _A native representation._
-A reader borrows a native representation in place, so a frame that names one is not carried as bytes under this item.
+A reader borrows a native representation in place, so a frame that names one has no serialized payload and is not carried as serialized bytes.
 <<req-ssr-streamer-qos-per-leg,Both legs are checked, at setup and per frame>> says when a leg carries it.
 
 Unchanged bytes let a check made at the endpoints, such as end-to-end protection, cover every hop (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop]).
@@ -294,7 +294,7 @@ Verification:: test
 A limit checked on one forwarding path and not on another lets a frame through on the path that skips it, so every path checks.
 
 _What a leg can refuse._
-A leg refuses what it cannot hold or cannot express: a payload longer than its storage, a token longer than its bound, a head that its envelope cannot represent.
+A leg refuses what it cannot hold or cannot express: a payload longer than its storage, a token longer than its bound, a header that its envelope cannot represent.
 Each refusal is counted under its cause (xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 
 _A native representation._
@@ -367,7 +367,7 @@ Verification:: test, heap-window
 *Rationale.*
 The integrity-code check is its own item, <<req-ssr-streamer-config-integrity,The deployment data is checked before it is applied>>, because it must run before any of the data is applied.
 
-The report exposes the admitted routes and their resources after transition, so producing it must obey the runtime heap contract.
+The report lists the admitted routes and their resources after the transition, in runtime mode, so producing it uses no heap (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
 
 [[req-ssr-streamer-config-integrity]]
 == The deployment data is checked before it is applied
@@ -486,7 +486,7 @@ So a gate silences one route while every other route carries on (<<req-ssr-strea
 The gate is the only route state that changes in runtime mode (<<req-ssr-streamer-route-lock,Routes and subscriptions are locked at activation>>), and fixed storage lets it change without heap (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
 
 A gated request is answered `+Unavailable+` where the reverse route can carry it.
-So a client without the E2E wire learns of the outage at once, not at its TTL (<<req-ssr-streamer-rpc-error-response,An RPC request that cannot be dispatched is answered, best effort>>).
+So a client without the E2E wire can learn of the outage from that answer, without waiting out its TTL (<<req-ssr-streamer-rpc-error-response,An RPC request that cannot be dispatched is answered, best effort>>).
 
 With its cause counted, each change shows in the reports as an operator's disable or as a monitor's trip (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>; <<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>).
 
@@ -512,10 +512,10 @@ Verification:: test (changes only through the interface declared at setup, which
 *Rationale.*
 Disabling an ASIL route removes its function.
 So the only way to do it at run time is declared at setup, bounded and shown in the reports.
-Who may use it is <<aou-seooc-operator-access,Only authorized operators reach the Streamer's operator interface>>.
+Who may use it is the integrator's to restrict (<<aou-seooc-operator-access,Only authorized operators reach the Streamer's operator interface>>).
 
 Only an operator's re-enable clears a monitor's trip (<<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>).
-A route outside the declared interface stays disabled until the Streamer restarts.
+So a tripped route that the interface does not name stays disabled until the Streamer restarts.
 
 [[req-ssr-streamer-monitors]]
 == Worker and transport monitors trip routes
@@ -590,7 +590,7 @@ A heartbeat from an interrupt can keep ticking while the forwarding loop is stuc
 _Reaction time._
 A monitor can support a fail-silent reaction even where delivery itself has no hard deadline.
 But only a configuration that bounds the whole chain, with a monitor that does not share the fault it detects, can claim a reaction time.
-A monitor alone cannot repair memory unsoundness or prove future service.
+A monitor alone cannot correct a memory-safety fault, and it cannot show that a route will serve its later frames.
 
 [[req-ssr-streamer-mode-report]]
 == The Streamer reports degraded
@@ -616,28 +616,30 @@ A degraded mode that changed behaviour would let one route's fault act on the ot
 [[req-ssr-streamer-watchdog-hook]]
 == A watchdog hook shows progress
 
-[.specitem,oft-sid="req~ssr-streamer-watchdog-hook~1",oft-title="A watchdog hook shows progress",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
+[.specitem,oft-sid="req~ssr-streamer-watchdog-hook~2",oft-title="A watchdog hook shows progress",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
 --
 The Streamer *MUST* offer a hook through which an external watchdog or supervisor learns that each worker's loop is making progress.
 
 Serving the hook *MUST* use no heap and *MUST NOT* block a worker.
 
 A worker that stops making progress stops reporting through it.
+
+Progress is a completed forwarding pass, and the hook *MUST* report a worker's progress only from the passes that it completes.
+A timer tick, an interrupt or a heartbeat that continues whether or not a pass completes is not progress.
 --
 
 [horizontal]
-ID:: `+req~ssr-streamer-watchdog-hook~1+`
+ID:: `+req~ssr-streamer-watchdog-hook~2+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: test (a stalled worker is seen through the hook), heap-window
+Verification:: test (a stalled worker is seen through the hook, also while its timer or an interrupt keeps running), heap-window
 ISO 26262:: 6-7.4.12 (part-clause numbers only)
 
 *Rationale.*
 A worker that is stuck, or looping without progress, can look alive from inside the process.
-So only a watchdog outside it, told of progress, can see the stall and act on it.
+So a watchdog outside it, told of progress, can see the stall and act on it.
 
 A worker's loop never returns (<<req-ssr-streamer-workers,Workers are fixed at initialization>>), so progress, not exit, is what a watchdog can check.
-Progress here is a completed forwarding pass, so a timer or interrupt that keeps running while the loop is stuck cannot report for it.
 
 The hook reports progress.
 It establishes neither the watchdog's independence nor a bounded reaction, which a configuration that claims one has to argue (<<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>).

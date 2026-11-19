@@ -84,7 +84,7 @@ Allocated to:: the element
 Verification:: test (including a setup kept alive with `+mem::forget+`), heap-window
 
 *Rationale.*
-A shared startup allocator must stop serving new requests once initialization ends, including failure paths that leave some transports active.
+A startup memory that several setups share places nothing once initialization ends, including after a failed `+enter_runtime_all+`, which can leave some transports in runtime mode.
 
 [[req-ssr-memory-computable]]
 == Startup storage is computable before start
@@ -133,7 +133,7 @@ ISO 26262:: 6-7.4.13 (part-clause numbers only)
 
 *Rationale.*
 An integrator who places startup memory in a static region or a linker section has to size it before the process starts, and a request that does not fit is refused only at startup.
-A size that anyone could work out in principle helps no one, so the element provides the computation itself.
+A size that could be worked out only in principle does not help the integrator, so the element provides the computation itself.
 Each route's reserved storage is reported under xref:errors.adoc#req-ssr-error-route-report[Each route reports what it got].
 
 _What each figure measures._

@@ -68,8 +68,8 @@ So the failure's own handling acquires no heap anywhere, and releases none on na
 The release of what the failure ends is confined to the route's declared class (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
 
 _Where that release runs._
-An ordinary owning route has no release service and requires none (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]), and an owned value's release there can wait behind an allocator's lock like any other.
-So an owned value's release is kept pending and apart on a route that requires non-waiting release.
+An ordinary owning route uses no release service and requires none (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]), and an owned value's release there can wait behind an allocator's lock like any other.
+So on a route that requires non-waiting release, an owned value's release that can wait is kept pending and apart.
 On a route that does not, it runs under the route's declared policy, after the failure's outcome is recorded and never in native or shared work.
 A retained owner's deferred return is pending cleanup on every route, whatever the route requires.
 
@@ -110,7 +110,7 @@ Verification:: test
 * Each Miri lane's logged fingerprint, on three targets with three values.
 
 *Rationale.*
-Equal message identity does not imply equal in-memory layout.
+The same type, built for two targets, can have two in-memory layouts.
 An explicit ABI agreement prevents interpreting one target layout as another.
 
 [[req-ssr-peer-stale-rejected]]
@@ -158,12 +158,12 @@ Verification:: test, fault-injection, review
 * *review*: the exclusive step's source argument for each configuration's mechanism, against every participant that can reach the table.
 
 *Rationale.*
-A restarted peer must not inherit frames or calls from its predecessor, and contention must not turn a stale incarnation into a current one.
+Without this rule, a restarted peer could inherit frames or calls from its predecessor, and contention could turn a stale incarnation into a current one.
 
 _An outcome, not a mechanism._
 The requirement states the outcome that every mechanism keeps, and names no representation.
-A limit of one representation, such as 32-bit words with a contended raise refused as contention, or at most 255 concurrent classifications of one peer, belongs to that mechanism and not to the product.
-A mechanism that keeps each peer's full 64-bit identity and incarnation in one exclusive record has neither limit.
+A limit that one representation would bring, such as a refusal under contention or a cap on how many frames of one peer are classified at once, is not a limit of the element: a mechanism that has one does not meet this item.
+A mechanism that keeps each peer's full identity and incarnation in one exclusive record has neither limit.
 
 Full width removes a wrap window.
 It does not by itself establish the exclusion argument, which the review of each mechanism supplies (xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-width[No target needs an atomic width it lacks]).
@@ -187,5 +187,5 @@ Allocated to:: the element
 Verification:: fault-injection (strangers first, then declared clients; a lost peer racing its own last frame, on two threads), miri, test
 
 *Rationale.*
-Undeclared sources must not consume the entries reserved for declared peers.
-Concurrent reuse must preserve the identity of each entry.
+An undeclared source that could take a peer-table entry could fill the table, which is sized for the declared peers, and lock them out.
+Reuse that lost an entry's identity under concurrency could bind a lost peer's frames to a later peer, or have a later peer's frames refused as stale.

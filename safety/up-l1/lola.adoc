@@ -191,12 +191,12 @@ _Carried, or refused for a stated reason._
 To be able to carry both kinds of route is the binding's capability.
 Whether one declared route is carried depends on what that route asks: a payload that is larger than LoLa's storage for it cannot be carried, whichever wire wrote it.
 So the binding compares the route's declarations with its own, and a refusal names the one that does not fit.
-A wire that allocates asks nothing of LoLa's storage that a binding could lack, so allocation is never the reason.
+A wire that allocates asks nothing of LoLa's storage that a binding could lack, so a wire's allocation is never the reason.
 
 _The wire is chosen for a message._
 Which wire a message uses is decided where the message is declared, and the same wire runs on another transport (xref:payload-paths.adoc#independent[a wire and a transport are chosen apart]).
 A binding that admitted routes by the name of a wire would tie the two together.
-So the binding looks only at what a route asks of its storage.
+So the binding looks at what a route declares, never at the name of its wire.
 
 _Genuine native routes._
 A native route that was served by a copy would still deliver correct values, and nothing in a test of values would show the difference.
@@ -259,7 +259,7 @@ A report that gave one for the other would let a deployment size against a numbe
 _Why no count is fixed._
 How many loans or samples a route needs is a deployment's choice, and what LoLa serves is a fact of the revision that the binding is built against.
 What a declared count obliges of any middleware's storage is not decided, for every binding (<<lola-cell-6>>).
-So this item makes the binding state what it serves, and fixes nothing more.
+So this item fixes no count and no meaning of one, and has the binding state what it serves.
 
 [[req-ssr-binding-lola-foreign-boundary]]
 == Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path
@@ -319,7 +319,7 @@ So a termination path that a peer's input, death or restart can reach is a known
 
 _Builds and loading._
 Whether an exception can be caught at the boundary depends on how the C++ code was built and loaded.
-So the README names the cases for which it is established (<<lola-cell-9>>).
+So the binding's qualification record names the builds and the ways of loading for which it is established (<<lola-cell-9>>).
 
 [[req-ssr-binding-lola-sample-lifetime]]
 == On LoLa, no subscription ends while one of its samples is held
@@ -357,7 +357,8 @@ Verification:: test, review
 * *review*: every path of the binding that unsubscribes a proxy event or destroys one or its proxy, at source level, against every way a sample can still be held.
 
 *Rationale.*
-LoLa publishes that a proxy event is not unsubscribed, and its proxy not destroyed, while a sample it provided is still held, because unsubscribing invalidates the memory that the sample points to (<<lola-assumptions>>, `+EventSubscriptionActiveWhileHoldingSamplePtr+`).
+LoLa publishes that a proxy event is not to be unsubscribed, and its proxy not to be destroyed, while a sample that it provided is still held (<<lola-assumptions>>, `+EventSubscriptionActiveWhileHoldingSamplePtr+`).
+This page reads that as the condition under which the memory that the sample points to stays valid.
 
 A frame that the element retains on a native route is a view into that memory (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 If the subscription ended first, safe code would hold a view of invalid memory, which xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] forbids.
@@ -418,7 +419,7 @@ A callable that LoLa holds is a pointer into the binding that only LoLa decides 
 If what it points to has ended, the next call uses invalid memory, and the application's safe code caused it (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour]).
 
 _A minimum is not an end._
-LoLa publishes that every callback passed to it is valid for as long as its proxy is alive (<<lola-assumptions>>, `+ValidCallbacksWhileProxyAlive+`).
+LoLa publishes that every callback passed to it is to be valid for as long as its proxy is alive (<<lola-assumptions>>, `+ValidCallbacksWhileProxyAlive+`).
 That is a minimum: it says for how long the binding owes validity at least.
 It does not say that LoLa stops invoking a callback when its proxy ends, or at any other point.
 None of the assumptions quoted on this page names such a point.
@@ -429,6 +430,7 @@ The element offers no shutdown, and a process in runtime mode leaves by exit, cr
 An exit runs handlers and destructors while other threads still run.
 A thread of LoLa that then called into state the binding had already destroyed would corrupt the process while it still shares memory with its peers.
 So what such a thread can reach outlives it, whatever the order of destruction.
+The item fixes no means of arranging that.
 How the binding arranges that, and how the process then ends, is not fixed here (<<lola-cell-5>>).
 
 [[req-ssr-binding-lola-assumptions]]
@@ -495,7 +497,8 @@ _Who can keep one._
 Some assumptions are about how LoLa's interface is called: how many loans a producer holds, or when a subscription ends.
 An application reaches LoLa only through safe calls of the element, so only the binding can keep these, and it keeps them whatever the application does.
 Others are about the system: that timing is supervised, or what the system does after a failure.
-The binding cannot keep those, so it names them for the integrator, who already reacts to what the element reports and supervises timing (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+The binding cannot keep those, so it names them for the integrator.
+The integrator already reacts to what the element reports (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]), and the item's timing budgets are the integrator's (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 
 _Not a rule for safe code._
 A rule that an application had to follow in order to keep LoLa safe would be a condition of memory safety that safe code could break.
@@ -506,10 +509,11 @@ An assumption can make LoLa serve less than a route asks: one loan at a time, fo
 The binding then says so as its capability and refuses the rest.
 It neither breaks the assumption nor serves the route in another way out of sight.
 The limit is LoLa's, at one revision and in one configuration.
-The element has no such limit, and another binding, or a later LoLa, may serve more.
+The element has no such limit, and another binding, or another revision of LoLa, may serve more.
 
 _A failure is reported as one._
-LoLa publishes that an error from allocating means a failure that is not recovered from (<<lola-assumptions>>, `+CheckForAllocationError+`).
+LoLa publishes that the system is to go to a safe state when allocating returns an error (<<lola-assumptions>>, `+CheckForAllocationError+`).
+This page reads that as a failure that is not recovered from.
 A binding that retried it, or reported it as a route that is briefly full, would keep the application from the reaction that LoLa asks for.
 
 [[index]]

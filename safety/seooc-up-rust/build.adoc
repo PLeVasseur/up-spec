@@ -79,7 +79,7 @@ ISO 26262:: 6-10.4.6 (part-clause numbers only)
 Code in an image that no requirement specifies is code that no requirement's verification covers, yet it can still run and change state.
 
 Hidden test hooks are the usual case.
-An ASIL image would contain them unless they are removed or specified (<<req-ssr-no-test-hooks,The shipped element contains no test hook>>).
+An ASIL image would contain them unless they are left out, as the element's own are (<<req-ssr-no-test-hooks,The shipped element contains no test hook>>), or specified and shown unable to affect any software safety requirement.
 
 [[req-ssr-no-test-hooks]]
 == The shipped element contains no test hook
@@ -100,7 +100,7 @@ Verification:: gate
 * Built without the configuration, a probe naming each test hook fails to resolve.
 
 *Rationale.*
-A test hook that changes hidden protocol state must not become an operation available in a shipped build.
+A test hook can change hidden protocol state, so in a shipped build it would be an operation that no requirement specifies (<<req-ssr-build-specified-functions-only,The ASIL build contains only specified functions>>).
 
 [[req-ssr-async-seam]]
 == The asynchronous interface has a written, executor-independent contract
@@ -223,7 +223,7 @@ The seam's names, the language's future and wake-up types, and the integrations 
 _Waits in a step and in an abandonment._
 The element's own work in a step and in an abandonment is free of waits and panics.
 A route's declared allocation domain behaves as its policy states.
-Pending cleanup is kept for a route that requires non-waiting release (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]), and for a return that a binding defers, on whatever route.
+Pending cleanup is used only on a route that requires non-waiting release (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]), and for a return that a binding defers, on whatever route.
 Requiring it everywhere would need a release service for every owned value an operation could hold.
 
 _Timeouts._
@@ -239,8 +239,8 @@ A release that waits on a scheduler's own worker would stop every task that work
 So pending cleanup is kept off the contexts that progress needs.
 
 An inline release is a different case.
-A route that does not require non-waiting release has declared that its release can wait, and its report shows it.
-That wait delays the step that ends the value, and an item that cannot accept the delay requires the guarantee.
+On a route that does not require non-waiting release, a release can wait only where the route's declared policy states it, and the route's report shows that wait.
+That wait delays the step that ends the value, and where the item relies on non-waiting release, the integrator requires it in the route's declaration (xref:assumptions-of-use.adoc#aou-seooc-resource-guarantees[A resource guarantee the item relies on is required by name]).
 
 _Separate guarantees._
 Non-waiting acquisition and non-waiting release are required separately (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
@@ -323,7 +323,7 @@ Verification:: gate, test
 ** An allocating wire is refused on a native route and admitted on a serialized route that declares its allocation.
 
 *Rationale.*
-An integrator-selected build lock prevents a development setting or convenience dependency from silently restoring an unsupported runtime surface.
+A lock that the integrator sets in the build keeps a development setting or a convenience dependency from quietly bringing back runtime behaviour that the claim does not support.
 
 Refusing every crate of a kind, such as every allocating wire or the whole `+up-rust+` facade, would refuse configurations the safety case can support.
 It would also force ordinary users to migrate only to keep communicating.

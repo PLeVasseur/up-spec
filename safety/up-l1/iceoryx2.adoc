@@ -63,7 +63,7 @@ Verification:: test (the event IDs read from the event service's static config; 
 
 *Rationale.*
 The event IDs, and the largest one that the service carries, belong to the event service's static config, not to the deployment data that xref:../seooc-up-rust/deployment-data.adoc#req-ssr-config-validated[Deployment data is validated in full] checks.
-So the binding reads them there and checks each route against them at setup, and a deployment on iceoryx2 accepts the refusal as one of the binding's limits (<<aou-seooc-iceoryx2-limits,A deployment on iceoryx2 accepts that binding's limits, and no known failure as one>>).
+So the binding reads them there and checks each route against them at setup.
 
 [[req-ssr-binding-iceoryx2-panic-paths]]
 == iceoryx2's allowed panic paths are named, bounded and disclosed
@@ -147,7 +147,7 @@ Verification:: test (the requirement recorded on a service the binding creates; 
 
 *Rationale.*
 A panic path inside the middleware is made unreachable by a setup check or by sizing (xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input]).
-This is that check for a publisher's data segment, which only iceoryx2 has in this form.
+This item is such a setup check, for a publisher's data segment, which only iceoryx2 has in this form.
 So it is stated with this binding, and the rule of every binding does not name it.
 
 [[req-ssr-binding-iceoryx2-expired-buffer]]
@@ -165,8 +165,8 @@ Allocated to:: the iceoryx2 binding
 Verification:: test (a receive route whose retained budget fits twice in the expired-connection buffer, admitted; the smallest budget that does not, refused at setup)
 
 *Rationale.*
-A panic path inside the middleware is made unreachable by a setup check or by sizing (xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input]), and this is that check for iceoryx2's expired-connection buffer.
-A deployment on iceoryx2 accepts this sizing as one of the binding's limits (<<aou-seooc-iceoryx2-limits,A deployment on iceoryx2 accepts that binding's limits, and no known failure as one>>).
+A panic path inside the middleware is made unreachable by a setup check or by sizing (xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input]).
+This item is such a sizing, checked at setup, for iceoryx2's expired-connection buffer.
 
 [[req-ssr-binding-iceoryx2-arrival-reports]]
 == iceoryx2's arrivals are reported from its receive thread, and a failed notification is counted
@@ -212,8 +212,9 @@ Verification:: test, fault-injection
 * *fault-injection*: a data connection that cannot be set up, after which only a queue that turned non-empty is reported, until the publisher list changes and an update runs clean.
 
 *Rationale.*
-How iceoryx2 treats a data connection that cannot be set up is stated with the limits that a deployment on it accepts (<<aou-seooc-iceoryx2-limits,A deployment on iceoryx2 accepts that binding's limits, and no known failure as one>>).
-So the binding handles that failure on each port itself, and a deployment on iceoryx2 accepts the misses that a route can show while it reports only a queue that turned non-empty.
+iceoryx2's treatment of a data connection that cannot be set up, under its default handler, is one of the limits that a deployment on iceoryx2 accepts (<<aou-seooc-iceoryx2-limits,A deployment on iceoryx2 accepts that binding's limits, and no known failure as one>>).
+So the binding handles that failure on each port itself.
+While a route reports only a queue that turned non-empty, a queue that a healthy second publisher keeps non-empty shows misses, and a deployment on iceoryx2 accepts them.
 
 [[aou-seooc-iceoryx2-level-separation]]
 == On iceoryx2, each integrity level has its own processes, domain and OS user
@@ -242,7 +243,7 @@ ASIL:: B
 ISO 26262:: 6-7.4.8, 9-6, 6-Annex D.2.4 (part-clause numbers only)
 
 *Rationale.*
-A shared reference cannot remain valid against an uncontrolled concurrent writer, and bidirectional shared state also exposes a publisher to a faulty consumer.
+A shared reference cannot remain valid against an uncontrolled concurrent writer, and shared state that ports write both ways also exposes a publisher to a faulty consumer.
 So on iceoryx2 the levels are kept apart by what the OS enforces.
 
 These duties bind only a deployment on iceoryx2, so they are stated with that binding and not with the duties of every transport.

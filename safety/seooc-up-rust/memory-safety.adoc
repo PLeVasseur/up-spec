@@ -94,7 +94,7 @@ Allocated to:: the element
 Verification:: test (a replaced writer is refused), miri
 
 *Rationale.*
-A wire is written in safe code against a safe interface.
+A wire can be written in safe code alone, against a safe interface.
 So its code can be wrong without any `+unsafe+`, and the element cannot rely on what it reports.
 
 Encoding goes through a checked writer that keeps the count of the bytes written itself.
@@ -124,7 +124,7 @@ A safe trait's implementation can return any value without breaking Rust's rules
 So `+unsafe+` code must not rely on it for memory safety, while an `+unsafe trait+` makes its implementer take on stated obligations.
 
 The binding contract therefore keeps its interfaces safe, with their values checked.
-It puts the one kind of claim that memory safety relies on, such as the exclusivity of lent transmit storage, behind an `+unsafe trait+`.
+It puts each claim that memory safety relies on, such as the exclusivity of lent transmit storage, behind an `+unsafe trait+`.
 
 The same pattern exists elsewhere.
 For example, up-spec's iceoryx2 chapter asks it of a Rust payload's author, through iceoryx2's `+ZeroCopySend+` (xref:../../up-l1/iceoryx2.adoc[the iceoryx2 transport]), which iceoryx2 declares as an `+unsafe trait+` (https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2-bb/elementary-traits/src/zero_copy_send.rs#L32[`+zero_copy_send.rs+` in iceoryx2 0.9.3, its declaration of the trait]).

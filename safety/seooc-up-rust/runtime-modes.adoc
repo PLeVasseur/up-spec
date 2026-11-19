@@ -151,7 +151,7 @@ The transition is a conjunction of its prerequisites.
 Checking only some of them cannot establish readiness for runtime.
 
 All or nothing holds for each transport, not for a group.
-A transport that has entered runtime mode cannot be taken back (<<req-ssr-mode-one-way,There is no way back>>), so a group's later refusal does not roll it back, and a refusal ends the process for a restart.
+A transport that has entered runtime mode cannot be taken back (<<req-ssr-mode-one-way,There is no way back>>), so a group's later refusal does not roll it back, and the element is designed on the assumption that the application then exits so that its supervisor restarts it (xref:assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
 
 [[req-ssr-mode-entry-admission]]
 == Every route is admitted before runtime mode
@@ -172,11 +172,11 @@ Allocated to:: the element
 Verification:: test
 
 *Rationale.*
-The SDK owns admission, as it owns the mode state machine and the startup slots.
+The element owns admission, as it owns the two modes, the transition and the startup slots.
 So every binding's routes meet the same checks.
 
 A route that cannot be served then fails setup by name instead of failing its first message.
-A refused carrier leg, for one, reports the route, the binding and the reason.
+A refused carrier leg, for one, reports the route, the leg, the setting and the cause (xref:../up-l2/streamer.adoc#req-ssr-streamer-qos-per-leg[Both legs are checked, at setup and per frame]; <<req-ssr-mode-init-failure,Initialization failure>>).
 
 [[req-ssr-mode-entry-clock]]
 == The wall clock is read before runtime mode
@@ -208,9 +208,10 @@ Reading the clock once before the transition makes a clock that cannot be read f
 
 A board without a synchronized wall clock is a real configuration.
 Quietly using uptime there would make every TTL decision wrong while appearing to work.
-So the provider's contract is checked where it can be, and a known substitution is refused.
+So every transition requires the provider to pass the setup check of its package's stated contract, and a known substitution fails that check.
 Such a board supplies a synchronized wall clock through its time provider (xref:assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]).
 Where its provider supplies none, every TTL decision would rest on a wall clock that nothing keeps in step with the peers' time bases, so the transition fails.
+A wall clock that reads but is wrong still passes the setup check, and only the integrator's own measures cover it (xref:assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]).
 
 Simulated time and test seeds establish only the behaviour of a test harness.
 
@@ -347,7 +348,7 @@ ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 In a build that aborts on panic (xref:build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]), a setup mistake that panicked would end the process, and its restart would run straight into the same panic.
 An error that names its cause, its route and the setter to change tells the integrator what to fix instead.
 
-Leaving nothing behind lets a successor start cleanly, since it recovers what a dead predecessor left before it prepares a route (<<req-ssr-mode-restart,A restart is an initialization>>).
+Leaving nothing that stops a successor from initializing lets the successor start cleanly, since it recovers what a dead predecessor left before it prepares a route (<<req-ssr-mode-restart,A restart is an initialization>>).
 
 _Dispositions._
 The fate of what a failed setup had acquired is stated, never left open.
@@ -375,14 +376,13 @@ An ordinary configuration runs with it reported, and a route that requires the g
 _Groups of transports._
 This item does not ask a refused group of transports to roll back one that has already entered runtime mode (<<req-ssr-mode-entry,Entering runtime mode is one all-or-nothing operation>>).
 
-_No release service._
-Setup has no release service to lean on.
+_No release service for a refusal._
 Using pending cleanup would let a setup failure leave work running after its refusal.
 So a destruction that setup performs runs within setup, on the refusing path.
 Where a route requires non-waiting release and the destruction could wait, the value is handed back or never taken.
 
 _Ordinary setup._
-An ordinary owning input and an ordinary allocator cannot show that a destruction can neither panic nor outlast setup's bound, or that exhaustion never ends the process.
+An ordinary owning input and an ordinary allocator cannot show panic-free cleanup, non-waiting release or recoverable exhaustion.
 So setup is not refused for want of those guarantees where no route or claim requires them.
 Every refusal stays an error, element code stays free of panics, everything setup acquired gets one honest disposition, and the cleanup and exhaustion guarantees apply where a route or claim requires them.
 
@@ -443,7 +443,7 @@ So a property that needed one would fail exactly when a peer fails.
 
 Even without a crash, Rust does not promise that destructors run: `+mem::forget+` is safe, and `+process::exit+` skips them (https://doc.rust-lang.org/1.88.0/std/mem/fn.forget.html[Rust's `+mem::forget+` documentation]).
 
-Liveness therefore comes from the service tick and the transport, never from a destructor.
+Liveness therefore rests on the transport's receive, wait and service operations, never on a destructor.
 
 [[req-ssr-mode-classic-excluded]]
 == Classic routes never enter runtime mode
@@ -469,7 +469,7 @@ So no waiver can admit a classic route.
 
 The item keeps classic routes out of the two-mode contract.
 It does not withdraw the classic API, which stays available for ordinary use outside that contract.
-A compatibility re-export of a two-mode type from `+up-rust+` is not itself a classic route.
+A two-mode type is not a classic route, whichever crate re-exports it.
 
 [[req-ssr-mode-bounded-startup]]
 == Setup never waits without a bound
@@ -505,7 +505,7 @@ Verification:: test, fault-injection (a peer that never starts; a service that n
 ** A refusal's destruction that can wait, performed and reported where nothing requires non-waiting release of the value, a route that requires only non-waiting acquisition included, and not performed where that guarantee is required of the value and not established.
 
 *Rationale.*
-Processes start and restart in any order (<<req-ssr-mode-restart,A restart is an initialization>>), so a peer that is not up yet is normal input, not a fault (xref:../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
+Processes start and restart in any order, so a peer that is not up yet is normal input, not a fault, as a peer that has died or restarted is (xref:../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
 
 A wait without a bound would leave a process stuck in initialization with nothing to report.
 A bound that expires ends setup with an error naming what was missing.
@@ -514,7 +514,7 @@ The bound is logical, as every wait of the element's own is (xref:bounded-work.a
 Setup fails with that error once it runs after the bound has passed, and a supervisor's own timeout covers a process that the OS does not run at all.
 
 A destruction that setup performs on a refusal runs within setup, on the refusing path (<<req-ssr-mode-init-failure,Initialization failure>>).
-Setup has no release service, so pending cleanup (xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]) does not reach it.
+Setup hands nothing to a release service to dispose of a refusal (<<req-ssr-mode-init-failure,Initialization failure>>), so pending cleanup (xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]) does not reach it.
 
 _An allocation domain's wait._
 The bound is on the element's own waits.

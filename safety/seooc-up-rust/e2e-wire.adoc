@@ -138,7 +138,8 @@ Allocated to:: the E2E wire
 Verification:: gate (manifest; restricted sysroot; `+forbid(unsafe_code)+`; a build for a bare-metal 32-bit target without 64-bit atomics)
 
 *Rationale.*
-A separate wire crate keeps protection optional while maintaining the same dependency and heap restrictions as the runtime element.
+A separate wire crate keeps protection optional.
+It keeps the heap restrictions of the crate that holds the element's runtime path, and depends only on `+up-rust-core+`.
 
 [[req-ssr-e2e-detects]]
 == The E2E wire detects each fault
@@ -203,7 +204,7 @@ ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 *Rationale.*
 Resynchronization is <<req-ssr-e2e-resync,A restart resynchronizes, stale frames are refused, and no arrival order locks a sender out>>.
 
-Checking framing and integrity before changing receiver state prevents a corrupt header from intentionally becoming a valid sequence observation.
+Checking framing and integrity before changing receiver state keeps a corrupt header from becoming a valid sequence observation.
 An undetected corruption remains a residual.
 
 [[req-ssr-e2e-resync]]
@@ -286,7 +287,7 @@ Per-hop peer identity cannot establish end-to-end restart order.
 So the wire needs its own incarnation rule and must trust start order only where deployment declares it.
 
 A persistent increasing source alone does not prevent old frames arriving after several restarts.
-The strict receive rule prevents those frames from moving the reference backwards.
+On a strict-mode ASIL RPC request route, the strict older-incarnation refusal keeps those frames from moving the reference backwards.
 Refusal finality still requires proof of non-delivery, not merely an older incarnation.
 
 [[req-ssr-e2e-replay-window]]
@@ -427,7 +428,7 @@ Verification:: test
 
 *Rationale.*
 A route-only identity would merge different senders, and omitting the destination would admit a misaddressed frame.
-Deployment must distinguish both.
+So each data ID is derived from its sender and, where the route has one, from the route's fixed sink.
 
 [[req-ssr-e2e-sender-state]]
 == E2E sending state is one counter per wire value
@@ -552,7 +553,7 @@ Verification:: test, heap-window
 ** A refused request's frame released at once.
 
 *Rationale.*
-A response rejected before completion still needs a visible cause, and an unprotected operator response must not appear as corrupt protected traffic.
+A response rejected before completion still needs a visible cause, and a response with no E2E header is not corrupt protected traffic, so it has a counter of its own.
 
 [[req-ssr-e2e-refusal-answered]]
 == A refused request is answered, final or advisory
@@ -670,8 +671,8 @@ Verification:: test, heap-window
 ** A frame that drop-oldest evicts after decode, which appears in `+dropped_oldest+` and not in the figures.
 
 *Rationale.*
-Sequence observations establish only certain losses, while holes remain pending until the window passes them.
-Per-hop and end-to-end counts therefore answer different questions.
+A frame missing from a sender's counters is a certain loss only once the window has passed it or the reference has changed, and its gap stays pending until then.
+The route counters of one hop and the E2E figures, which cover the stretch from encode to decode, answer different questions.
 
 Distinct arrivals outside retained history cannot always be distinguished from duplicates.
 So an explicit unknown preserves the observation limit without stopping traffic or requiring unbounded storage.

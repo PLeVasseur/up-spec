@@ -84,7 +84,7 @@ A receiver can decode a sender's bytes only if both mean the same format.
 A wire that wrote a variant of its own, or read more leniently than its format, would agree with itself and with nothing else.
 
 _The format decides._
-What a decoder must refuse is already an item (xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]).
+What a decoder must refuse is stated by another item (xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]).
 This item adds the other half: the wire names the format, at a version, so that a test can state each expected result from the format and so that a second implementation can be checked against the same text.
 
 _Type identity._
@@ -161,7 +161,7 @@ The element cannot see inside a wire, so the duty is the wire's.
 _Sizing._
 The element reserves storage before a wire encodes.
 A size reported as exact that was wrong would leave bytes of an earlier frame in the payload, or cut the encoding short.
-The element checks the writer afterwards and trusts no byte count (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]), and the wire still owes an honest size, so that a refusal comes before anything is written.
+The element checks the writer afterwards and trusts no byte count (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]), and the wire still owes an honest size, so that a refusal can come before anything is written.
 
 _Owned._
 A frame goes back to its transport as soon as decoding is done, and its storage is then reused.

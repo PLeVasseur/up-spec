@@ -47,10 +47,7 @@ Allocated to:: the element; each asynchronous layer, for its place above the run
 Verification:: gate (a token scan for `+async+`, `+.await+`, `+Future+`, `+Pin+`, `+Poll+`, `+Waker+` and `+Context+`, and for grouped `+use core::{…}+` paths, with a negative control for each)
 
 *Rationale.*
-The runtime path keeps to a smaller part of `+core+`, with no futures, tasks or pinning, and leaves async scheduling to a layer above it.
-
-The synchronous or polled form is the element's own product rule.
-It keeps traffic independent of any executor and of library modules that a given qualification scope may not cover.
+Offering traffic in synchronous or polled form, with no futures, tasks or pinning, keeps it independent of any executor and of library modules that a given qualification scope may not cover.
 
 Which compiler releases, targets, library modules and options a qualification covers is stated by its supplier for an exact release (for example https://ferrous-systems.com/blog/ferrocene-26-05-0/[the Ferrocene 26.05.0 release notes]).
 This item does not rest on any one such scope.
@@ -110,7 +107,7 @@ So the graph names them instead of pretending the safety crate is the whole imag
 
 _Optional layers._
 The statement keeps the checked policy in the safety crate, and does not require everything the element provides to sit there.
-That leaves a way to admit an independently specified optional layer, such as an allocation-aware or asynchronous layer, into a later claimed configuration.
+That leaves a way to admit an independently specified optional layer, such as an allocation-aware or asynchronous layer, into a claimed configuration.
 An admitted optional layer carries its own allocated requirements and evidence.
 
 No configuration admits an optional layer at this revision.
@@ -143,4 +140,4 @@ Allocated to:: the Streamer
 Verification:: gate (the same gates as `+up-rust-core+`: manifest, restricted sysroot, token scan, and its own panic-link fixture; a build for a bare-metal 32-bit target without 64-bit atomics)
 
 *Rationale.*
-Separating the data plane prevents convenience dependencies or feature unification from introducing heap use into the safety path.
+Separating the data plane keeps a convenience dependency, or a feature that another crate turns on for the whole build, from bringing heap use into it.

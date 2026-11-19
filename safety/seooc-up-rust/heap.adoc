@@ -122,10 +122,10 @@ ISO 26262:: 6-9.4.5, 6-10.4.7 (part-clause numbers only)
 
 *Rationale.*
 A primitive that sets itself up on first use moves that work, and any allocation in it, from initialization into the first message.
-There <<req-ssr-heap-none,No heap in runtime mode>> forbids it on a native path.
+On a native path, <<req-ssr-heap-none,No heap in runtime mode>> forbids that allocation.
 
 A serialized route's declared allocation covers the owned values that route admits.
-It never covers a primitive's first-use setup, which this item requires to be forced on every route.
+It never covers a primitive's first-use setup, which this item requires, on every route, to be forced during initialization or to be absent from the runtime path.
 
 [[req-ssr-heap-declared]]
 == The heap class is declared, with no default
@@ -416,7 +416,7 @@ A record that matches a type says nothing about the provider behind it.
 A wire's record says nothing about a second wire on the same route.
 
 _Destructors._
-A destructor is a measure of nothing but itself.
+The presence of a destructor shows only that code runs when a value ends.
 A value can have one and own no heap memory, as a value that only updates a counter does.
 A value's destruction can also free memory though its decoding acquired none (<<req-ssr-heap-declared,The heap class is declared, with no default>>).
 So the heap class states heap use, the type states whether anything runs at all, and neither is inferred from the other.
@@ -555,7 +555,8 @@ So this item keeps three things apart:
 
 _Native routes._
 A destructor on a native route would be unexamined code inside the native rule.
-It could free, wait or panic where <<req-ssr-heap-none,No heap in runtime mode>> forbids each.
+It could free heap memory, which <<req-ssr-heap-none,No heap in runtime mode>> forbids there.
+It could also wait or panic when a lease on a native route is dropped, and that drop never waits and cannot panic (xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
 Refusing every type that has one is sufficient, and a type alone decides it.
 A native payload type has no need of one.
 
@@ -567,7 +568,7 @@ So a type with a destructor is admitted there on that claim, and refused without
 _Routes that declare allocation._
 A serialized route that declares its allocation may free what it allocated.
 An ordinary decoded message owns strings, sequences and nested messages, and ending it returns their memory through the route's provider.
-Refusing such a type for want of a proof about its destruction would refuse ordinary serialized communication, which every profile offers (<<req-ssr-heap-guarantees,A stronger resource guarantee is required by name>>).
+Refusing such a type for want of a proof about its destruction would refuse ordinary serialized communication (<<req-ssr-heap-guarantees,A stronger resource guarantee is required by name>>).
 
 The value's destruction is part of that route's resource policy; it is not a release of the reservation that holds it.
 Every transition that ends a value uses this one rule, so the refusal, overflow and peer-failure items need no release of their own (xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; xref:qos.adoc#req-ssr-qos-overflow[Overflow acts as declared]; xref:../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
@@ -576,7 +577,7 @@ _Waiting._
 Waiting and panicking are different properties, and neither follows from ownership.
 
 An ordinary allocator's release can take a lock that waits.
-On a route that does not require non-waiting release, that wait is the declared policy's, on the path that ended the value.
+On a route that does not require non-waiting release, that wait is the declared policy's, on a path of that route: the path that ended the value or, where that path is native or shared work, a later operation of the same route.
 A route that requires non-waiting release moves it off that path, in the same way as a retained owner's deferred return (xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 
 That hand-off holds ownership awaiting destruction, not unread traffic, so it is not a second receive queue.

@@ -74,7 +74,7 @@ Verification:: test
 
 *Rationale.*
 Every part of the envelope is found from the header, so a reader needs nothing but the sample to locate the frame.
-One version, written and checked, lets a later layout be told apart instead of being misread.
+One version, written and checked, lets a sample of another layout be told apart instead of being misread.
 
 [[req-ssr-binding-lola-envelope-checks]]
 == On LoLa, a sample that is not a well-formed envelope is refused before any of it is used
@@ -200,7 +200,8 @@ Verification:: test, fault-injection
 * *fault-injection*: metadata that does not decode, in an envelope that passes every other check, sent by a faulty peer: refused and counted.
 
 *Rationale.*
-The metadata says what the frame is, and the selected wire is the one that can read it; the binding only places it, so that no second reading of the metadata stands beside the wire's.
+The metadata says what the frame is, and the selected wire is the one that can read it.
+The binding places it and reads from it only whether the frame has a payload, so that no second reading of what the frame is stands beside the wire's.
 
 [[req-ssr-binding-lola-envelope-lifetime]]
 == On LoLa, a loan exposes only its payload, and a receive view lives within its sample

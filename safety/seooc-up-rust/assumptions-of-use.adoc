@@ -198,7 +198,7 @@ Restarting one thread cannot provide that recovery.
 A watchdog or supervisor can support a fail-silent reaction even where delivery has no hard deadline.
 But only a chain that is bounded end to end, by a supervisor that does not fail with what it supervises, gives the item a reaction time.
 
-Use that claims no safety scope may run without such a supervisor, and then claims no restart or reaction time.
+Ordinary use, which claims no safety-assurance scope, need not have such a supervisor (<<aou-seooc-assumptions-bind,An assumption of use binds the integrator who claims the scope, and replaces no requirement>>), and then claims no restart or reaction time.
 
 [[aou-seooc-process-isolation]]
 == Processes or partitions are isolated
@@ -222,13 +222,14 @@ ISO 26262:: 6-7.4.9, 6-7.4.8, 9-6 (part-clause numbers only)
 
 *Rationale.*
 The element's requirements assume that a faulty process cannot write another's private memory.
-Only the OS's memory protection can ensure that, and the element can neither provide nor check it.
+Only protection outside the element can ensure that: the OS's memory protection or, on an MCU, the partition boundary that its configuration states.
+The element can neither provide nor check it.
 
 Threads in one process share its memory.
 So ASIL and QM code in one process are kept apart only by an argument the integrator makes and verifies.
 
 An MCU often has no process boundary at all.
-So its boundary is whatever its configuration's memory protection provides, and the argument has to say what that is.
+So its boundary is the memory protection that its configuration states, or else a boundary that the integrator states, with a coexistence argument for everything that shares it.
 
 [[aou-seooc-capability-ceiling]]
 == Data above ASIL B relies on measures outside the element
@@ -261,9 +262,9 @@ ISO 26262:: 9-5, 9-6, 6-7.4.8 (part-clause numbers only)
 
 *Rationale.*
 A declared integrity level cannot raise what the element was developed for.
-The integrator therefore supplies the capability and coexistence arguments.
+So the measures that data above ASIL B relies on, and the freedom from interference of the element inside an ASIL C or D process, are the integrator's.
 
-The decomposition and coexistence duties are about the system's protection, so they hold whatever end-to-end mechanism the system uses.
+The decomposition and interference duties do not depend on which end-to-end mechanism the system uses: the integrator argues the decomposition, and no end-to-end mechanism covers the timing and memory interference that the element could cause inside an ASIL C or D process.
 The SDK's own E2E wire is deferred and not part of this delivery.
 
 _Why these duties are an assumption of their own._
@@ -345,7 +346,8 @@ ISO 26262:: 10-4.4.1, 6-7.4.13 (part-clause numbers only)
 
 *Rationale.*
 A bounded number of operations is not a bound on elapsed time.
-Detection, scheduling, reuse windows and the reaction must fit the same system budget.
+So detection, scheduling and the reaction are fitted into one budget, the item's fault tolerant time interval.
+Where a configuration keeps narrowed values, the watchdog also covers their wrap windows.
 
 Choosing event-only traffic explicitly forgoes deadline-based silence detection.
 
@@ -395,7 +397,7 @@ ASIL:: B
 Clock reads and clock correctness are separate obligations: a readable but incorrect wall clock can make both expiration and correlation misleading.
 
 A provider that reported uptime as wall time would pass every read while making each TTL decision wrong.
-So the substitution is refused where it is known rather than left for a reader to notice.
+So setup refuses a provider known to make that substitution (xref:runtime-modes.adoc#req-ssr-mode-entry-clock[The wall clock is read before runtime mode]), instead of leaving the error to be noticed later.
 
 A clock call can fail after initialization succeeded.
 So its failure is handled, fail-closed, instead of assumed away.
@@ -430,7 +432,7 @@ ISO 26262:: 6-7.4.7, 8-12, 9-7 (part-clause numbers only)
 
 *Rationale.*
 A waiver records that the deployment accepts an allocation.
-It is not the argument that the allocation cannot interfere, which the deployment still has to make: a permit is not approval.
+It is not the argument that the allocation cannot interfere, which the deployment still has to make, and the permit that a binding ships is not the deployment's approval.
 
 The element checks that a waiver exists and names an approver other than its author (xref:waivers.adoc#req-ssr-waiver-record[Waivers are recorded and can be found]).
 So judging the allocation, and arguing that it cannot interfere, stay with the deployment.
@@ -562,7 +564,7 @@ _Which duties bind which route._
 Every duty that only the E2E wire needs, its declarations, residuals, start counters and receive rules, binds only a route that selects that wire.
 A strict ASIL RPC route that the wire does not protect is bound by none of them.
 
-The duty to decide which routes need protection, to supply it and to justify it, and the black-channel and decomposition rules, hold for every route.
+The duty to decide which routes need protection, and to supply and justify it on each of them, holds whether or not a route selects the wire, and so do the black-channel and decomposition rules, each under its own condition.
 The deferred E2E items gain no implementation, gate or coverage credit from this assumption.
 
 [[aou-seooc-target-environment]]
@@ -607,7 +609,7 @@ ASIL:: B
 ISO 26262:: 6-9.4.5, 6-10.4.7 (part-clause numbers only)
 
 *Rationale.*
-The protocol requires atomicity and coherence on the actual hardware, not just a type that the compiler accepts.
+The element's synchronization relies on atomicity and coherence on the actual hardware, not just on a type that the compiler accepts.
 A native representation also requires matching ABIs.
 
 A profile's support and a configuration's assurance are separate.
@@ -615,7 +617,7 @@ A profile without an assurance package keeps its functional support, and no OS, 
 
 Strict mode is usable before any assurance package exists.
 Enforce keeps checking what a configuration declares, and refuses an assurance scope only where it is requested and unsupported.
-So an ASIL-labelled development configuration proceeds as Draft and unassessed.
+So an ASIL-labelled development configuration is not refused for lacking an assurance package alone, and its report shows its assurance as Draft and unassessed.
 
 The MCU profiles run their images on an emulator, which shows functional behaviour, not physical timing or a qualified board.
 
@@ -652,7 +654,7 @@ ISO 26262:: 1-3.22 (part-clause numbers only)
 
 *Rationale.*
 Only the crates of the claimed graph are developed and qualified for the element's requirements.
-So other code in the binary would run code that no requirement covers.
+So the binary would run other code that no requirement covers.
 
 The ASIL Streamer binary refuses to compile with unwinding, and so does another ASIL binary where its application places the element's build check (xref:build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]).
 Strict mode refuses at setup an ASIL process built with unwinding (xref:build.adoc#req-ssr-strict-rules[The rules that strict mode checks]).
@@ -781,7 +783,7 @@ ASIL:: B
 Reporting a fault cannot itself restore the application function.
 The application must observe the report within the reaction budget and choose its response.
 
-A middleware visibility disclosure conveys a limit, not a discard measurement or a proof of peer progress.
+A route's disclosed unobservable-loss limitation is a limit only, not a count of discards or a proof that a peer makes progress.
 
 The element's detection bound ends where the count becomes visible.
 How soon the application looks is its own part of the reaction.
@@ -882,7 +884,7 @@ ASIL:: B
 
 *Rationale.*
 Once a transport that shares startup memory enters runtime mode, the caller's handle places nothing more.
-The memory is sealed for every handle when the last setup sharing it has entered runtime mode (xref:startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
+A startup memory is sealed when the last live setup that uses it enters runtime mode, and in any case when `+enter_runtime_all+` returns (xref:startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
 
 A setup that never enters runtime mode keeps its claim.
-So the memory is never sealed for every handle, and nothing that rests on the seal holds.
+So, unless `+enter_runtime_all+` returns, the memory is never sealed, and nothing that rests on the seal holds.
