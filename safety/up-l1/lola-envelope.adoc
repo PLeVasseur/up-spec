@@ -7,7 +7,7 @@ Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 The contract of the LoLa binding, and the words _loan_ and _sample_: xref:lola.adoc[LoLa].
 
-This page states how the LoLa binding places one uProtocol frame in one LoLa sample.
+NOTE: This page states how the LoLa binding places one uProtocol frame in one LoLa sample.
 
 == Whom the items bind
 

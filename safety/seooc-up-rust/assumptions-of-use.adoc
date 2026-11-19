@@ -9,7 +9,7 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 Each assumption of use is something the integrator must provide or guarantee.
 It stays assumed until the integrator validates it for the item.
 
-This page indexes the element's twenty-four assumptions of use, and states seventeen of them.
+NOTE: This page indexes the element's twenty-four assumptions of use, and states seventeen of them.
 The other seven are stated in the layer part that their duty concerns: three with the transports, two with one binding and its middleware, iceoryx2, and two with the Streamer (<<summary>>).
 
 [[who]]
@@ -65,6 +65,8 @@ A "Violation" text can also state a limit of the contract instead of a class: th
 [[coverage]]
 == Tags and coverage
 
+[NOTE]
+====
 Every assumption needs `uman`, because the safety manual states it, and carries the tag `SafetyManual`.
 
 * The nineteen assumptions that the SDK's safety manual states also carry the gate tag `SafetyGateUpRust`, so the gating run of the repository that covers them keeps them.
@@ -72,6 +74,7 @@ Every assumption needs `uman`, because the safety manual states it, and carries 
 The repository that owns each states it in its own safety manual.
 * An assumption keeps its tags wherever it is filed.
 A run keeps it when the run's patterns name the part that states it (xref:../README.adoc#tracing[how a repository starts tracing]).
+====
 
 [[summary]]
 == Summary
@@ -237,7 +240,7 @@ An MCU often has no process boundary.
 The element is developed for ASIL B capability, and no configuration claims more for it, whatever OS, middleware or compiler it runs on, so data above ASIL B that crosses the element relies on measures outside it.
 
 *Decomposition and interference.*
-End-to-end protection, whichever mechanism the system supplies, can carry part of an ASIL C or D requirement only within a decomposition the integrator argues (9-5), with independence shown by dependent failure analysis. It covers faults in the exchange of information, not the timing and memory interference the element could cause inside an ASIL C or D process: there the integrator shows freedom from interference at the higher ASIL's rigour, or keeps the element out of that partition. The usual pattern is an ASIL B process that relays to the C or D partition over a channel the integrator protects at C or D.
+End-to-end protection, whichever mechanism the system supplies, can carry part of an ASIL C or D requirement only within a decomposition the integrator argues (9-5), with independence shown by dependent failure analysis. It covers faults in the exchange of information, not the timing and memory interference the element could cause inside an ASIL C or D process: there the integrator shows freedom from interference at the higher ASIL's rigour, or keeps the element out of that partition.
 
 *Strict mode.*
 In strict mode, the integrator names its measures in `+above_capability+` for a transport or route at C or D, and the argument in `+decomposition+` for C or D data whose only protection is an end-to-end mechanism of ASIL B capability.
@@ -266,6 +269,11 @@ The SDK's own E2E wire is deferred and not part of this delivery.
 
 These duties bind only where data above ASIL B crosses the element, or where the element runs inside an ASIL C or D process or partition, whatever the level of its own data.
 They are duties of the integrator.
+
+.An ASIL B process that relays to a C or D partition
+====
+The usual pattern is an ASIL B process that relays to the C or D partition over a channel the integrator protects at C or D.
+====
 
 [[aou-seooc-timing-budgets]]
 == Timing claims rest on a supported configuration, and the item's budgets are the integrator's

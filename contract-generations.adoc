@@ -1,7 +1,7 @@
 = Which requirements an implementation follows
 :toc: preamble
 
-This page says which requirements of this repository an implementation follows.
+NOTE: This page says which requirements of this repository an implementation follows.
 For some behaviours the repository holds two rules: one in a protocol chapter, and one in an item filed under `safety/`.
 
 == Where the rules are stated, and who follows them
@@ -19,6 +19,8 @@ For some behaviours the repository holds two rules: one in a protocol chapter, a
 | Each part that a requirement names, and for an assumption of use the integrator who claims the up-rust SEooC's safety-assurance scope (<<claims>>)
 |===
 
+[NOTE]
+====
 * *One implementation family.*
 The items of the safety area are written for the up-rust SEooC and for the parts that work with it.
 * *Kinds of claim.*
@@ -26,6 +28,7 @@ They are filed under `safety/`, and they make claims of more than one kind (<<cl
 * *Relation to the chapters.*
 Most items add to the protocol chapters.
 Some state a chapter's rule again with more precision, and some differ from a chapter's rule on purpose.
+====
 
 [[claims]]
 == Responsibility and kind of claim
@@ -44,7 +47,7 @@ The answer to one question cannot be derived from the answer to the other, or fr
 | Ordinary functional behaviour; an additional resource, fault or timing condition; or safety assurance, with its evidence and its assumptions of use.
 |===
 
-So an item under `safety/` can state ordinary functional behaviour of the up-rust SEooC.
+NOTE: So an item under `safety/` can state ordinary functional behaviour of the up-rust SEooC.
 
 These items state when an item binds, whatever its kind of claim:
 

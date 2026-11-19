@@ -7,11 +7,16 @@ Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
-These are the three assumptions of use of the up-rust SEooC whose duty is about every transport: who can reach a transport's resources, which integrity level each transport is given, and which bindings and wires a deployment uses.
+NOTE: These are the three assumptions of use of the up-rust SEooC whose duty is about every transport: who can reach a transport's resources, which integrity level each transport is given, and which bindings and wires a deployment uses.
 
 * Whom they bind: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+
+[NOTE]
+====
 * Each "Violation" text uses the three classes of xref:../seooc-up-rust/assumptions-of-use.adoc#violation-classes[how a violation shows up].
 * The safety manual of the SDK states them, and they carry `SafetyManual` and the gate tag `SafetyGateUpRust` (xref:../seooc-up-rust/assumptions-of-use.adoc#coverage[tags and coverage]).
+====
+
 * What only one binding adds is stated with that binding (xref:README.adoc#one-binding[what is specific to one binding]).
 * The index of all the element's assumptions is in xref:../seooc-up-rust/assumptions-of-use.adoc[its assumptions of use].
 

@@ -223,10 +223,11 @@ A release that waits for an allocator's or a middleware's own lock cannot observ
 So the element states when the ending operation's outcome is due, not when its cleanup completes.
 It keeps what the cleanup owns charged, and keeps pending cleanup from holding what the element needs for other work.
 
-Two designs would not meet that:
-
-* a single worker that serves every route, which one stalled release could stop for all of them;
-* a release that, while it waits, holds a lock that an allocation for a bounded operation also needs.
+.Two designs whose pending cleanup is not isolated
+====
+* A single worker that serves every route, which one stalled release could stop for all of them.
+* A release that, while it waits, holds a lock that an allocation for a bounded operation also needs.
+====
 
 _What fixed capacity gives._
 Fixed capacity bounds what an unfinished release can consume, but it cannot keep throughput going while a release never completes.

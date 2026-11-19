@@ -24,10 +24,14 @@ They are the up-rust SEooC's assumptions.
 Whom they bind: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 * The protocol's iceoryx2 chapter names version 0.6.1 of the iceoryx2 protocol, and the items here target iceoryx2 0.9.3.
 
-Example: An iceoryx2 transport implementation written for another SDK may follow the protocol's chapters without the items of this page.
+.An iceoryx2 transport for another SDK
+====
+An iceoryx2 transport implementation written for another SDK may follow the protocol's chapters without the items of this page.
+====
 
 The assumptions of every transport bind a deployment on iceoryx2 as well: xref:deployment.adoc[what a deployment provides for its transports].
-Each "Violation" text uses the three classes of xref:../seooc-up-rust/assumptions-of-use.adoc#violation-classes[how a violation shows up], or states a limit of the contract in place of a class.
+
+NOTE: Each "Violation" text uses the three classes of xref:../seooc-up-rust/assumptions-of-use.adoc#violation-classes[how a violation shows up], or states a limit of the contract in place of a class.
 
 [[req-ssr-binding-depth-from-deployment]]
 == iceoryx2's service depth comes from deployment data
@@ -314,7 +318,7 @@ These are one binding's limits, so they are stated with that binding.
 [[index]]
 == The general rules to read for iceoryx2
 
-The rules of every binding, of the element and of every deployment name no middleware.
+NOTE: The rules of every binding, of the element and of every deployment name no middleware.
 This section links those to read for iceoryx2.
 
 === What a deployment that uses iceoryx2 provides
@@ -355,7 +359,7 @@ This section links those to read for iceoryx2.
 
 === Where iceoryx2 is only the test bed or the example
 
-Verification lines and rationales of other items name iceoryx2 as the real middleware a test runs on, or as the source of an example.
+NOTE: Verification lines and rationales of other items name iceoryx2 as the real middleware a test runs on, or as the source of an example.
 
 * A test that runs on real iceoryx2 is evidence on iceoryx2.
 It is no evidence for another binding, which covers the duties of every binding in its own repository (xref:bindings.adoc[allocated to each binding]).

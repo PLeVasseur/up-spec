@@ -11,8 +11,9 @@ These items say how the element treats the peers of a transport.
 They are allocated to the element, and one of them also to each binding that carries native frames between processes (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 
 * Where they concern what a peer sends or writes, the faults that they hold against are stated in xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer].
-A peer's death and restart, and a peer of another ABI, are stated in these items.
 * RPC calls and message identity are in xref:../up-l2/interaction.adoc[the communication layer's part].
+
+NOTE: A peer's death and restart, and a peer of another ABI, are stated in these items.
 
 [[req-ssr-peer-failure-normal]]
 == Peer failure is normal input

@@ -32,7 +32,6 @@ On a native route, and on any route whose heap class is none, a refusal does not
 
 *Serialized and owned routes.*
 On a serialized or owned route, some refusals are reached only after the operation acquired heap memory under its declared heap class.
-Examples are a check after decode, a failed allocation at a declared allocation point, or a wire check whose acceptance event falls after its deadline.
 Such a refusal acquires nothing more.
 It *MUST* end the ownership already created, and what that ownership holds is released exactly once as xref:heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors] and xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
 That release is the route's declared heap use, not part of producing the refusal.
@@ -65,6 +64,11 @@ Not every refusal can come before the heap is touched.
 A serialized route that has already admitted an owned value still ends it on a refusal after decode, or on a response first accepted after its deadline, and ending it frees what the route's wire allocated.
 
 A declaration does not make an allocation call that can end the process on exhaustion return an error instead.
+
+.On a serialized or owned route, refusals reached only after heap memory is acquired
+====
+A check after decode, a failed allocation at a declared allocation point, or a wire check whose acceptance event falls after its deadline.
+====
 
 [[req-ssr-refuse-no-panic]]
 == No panic on runtime paths

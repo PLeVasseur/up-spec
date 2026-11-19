@@ -20,9 +20,12 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview
 
+[NOTE]
+====
 https://iceoryx.io[Eclipse iceoryx2&trade;] is a middleware for inter-process communication, built to be efficient and to have extremely low latency. Its library is designed to offer fast and reliable mechanisms of inter-process communication that are zero-copy and lock-free.
 
 This document defines how uProtocol messages can be exchanged by means of iceoryx2 _Services_.
+====
 
 == iceoryx2 Version
 
@@ -40,7 +43,7 @@ All types of uProtocol messages *MUST* be transferred using iceoryx2's PublishSu
 
 == UMessage Mapping
 
-A uProtocol message consists of _UAttributes_ and optional payload. The following sections define how these are mapped to/from iceoryx2 Services.
+NOTE: A uProtocol message consists of _UAttributes_ and optional payload. The following sections define how these are mapped to/from iceoryx2 Services.
 
 === UAttributes
 
@@ -111,7 +114,7 @@ That encapsulates the following additional properties in Rust:
 
 == iceoryx2 Service Name Structure
 
-Message producers publish messages to the iceory2 inter-process communication using _ServiceNames_. Other clients can then use the same _ServiceName_ to receive the messages that are being published.
+NOTE: Message producers publish messages to the iceory2 inter-process communication using _ServiceNames_. Other clients can then use the same _ServiceName_ to receive the messages that are being published.
 
 The iceoryx2 _ServiceName_ that is used to transfer a uProtocol message is derived from the message's `source` and `sink` attributes.
 
@@ -174,10 +177,10 @@ upper-case link:https://www.rfc-editor.org/rfc/rfc4648#section-8[base16 encoding
 
 === Examples
 
-The examples below assume that the local entity's authority name is `device1`.
+NOTE: The examples below assume that the local entity's authority name is `device1`.
 
 .Publishing an event on a topic
---
+====
 [cols="2,8"]
 |===
 |*Source URI*
@@ -189,10 +192,10 @@ The examples below assume that the local entity's authority name is `device1`.
 |*iceoryx2 ServiceName*
 |`up/device1/10AB/1/3/80CD`
 |===
---
+====
 
 .Sending a Notification to another uEntity
---
+====
 [cols="2,8"]
 |===
 |*Source URI*
@@ -204,10 +207,10 @@ The examples below assume that the local entity's authority name is `device1`.
 |*iceoryx2 ServiceName*
 |`up/device1/10AB/1/3/80CD/device1/EF/3/4/0`
 |===
---
+====
 
 .Sending an RPC Request to a service provider
---
+====
 [cols="2,8"]
 |===
 |*Source URI*
@@ -219,10 +222,10 @@ The examples below assume that the local entity's authority name is `device1`.
 |*iceoryx2 ServiceName*
 |`up/device1/CD/1/4/B`
 |===
---
+====
 
 .Sending an RPC Response to a service client
---
+====
 [cols="2,8"]
 |===
 |*Source URI*
@@ -234,10 +237,10 @@ The examples below assume that the local entity's authority name is `device1`.
 |*iceoryx2 ServiceName*
 |`up/device1/CD/1/4/B/device1/3AB/4/3/0`
 |===
---
+====
 
 .Subscribe to a specific Publish topic
---
+====
 [cols="2,8"]
 |===
 |*Source Filter*
@@ -249,10 +252,10 @@ The examples below assume that the local entity's authority name is `device1`.
 |*iceoryx2 ServiceName*
 |`up/device1/10AB/1/3/80CD`
 |===
---
+====
 
 .Subscribe to all Request messages for a given invokable method pointed to this uEntity
---
+====
 [cols="2,8"]
 |===
 |*Source Filter*
@@ -264,7 +267,7 @@ The examples below assume that the local entity's authority name is `device1`.
 |*iceoryx2 ServiceName*
 |`up/device1/CD/1/4/B`
 |===
---
+====
 
 Note that subscribing to all Request messages pointed to this uEntity for a given invokable method
 means that we **MUST** determine the source in order to send Response messages.

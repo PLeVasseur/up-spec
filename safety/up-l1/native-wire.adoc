@@ -9,7 +9,7 @@ The duties of every wire: xref:wires.adoc[allocated to each wire].
 The other kind of wire: xref:serialized-wires.adoc[serialized wires, and the values they own].
 Both kinds, end to end and on either kind of transport: xref:payload-paths.adoc[payload paths, end to end].
 
-The native wire carries a value as it lies in memory (xref:wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]).
+NOTE: The native wire carries a value as it lies in memory (xref:wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]).
 A sender initializes the value in the storage that carries it, and a receiver borrows it there.
 The value is not encoded or decoded.
 
@@ -20,7 +20,7 @@ The native wire is the element's own, so they carry the tag `SafetyUpRustCore`;
 * the rules of other pages that a native route rests on, in the order in which a payload meets them (<<index>>);
 * what fails, where, and with which outcome (<<failures>>);
 * who establishes each property, and what does not establish it (<<boundary>>);
-* guidance on one way to establish a layout identity (<<guidance>>).
+* one way to establish a layout identity (<<guidance>>).
 
 == Whom the items bind
 
@@ -448,7 +448,7 @@ Each row names the rule that governs a step, and who acts.
 [[boundary]]
 == Who establishes what
 
-A native route rests on properties that safe code cannot check.
+NOTE: A native route rests on properties that safe code cannot check.
 The table says who states each one, what establishes it, and what does not.
 
 [cols="3,2,3,3",options="header"]
@@ -487,8 +487,10 @@ The table says who states each one, what establishes it, and what does not.
 |===
 
 [[guidance]]
-== Guidance: one way to establish a layout identity
+== One way to establish a layout identity
 
+.A built-in table of layouts, checked at setup
+====
 * *A table fixed when a binary is built.*
 A deployment can write its agreement as a table that lists each native type with a canonical description of its layout.
 A table that is built in can be reviewed as one file, and nothing at run time changes it.
@@ -501,3 +503,4 @@ The ABI fingerprint is exchanged in the same way.
 * *A short value on each frame.*
 A few bytes taken from a layout's description can tell the frames of several agreed types apart at little cost.
 Such a value can select which agreed layout a frame is compared with, and <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout, apart from the encoding identifier>>, "A complete comparison", states which comparison establishes that a writer's layout identity is the reader's.
+====

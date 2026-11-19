@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview 
 
-UAttributes contain meta data describing a particular message's purpose, content and processing requirements.
+NOTE: UAttributes contain meta data describing a particular message's purpose, content and processing requirements.
 
 [#data-model-definition]
 == Data Model

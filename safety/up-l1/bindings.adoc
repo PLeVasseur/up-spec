@@ -11,8 +11,12 @@ These are the duties of the binding contract.
 Each item's statement says whom it binds: every binding or some of them, and the element where an item's statement gives it a duty (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 A binding meets those that bind it in its own code, and covers them in its own repository, by running the contract suites against itself.
 
+[NOTE]
+====
 * They carry the tag `SafetyBinding`, and an item whose statement holds a duty of pull bindings only also carries `SafetyBindingPull`.
 The tags say which repositories cover an item (xref:../README.adoc#tags[the tags]).
+====
+
 * They name no middleware.
 What only one binding must meet is stated with that binding, in an item that is allocated to it alone (xref:README.adoc#one-binding[what is specific to one binding]).
 * What a binding is, and what is not one: <<req-ssr-binding-scope,What a binding is, and the binding contract>>.
@@ -456,7 +460,10 @@ Verification:: gate (the binding's copy of the inventory check, with a negative 
 A binding's `+unsafe+` code runs on the same runtime paths as the element's.
 So its obligations need the same record and the same gate (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]).
 
-Example: A binding may keep its unsafe-site inventory in its repository and run the inventory check there.
+.A binding's inventory in its own repository
+====
+A binding may keep its unsafe-site inventory in its repository and run the inventory check there.
+====
 
 [[req-ssr-binding-lent-storage]]
 == Lent storage is exclusive, disjoint and stable for as long as it is held

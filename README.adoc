@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview
 
-uProtocol is a communication protocol that enables software applications (uEntities) to easily communicate with each other running in distributed systems. The protocol is designed to be lightweight, efficient, easy to use, and run on top of any other communication middleware (transport) such as SOME/IP, MQTT, zenoh, HTTP, etc...
+NOTE: uProtocol is a communication protocol that enables software applications (uEntities) to easily communicate with each other running in distributed systems. The protocol is designed to be lightweight, efficient, easy to use, and run on top of any other communication middleware (transport) such as SOME/IP, MQTT, zenoh, HTTP, etc...
 
 To achieve the above mentioned objectives, we have split the specifications into sections (folders) that are:
 
@@ -50,7 +50,7 @@ If you would like to contribute to uProtocol to develop a new language library o
 
 == Tracing Requirements
 
-Implementers of the uProtocol specification are encouraged to use link:https://github.com/itsallcode/openfasttrace[OpenFastTrace] (OFT) for making sure that they actually cover all requirements from the specification that are relevant for the implemented component.
+NOTE: Implementers of the uProtocol specification are encouraged to use link:https://github.com/itsallcode/openfasttrace[OpenFastTrace] (OFT) for making sure that they actually cover all requirements from the specification that are relevant for the implemented component.
 
 The link:https://github.com/eclipse-uprotocol/ci-cd[uProtocol CI/CD repository] contains a reusable GitHub Action workflow for link:https://github.com/eclipse-uprotocol/ci-cd/.github/workflows/trace-requirements.yaml[tracing requirements] which can be used for that purpose. The link:https://github.com/eclipse-uprotocol/up-rust[uProtocol Rust Language Library] also makes use of this workflow in its link:https://github.com/eclipse-uprotocol/up-rust/.github/workflows/nightly.yaml[nightly build] and can serve as a blueprint.
 
@@ -73,4 +73,4 @@ The uProtocol specification documents contain a lot of requirements that are def
 
 === Gherkin Feature Files
 
-Along with the specification itself, this repository contains Gherkin Features and Scenarios, defined in files with a `.feature` suffix, which can be used with test frameworks like https://cucumber.io/[Cucumber] to assert compliance of implementations with the uProtocol specification. Not all parts of the specification are covered (yet), but we intend to add Scenario descriptions so that more and more of the requirements defined in the specification will be covered over time.
+NOTE: Along with the specification itself, this repository contains Gherkin Features and Scenarios, defined in files with a `.feature` suffix, which can be used with test frameworks like https://cucumber.io/[Cucumber] to assert compliance of implementations with the uProtocol specification. Not all parts of the specification are covered (yet), but we intend to add Scenario descriptions so that more and more of the requirements defined in the specification will be covered over time.

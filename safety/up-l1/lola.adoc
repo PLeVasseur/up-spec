@@ -15,7 +15,7 @@ This page holds what is specific to the binding of the up-rust SEooC to LoLa, th
 * what each rule of every binding, of the element and of every deployment asks on LoLa (<<index>>);
 * ten matters on which a LoLa binding's evidence or a decision of the product is still missing, each with its duty, what is missing and whose it is (<<cells>>).
 
-The protocol specification has no LoLa chapter, and the envelope that carries a frame in a LoLa sample is stated on xref:lola-envelope.adoc[the LoLa physical envelope].
+NOTE: The protocol specification has no LoLa chapter, and the envelope that carries a frame in a LoLa sample is stated on xref:lola-envelope.adoc[the LoLa physical envelope].
 
 == Whom the items bind
 
@@ -44,12 +44,13 @@ A choice about the product that this specification has not made.
 Each one is named in <<cells>>, with whose it is, and the duties are written so that they hold under every answer.
 
 No LoLa binding has been accepted against this page.
-What a binding's code does at a given revision is stated by its qualification record (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
+
+NOTE: What a binding's code does at a given revision is stated by its qualification record (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
 
 [[lola]]
 == LoLa
 
-LoLa is the `mw::com` communication middleware of Eclipse S-CORE, in the repository https://github.com/eclipse-score/communication[`eclipse-score/communication`].
+NOTE: LoLa is the `mw::com` communication middleware of Eclipse S-CORE, in the repository https://github.com/eclipse-score/communication[`eclipse-score/communication`].
 
 * *One revision.*
 The facts on this page are LoLa's own published statements at commit `72fe936e4d1e091181134ebdb8dbfed7f6574dc9` of that repository.
@@ -59,7 +60,8 @@ The binding's qualification record states the revision of LoLa that the binding 
 LoLa's assumptions of use speak of a producer that obtains the storage for an event's sample with `+Allocate()+`, holds it through an `+AllocateePtr+` and sends it.
 They speak of a proxy event that a consumer subscribes to, and that provides each received sample through a `+SamplePtr+` (https://github.com/eclipse-score/communication/blob/72fe936e4d1e091181134ebdb8dbfed7f6574dc9/score/mw/com/dependability/safety_analysis/aou.trlc[`+aou.trlc+` at that commit]).
 On this page a _loan_ is storage held through an `+AllocateePtr+`, and a _sample_ is what a `+SamplePtr+` holds.
-* *Qualification.*
+
+NOTE: *Qualification.*
 LoLa's README says that the safety qualification of its elements "is not provided" (https://github.com/eclipse-score/communication/blob/72fe936e4d1e091181134ebdb8dbfed7f6574dc9/README.md[`+README.md+` at that commit]).
 
 [[lola-assumptions]]
@@ -506,7 +508,7 @@ A binding that retried it, or reported it as a route that is briefly full, would
 [[index]]
 == What the general rules ask on LoLa
 
-The rules of every binding, of the element and of every deployment name no middleware.
+NOTE: The rules of every binding, of the element and of every deployment name no middleware.
 This section says what each of them asks on LoLa, so that the binding's maintainers and a deployment on LoLa find it in one place.
 
 * Each rule stays in its own item, and that item governs.
@@ -714,7 +716,7 @@ That withholds the claim that a row is met, and it withholds no duty.
 [[errors]]
 === What a result of LoLa becomes
 
-The name of the refusal or of the counter is the binding's to state, and no name is fixed here (<<lola-cell-8>>).
+NOTE: The name of the refusal or of the counter is the binding's to state, and no name is fixed here (<<lola-cell-8>>).
 
 [cols="3,5,3",options="header"]
 |===

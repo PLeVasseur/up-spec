@@ -18,7 +18,7 @@ SPDX-FileType: DOCUMENTATION
 SPDX-License-Identifier: Apache-2.0
 ----
 
-In the following section we will outline fundamental rules for naming conventions for uProtocol things like uDomains, uDevices, and uEntities, these names are used to address the uThings by distributed apps and services.
+NOTE: In the following section we will outline fundamental rules for naming conventions for uProtocol things like uDomains, uDevices, and uEntities, these names are used to address the uThings by distributed apps and services.
 
 == uEntities
 
@@ -58,4 +58,6 @@ A device is a logical independent representation of a service bus in different e
 
 == uDomain
 
-uProtocol will follow Domain Name System (DNS) specifications such as https://datatracker.ietf.org/doc/html/rfc1034[RFC1034], https://datatracker.ietf.org/doc/html/rfc1035[RFC1035], https://datatracker.ietf.org/doc/html/rfc1123[RFC1123], https://datatracker.ietf.org/doc/html/rfc8117[RFC8117], and other RFCs, for naming and organizing devices into domains (a.k.a grouping of devices). A domain name is a textual identifier that marks out a part of the Internet in which an administration has autonomy, authority or control.
+uProtocol will follow Domain Name System (DNS) specifications such as https://datatracker.ietf.org/doc/html/rfc1034[RFC1034], https://datatracker.ietf.org/doc/html/rfc1035[RFC1035], https://datatracker.ietf.org/doc/html/rfc1123[RFC1123], https://datatracker.ietf.org/doc/html/rfc8117[RFC8117], and other RFCs, for naming and organizing devices into domains (a.k.a grouping of devices).
+
+NOTE: A domain name is a textual identifier that marks out a part of the Internet in which an administration has autonomy, authority or control.

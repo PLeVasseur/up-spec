@@ -38,11 +38,11 @@ Client ->> UDiscoveryService: FindService()
 Client ->> UDiscoveryService: FindServiceTopics()
 ----
 
-In <<client-api>> above, _Client_ represents the client-facing APIs to talk to uDiscovery database that can be found in the various language libraries such as https://github.com/eclipse-uprotocol/up-cpp[up-cpp], https://github.com/eclipse-uprotocol/up-java[up-java], etc..  that are used to find services and their topics. 
+NOTE: In <<client-api>> above, _Client_ represents the client-facing APIs to talk to uDiscovery database that can be found in the various language libraries such as https://github.com/eclipse-uprotocol/up-cpp[up-cpp], https://github.com/eclipse-uprotocol/up-java[up-java], etc..  that are used to find services and their topics. 
 
 == Client Facing APIs
 
-The client facing APIs of uDiscovery provide the means for uEntities to discover services (where they are located, versions, etc...), and topic metadata that a service produces (method id and permissions, publish topic message formats, etc...). The API is declared in the {discovery-proto-ref}.
+NOTE: The client facing APIs of uDiscovery provide the means for uEntities to discover services (where they are located, versions, etc...), and topic metadata that a service produces (method id and permissions, publish topic message formats, etc...). The API is declared in the {discovery-proto-ref}.
 
 [.specitem,oft-sid="dsn~discovery-client-apis~1",oft-needs="impl"]
 --
@@ -73,7 +73,9 @@ The FindServices() API is used to find service instances matching search criteri
 
 ==== Example Use Cases
 
- Below are example string URIs that could be passed to the API.
+.FindServices() search URIs and what they find
+====
+Below are example string URIs that could be passed to the API.
 
 .FindServices() Examples
 [#findservices-examples, cols="1,1,3", options="header", width="80%"]
@@ -86,6 +88,7 @@ The FindServices() API is used to find service instances matching search criteri
 | `up://*/11234/2/0` | false | Find the authority_name for version 2 & instance 1 of service 1234.
 
 |===
+====
 
 
 === GetServiceTopics()
@@ -109,6 +112,8 @@ The GetServiceTopics() API is used to fetch metadata about one or more topics (d
 
 ==== Example Use Cases
 
+.GetServiceTopics() URIs and their results
+====
 Below are example use cases for the API when passed certain URIs (shown in string form) along with the expected results.
 
 .GetServiceTopics() Examples
@@ -121,6 +126,7 @@ Below are example use cases for the API when passed certain URIs (shown in strin
 | `up:/1234/2/FFFF` | Return repeated list of `UServiceTopic` for all tpoics from service 1234 version 2.
 
 |===
+====
 
 
 

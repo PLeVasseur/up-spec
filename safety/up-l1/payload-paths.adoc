@@ -8,7 +8,7 @@ This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 The two kinds of wire: xref:native-wire.adoc[the native wire] and xref:serialized-wires.adoc[serialized wires, and the values they own].
 The duties of every binding: xref:bindings.adoc[allocated to each binding].
 
-A payload reaches its reader on one of two kinds of route, native or serialized, over one of two kinds of binding, lending or handoff.
+NOTE: A payload reaches its reader on one of two kinds of route, native or serialized, over one of two kinds of binding, lending or handoff.
 The choice of a wire and the choice of a transport are separate, so all four combinations exist.
 A component that only carries a payload is a third case, and it reads nothing.
 
@@ -241,7 +241,7 @@ A carrier forwards a serialized payload without reading it, as xref:../up-l2/str
 [[independent]]
 == A wire and a transport are chosen apart
 
-A message's wire, such as the native wire or Protobuf, and a route's transport are two choices, and <<req-ssr-payload-route-form,A route's form is fixed at setup, by what the route declares and never by a name>> keeps them apart.
+NOTE: A message's wire, such as the native wire or Protobuf, and a route's transport are two choices, and <<req-ssr-payload-route-form,A route's form is fixed at setup, by what the route declares and never by a name>> keeps them apart.
 
 [cols="2,5,5",options="header"]
 |===

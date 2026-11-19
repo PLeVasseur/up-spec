@@ -107,7 +107,7 @@ So a safe wire cannot claim more initialized bytes than it wrote.
 --
 The element's memory safety *MUST NOT* depend on a binding's safe methods returning correct values.
 
-* Where it relies on a claim from a binding, for example that lent storage is exclusive, disjoint and stable, the element *MUST* take the claim through an `+unsafe+` trait with stated obligations, listed in the inventory.
+* Where it relies on a claim from a binding, the element *MUST* take the claim through an `+unsafe+` trait with stated obligations, listed in the inventory.
 * The element *MUST* check, or treat as untrusted, everything else that a binding hands over, such as lengths, slices, route handles and peer references.
 --
 
@@ -126,4 +126,9 @@ So `+unsafe+` code cannot rely on it for memory safety, while an `+unsafe trait+
 The binding contract therefore keeps its interfaces safe, with their values checked.
 It puts each claim that memory safety relies on, such as the exclusivity of lent transmit storage, behind an `+unsafe trait+`.
 
-For example, up-spec's iceoryx2 chapter asks the same of a Rust payload's author, through iceoryx2's `+ZeroCopySend+` (xref:../../up-l1/iceoryx2.adoc[the iceoryx2 transport]), which iceoryx2 declares as an `+unsafe trait+` (https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2-bb/elementary-traits/src/zero_copy_send.rs#L32[`+zero_copy_send.rs+` in iceoryx2 0.9.3, its declaration of the trait]).
+.Claims made through an unsafe trait
+====
+The element's memory safety relies on a binding's claim that lent storage is exclusive, disjoint and stable, so the element takes that claim through an `+unsafe+` trait.
+
+up-spec's iceoryx2 chapter asks the same of a Rust payload's author, through iceoryx2's `+ZeroCopySend+` (xref:../../up-l1/iceoryx2.adoc[the iceoryx2 transport]), which iceoryx2 declares as an `+unsafe trait+` (https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2-bb/elementary-traits/src/zero_copy_send.rs#L32[`+zero_copy_send.rs+` in iceoryx2 0.9.3, its declaration of the trait]).
+====

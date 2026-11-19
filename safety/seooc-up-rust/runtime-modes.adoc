@@ -244,10 +244,11 @@ Verification:: test, review (each runtime refusal reason checked for whether set
 *Rationale.*
 A route admitted only to refuse all its traffic looks healthy at setup and fails only in operation, where the cause is harder to see.
 
-Setup refuses, for example:
-
-* a wire with no size bound when the route also has no payload bound;
-* a variable-size wire on a binding that cannot carry a short payload.
+.Wires that do not fit their route or their binding
+====
+* A wire with no size bound when the route also has no payload bound.
+* A variable-size wire on a binding that cannot carry a short payload.
+====
 
 [[req-ssr-mode-one-way]]
 == There is no way back
@@ -478,7 +479,10 @@ So no waiver can admit a classic route.
 
 A two-mode type is not a classic route, whichever crate re-exports it.
 
-Example: In ordinary use, an application may use the classic API for a route outside the two-mode contract.
+.The classic API outside the two-mode contract
+====
+In ordinary use, an application may use the classic API for a route outside the two-mode contract.
+====
 
 [[req-ssr-mode-bounded-startup]]
 == Setup never waits without a bound

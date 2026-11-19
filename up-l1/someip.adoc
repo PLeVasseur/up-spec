@@ -24,6 +24,8 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview
 
+[NOTE]
+====
 Scalable service-Oriented MiddlewarE over IP *(SOME/IP)* is a communication protocol used in the automotive industry for exchanging data between electronic control units (ECUs) in a vehicle.
 
 SOME/IP provides a framework for efficient and reliable communication between ECUs over IP networks. It is designed to support real-time and high-bandwidth communication requirements in automotive systems. The protocol allows ECUs to discover and communicate with each other, exchange messages, and provide services in a distributed system.
@@ -31,6 +33,7 @@ SOME/IP provides a framework for efficient and reliable communication between EC
 SOME/IP is based on the Internet Protocol (IP) and uses UDP or TCP as the transport layer. It supports various communication patterns, including unicast, multicast, and broadcast. The protocol defines a set of message formats and procedures for encoding and decoding data, handling service discovery, and managing communication sessions.
 By using SOME/IP, automotive ECUs can communicate with each other to exchange information related to vehicle functions, such as sensor data, control commands, diagnostics, and software updates. It enables the integration and interoperability of different ECUs from various automotive suppliers within a vehicle's network architecture.
 Overall, SOME/IP plays a crucial role in facilitating efficient and standardized communication between ECUs in modern automotive systems.
+====
 
 The following specification will elaborate on how uProtocol shall be mapped to SOME/IP protocol so that mechatronics applications and services can be connected to non-mechatronics and cloud based applications and services.
 
@@ -132,7 +135,7 @@ or ignoring the `RESPONSE`.
 [[uuid-mapping]]
 ==== UUIDs
 
-xref:../basics/uuid.adoc[uProtocol UUID] specifications create a unique identifier for each message along with timestamp information.
+NOTE: xref:../basics/uuid.adoc[uProtocol UUID] specifications create a unique identifier for each message along with timestamp information.
 
 The *UUid* is used for correlate between request and response as well. SOME/IP instead defines the `RequestID` as 16 bit `ClientID` + 16 bit `SessionID` (that is incremented).
 
@@ -181,7 +184,7 @@ Further details of the usage of IDs for the various message types is described <
 
 ==== Sink & Source Mapping
 
-*UAttributes* Specification explains that `source` attributes defines the address of whom sent the message, while `sink` defines the destination for the message as described in <<uri-mapping>>.
+NOTE: *UAttributes* Specification explains that `source` attributes defines the address of whom sent the message, while `sink` defines the destination for the message as described in <<uri-mapping>>.
 
 .SOME/IP to UAttributes Sink & Source Mapping
 [[uattribute-mapping]]
@@ -283,7 +286,7 @@ NOTES::
 
 == Application Layer Translation
 
-Application (or message payload) translation is the process of converting *SOME/IP-SD* subscription and discovery messages, to/from *uDiscovery* and *uSubscription* Messages.
+NOTE: Application (or message payload) translation is the process of converting *SOME/IP-SD* subscription and discovery messages, to/from *uDiscovery* and *uSubscription* Messages.
 
 === uSubscription
 

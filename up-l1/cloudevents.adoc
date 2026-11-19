@@ -20,6 +20,8 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview
 
+[NOTE]
+====
 https://cloudevents.io/[CloudEvents] is a specification hosted by the https://cncf.io/[Cloud Native Computing Foundation] (CNCF) for describing events in a common way.
 
 The CloudEvents specification defines an envelope for carrying information about the occurrence of a noteworthy event in a system.
@@ -46,6 +48,7 @@ Support for using CloudEvents is available for many programming languages by mea
 The https://cloudevents.io/[CloudEvents] project has defined a set of *Formats* which describe how events can be expressed using https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/json-format.md[JSON], https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/protobuf-format.md[Protobuf] or https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/avro-format.md[Apache Avro].
 
 The accompanying CloudEvents *protocol bindings* describe how events can be sent via well-known transport protocols like https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/http-protocol-binding.md[HTTP], https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/mqtt-protocol-binding.md[MQTT] etc.
+====
 
 [.specitem,oft-sid="dsn~cloudevents-umessage-mapping~3",oft-needs="impl,utest",oft-title="Mapping of UMessages to CloudEvents"]
 == uMessage Mapping
@@ -304,12 +307,14 @@ CloudEvents *SHOULD* only be serialized when they are about to be sent via the x
 
 == Examples
 
-The following examples use the CloudEvent JSON Format with the opaque carriage
+NOTE: The following examples use the CloudEvent JSON Format with the opaque carriage
 baseline. The notification's `data_base64` value decodes to the JSON text
 `{"subject":"door.front_left","status":"open"}`; the publish example's decodes
 to the UTF-8 text `open`.
 
-=== Publish
+[#_publish]
+.A Publish message
+====
 [source, json]
 ----
 {
@@ -324,8 +329,11 @@ to the UTF-8 text `open`.
     "data_base64": "b3Blbg=="
 }
 ----
+====
 
-=== Notification
+[#_notification]
+.A Notification message
+====
 [source, json]
 ----
 {
@@ -339,8 +347,11 @@ to the UTF-8 text `open`.
     "data_base64": "eyJzdWJqZWN0IjoiZG9vci5mcm9udF9sZWZ0Iiwic3RhdHVzIjoib3BlbiJ9"
 }
 ----
+====
 
-=== Request
+[#_request]
+.A Request message
+====
 [source, json]
 ----
 {
@@ -357,8 +368,11 @@ to the UTF-8 text `open`.
                         in google.protobuf.Any ..."
 }
 ----
+====
 
-=== Response
+[#_response]
+.A Response message
+====
 [source, json]
 ----
 {
@@ -375,3 +389,4 @@ to the UTF-8 text `open`.
     "data_base64": "... base64 encoded serialization of google.rpc.Status ..."
 }
 ----
+====

@@ -110,25 +110,28 @@ preserves `0xFFFF` as an opaque reserved identifier, not a match-all value.
 Moving an existing private use of `0xFFFF` to another agreed identifier is a
 deployment-level migration, not a relabeling performed by intermediaries.
 
-This is an independent uProtocol registry. Its identifiers do not reuse the
+NOTE: This is an independent uProtocol registry. Its identifiers do not reuse the
 numeric values of the IANA CoAP Content-Formats registry, and identifiers
 `0x0001` to `0x0007` preserve the numeric values of the `UPayloadFormat`
 enumeration that this registry replaces.
 
 === Private-use Identifiers
 
-Private use is a normative part of the identifier model. The assumptions of use in
+NOTE: Private use is a normative part of the identifier model. The assumptions of use in
 xref:#allocation[Allocation and Origination] and
 xref:#acceptance[Carrying a Payload versus Reading It] govern the origination,
 preservation and interpretation of private-use identifiers.
 
 ==== Example of Private Allocation Coordination (Non-normative)
 
-These rules support long-lived proprietary encodings as well as encodings
+NOTE: These rules support long-lived proprietary encodings as well as encodings
 awaiting a public registry assignment. An allocation plan can reserve separate
 blocks for shared library conventions, generated native-representation tables,
 and non-public formats managed by different organizations, vendors or products.
-For example, parties sharing an interpretation agreement could coordinate the
+
+.An allocation plan for the private-use range
+====
+Parties sharing an interpretation agreement could coordinate the
 following allocation:
 
 [cols="2,6", options="header"]
@@ -152,12 +155,13 @@ The number, sizes and ownership of these blocks are choices made by the parties
 to the agreement. They can allocate additional or differently sized blocks as
 their production formats require. Such private reservations are distinct from
 the registry's Reserved category and are not public registry assignments.
-This example adds no restriction on carriage. A library's built-in private value
+A library's built-in private value
 has meaning only through the applicable agreement. A deployment with a
 conflicting allocation can select its own codec identity and coordinate that
 meaning with its interpreting peers.
+====
 
-If an encoding later receives a public registry assignment, implementations and
+NOTE: If an encoding later receives a public registry assignment, implementations and
 deployments coordinate migration to the assigned identifier. An earlier private
 value retains only its agreed private meaning; it does not automatically become
 an alias of the registered identifier. Proprietary encodings can continue using
@@ -187,9 +191,6 @@ on `payloadEncodingId` in xref:uattributes.adoc[UAttributes].
 A component that reads a payload *SHALL* first determine its encoding. It *SHALL*
 reject the payload if it cannot determine or does not support that encoding.
 --
-
-This is a decoding decision, not a restriction on which valid identifiers a
-message can carry.
 
 [#allocation]
 == Allocation and Origination
@@ -250,7 +251,7 @@ Each assignment *MUST* provide:
 * a registered media type when one accurately identifies the encoding, or
   `None registered` otherwise.
 
-The representation category and media type are semantic descriptions of the
+NOTE: The representation category and media type are semantic descriptions of the
 encoding. They support explicit, application-aware operations such as
 projecting a payload into another format's native data model.
 

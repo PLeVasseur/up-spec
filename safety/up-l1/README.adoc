@@ -14,14 +14,16 @@ It holds three things:
 
 == Whom the items bind
 
-Where an item is filed says which layer it concerns (xref:../README.adoc#filing[filing and scope]).
+NOTE: Where an item is filed says which layer it concerns (xref:../README.adoc#filing[filing and scope]).
 
 * *One element.*
 The items here were written for the up-rust SEooC (xref:../seooc-up-rust/README.adoc[its README]) and for the bindings and wires that work with it.
 They are not protocol requirements of uP-L1, and none of them names a transport implementation of another SDK, or an SDK of another language.
 * *Requirements.*
 Each requirement's statement says whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]): such as every binding or those among them that it names, every wire, every serialized wire apart from the end-to-end protection wire, each wire of the fixed-layout XCDR2 profile, one binding alone (<<one-binding>>), or the element itself.
-Its tags say which repositories cover it (xref:../README.adoc#tags[the tags]).
++
+NOTE: Its tags say which repositories cover it (xref:../README.adoc#tags[the tags]).
+
 * *Assumptions of use.*
 The five assumptions of use filed here are that element's: three about every transport, and two about one binding and its middleware, iceoryx2.
 Whom they bind: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
@@ -117,8 +119,9 @@ The item governs, and this table adds no duty.
 
 == Items filed with the element
 
-Some items that concern a transport or a wire are filed with the element, because they are rules of the element's own modes, memory and reports.
+NOTE: Some items that concern a transport or a wire are filed with the element, because they are rules of the element's own modes, memory and reports.
 In their statements, some of these name a binding or a wire beside the element (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+
 A binding or wire author reads them in xref:../seooc-up-rust/README.adoc[the element's part]:
 
 * the heap class that every wire, binding and route declares, and the stronger resource guarantees a route may require (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]);

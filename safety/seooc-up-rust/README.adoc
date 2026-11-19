@@ -4,12 +4,13 @@
 The software safety requirements and assumptions of use of one safety element out of context (SEooC).
 
 * The element is developed for ASIL B capability, and claims it only for a supported configuration whose evidence establishes it (<<claims>>).
-* No item in ISO 26262's sense is known yet, so the requirements are assumed ones, and the assumptions of use say what an integrator has to provide (10-9).
+
+NOTE: No item in ISO 26262's sense is known yet, so the requirements are assumed ones, and the assumptions of use say what an integrator has to provide (10-9).
 
 The conventions and tags are in xref:../README.adoc[the safety area's README].
 xref:../../contract-generations.adoc[Which requirements an implementation follows] says how these items relate to the protocol chapters.
 
-This directory holds what is specific to the element: its scope and boundary, its claims, its modes, memory, build and platform rules, and the index of its assumptions of use.
+NOTE: This directory holds what is specific to the element: its scope and boundary, its claims, its modes, memory, build and platform rules, and the index of its assumptions of use.
 The items that concern a protocol layer are filed with that layer, in xref:../up-l1/README.adoc[the transport layer's part] and xref:../up-l2/README.adoc[the communication layer's part].
 They are items of this element and of the parts that work with it, and <<files>> lists them.
 

@@ -1,6 +1,8 @@
 = Safety requirements for traceability
 :toc: preamble
 
+[NOTE]
+====
 This area holds the requirements of the up-rust SEooC, and of the transports, wires and Streamer that work with it, which their repositories trace with OpenFastTrace (OFT).
 It is laid out like the protocol specification: what is shared comes first, then a part for each protocol layer, then a part for each SDK element.
 
@@ -10,11 +12,12 @@ It also holds what they rest on: the up-rust SEooC's ordinary functional contrac
 * *Beside the protocol chapters.*
 Most items add to the protocol chapters, and some differ from them on purpose.
 How an item and a rule of the protocol chapters meet: <<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>.
+====
 
 [[layout]]
 == How this area is laid out
 
-An item is filed by the protocol responsibility it concerns.
+NOTE: An item is filed by the protocol responsibility it concerns.
 Each obligation is stated in one place, and tables, indexes and safety manuals summarize it and link to it.
 
 [cols="2,5,3",options="header"]
@@ -35,6 +38,9 @@ Each obligation is stated in one place, and tables, indexes and safety manuals s
 === Where a new item goes
 
 * *Protocol requirements*, which every SDK of a kind must meet, stay in the protocol chapters (`basics/`, `up-l1/`, `up-l2/`, `up-l3/`), tagged as those chapters tag them.
+
+[NOTE]
+====
 * *A safety obligation of a protocol layer* goes in that layer's part here.
 A restriction that only one binding has goes in that binding's file, beneath its layer.
 * *An SDK element's own scope, boundary and implementation-specific rules* go in a directory of their own here, named `seooc-<sdk>/`.
@@ -42,6 +48,7 @@ They name one element and its parts.
 * *A concept or fault model that several parts rely on* is described on this page, with its scope.
 * *A part is added when it has content.*
 No empty directory mirrors a protocol chapter.
+====
 
 [[filing]]
 === Filing and scope
@@ -324,14 +331,15 @@ xref:seooc-up-rust/README.adoc#claims[The SEooC's claims] and xref:seooc-up-rust
 [[spec-first]]
 == Specification and implementation
 
-The items here say what an implementation must satisfy.
+NOTE: The items here say what an implementation must satisfy.
 An implementation's code, tests and reviews trace to the items.
 
 * No statement, rationale or verification entry rests on an implementation's source files, internal names, review records or current state.
 * A rationale cites what <<markup>> allows.
 * A statement may name something the element must provide, such as an operation, a setting, a counter or a crate.
 That name is part of the specification, not a citation of code.
-* An SDK that implements an item keeps its own record of where it does so, outside this repository, as non-normative traceability.
+
+NOTE: An SDK that implements an item keeps its own record of where it does so, outside this repository, as non-normative traceability.
 
 == Why this area cannot break an SDK's run
 
@@ -374,8 +382,13 @@ As in the protocol chapters: a block attribute line that gives the item its `spe
 All of it is the statement.
 * Text after the block is not part of the statement: the `ID` row, which repeats the item's identifier for readers, the ASIL, the allocation, the verification methods, the ISO 26262 references and the rationale.
 A requirement's statement says whom the requirement binds (<<req-ssr-requirements-bind,A requirement binds the parts that it names>>).
+
+[NOTE]
+====
 * A rationale gives the product or safety reason for the rule as it stands.
 It does not recount earlier revisions: an item's history is kept outside these pages (<<source>>).
+====
+
 * A rationale cites only public sources: up-spec, public standards by part and clause number, and the published documents and code of other projects, each at a fixed version.
 It does not cite the code of the SDK that implements the item (<<spec-first>>).
 
@@ -386,9 +399,11 @@ Text that refers to an item links to it, and the text of the link is the item's 
 * *To the item as it stands.*
 The link points at the item's anchor, which is its type and name without its revision: `req-ssr-heap-declared` for `+req~ssr-heap-declared~N+`.
 So a reference always means the current revision of the item.
-* *Identifiers.*
+
+NOTE: *Identifiers.*
 An item's identifier and revision are in its block attribute line and in its `ID` row.
 Code and tests cite that identifier in their coverage tags (<<tracing>>).
+
 * *A change of meaning is reviewed with its references.*
 When an item's meaning changes, its revision rises, and each item that links to it is read again against the new text.
 
@@ -404,18 +419,22 @@ An item whose statement uses no key word binds just the same; a new or revised s
 
 === Needs
 
+[NOTE]
+====
 * A requirement met in code needs `impl,utest`: the code that meets it, and the tests that show it, carry coverage tags.
 * A requirement shown only by reviewing a document needs `uman`.
 * A requirement met in code that also makes the element state something for integrators needs `impl,utest,uman`.
 * An assumption of use needs `uman`: the safety manual states it.
 A document covers it with an item of its own that covers the assumption, because OFT reads no coverage tag in a Markdown file.
+====
 
 [[tags]]
 == Tags
 
-A requirement carries the tag of a part that its "Allocated to" line names, and `SafetyBindingPull` as well where its statement holds a duty of pull bindings only; an assumption of use carries the tag `SafetyManual`.
+NOTE: A requirement carries the tag of a part that its "Allocated to" line names, and `SafetyBindingPull` as well where its statement holds a duty of pull bindings only; an assumption of use carries the tag `SafetyManual`.
 A tag says which repositories cover an item.
 The column "Items allocated to" summarizes which items carry each tag.
+
 A requirement's own statement governs over its row: it may name parts that the row does not name, or only some of those that the row names.
 
 [cols="2,4,3,3",options="header"]
@@ -437,10 +456,14 @@ A requirement's own statement governs over its row: it may name parts that the r
 
 === Gate tags
 
+[NOTE]
+====
 Each repository that covers items here gets one gate tag, named after it: `SafetyGateUpRust`, `SafetyGateStreamer`, `SafetyGateIceoryx2`, `SafetyGateXcdrV2`, and so on.
 
 * An item gets a repository's gate tag once that repository covers it in OFT's sense, with at least one coverage link of each type the item needs.
-* Coverage in OFT's sense says nothing about whether an item is verified, which its verification methods decide.
+* Coverage in OFT's sense says nothing about whether an item is verified (xref:seooc-up-rust/README.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for]).
+====
+
 * A repository's gating runs keep only the items that carry its gate tag, so they stay green while it covers the rest, and a report-only run keeps them all.
 * Bindings and wires share items, so each gets a gate tag of its own.
 * Gate tags present on items record the repository mappings admitted with them.
@@ -469,7 +492,7 @@ The repository's patterns name the new part in the same merge, so that no run lo
 
 == ISO 26262
 
-Items and text in this area cite ISO 26262 by part and clause number only, written `part-clause`, for example `6-7.4.13`, or `part-Table n`.
+NOTE: Items and text in this area cite ISO 26262 by part and clause number only, written `part-clause`, for example `6-7.4.13`, or `part-Table n`.
 No text of the standard appears here, quoted or closely paraphrased, and no table that maps it.
 
 A reference is trace metadata: it names a clause that an item relates to.

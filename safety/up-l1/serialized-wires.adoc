@@ -9,7 +9,7 @@ The duties of every wire: xref:wires.adoc[allocated to each wire].
 The other kind of wire: xref:native-wire.adoc[the native wire].
 Both kinds, end to end and on either kind of transport: xref:payload-paths.adoc[payload paths, end to end].
 
-A serialized wire encodes a value into the bytes of a format, and decodes such bytes into a value (xref:wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]).
+NOTE: A serialized wire encodes a value into the bytes of a format, and decodes such bytes into a value (xref:wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]).
 The decoded value is _owned_: its slot owns it, then the lease that an application holds, and it borrows nothing from the frame that it came from.
 
 This page holds:
@@ -176,7 +176,7 @@ The wire says it, for each direction, and a deployment that needs more than ordi
 [[owning]]
 == Encoding, owning and heap use
 
-Three questions about a payload have separate answers.
+NOTE: Three questions about a payload have separate answers.
 
 [cols="3,4,3",options="header"]
 |===
@@ -195,9 +195,13 @@ Three questions about a payload have separate answers.
 | xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]
 |===
 
+[NOTE]
+====
 No answer follows from another.
 
 * An owned value need not use the heap, and a route that uses none is not thereby native.
+====
+
 * A value that owns heap memory is ordinary on a route that declares allocation.
 Setup does not refuse it for that, and no stronger guarantee is asked of it unless the route requires one by name.
 
