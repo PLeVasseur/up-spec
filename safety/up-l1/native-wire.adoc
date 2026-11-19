@@ -20,8 +20,7 @@ The native wire is the element's own, so they carry the tag `SafetyUpRustCore`;
 * the rules of other pages that a native route rests on, in the order in which a payload meets them (<<index>>);
 * what fails, where, and with which outcome (<<failures>>);
 * who establishes each property, and what does not establish it (<<boundary>>);
-* guidance on one way to establish a layout identity, which requires nothing (<<guidance>>);
-* what is not decided (<<open>>).
+* guidance on one way to establish a layout identity, which requires nothing (<<guidance>>).
 
 == Whom this page binds
 
@@ -42,12 +41,13 @@ It is a separate element, and its integrator qualifies that code (xref:deploymen
 * A *native route* is a route whose wire carries a native type in place.
 * A *layout identity* is everything that decides how the bytes of a native type are read: which type it is, and its complete layout (<<req-ssr-native-agreement,A native type is read only under its exactly agreed layout, apart from the encoding identifier>>).
 * An *agreement* is a deployment's statement of the native types that its routes carry, with the layout identity of each and the payload encoding identifier of their frames.
+* The *Rust-only native domain* is defined in <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout, apart from the encoding identifier>>, "Only between binaries that use the element".
 * A *view* is a typed, read-only borrow of the storage in which a frame arrived (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 
 [[req-ssr-native-type]]
 == A native payload type holds its whole value in one fixed layout
 
-[.specitem,oft-sid="req~ssr-native-type~1",oft-title="A native payload type holds its whole value in one fixed layout",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-native-type~2",oft-title="A native payload type holds its whole value in one fixed layout",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *What a native type is.*
 A type that a native route carries *MUST* hold its whole value in one contiguous block of memory.
@@ -65,7 +65,16 @@ A native type *MUST NOT* hold:
 A handle is a value of a type that stands for a resource of an operating system, of a process or of a middleware: a descriptor, a socket, a mapping, a lock, a thread, a process, a loan or a frame.
 No such type is native, whether or not its values would mean something in another process.
 A number is carried as a number, and the element gives a received number no meaning as a resource.
-Carrying a resource from one process to another needs a contract of its own, and this item gives none (<<open>>).
+
+*Size zero, and unions.*
+A type of size zero *MAY* be a native type.
+Its frames are present payloads of length zero (xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), and storage lent for one is lent as storage of zero bytes is (xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], "An empty payload").
+A union *MAY* be a native type where this item admits each of its fields.
+Both are native only inside the Rust-only native domain (<<req-ssr-native-agreement,A native type is read only under its exactly agreed layout, apart from the encoding identifier>>, "Only between binaries that use the element").
+
+*Padding.*
+A native type *MAY* have padding.
+The contents of its padding bytes *MUST NOT* be relied on: by a contract, by a reader, by a comparison of layouts, by a serialization or by a rule of equality.
 
 *The value is the payload.*
 A native payload is the value itself.
@@ -87,13 +96,15 @@ It is the type's size in memory, and its alignment is the type's alignment.
 --
 
 [horizontal]
-ID:: `+req~ssr-native-type~1+`
+ID:: `+req~ssr-native-type~2+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, review, gate
 * *test*
 ** The derive's refusal of each kind of field that this item forbids, one compile-fail case for each, with a control that compiles: a pointer, a reference, a type that stands for a resource, a field with an invalid bit pattern, a field with a destructor, and a field whose size depends on the value.
 ** A type that the derive accepts, with its size, its alignment and the place of each field compared with its layout as built.
+** A type of size zero and a union that are admitted: each is native, and a frame of the first is a present payload of length zero.
+** Two values of a type with padding that differ only in their padding bytes: every comparison and every view that the element makes gives the same result for both.
 * *review*: each `+unsafe+` declaration of a native type, against the obligations of this item.
 * *gate*: the inventory check, which refuses a new or changed declaration until it is reviewed.
 Status:: Draft
@@ -126,7 +137,7 @@ Only the derive, which checks, or an inventoried `+unsafe+` declaration, which a
 [[req-ssr-native-agreement]]
 == A native type is read only under its exactly agreed layout, apart from the encoding identifier
 
-[.specitem,oft-sid="req~ssr-native-agreement~1",oft-title="A native type is read only under its exactly agreed layout, apart from the encoding identifier",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-native-agreement~2",oft-title="A native type is read only under its exactly agreed layout, apart from the encoding identifier",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Layout identity.*
 The _layout identity_ of a native type is everything that decides how its bytes are read:
@@ -136,6 +147,13 @@ The _layout identity_ of a native type is everything that decides how its bytes 
 
 Two layout identities are the same only where every part is the same.
 The ABI that a layout holds for is agreed beside it, by the fingerprint (xref:peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]).
+
+*Only between binaries that use the element.*
+A layout identity is stated for types of the up-rust element.
+A native route is agreed only between binaries that use the element; they are the _Rust-only native domain_ of a deployment.
+A payload of a C or a C++ program is not native under this item.
+Nothing widens that: not a declaration that fixes a C layout, and not a tool that generates or reads declarations of another language.
+A binary outside that domain is reached through a serialized wire (xref:serialized-wires.adoc[serialized wires, and the values they own]).
 
 *Agreed by the deployment.*
 The element *MUST* prepare a native route only for a type that the deployment has agreed for native carriage, with its layout identity.
@@ -186,7 +204,7 @@ This item fixes no table, no digest, no algorithm, no place where a layout ident
 --
 
 [horizontal]
-ID:: `+req~ssr-native-agreement~1+`
+ID:: `+req~ssr-native-agreement~2+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, fault-injection, review
@@ -506,25 +524,3 @@ The ABI fingerprint is exchanged in the same way.
 A few bytes taken from a layout's description can tell the frames of several agreed types apart at little cost.
 Such a value only selects.
 The complete comparison still has to have been made, for the writer or for the frame, before a view (<<req-ssr-native-agreement,A native type is read only under its exactly agreed layout, apart from the encoding identifier>>, "Complete, or not established").
-
-[[open]]
-== What is not decided
-
-* *A handle that is valid in more than one process.*
-No handle is native (<<req-ssr-native-type,A native payload type holds its whole value in one fixed layout>>).
-Whether a native type may one day carry a resource to another process is not decided.
-It would need an item that states how the handle is represented for an ABI, how long it is valid, who owns the resource and who closes it, what a peer's death does to it, and how the derive and an `+unsafe+` declaration admit it.
-* *A type of size zero.*
-Whether a type with no bytes can be a native type, and what its frame then carries, is not decided.
-A deployment does not rely on one.
-* *Unions.*
-Whether a union can be a native type is not decided.
-A deployment does not rely on one.
-* *Padding.*
-What the padding bytes of a native type hold when it is sent, and whether the derive refuses a type that has padding, is not decided.
-* *Another language.*
-A layout identity is stated here for types of the up-rust element.
-Whether a type of another language can be agreed, and how its layout identity is then formed, is not decided.
-Until it is, this page agrees a layout only between binaries that use the element.
-
-Each of these is the element's maintainers' to decide, and none of them withholds a duty above.

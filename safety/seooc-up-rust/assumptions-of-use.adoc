@@ -126,6 +126,7 @@ A "Strict mode" clause is the element's own, and is not listed.
 | <<aou-seooc-build-configuration,The ASIL binary is built from its claimed graph, with the ASIL profile>>, opening paragraph | uP-L1 and uP-L2: the bindings and wires, and the ASIL Streamer crate, that a claimed graph may hold | The integrator | xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts] in xref:../up-l1/deployment.adoc[what a deployment provides]; xref:crate-isolation.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate] in xref:crate-isolation.adoc[crate isolation]
 | <<aou-seooc-deployment-data,Deployment data is in range, verified and protected>>, the list of what the data covers | uP-L1: each transport's integrity level, and the peers a route declares, RPC client lists among them | The integrator | xref:../up-l1/integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level] in xref:../up-l1/integrity.adoc[integrity levels]; xref:../up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones] in xref:../up-l1/peers.adoc[peers of a transport]
 | <<aou-seooc-deployment-data,Deployment data is in range, verified and protected>>, the entry for what one binding adds | One transport, by reference | The integrator declares the setting; the binding checks it | The page of that binding (xref:../up-l1/README.adoc#one-binding[what is specific to one binding])
+| <<aou-seooc-deployment-data,Deployment data is in range, verified and protected>>, the clause on native routes | uP-L1: the native wire | The integrator agrees the routes; the element establishes each layout identity | xref:../up-l1/native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout, apart from the encoding identifier] in xref:../up-l1/native-wire.adoc[the native wire]
 | <<aou-seooc-deployment-data,Deployment data is in range, verified and protected>>, the Streamer's integrity code | uP-L2: forwarding | The integrator delivers the code; the Streamer checks it | xref:../up-l2/streamer.adoc#req-ssr-streamer-config-integrity[The deployment data is checked before it is applied] in xref:../up-l2/streamer.adoc[the Streamer's page]
 | <<aou-seooc-application-reacts,The application reacts to what the element reports>>, "What the element reports" | uP-L1: a loss inside middleware that a binding cannot observe | The element declares it; the application uses it within its limits | xref:errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] in xref:errors.adoc[refusal, errors and reporting]
 | <<aou-seooc-peer-rates,Peer rates on shared routes are the integrator's>>, "What the element does" | uP-L1: the discards a binding can observe | The element counts or discloses; the integrator bounds the rates | xref:qos.adoc#req-ssr-qos-overflow[Overflow acts as declared] in xref:qos.adoc[QoS, TTL and deadlines]; xref:errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] in xref:errors.adoc[refusal, errors and reporting]
@@ -607,7 +608,7 @@ A build that succeeds elsewhere, or a newly available language feature, is not c
 [[aou-seooc-deployment-data]]
 == Deployment data is in range, verified and protected
 
-[.specitem,oft-sid="aou~seooc-deployment-data~6",oft-title="Deployment data is in range, verified and protected",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-deployment-data~7",oft-title="Deployment data is in range, verified and protected",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
 The integrator *SHALL* produce the deployment data within the admissible ranges the element publishes, and verifies it for the item. The data covers:
 
@@ -617,11 +618,14 @@ The integrator *SHALL* produce the deployment data within the admissible ranges 
 * capacities;
 * what the assumption of one binding adds for its transport;
 * for each route that uses the E2E wire, its senders, from which its data IDs are derived, its `+resync_frames+`, and, for each sender, its start value's source and whether its starts are declared increasing;
-* the selection of compiled-in waivers.
+* the selection of compiled-in waivers;
+* the agreement of native types, for each native route (xref:../up-l1/native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout, apart from the encoding identifier]).
 
 The integrator protects the data against unintended change between release and use, and delivers the Streamer's deployment data with an integrity code over its content, which the Streamer checks.
 
 Every peer that a route *SHALL* accept is declared at startup, because setup is impossible at runtime: adding an RPC client on a lending transport means restarting the server with new deployment data.
+
+The integrator *SHALL* agree a native route only between binaries that use the element, and *SHALL NOT* use a native type of size zero or an untagged union across a boundary to an ABI that is not Rust's (xref:../up-l1/native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout, apart from the encoding identifier], "Only between binaries that use the element").
 
 In strict mode, the Enforce state refuses deployment data without a matching integrity code, and the report shows the data's digest, and what was declared and checked.
 --
@@ -632,9 +636,10 @@ In strict mode, the Enforce state refuses deployment data without a matching int
 * Streamer deployment data whose integrity code does not match its content is *refused at setup* (xref:../up-l2/streamer.adoc#req-ssr-streamer-config-integrity[The deployment data is checked before it is applied]).
 * In strict mode, deployment data without a matching integrity code is *refused at setup* in the Enforce state.
 * Data that is valid but wrong for the item, such as a route to the wrong peer delivered with a matching code, is *undetectable*.
+* A native route agreed with a binary that does not use the element is *refused at setup* where the element cannot establish that binary's layout identity (xref:../up-l1/native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout, apart from the encoding identifier]); where that binary presents the agreed layout identity and an equal ABI fingerprint, it is *undetectable*.
 
 [horizontal]
-ID:: `+aou~seooc-deployment-data~6+`
+ID:: `+aou~seooc-deployment-data~7+`
 ASIL:: B
 Status:: Draft
 ISO 26262:: 6-Annex C, 6-C.4.6, 6-Table C.1 (part-clause numbers only)
