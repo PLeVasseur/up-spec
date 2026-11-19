@@ -24,7 +24,7 @@ Allocated to:: the element
 Verification:: gate (the manifest has no `+[features]+` and no `+[dependencies]+`; the crate builds on a sysroot with neither `+alloc+` nor `+std+`)
 
 *Rationale.*
-Cargo turns a crate's feature on for the whole build once any crate asks for it.
+Cargo turns a crate's feature on for the whole build once any crate asks for it (source: the Cargo Book, Rust 1.98.1, chapter Features, section Feature unification).
 So only a crate with no features and no dependencies cannot have `+std+` switched on inside it by another.
 
 With no `+alloc+`, the crate's URIs keep their authority inline, so this crate does not allocate a separate heap-owned authority representation.
@@ -140,4 +140,4 @@ Allocated to:: the Streamer
 Verification:: gate (the same gates as `+up-rust-core+`: manifest, restricted sysroot, and its own panic-link fixture; a build for a bare-metal 32-bit target without 64-bit atomics), review (the `+std+` loader, which only parses deployment data, with all validation of it in this crate)
 
 *Rationale.*
-Separating the data plane keeps a convenience dependency, or a feature that another crate turns on for the whole build, from bringing heap use into it.
+Separating the data plane keeps a convenience dependency, or a feature that another crate turns on for the whole build, from bringing heap use into it (source: the Cargo Book, Rust 1.98.1, chapter Features, section Feature unification).

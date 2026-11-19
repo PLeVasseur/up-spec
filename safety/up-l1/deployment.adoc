@@ -80,7 +80,7 @@ ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 A publisher below the reader's level, or of unknown level, may write a sample while it is read, so the reader takes the copy route.
 A zero-copy route relies on the writer instead, and a publisher that declares a level it was not built to is not caught at setup.
 
-A shared reference cannot remain valid against an uncontrolled concurrent writer, and bidirectional shared state also exposes a publisher to a faulty consumer.
+A shared reference cannot remain valid against an uncontrolled concurrent writer (source: the Rust Reference, Rust 1.98.1, chapter Behavior considered undefined, rules undefined.race and undefined.alias), and bidirectional shared state also exposes a publisher to a faulty consumer.
 
 _What this assumption leaves to other items._
 It states the integrator's duties and no one else's.

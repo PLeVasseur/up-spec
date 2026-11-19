@@ -85,7 +85,7 @@ ISO 26262:: 9-7 (part-clause numbers only)
 A binding ships a permit that states the use it needs, and a deployment files a waiver against it.
 So accepting the allocation is the deployment's recorded decision.
 
-The split follows MISRA Compliance:2020, which keeps a deviation permit, the accepted use case, apart from the deviation record of each use (https://misra.org.uk/app/uploads/2021/06/MISRA-Compliance-2020.pdf[MISRA Compliance:2020]).
+The split follows MISRA Compliance:2020, which keeps a deviation permit, the accepted use case, apart from the deviation record of each use (https://misra.org.uk/app/uploads/2021/06/MISRA-Compliance-2020.pdf[MISRA Compliance:2020], section 4.3, Deviation permits, beside section 4.2, Deviation records).
 
 Keeping waivers compiled in and selected by id lets deployment data choose among approved waivers, but never write a new one.
 

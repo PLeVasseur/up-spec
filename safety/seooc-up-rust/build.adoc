@@ -43,14 +43,14 @@ Verification:: gate
 
 *Rationale.*
 With `+panic = "abort"+`, a panic ends the process at once instead of unwinding through code that may hold half-changed state.
-Overflow checks turn an arithmetic overflow into that panic instead of a wrong value.
+Overflow checks turn an arithmetic overflow into that panic instead of a wrong value (source: the Cargo Book, Rust 1.98.1, chapter Profiles, sections panic and overflow-checks).
 
 _Why the refusal sits in the binary._
-Cargo builds tests with unwinding.
+Cargo builds tests with unwinding (source: the Cargo Book, Rust 1.98.1, chapter Profiles, section panic).
 In a library crate, the refusal would stop that crate's tests, and every test that uses the crate, from compiling.
 
 _Why the development profile matters._
-Unless the development profile aborts on panic too, or the binary is left out of the default members, a development build of the workspace compiles the binary with unwinding, and fails.
+Unless the development profile aborts on panic too, or the binary is left out of the default members, a development build of the workspace compiles the binary with unwinding, and fails (source: the Cargo Book, Rust 1.98.1, chapter Profiles, sections dev and Overrides; chapter Workspaces, section The default-members field).
 Confirm Cargo's behaviour against the toolchain in use.
 
 _What aborting does not do._

@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview
 
-https://iceoryx.io[Eclipse iceoryx2&trade;] is an efficient, and ultra-low latency inter-process communication middleware. The library is designed to provide you with fast and reliable zero-copy and lock-free inter-process communication mechanisms.
+https://iceoryx.io[Eclipse iceoryx2&trade;] is a middleware for inter-process communication, built to be efficient and to have extremely low latency. Its library is designed to offer fast and reliable mechanisms of inter-process communication that are zero-copy and lock-free.
 
 This document defines how uProtocol messages can be exchanged by means of iceoryx2 _Services_.
 
@@ -95,9 +95,9 @@ An iceoryx2 `Sample` that is used to convey a uProtocol message *MUST* contain i
 --
 An iceoryx2 message that is used to convey a uProtocol message *MUST* be zero-copy and shared-memory compatible, in iceoryx2's sense:
 
-* is self contained, no heap, no pointers to external sources, no handles to external resources (files etc)
-* has a uniform memory representation
-* does not use pointers to manage their internal structure
+* holds all of its data within itself: it uses no heap memory, and it has no pointer to anything outside itself and no handle to an outside resource, such as a file
+* has the same memory representation wherever it is used
+* organizes its internal structure without pointers
 * has a lifetime of the entire program duration
 --
 

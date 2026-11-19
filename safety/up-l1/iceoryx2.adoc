@@ -62,7 +62,7 @@ Allocated to:: the iceoryx2 binding
 Verification:: test (the event IDs read from the event service's static config; a route whose lifecycle events share its data ID refused at setup; a data ID at the service's `+event_id_max_value+` admitted, and one above it refused at setup)
 
 *Rationale.*
-The event IDs, and the largest one that the service carries, belong to the event service's static config, not to the deployment data that xref:../seooc-up-rust/deployment-data.adoc#req-ssr-config-validated[Deployment data is validated in full] checks.
+The event IDs, and the largest one that the service carries, belong to the event service's static config, not to the deployment data that xref:../seooc-up-rust/deployment-data.adoc#req-ssr-config-validated[Deployment data is validated in full] checks (source: the code of iceoryx2, release 0.9.3, `+iceoryx2/src/service/static_config/event.rs+`, lines 51 to 65 and 114 to 138; `+iceoryx2/src/service/builder/event.rs+`, lines 593 to 681).
 So the binding reads them there and checks each route against them at setup.
 
 [[req-ssr-binding-iceoryx2-panic-paths]]
@@ -166,7 +166,7 @@ Verification:: test (a receive route whose retained budget fits twice in the exp
 
 *Rationale.*
 A panic path inside the middleware is made unreachable by a setup check or by sizing (xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input]).
-This item is such a sizing, checked at setup, for iceoryx2's expired-connection buffer.
+This item is such a sizing, checked at setup, for iceoryx2's expired-connection buffer (source: the code of iceoryx2, release 0.9.3, `+iceoryx2/src/port/details/receiver.rs+`, lines 256 to 324, the function `+prepare_connection_removal+`; `+iceoryx2/src/port/subscriber.rs+`, lines 238 to 255, where the buffer is sized).
 
 [[req-ssr-binding-iceoryx2-arrival-reports]]
 == iceoryx2's arrivals are reported from its receive thread, and a failed notification is counted
@@ -243,7 +243,7 @@ ASIL:: B
 ISO 26262:: 6-7.4.8, 9-6, 6-Annex D.2.4 (part-clause numbers only)
 
 *Rationale.*
-A shared reference cannot remain valid against an uncontrolled concurrent writer, and shared state that ports write both ways also exposes a publisher to a faulty consumer.
+A shared reference cannot remain valid against an uncontrolled concurrent writer (source: the Rust Reference, Rust 1.98.1, chapter Behavior considered undefined, rules undefined.race and undefined.alias), and shared state that ports write both ways also exposes a publisher to a faulty consumer.
 So on iceoryx2 the levels are kept apart by what the OS enforces.
 
 These duties bind only a deployment on iceoryx2, so they are stated with that binding and not with the duties of every transport.

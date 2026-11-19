@@ -207,7 +207,7 @@ in `pformat`, and set `datacontenttype` to `application/octet-stream`.
 |===
 
 For a present payload, `dataschema` *MAY* name its schema with a non-empty
-absolute URI as defined by CloudEvents. It *MUST NOT* determine the encoding;
+absolute URI as defined by CloudEvents (source: the CloudEvents specification, version 1.0.2, section OPTIONAL Attributes, attribute `dataschema`, and section Type System, type `URI`). It *MUST NOT* determine the encoding;
 carriage requires no schema lookup.
 
 The binding *MUST NOT* change `pformat`, relabel the payload, wrap or unwrap
@@ -225,7 +225,7 @@ bytes to choose a data property.
 |Binary payload (`binary_data` or `data_base64`)
 |`payload` *MUST* contain exactly those octets and `payload_encoding_id` *MUST*
 equal `pformat`, even when `datacontenttype` is absent or is not
-`application/octet-stream`.
+`application/octet-stream` (source: Protobuf Event Format for CloudEvents, Version 1.0.2, section 3 Data; JSON Event Format for CloudEvents, Version 1.0.2, section 3.1.2 Payload Deserialization).
 
 |Payload data property present and `pformat` absent
 |The binding *MUST* reject the event, regardless of the data property's type.

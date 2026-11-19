@@ -382,7 +382,7 @@ It cannot both own a value with a destructor and claim to have refused it untouc
 Where a route requires panic-free cleanup, the destruction is established or not performed, and elsewhere its behaviour is the value's own (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
 
 _Providers._
-A standard allocation interface may let an allocator end the process on exhaustion or panic on a request it cannot serve, which a fallible call does not prevent.
+A standard allocation interface may let an allocator end the process on exhaustion or panic on a request it cannot serve, which a fallible call does not prevent (source: the standard library documentation, Rust 1.98.1, section Errors of `+std::alloc::GlobalAlloc::alloc+` and of `+std::alloc::Allocator::allocate+`).
 So a provider's own contract decides what setup can rely on.
 
 * A panic that setup can exclude by a check is excluded, on every configuration: sending a request that the contract says will panic would be a defect of setup.

@@ -242,7 +242,7 @@ A decoded value's memory is often returned when the value ends, not when it is m
 So a class covers the value's whole life.
 A wire that decodes into a value which later frees memory uses the heap in that direction, whatever its decoding call does.
 
-A standard allocation interface can permit an allocator to end the process on exhaustion, and an interface that returns an error cannot intercept that.
+A standard allocation interface can permit an allocator to end the process on exhaustion, and an interface that returns an error cannot intercept that (source: the standard library documentation, Rust 1.98.1, section Errors of `+std::alloc::GlobalAlloc::alloc+` and of `+std::alloc::Allocator::allocate+`).
 So the declared policy comes from the allocator's stated contract, not from the shape of the call.
 An ordinary allocator may also take a lock, in an acquisition as in a release, and the policy says so.
 

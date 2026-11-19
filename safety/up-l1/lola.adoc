@@ -312,7 +312,7 @@ A middleware written in C++ does not panic: it throws, or it ends the process.
 This item says how that rule reads there.
 
 _Unwinding._
-Rust code and C++ code unwind in different ways, and an unwind that crosses from one into the other is not defined for the Rust code unless the boundary is declared for it.
+Rust code and C++ code unwind in different ways, and an unwind that crosses from one into the other is not defined for the Rust code unless the boundary is declared for it (source: the Rust Reference, Rust 1.98.1, chapter Panic, section Unwinding across FFI boundaries, rule panic.unwind.ffi.undefined).
 So nothing unwinds across the boundary at all: an exception becomes an error value where it is still C++, and the element sees an ordinary refusal.
 
 _Termination._
@@ -430,7 +430,7 @@ So, unless another published document of LoLa names one, the binding keeps a cal
 
 _Exit._
 The element offers no shutdown, and a process in runtime mode leaves by exit, crash or kill (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode]).
-An exit runs handlers and destructors while other threads still run.
+An exit runs handlers and destructors while other threads still run (source: the standard library documentation, Rust 1.98.1, `+std::process::exit+`, on the exit handlers that it runs).
 A thread of LoLa that then called into state the binding had already destroyed would corrupt the process while it still shares memory with its peers.
 So what such a thread can reach outlives it, whatever the order of destruction.
 The item fixes no means of arranging that.

@@ -527,7 +527,7 @@ uProtocol distinguishes between the following message delivery methods:
 
 
 |https://peterdaugaardrasmussen.com/2021/02/26/polling-vs-pushing-data/[*Pull/Poll*]
-|Data is pulled in by the receiver. This is done periodically at certain intervals, because the receiver (usually) does not know when new data will be available.
+|Data is pulled in by the receiver. The receiver does so periodically, at set intervals, because it is usually unaware of when new data will become available.
 
 |===
 

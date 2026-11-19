@@ -557,7 +557,7 @@ This item states those obligations once, for every lending binding.
 
 _Once, or never._
 A loan or a frame ends once, by the send, the give-back or the return.
-Forgetting a lease is safe code, and it runs no destructor.
+Forgetting a lease is safe code, and it runs no destructor (source: the standard library documentation, Rust 1.98.1, `+std::mem::forget+`, with its section Safety).
 So a forgotten loan or frame never ends: its route pays a slot for good, and the storage is never handed out again.
 The element's own leases follow the same rule (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors]).
 

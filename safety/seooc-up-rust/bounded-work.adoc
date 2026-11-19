@@ -212,5 +212,5 @@ Verification:: review (an inventory of synchronization primitives), fault-inject
 A process can die at any instruction (xref:../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
 A lock it shares can then be left held, with the state it guards half changed and no process left to finish the change.
 
-Eclipse S-CORE's LoLa middleware gave up an inter-process mutex for this reason: its error handling grew too complex when a process died while holding it (https://github.com/eclipse-score/communication/blob/f5e8f2c8a9247b025b1d425af399588e0264698a/score/mw/com/impl/bindings/lola/dependability/partial_restart/README.md[LoLa's partial-restart notes]).
+Eclipse S-CORE's LoLa middleware gave up an inter-process mutex for this reason: its error handling grew too complex when a process died while holding it (https://github.com/eclipse-score/communication/blob/f5e8f2c8a9247b025b1d425af399588e0264698a/score/mw/com/impl/bindings/lola/dependability/partial_restart/README.md[LoLa's partial-restart notes], section Synchronization of access to a `+TransactionLogSet+` instance).
 Waits that stay private to one process cannot be left in that state by another process's death.

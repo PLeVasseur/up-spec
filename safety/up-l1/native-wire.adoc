@@ -318,7 +318,7 @@ So the sender writes into the loan, and that is the only write.
 
 _One rule for how a loan and a frame end._
 A loan ends once, when it is sent or given back, and a frame ends once, when it is returned.
-Forgetting a lease is safe code, and it runs no destructor.
+Forgetting a lease is safe code, and it runs no destructor (source: the standard library documentation, Rust 1.98.1, `+std::mem::forget+`, with its section Safety).
 So a forgotten loan or frame has no end: it costs its route a slot for good, and nobody else may end it or use its storage.
 That is the rule of every lease of the element (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors]), stated here for native storage.
 
