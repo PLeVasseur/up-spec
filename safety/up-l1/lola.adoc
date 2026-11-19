@@ -244,6 +244,8 @@ Verification:: test, review
 ** LoLa configured with less storage than a route declares, refused in route preparation with both values.
 ** A route at each of its counts: one request more is a returned error, with no heap use and no panic. A loan that is given back, and a frame that is returned, make room again. One whose lease safe code forgot never does.
 ** Each declared count compared with what the route in fact holds, for each meaning that the binding states.
+** A full route given a new frame under each overflow policy that the binding serves: the declared policy applied.
+** A route whose declared overflow policy the binding cannot honor: refused at setup.
 * *review*: how the binding establishes LoLa's storage for a route, at source level.
 
 *Rationale.*
@@ -295,7 +297,7 @@ ASIL:: B
 Allocated to:: the LoLa binding
 Verification:: test, fault-injection, review
 * *test*
-** An exception raised behind each entry of the boundary that the binding uses, returned as that operation's error and counted.
+** An exception raised behind each entry of the boundary that the binding uses: returned as the refusal of the operation that met it, or counted on its route.
 ** An error value of each kind that the boundary can return, reported under its own cause.
 ** A result of LoLa that the binding cannot classify, injected behind the boundary: reported as a failure.
 * *fault-injection*: malformed frames, and peers killed and restarted, with no termination of a process that stays up.
@@ -408,11 +410,12 @@ Verification:: test, review
 * *test*
 ** Each callable that the binding registers, invoked after every operation of the binding that an application can reach, with what it uses still valid.
 ** A process that ends by a return from `+main+`, by a call that exits and by a signal, each while LoLa's threads run and frames are held, under a tool that reports a use of freed or destroyed memory.
-** A callable under the heap guard and the panic guard of the binding contract suite.
+** A callable run by the binding contract suite under the heap guard, with any panic in it failing the suite.
 * *review*
 ** For each callable and each address that the binding gives LoLa, at source level: the no-use point that LoLa's documentation names for it, quoted with its source, or else the process lifetime.
 ** That no argument takes a minimum for a no-use point.
 ** Each way the process can end, against what LoLa's threads can still reach.
+** Each callable's waits, at source level: none without a bound.
 
 *Rationale.*
 A callable that LoLa holds is a pointer into the binding that only LoLa decides when to follow.

@@ -137,7 +137,7 @@ Bindings and wires are linked by the binary that uses the crate, not by the crat
 ID:: `+req~ssr-crate-streamer-isolated~3+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: gate (the same gates as `+up-rust-core+`: manifest, restricted sysroot, token scan, and its own panic-link fixture; a build for a bare-metal 32-bit target without 64-bit atomics)
+Verification:: gate (the same gates as `+up-rust-core+`: manifest, restricted sysroot, and its own panic-link fixture; a build for a bare-metal 32-bit target without 64-bit atomics), review (the `+std+` loader, which only parses deployment data, with all validation of it in this crate)
 
 *Rationale.*
 Separating the data plane keeps a convenience dependency, or a feature that another crate turns on for the whole build, from bringing heap use into it.

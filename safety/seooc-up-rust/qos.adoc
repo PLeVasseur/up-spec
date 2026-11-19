@@ -74,15 +74,19 @@ A report *MUST NOT* present a passed setup check as a safety qualification.
 ID:: `+req~ssr-qos-no-downgrade~4+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test, review (each statement that uses a finite timing bound or a safety-assurance scope, read with the clause "Timing and assurance are separate claims")
-* The QoS contract suite on real iceoryx2 and on in-memory bindings.
-* The iceoryx2 binding's QoS tests.
-* The native lanes.
-* A route that requires a timing bound or an assurance scope its configuration does not establish is refused by name.
-* The same route without that requirement is admitted on a configuration that has no timing or assurance package.
-* A route at an ASIL integrity level that requires neither claim is not refused for want of a timing bound or an assurance scope, in any strict-mode state, on a configuration that has no timing or assurance package.
-* On a configuration that offers no finite bound for an endpoint, a route that does not require that bound operates and reports functionally.
-* In the Enforce state, a route whose detection bound exceeds its declared reaction budget is refused, and one whose bound equals the budget is not.
+Verification:: test, review
+* *test*
+** The QoS contract suite on real iceoryx2 and on in-memory bindings.
+** The iceoryx2 binding's QoS tests.
+** The native lanes.
+** A route whose QoS its binding cannot honor, refused at setup before any resource is reserved for it, naming the route and the setting.
+** A route that requires a timing bound or an assurance scope its configuration does not establish is refused by name.
+** The same route without that requirement is admitted on a configuration that has no timing or assurance package.
+** A route at an ASIL integrity level that requires neither claim is not refused for want of a timing bound or an assurance scope, in any strict-mode state, on a configuration that has no timing or assurance package.
+** On a configuration that offers no finite bound for an endpoint, a route that does not require that bound operates and reports functionally.
+** In the Enforce state, a route whose detection bound exceeds its declared reaction budget is refused, and one whose bound equals the budget is not.
+** Each route's report, stating apart its admitted functional QoS, any admitted finite timing bound with the configuration it rests on, and any admitted assurance scope, and presenting no passed setup check as a safety qualification.
+* *review*: no path on which a finite timing bound or a safety-assurance scope is inferred from an OS family, an architecture or a compiler; and each statement that uses a finite timing bound or a safety-assurance scope, read with the clause "Timing and assurance are separate claims".
 
 *Rationale.*
 Silently substituting a supported policy would leave the application relying on a guarantee the route does not provide.
@@ -234,11 +238,12 @@ Verification:: test, miri, fault-injection, review
 ** A preempted reporter that does not move the tick back.
 ** A checker or reporter suspended across many later gaps, with no double or stale credit.
 ** A saturated count.
-** Gaps at the threshold plus and minus one tick.
+** Gaps at the threshold plus and minus one tick, and a gap longer than the threshold by one tick more than the monitor's resolution, counted as a miss.
 ** For the one-word tick representation, a silence across the tick wrap and past the refresh, through a hook.
 ** The inner loop of `+wait+`.
 ** The report's bound with and without an established J.
 ** In the Enforce state, a declared servicing period at its transport's bound and one just longer.
+** On an ASIL deployment, a binding whose middleware has event deadlines of its own, with them turned off.
 * *miri*: an arrival racing a refresh.
 * *fault-injection*: the publisher killed.
 * *review*: each monitor backend's argument that its properties hold however long a thread that records, checks or reports for the route is suspended, and its arithmetic.

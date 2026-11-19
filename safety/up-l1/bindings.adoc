@@ -81,7 +81,8 @@ ASIL:: B
 Allocated to:: each binding
 Verification:: heap-window
 * For each binding, over native traffic with errors, cancellation, retirement and deferred release, with middleware allocation reported apart under its permit.
-* On a serialized route, the binding's declared allocation reported, never hidden.
+* On every other path, a serialized or owned route's included: binding code acquiring and releasing heap memory only as a route's declared heap class permits and setup admits, and not at all where no class admits it.
+* On a serialized route, the binding's declared allocation reported, never hidden, as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
 
 *Rationale.*
 Binding code runs inside the process on every runtime path.
@@ -275,7 +276,7 @@ A binding that cannot identify peers *MUST* say so, and its routes then rely on 
 ID:: `+req~ssr-binding-peer-identity~1+`
 ASIL:: B
 Allocated to:: each binding
-Verification:: test (a test double that restarts; a real restart)
+Verification:: test (a test double that restarts; a real restart), review (whether the binding can identify peers, and, where it cannot, that it says so)
 
 *Rationale.*
 A stable identity with a rising incarnation lets the element tell a restarted peer from its earlier self, and refuse a frame from the earlier one as stale (xref:peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected]).
@@ -331,10 +332,11 @@ Allocated to:: each binding; the element, for the frames that its carrier ingres
 Verification:: fault-injection, test
 * *fault-injection*
 ** A flood.
-** A deferred return held behind the middleware's lock while the binding's calls, arrival reports and the returns of owners that do not need that lock continue.
+** A deferred return held behind the middleware's lock while the binding's calls, arrival reports and health reports continue.
 * *test*
 ** No binding call waits for a deferred return.
-** On a route that requires non-waiting acquisition, a binding whose allocation can wait refused at setup by name.
+** On a route that requires non-waiting acquisition, a binding whose allocation can wait: the route refused at setup by name, as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name] requires, so that no acquisition of the binding waits there.
+** A carrier ingress taking pulled or retained frames, and never a borrowed frame whose carriage would need a staged copy.
 
 *Rationale.*
 A receive that gave up any number of frames per call could hold its caller for as long as a peer keeps sending.
@@ -439,7 +441,7 @@ The check does not apply to a handoff binding (<<req-ssr-binding-scope,What a bi
 ID:: `+req~ssr-binding-integrity-level~1+`
 ASIL:: B
 Allocated to:: each binding
-Verification:: test (the binding contract suite), fault-injection (a publisher below the recorded level, with real processes)
+Verification:: test (the binding contract suite), fault-injection (a publisher below the recorded level, with real processes), review (a handoff binding's README, which says that the check does not apply to it)
 
 *Rationale.*
 The element can compare levels only if each binding records them where every process of a service can read them.
@@ -542,9 +544,10 @@ Verification:: test, miri, review
 ** A loan whose lease is dropped unsent, and a frame whose lease is dropped: the storage goes back once, counted by the suite.
 ** A loan and a frame whose leases safe code forgot: each is still charged at the end of the run, its storage is never lent or delivered again, and nothing is returned or destroyed for it.
 ** A loan and a frame of zero bytes, each with an aligned address that is not null.
-** A middleware that could enlarge or map again its storage in runtime mode: turned off, or the route refused.
+** A middleware that could enlarge, move or map again its storage in runtime mode: turned off, or every route that would use it refused in route preparation.
+** A route for which the binding cannot keep these properties: lending refused in route preparation, naming the route and the property.
 * *miri*: the lending test double, under the same suite, forgotten leases included.
-* *review*: each site of the binding that makes the claim, at source level; each path that ends a loan or returns a frame; and that no property rests on a destructor running.
+* *review*: each site of the binding that makes the claim, at source level; each path that ends a loan or returns a frame; that no property rests on a destructor running; and that no storage that the binding copies into or out of is presented as lent.
 
 *Rationale.*
 The element builds a writer on a loan and a typed view on a received frame.
@@ -595,7 +598,10 @@ Verification:: test, review
 * *test*
 ** The binding contract suite: a binding that states two-way shared state has a port of another level refused at setup, on every port kind.
 ** A binding that states one-way shared state: a receiving port of the suite's double that writes shared state fails the suite.
-* *review*: the middleware's shared state, by kind of port, at the revision that the binding is built against.
+* *review*
+** The middleware's shared state, by kind of port, at the revision that the binding is built against.
+** Where it is not established which way a kind of port writes, the binding's statement that its ports write both ways.
+** The binding's README, which repeats the statement that the binding makes at setup.
 
 *Rationale.*
 A process that writes shared state which a higher process reads can corrupt that process, whatever the payload rules say.

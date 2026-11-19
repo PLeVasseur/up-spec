@@ -105,7 +105,8 @@ ID:: `+req~ssr-native-abi-agreed~1+`
 ASIL:: B
 Allocated to:: the element; each binding that carries native frames between processes
 Verification:: test
-* The binding contract's refusal of an ABI mismatch at setup, on the test doubles and on iceoryx2 with two processes.
+* The binding contract's refusal of an ABI mismatch at setup, on the test doubles and on iceoryx2 with two processes, naming both ABIs and the copying route as the fix.
+* A native peer's refusal, by name, of a peer that records no fingerprint.
 * The fingerprint's unit tests.
 * Each Miri lane's logged fingerprint, on three targets with three values.
 

@@ -26,7 +26,7 @@ A value *MUST NOT* be coerced, silently defaulted or skipped.
 ID:: `+req~ssr-config-validated~2+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test (a negative configuration suite, run on both construction paths), review (the published ranges, against the ranges that validation uses)
+Verification:: test (a negative configuration suite of deployment data), review (the published ranges, against the ranges that validation uses)
 ISO 26262:: 6-C.4.6 (part-clause numbers only)
 
 *Rationale.*

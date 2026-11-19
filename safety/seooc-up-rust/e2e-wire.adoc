@@ -81,7 +81,7 @@ Verification:: test, heap-window
 ** The sequenced wire contract on the E2E wire over the XCDR2 wire and over a test wire.
 ** A control that the ordinary wire contract suite still refuses the E2E wire, with its existing message.
 ** A byte comparison showing the inner encoding unchanged inside the frame.
-** The wire's stated identity, payload encoding, maximum encoded length and its exactness.
+** The wire's stated identity, payload encoding, maximum encoded length and its exactness, and the inner wire's heap claim, stated for each direction.
 ** The XCDR2 wire and the test wire passing the ordinary wire contract suite.
 
 *Rationale.*
@@ -272,9 +272,13 @@ Verification:: fault-injection, test, heap-window
 ** Declared increasing, with a counter supplied at construction: no frame refused and one restart counted.
 ** Not declared increasing: exactly `+resync_frames+` frames refused and one resync counted.
 * *test*
-** Walks A and B and a clock reset at boot.
-** The arrival-order properties P1 to P3, with the receiver states, start orders and duplicated frames.
-** The sequenced contract's check that no arrival order permanently refuses a live sender while its declaration is true.
+** A sender's clock reset at boot, so that its new start reads earlier than its old one: with the old incarnation's late frames arriving among the new one's frames, and with the receiver restarted while those late frames are in flight, so that they arrive after the new incarnation's first frame; for each kind of sender, with the outcome that the run rule gives.
+** Three starts of one sender within one millisecond, ordered by their entropy and not by their start values, with the frames of one that died delayed; for each kind of sender, with the outcome that the run rule gives.
+** Every order in which the frames in flight of two dead incarnations and of the live one can arrive, each incarnation's frames in their own order, from each state of the receiver's slot and under each order of the three starts, without and with a frame of each incarnation duplicated.
+While the sender's declaration is true: after the last dead frame, at most `+resync_frames+` of the live incarnation's frames refused, and every later one delivered at its first copy and refused as a repeat at its second; once a live frame has been delivered, a dead frame delivered only by or after the adoption of its incarnation; and every frame counted once, as delivered or as refused by kind.
+For a sender declared increasing whose declaration is false: the live incarnation refused as stale only once a frame of a newer incarnation has retired it while it was the reference, and from then on each of its frames refused as stale and counted; otherwise the first and the last assertion above hold.
+** On a route that keeps order, while the sender's declaration is true, the restart of a sender declared increasing with no frame refused, and the restart of any other sender with exactly `+resync_frames+` frames refused, counted from the last frame of the old incarnation to arrive, where the new incarnation sends more than `+resync_frames+` frames.
+** The sequenced wire contract's check that no arrival order refuses a live declared sender for good while its declaration is true.
 ** A counter raised under a matching CRC, and an incarnation raised under a matching CRC from a sender declared increasing, each with the refusals that follow it.
 ** With increasing starts A < B < C, adopt A, then B, then C and deliver delayed valid A requests with counters 0, 1 and 2, all within TTL, at `+resync_frames=2+`.
 Strict mode refuses and counts each A request, answers each advisory because A is older than retired B and non-delivery cannot be proved, never adopts A, and still delivers a fresh C request.
@@ -386,7 +390,7 @@ Verification:: test, heap-window
 ** A copy that another server answers.
 ** An answer from another declared server to a misaddressed copy, accepted where the client declares several servers for the method.
 ** A response with no E2E header.
-** A response naming another payload encoding, refused on an E2E route.
+** One response wire per method, which the element provides: on an E2E route, a response that names another payload encoding reaching no wire and refused, as xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding] states.
 
 *Rationale.*
 A response sequence alone does not identify the outstanding call.
@@ -471,8 +475,8 @@ Verification:: compile-fail, test, heap-window
 ** Two clients of one method raise no false gaps.
 ** A send refused and retried shows as one lost frame.
 ** Construction refused when the clock reads none, and when the entropy fails.
-** An encode at 2^48^ refused, from a sender built at a chosen counter.
-** Encodes across 2^31^ and 2^32^, from senders built at those counters.
+** An encode at 2^48^ refused, with the counter brought there through a test hook.
+** Encodes across 2^31^ and 2^32^, with the counter brought near each through a test hook.
 ** A contended encode refused before the counter moves.
 ** A supplied start value used as given.
 
@@ -507,12 +511,13 @@ An RPC client keeps no receiving slot: it checks a response against its call's t
 ID:: `+req~ssr-e2e-receiver-state~2+`
 ASIL:: B
 Allocated to:: the E2E wire
-Verification:: test, miri, heap-window
+Verification:: test, miri, heap-window, review
 * *test*
 ** A contended frame is refused and counted, never waited on.
-** Concurrent decoders' reordering is refused and counted, not corrupted, including from a push-binding test double that delivers one route's frames from two threads.
+** Frames of one route decoded concurrently, including from a push-binding test double that delivers them from two threads: a frame that finds its slot held refused and counted as contended, every other judged as <<req-ssr-e2e-detects,The E2E wire detects each fault>> states, and the slot's state never corrupted.
 ** Reading the figures in a loop on another thread causes no refusal.
 * *miri*: the try-lock under threads.
+* *review*: one fixed-size slot per declared data ID, each in storage that the caller provides at construction, no route context reaching the wire, and an RPC client keeping no receiving slot.
 
 *Rationale.*
 Receiver state is larger than a single atomic word.
@@ -657,7 +662,7 @@ Verification:: test, heap-window
 ** A late frame inside the window, counted late and not lost.
 ** A frame more than 63 counters late, counted lost and refused.
 ** Pending, read on another thread while gaps open and close.
-** Not-delivered-before-adoption exact at first adoption, with its re-adoption over-count disclosed.
+** Not-delivered-before-adoption raised by c at each adoption at counter c, re-adoptions included, and exact at an incarnation's first adoption.
 ** Never-arrived-before-adoption exact when retained distinct-arrival history proves it.
 ** Prefix-boundary arrivals and duplicates counted correctly.
 ** An evicted duplicate, interleaved candidate changes or unrecorded contended arrival yielding unknown when necessary history is incomplete.
@@ -669,7 +674,8 @@ Verification:: test, heap-window
 ** A restart.
 ** A resync.
 ** Each figure saturating.
-** A frame that drop-oldest evicts after decode, which appears in `+dropped_oldest+` and not in the figures.
+** A frame that the receiving route's drop-oldest policy evicts after decode, counted by that route under its cause and not in the figures.
+** A frame that the receiving route expires after decode, counted by that route under its cause and not in the figures.
 
 *Rationale.*
 A frame missing from a sender's counters is a certain loss only once the window has passed it or the reference has changed, and its gap stays pending until then.
@@ -694,7 +700,7 @@ A byte corrupted between hops *MUST* be detected there.
 ID:: `+req~ssr-e2e-survives-hops~1+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: test (a carriage test through the test forwarder; a full hop test)
+Verification:: test (frames carried through a test double of the Streamer's forwarding, across envelopes and transport families, each passing its check at the receiving endpoint; the same through the ASIL Streamer, after each allowed hop), fault-injection (a byte corrupted between hops, detected at the receiving endpoint)
 
 *Rationale.*
 A carrier forwards a frame's identifiers and payload bytes unchanged (xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).

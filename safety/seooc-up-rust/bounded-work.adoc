@@ -140,7 +140,7 @@ Idle waiters *MUST NOT* wake each other.
 ID:: `+req~ssr-bound-wait~3+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test, heap-window, fault-injection
+Verification:: test, heap-window, fault-injection, review
 * *test*
 ** Several idle waiters.
 ** A spurious and an interrupted return that recheck state and time.
@@ -153,8 +153,11 @@ Verification:: test, heap-window, fault-injection
 ** On a route that requires non-waiting acquisition, a provider whose acquisition can wait refused at setup by name.
 ** On a route that requires only non-waiting acquisition, a declared release that waits on the path that ended its value, and on a route that requires only non-waiting release, a declared acquisition that waits on the path that performs it.
 ** No wait inside an allocation domain in native or shared work.
+** A QoS wait on overflow that ends by its declared limit, with capacity freed just before the limit and with none freed.
+** A QoS wait on overflow refused at setup where its binding cannot bound it, and on a carrier egress.
 * *heap-window*: the failure path of a QoS wait.
 * *fault-injection*: a peer killed while a sender waits.
+* *review*: each operation's contract, stating its acceptance event and its clock.
 ISO 26262:: 6-Annex D.2.2 (part-clause numbers only)
 
 *Rationale.*

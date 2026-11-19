@@ -99,7 +99,7 @@ Verification:: test, fault-injection
 ** No case requires a wire's encoder to write one particular encoding of a value where the format allows several.
 ** Controls on the suite itself, each a wire that the suite must fail: one whose decoder returns a default for an empty input that the format does not define; one whose decoder refuses an empty input that the format defines; one whose decoder and encoder agree with each other against the format.
 ** A control that the suite must pass: a wire that decodes the empty input which its format defines, and whose encoder writes the same value with a non-empty encoding that the format also allows.
-** A property test over arbitrary byte strings, run under `+catch_unwind+` on the unwinding diagnostic profile and inside the heap guard.
+** A property test over arbitrary byte strings decoded, and over arbitrary values of the type encoded, each run under `+catch_unwind+` on the unwinding test profile and inside the heap guard.
 
 *Rationale.*
 Decoding reads bytes a peer sent.
@@ -154,13 +154,13 @@ ASIL:: B
 Allocated to:: each wire
 Verification:: heap-window, test
 * *test*: both contract suites, with their negative controls.
-** An ordinary wire fails the sequenced check.
-** A wire that never resynchronizes fails its restart check.
+** An ordinary wire fails the sequenced check of the sequenced wire contract.
+** A wire that never resynchronizes fails the restart check of its contract suite.
 ** A wire that draws a random value per encode fails determinism.
 ** A wire whose decoded value frees memory when it is replaced or destroyed fails its heap-free check for the decode direction.
 ** A wire whose decoded value runs a destructor that uses no heap passes it.
-** Once the deferred E2E wire is delivered, it fails the ordinary check.
-** The sequenced check's interface: a sender factory that is given a start value, a receiver factory and the restart bound, with receivers' slot storage made outside the heap windows.
+** The E2E wire fails the ordinary check of the wire contract suite.
+** The interface of the sequenced check of the sequenced wire contract: a way to build a sender from a start value that it is given, a way to build a receiver, and the restart bound, with receivers' slot storage made outside the heap windows.
 
 *Rationale.*
 A sequenced wire deliberately changes its encoding (<<req-ssr-wire-scope,What a wire is, and the wire contract>>).

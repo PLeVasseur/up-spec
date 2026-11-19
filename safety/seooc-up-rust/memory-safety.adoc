@@ -23,7 +23,7 @@ A sequence of safe calls through the element's public API, including items hidde
 ID:: `+req~ssr-unsafe-sound~1+`
 ASIL:: B
 Allocated to:: the element
-Verification:: miri (Stacked Borrows and Tree Borrows, over the tests and proof programs), compile-fail (each closed misuse), review (a sweep of each defect class)
+Verification:: miri (Stacked Borrows and Tree Borrows, over the tests and over programs of safe calls that attempt undefined behaviour, at least one for each kind that the statement lists and every one that demonstrated a defect), compile-fail (each misuse of the public API from which undefined behaviour would follow and that the element's types rule out, every misuse that a fix ruled out among them), review (a sweep of each defect class)
 ISO 26262:: 6-Annex D.2.3 (part-clause numbers only)
 
 *Rationale.*

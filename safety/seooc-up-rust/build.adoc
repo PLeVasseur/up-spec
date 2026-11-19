@@ -95,9 +95,12 @@ The async layer's seam is not a test hook; <<req-ssr-async-seam,The asynchronous
 ID:: `+req~ssr-no-test-hooks~1+`
 ASIL:: B
 Allocated to:: the element
-Verification:: gate
-* The source scan refuses a hidden public function that is neither under the configuration nor one of the seam's names.
-* Built without the configuration, a probe naming each test hook fails to resolve.
+Verification:: gate, review
+* *gate*
+** The source scan refuses a hidden public function that is neither under the configuration nor one of the seam's names.
+** Built without the configuration, a probe naming each test hook fails to resolve.
+** The build configuration of each shipped build, which sets no `+up_rust_test_hooks+`.
+* *review*: each code item of the element that exists only for tests, a function or an item of any other kind, compiled only under the configuration.
 
 *Rationale.*
 A test hook can change hidden protocol state, so in a shipped build it would be an operation that no requirement specifies (<<req-ssr-build-specified-functions-only,The ASIL build contains only specified functions>>).
@@ -209,6 +212,10 @@ Verification:: test, miri, review
 ** On a route that requires only non-waiting release, a step whose declared acquisition waits, with a release that could wait left as pending cleanup.
 ** Under a scheduler that cannot isolate pending cleanup, a route that requires non-waiting release over a dependency that can wait refused by name, and the same route without that requirement admitted with its inline release reported.
 ** Native paths inside heap windows.
+** A native transmit loan submitted or given back before its operation returns pending.
+** A native receive borrow tied to its retained owner while its operation is suspended.
+** In a configuration whose package does not establish the heap and panic rules for its scheduler's work on a native path, a native asynchronous operation not offered or refused at setup by name, and never replaced by a serialized one.
+** A dropped asynchronous handle to an activated role, with no service stopped and no runtime resource released.
 * *miri*: the seam's registration storage.
 * *review*: the contract against the code, and each scheduler's causal resource behaviour against its package.
 
@@ -273,10 +280,13 @@ Initialization-only policy checking does not mean identical E2E receive semantic
 ID:: `+req~ssr-strict-init-only~1+`
 ASIL:: B
 Allocated to:: the element's strict mode
-Verification:: test, heap-window, review
-* *test*: each rule's finding at setup, with a negative control per rule.
-* *heap-window*: setup and the transition in the Enforce state.
-* *review*: no runtime path runs the policy checker or reads its policy; initialization-selected E2E behavior is distinguished from policy checking and retains the runtime bounds.
+Verification:: test, gate, review
+* *test*
+** Each rule's finding at setup, with a negative control per rule.
+** Setup and the transition in the Report state and in the Enforce state, on a configuration whose setup otherwise allocates nothing, with every allocation and every free on all threads counted by the Rust allocation guard and the C-level observer, a positive control showing that the count fires, and none found; on macOS too, with the current stable compiler.
+** Each report written into storage that the caller provides.
+* *gate*: a compile-time assertion, for each type of finding, that it is a fixed-size value that can be copied.
+* *review*: each policy check run in initialization mode, at a route's build for a rule that concerns one route and at the transition for the rest; no runtime path runs the policy checker or reads its policy; no path of the checker blocks or panics; initialization-selected E2E behavior is distinguished from policy checking and retains the runtime bounds.
 
 *Rationale.*
 Admission findings must be complete before runtime starts, so policy checking cannot add runtime allocation or configuration work.
@@ -319,7 +329,7 @@ Verification:: gate, test
 ** A probe naming another state fails to compile.
 * *test*
 ** Deployment data naming another state is refused at setup.
-** A transport without a policy is refused.
+** Each transport that setup builds, carrying a strict-mode policy.
 ** An allocating wire is refused on a native route and admitted on a serialized route that declares its allocation.
 
 *Rationale.*
@@ -385,7 +395,7 @@ In the Enforce state, strict mode *MUST* refuse each route that a known failure 
 ID:: `+req~ssr-strict-ack-revision~2+`
 ASIL:: B
 Allocated to:: the element's strict mode
-Verification:: test (an acknowledgement of an earlier revision refuses again; one that names an unknown ID is refused; in the Enforce state, each route that a known failure affects refused whatever is acknowledged, and a route that it does not affect not refused for it)
+Verification:: test (an acknowledgement of an earlier revision refuses again; one that names an unknown ID, one that names a deviation by its type, and one without a reference, an approver or a date, each acknowledging no deviation, so that the deviations' findings still refuse in the Enforce state; in the Enforce state, each route that a known failure affects refused whatever is acknowledged, and a route that it does not affect not refused for it)
 
 *Rationale.*
 Acknowledging an earlier deviation cannot establish acceptance of a later change to its scope or consequences.
@@ -460,6 +470,7 @@ Allocated to:: the element's strict mode
 Verification:: test, review
 * *test*
 ** A run's report with findings of every severity.
+** A run's report, in the Report state and in the Enforce state, holding every finding with its rule, its route, the requirement IDs it serves and its fix, the acknowledged deviations and the warnings.
 ** The cited-items line before and after sign-off.
 ** A monitored route with and without an established J.
 ** A route's requested and admitted claims.

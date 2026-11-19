@@ -345,19 +345,19 @@ ASIL:: B
 Allocated to:: the element
 Verification:: test, review, fault-injection
 * *test*
-** Each refusal names its route and setter.
+** Each refusal returned as an error that names its cause, its route where there is one, and the setter to change.
 ** A refusal injected at each placement and provider request, with every acquired value returned, destroyed once or retained as stated and no storage of a successful owner released.
 ** A refused caller input returned untouched, refused before it was taken, or destroyed once and reported as destroyed.
 ** Where a route requires panic-free cleanup or non-waiting release, no value for which it is not established destroyed by setup.
 ** Nothing handed to a release service.
+** A refusal at each step of initialization and at the transition, leaving no runtime-mode value and starting no traffic.
 ** A request that a provider's contract lets panic for a condition setup can check prevented, or the provider refused by name.
 ** A provider whose contract permits an outcome that setup cannot exclude reported with it, and refused by name where the configuration requires the guarantee it violates.
 * *review*
 ** No panic path in setup code.
-** Every panic site in the middleware's setup read, and decided by group.
 ** Each relied-on source, helper and provider contract.
 ** Each destruction setup performs on refusal, including a dropped input, against its stated disposition and, where a guarantee is required, its evidence.
-* *fault-injection*: a kill at each startup step.
+* *fault-injection*: a refusal at each startup step, followed by a successor process that initializes.
 ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
@@ -418,7 +418,7 @@ Every refusal stays an error, element code stays free of panics, everything setu
 ID:: `+req~ssr-mode-restart~2+`
 ASIL:: B
 Allocated to:: the element; each binding, for what a dead predecessor left and for the storage that a peer that stayed up still retains
-Verification:: fault-injection (a kill and restart at every startup step and during traffic; a restart while a peer that stayed up still retains storage, with that storage not revoked)
+Verification:: fault-injection (a kill and restart at every startup step and during traffic; a restart while a peer that stayed up still retains storage, with that storage not revoked), review (a restarted process runs the same initialization path as a first start)
 ISO 26262:: 6-Table 15 (part-clause numbers only)
 
 *Rationale.*

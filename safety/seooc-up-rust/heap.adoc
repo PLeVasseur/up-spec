@@ -66,12 +66,16 @@ These rules bind each transport from its own transition.
 ID:: `+req~ssr-heap-none~3+`
 ASIL:: B
 Allocated to:: the element
-Verification:: heap-window, gate
+Verification:: heap-window, test, review, gate
 * *heap-window*
-** Rust guard and C-level observer, all threads, allocations and frees, on Linux and on macOS.
-** Over native traffic, including errors, cancellation, retirement and deferred release.
+** The Rust allocation guard and the C-level observer, all threads, allocations and frees, on Linux and on macOS.
+** Over native traffic, sending and receiving, with refusals and error returns, cancellation, lease drops and a frame's return, retirement and deferred release, waits and wake-ups, deadline service, and the wire, binding and control work that these cause.
+** Over native traffic while a peer dies and while a peer restarts.
+** Over work that a native route shares with a serialized one, while the serialized route allocates under its declared class.
 ** On a serialized route, its declared allocation and the release of what it admitted, including each release that a release service performs, are reported, never hidden.
-** On a serialized route, no heap use in deciding, reporting or counting a refusal, a discard or a peer's failure.
+** On a serialized route, no heap use in deciding, reporting or counting any outcome, a refusal, a discard and a peer's failure among them.
+* *test*: a route whose declared class admits allocation and that requires no stronger guarantee, its report showing each stronger guarantee as not admitted and stating separately whether it is established.
+* *review*: no general allocator activity in element code on any runtime path, inside a region obtained at startup included, beyond what a serialized or owned route's declared class permits and setup admits.
 * *gate*: the crate builds without `+alloc+`.
 ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
@@ -115,9 +119,10 @@ This covers:
 ID:: `+req~ssr-heap-lazy-forced~1+`
 ASIL:: B
 Allocated to:: the element
-Verification:: heap-window, fault-injection
-* *heap-window*: on a pthread target (macOS) over first traffic.
+Verification:: heap-window, fault-injection, review
+* *heap-window*: over first traffic, on a pthread target (macOS) and on every other target on which its fault-injection control runs.
 * *fault-injection*: a control that leaves one primitive lazy must make the window fail, on every target.
+* *review*: each primitive on the runtime path that would allocate or initialize itself on first use, the five that the statement lists among them, forced during initialization or absent from the runtime path.
 ISO 26262:: 6-9.4.5, 6-10.4.7 (part-clause numbers only)
 
 *Rationale.*
@@ -206,7 +211,7 @@ A route with several wires shows each of them, never the first alone.
 ID:: `+req~ssr-heap-declared~3+`
 ASIL:: B
 Allocated to:: the element; each wire and each binding, for the classes that they state
-Verification:: test, review
+Verification:: test, heap-window, review
 * *test*
 ** Refusal at the transition of a native route with an allocating wire or binding.
 ** Refusal at the transition of a serialized route that does not declare its wire's or its binding's allocation.
@@ -214,9 +219,12 @@ Verification:: test, review
 ** A wire whose decoded value frees memory when it is destroyed, declaring none for its decode direction, failing its heap-free check.
 ** The startup report's heap class per route, naming who allocates, for every wire and direction of a route with several wires.
 ** A declared unknown reported as unknown.
+* *heap-window*: a native route, and the metadata that it shares with a serialized route, with no heap use while that serialized route allocates as its permission admits.
 * *review*
 ** No default in the declaration.
 ** Each declared policy against its allocator's stated contract on every reachable path.
+** No path on which a declared unknown is read as the favourable answer.
+** No path on which an allocation falls back silently to another domain.
 ** A stated panic, process end or wait refusing a route that requires the guarantee it violates, and reported, not refused, on a route that does not.
 ** A waiting release's named dependency and any claimed deadline against the allocator's own mechanism.
 
@@ -368,6 +376,7 @@ Verification:: test, review
 ** For each of the four guarantees, one that is established and not required, reported as not required, established and not admitted, with its route admitted and nothing promised.
 ** For each of the four guarantees, required and established varied independently, with admitted true only where both are.
 ** The same route refused by name once it requires a guarantee that is not established, the refusal naming the route, the guarantee and what lacks it.
+** A route that requires non-waiting acquisition over a binding whose allocation can wait, refused at setup by name, the refusal naming that binding, and the same route admitted without that requirement.
 ** A route that requires non-waiting release over a dependency that can wait, refused by name on a configuration without a release service, and the same route admitted without that requirement.
 ** A route that requires only non-waiting acquisition, admitted on a configuration with a declared release that can wait and no release service, and a route that requires only non-waiting release, admitted with a declared acquisition that can wait.
 ** A requirement that follows from a required timing bound or assurance scope, admitted or refused with that claim.
@@ -375,10 +384,12 @@ Verification:: test, review
 ** A record that matches a type and a wire, without its evidence, admitting no guarantee.
 ** A type without a destructor, with panic-free cleanup and non-waiting release established for the destruction of its decoded values and for nothing else, and a route that requires either still decided over its binding, providers and other wires.
 ** A route with several wires, with each guarantee decided and reported over all of them.
+** A route that requires a guarantee, with what setup takes or creates for it held to that guarantee, and a refusal disposing of it as xref:runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure] states.
 * *review*
 ** Each admitted guarantee's evidence against the exact type, wires, directions, binding, provider, dependencies, build and contexts that it names.
 ** No path on which the element states, reports or relies on a guarantee as held for a route for which it is not established, and none on which it reports as admitted a guarantee that is not both required and established.
 ** No path on which a report drops or changes what is established because the route does not require it, or shows a guarantee as required because it is established.
+** No path on which a fault against what holds whatever a route requires is reported as a guarantee that is merely not established.
 
 *Rationale.*
 Most wire formats decode into values that own what they hold: strings, sequences and nested messages.

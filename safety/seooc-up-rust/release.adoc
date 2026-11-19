@@ -169,16 +169,17 @@ Verification:: heap-window, test, miri, review
 ** On a heap-free route, a destructor that uses no heap.
 ** On a serialized route, the declared destruction reported under its class and nothing else.
 * *test*
-** Release order.
+** A slot given back exactly once: at once where it holds nothing whose release is in progress or pending, and otherwise only when that release completes.
 ** One destruction per initialized value of an admitted serialized type, none for an empty slot.
 ** On a route that does not require non-waiting release, the destruction on the drop's own path under the declared policy, its slot charged until it completes.
 ** On a route that requires it, a destruction that can wait handed to the release service without waiting, its slot charged until it completes.
 ** A route that requires non-waiting release over a dependency that can wait, refused by name on a configuration without a release service, and admitted without that requirement.
 ** The service stalled, with every pending value still charged, counted capacity pressure and no slot reused.
 ** No application call needed for the service to progress.
-** One release held indefinitely behind its named dependency while bounded operations, deadline and expiry accounting, health and capacity reports and the returns of owners that do not need that dependency still progress.
+** One release held indefinitely behind its named dependency while bounded operations, drops and hand-offs, arrival, deadline, expiry and peer-failure accounting, health and capacity reports and the returns of owners that do not need that dependency still progress.
 ** A timed-out observer that revokes, reuses or reports nothing.
 ** A route whose pending cleanup cannot be isolated refused at setup by name.
+** A claim of capacity recovered within a time, or of sustained throughput while a release stays unfinished, refused by name on a configuration whose package does not establish the release progress and sizing it relies on.
 * *review*
 ** No lock in the element's own work on the release path.
 ** Where a route requires a guarantee, each admitted type's destruction chain against its evidence, at once and on the service.

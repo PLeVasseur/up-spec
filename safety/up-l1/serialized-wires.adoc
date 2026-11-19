@@ -142,8 +142,10 @@ Allocated to:: each serialized wire, apart from the end-to-end protection wire
 Verification:: test, heap-window, review
 * *test*
 ** The largest encoding that the wire states, against a value built to reach it, and an exact size against the bytes written.
+** A wire that states that it has no largest encoding, on a route that declares no payload bound: the route refused at setup, as xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-entry-no-latent-refusal[Nothing is refused at runtime for a reason setup already knew] requires, so that the wire runs only on a route that declares one.
 ** A value one byte too large for the route's bound: refused, with nothing sent and the value unchanged.
-** A value encoded twice with the same result, for an ordinary wire.
+** A value that the format cannot represent: an error, with nothing sent.
+** A value encoded twice: unchanged by each encode, and, for an ordinary wire, the same result both times, as xref:wires.adoc#req-ssr-wire-heap-claim-tested[A heap-free claim passes the wire contract] states of an ordinary wire's encoding.
 ** Decoding into a slot that holds each of several earlier values, with the same result every time.
 ** A decode that fails part-way, with the slot's value valid afterwards and each acquisition released once.
 ** A decoded value used after its frame was returned and its storage reused.

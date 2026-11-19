@@ -106,7 +106,9 @@ Verification:: test, review
 * *test*
 ** A failed read is reported and refuses setup, through a fault-injected backend.
 ** A source short of its stated contract is refused.
-* *review*: each backend's source, against its OS's documentation and its package's stated contract.
+* *review*
+** Each backend's source, against its OS's documentation and its package's stated contract.
+** Each argument that a value never repeats across starts, resting on a checked persistent construction and never on entropy.
 
 *Rationale.*
 Entropy seeds each route's message-ID generator once, in initialization.
@@ -188,11 +190,14 @@ Verification:: gate, test, review
 ** Core builds for a bare-metal 32-bit target without 64-bit atomics.
 ** No `+core::sync::atomic+` or `+std::sync::atomic+` import in core outside the facade and the platform layer.
 * *test*
-** The suite under Miri, both models, for a little-endian and for a big-endian 32-bit target without 64-bit atomics.
+** The suite under Miri, both models, for a little-endian and for a big-endian 32-bit target without 64-bit atomics, with a test of each of the five properties that the obligation names.
 ** Each backend's mechanism on the targets its configuration names.
 * *review*
 ** Each mechanism's source-level safety argument, against every participant that can reach its storage.
 ** The source where the element tells whether a target has 32-bit atomics with compare-and-swap: `+target_has_atomic+`, and no list of targets.
+** Each pointer-sized atomic of core, holding only a length or an index.
+** Each read by core of memory shared with another process, in 32-bit words and bytes.
+** Each mechanism's supported execution contexts, memory ordering, alignment, lifetime and interruption obligations, stated and packaged with its configuration.
 
 *Rationale.*
 Some supported targets have no 64-bit atomics.
@@ -264,7 +269,7 @@ ASIL:: B
 Allocated to:: the element
 Verification:: test, review
 * *test*
-** Each remaining window's boundary driven through a test hook: a flow counter's wrap, a fault counter's and the deadline count's saturation, a pool retired before its reuse count or a slot's generation wraps.
+** Each remaining window's boundary driven through a test hook: a flow counter's wrap, a fault counter's and the deadline count's saturation, a pool retired, after the warning that its lifetime policy states, before its reuse count or a slot's generation wraps, and a route's message-ID generator at the end of its period, refusing as xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique] states.
 ** The tie of identity to tenure at each claim and at each expiry, peer failure and retirement.
 ** The one-word monitor's boundaries and an arrival racing a refresh, under Miri, as a model.
 * *review*

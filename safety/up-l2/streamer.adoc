@@ -40,7 +40,7 @@ A frame *MUST NOT* be forwarded before activation.
 ID:: `+req~ssr-streamer-route-lock~3+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: compile-fail (add or delete after activation; forward before activation; activate with an initialization value), test (a live subscription source is refused)
+Verification:: compile-fail (add or delete after activation; change a route's filters, legs, QoS or wires after activation; a listener or subscription operation on the runtime type; forward before activation; activate with an initialization value), test (a live subscription source is refused; the subscription directory read once, at setup, and a later change to its source changing no route)
 ISO 26262:: 6-7.4.3, 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
@@ -174,7 +174,9 @@ ASIL:: B
 Allocated to:: the Streamer
 Verification:: test
 * *test*
-** Byte identity on every route kind, and the loan-address checks.
+** Byte identity on every route kind.
+** A byte-only egress given the ingress bytes at the address where they arrived, with no copy staged between.
+** A lending egress given one copy of the bytes, written at the address of its loan.
 ** On a route with no encoding filter, a serialized payload under an identifier that no wire of the route names, carried with its identifier and bytes unchanged: an assigned identifier, an unassigned one, a reserved one, a private-use one, `0` and `0xFFFF`.
 ** An absent payload kept absent, and a present zero-length payload kept present with its identifier, between two different envelopes.
 ** The same frames carried the same way after a wire that reads their encoding is added to the route.
@@ -307,13 +309,17 @@ ASIL:: B
 Allocated to:: the Streamer
 Verification:: test
 * *test*
+** At setup, a route whose ingress leg's QoS fails its check, and one whose egress leg's QoS fails it: each refused, naming the leg.
 ** Each limit refusing its frame on every forwarding path, counted under a cause of its own.
-** A frame that names a native representation which none of the route's wires names: refused, with no part of it carried as serialized bytes.
+** A frame whose TTL has passed: refused before it is forwarded, on every forwarding path.
+** A frame that names a native representation which none of the route's wires names: refused, with no part of it carried as serialized bytes, and nothing carried in its place with what names its representation removed or changed.
 ** On a route with no encoding filter, a serialized payload under an identifier that no wire of the route names: forwarded.
 ** A route whose deployment data states no filter has none, whatever wires and decoders the build contains.
 ** On a route with an encoding filter, a serialized payload whose identifier the filter names: forwarded with its identifier, presence and bytes unchanged, with and without a wire that reads it.
 ** On a route with an encoding filter, a serialized payload whose identifier the filter does not name: refused, and counted under the filter's cause and under no other.
 ** On a route with an encoding filter, a frame that names a native representation: admitted or refused by the route's wires alone.
+** A filter that names `0xFFFF`: a payload under `0xFFFF` forwarded, and one under any other identifier that the filter does not name refused.
+** On a route with an encoding filter, a frame with no payload: not refused by the filter.
 ** The setup report of each route's filter, and of a route that has none.
 ** Controls: a filter refusal counted as an unknown or invalid encoding fails, and so does a filter derived from the route's wires.
 
@@ -410,7 +416,7 @@ Data whose code does not match its content *MUST* be refused, naming the mismatc
 ID:: `+req~ssr-streamer-config-integrity~1+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: test (a mismatched code; a truncated file; a code computed over other content)
+Verification:: test (a mismatched code; a truncated file; a code computed over other content; each refused before any of the data is applied, naming the mismatch, with no part of the data applied)
 ISO 26262:: 6-C.4.10, 6-Table C.1 (part-clause numbers only)
 
 *Rationale.*
@@ -440,7 +446,7 @@ The transports' reserved slots *MUST* be its only queues.
 ID:: `+req~ssr-streamer-sync-data-plane~1+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: gate (the crate's dependency set, and the token scan of xref:../seooc-up-rust/crate-isolation.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled]), heap-window
+Verification:: gate (the crate's dependency set, and the token scan of xref:../seooc-up-rust/crate-isolation.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled]), review (no queue on the forwarding path other than the transports' reserved slots)
 
 *Rationale.*
 The Streamer is built from the element's carrier primitives, which offer traffic in synchronous or polled form with no futures, tasks or pinning (xref:../seooc-up-rust/crate-isolation.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled]).
@@ -589,16 +595,21 @@ Without such a claim, the monitors still operate, and the Streamer's report *MUS
 ID:: `+req~ssr-streamer-monitors~5+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: fault-injection, test
+Verification:: fault-injection, test, review
 * *fault-injection*
 ** A worker stalled while its timer keeps running.
 ** An egress killed.
 ** A peer restarted within and beyond a monitor's threshold.
+** A fault on an ingress leg that meets its monitor's stated trip condition: the affected routes tripped.
 * *test*
+** A trip that sets the gates of its affected routes only, with every other route's gate unchanged.
+** Each trip counted with the condition that caused it.
 ** A tripped route that the operator interface does not name stays tripped.
+** A tripped route that the operator interface names, still tripped once its condition clears, until an operator re-enables it.
 ** A trip keeps its routes' storage.
 ** The report without a reaction claim.
 ** In strict mode's Enforce state, a threshold below the declared restart time of a peer on its monitor's routes: refused by setup, and not refused for that reason where `+outage_on_restart+` names the accepted outage.
+* *review*: each monitor's trip condition, as its specification states it, with its thresholds read from deployment data.
 ISO 26262:: 6-7.4.12 (part-clause numbers only)
 
 *Rationale.*
@@ -659,7 +670,7 @@ A timer tick, an interrupt or a heartbeat that continues whether or not a pass c
 ID:: `+req~ssr-streamer-watchdog-hook~2+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: test (a stalled worker is seen through the hook, also while its timer or an interrupt keeps running), heap-window
+Verification:: test (a stalled worker is seen through the hook, also while its timer or an interrupt keeps running; a reader of the hook that stalls, while every worker keeps completing its passes), heap-window
 ISO 26262:: 6-7.4.12 (part-clause numbers only)
 
 *Rationale.*
@@ -723,7 +734,7 @@ What that client then does, its refusal of the response as unprotected, the coun
 ID:: `+req~ssr-streamer-rpc-error-response~4+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: test (each cause; a full egress; a full reverse route; a call whose error response was not sent ends as expired), heap-window
+Verification:: test (each cause; a full egress; a full reverse route and a reverse route whose gate is not enabled, each with the response not sent, not retried and not blocking, and counted; a sent response counted; a call whose error response was not sent ends as expired), heap-window
 
 *Rationale.*
 The dispatcher can report a known delivery failure promptly without forwarding through a route whose gate is not enabled.

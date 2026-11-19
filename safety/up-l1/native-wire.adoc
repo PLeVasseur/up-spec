@@ -105,6 +105,7 @@ Verification:: test, review, gate
 ** A type that the derive accepts, with its size, its alignment and the place of each field compared with its layout as built.
 ** A type of size zero and a union that are admitted: each is native, and a frame of the first is a present payload of length zero.
 ** Two values of a type with padding that differ only in their padding bytes: every comparison and every view that the element makes gives the same result for both.
+** A value sent on a native route: the frame's payload is the value's bytes, with no address of a value, of a buffer or of a shared-memory segment in their place.
 * *review*: each `+unsafe+` declaration of a native type, against the obligations of this item.
 * *gate*: the inventory check, which refuses a new or changed declaration until it is reviewed.
 
@@ -294,7 +295,7 @@ This item restates none of them.
 ID:: `+req~ssr-native-in-place~1+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test, heap-window, miri, review
+Verification:: test, compile-fail, miri, review
 * *test*
 ** A native route on a lending test double and on each real lending binding: the value is read at the address at which it arrived.
 ** A loan that was not written whole, which cannot be sent, and a write after a send, which does not compile.
@@ -302,7 +303,7 @@ Verification:: test, heap-window, miri, review
 ** A loan and a frame whose leases safe code forgot: each is still charged at the end of the run, and its storage is never returned, and never lent or delivered again.
 ** A native route on a binding that cannot serve it, refused at setup by name, with no serialized or copied route in its place.
 ** Each route's report: lent or handed off, view or copy.
-* *heap-window*: native sending, receiving, refusal, cancellation and return.
+* *compile-fail*: a write through a view, and a view used after the lease of its frame is dropped.
 * *miri*: the view, on a lending test double, with a forgotten lease.
 * *review*: no path from a native route into an encoder, a decoder or a staging buffer, and no property of this item that holds only if a destructor runs.
 

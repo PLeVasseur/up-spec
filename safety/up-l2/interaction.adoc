@@ -43,10 +43,13 @@ ASIL:: B
 Allocated to:: the element
 Verification:: test, fault-injection
 * *test*
-** A call ended by its TTL, by its cancellation and by a peer's failure while what it owned is pending release.
+** A call ended by a response, by its TTL, by its cancellation and by a peer's failure while what it owned is pending release.
 Its outcome is reported at once, its storage is charged and not reused, and its slot is returned only once nothing it holds is pending.
+** The same calls, with what each owned kept with its slot and with it passed to a release service: in both places its storage stays charged and is not reused until the release completes, and the route's admitted capacity covers it.
+** A response that arrives after the call has ended in each of those ways: it completes nothing.
 ** A call whose request its server answers `+InvalidArgument+`, and one whose request the Streamer answers with an error response.
 Each call's outcome is set as soon as the answer arrives, without waiting out its TTL.
+** A server's answer just inside and just past the request's TTL, counted from when the request was created: only the first answers the request.
 * *fault-injection*: a server killed during a call.
 
 *Rationale.*
@@ -105,9 +108,10 @@ ASIL:: B
 Allocated to:: the element
 Verification:: test, review
 * *test*
-** A response after expiry, at a reused slot.
+** A response after expiry, at a reused slot: refused and counted, and never delivered to the later call.
 ** A response for an earlier tenure of a reused slot, refused with nothing recorded.
 ** A response from another peer, or from an older incarnation of the peer tied to the call, refused.
+** A response for an earlier tenure, on a route with a wire that records each check that it runs: refused, with no check of it recorded by the wire.
 * *review*: the claim's source argument for each configuration's mechanism: the comparison and the claim in one exclusive step, or the recheck after the claim and its give-back.
 ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 
@@ -165,7 +169,10 @@ Verification:: test, miri, heap-window
 ** Two polling threads on one response route.
 ** A refusal racing the call's drop, its TTL, a peer's loss and its restart.
 ** A final answer that completes its call at once, and an advisory one that leaves it open.
+** A call whose every response is refused, ending at its TTL and naming the last refusal that it recorded.
+** The call's tag recorded before its request is sent, and a response that arrives before then refused.
 * *miri*: the give-back and the delivering phases, with threads.
+* *heap-window*: the recording of a call's tag, the arrival checks of a response, a refused response, a refusal answer, a call's end at its TTL, the completion of a call by an accepted response and a peer's failure that finds a response being checked, with no heap use on a native route, and on a serialized route none beyond what its declared class permits and setup admits and none in deciding, reporting or counting an outcome, as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode] states.
 
 *Rationale.*
 Completing a call before checking its wire would let a corrupt first copy exclude a later intact response.
@@ -226,11 +233,18 @@ Allocated to:: the element
 Verification:: test, heap-window
 * *test*
 ** An undecodable request is answered `+InvalidArgument+` on both binding families.
+** A request whose encoding the server does not admit is answered `+InvalidArgument+`.
+** Each request answered `+InvalidArgument+` for an undecodable payload or for an encoding that is not admitted: counted.
+** Such an answer on a response route that is full: sent under the route's overflow policy, with a wait within its bound where the route declares a bounded wait.
+** A request whose header cannot be parsed: refused and counted, with no answer, and its call ending at its TTL.
+** An answer that cannot be sent: counted, and its call ending at its TTL.
 ** A duplicated request that arrives before the real response gets an advisory answer, and its call ends with the real response.
 ** A corrupted only copy gets no answer, and its call ends at its TTL.
 ** A request with an undeclared data ID is answered `+InvalidArgument+`.
 ** A request that passes the end-to-end check and fails the inner decode is answered `+InvalidArgument+`.
-** A refused request whose server never delivered its tag gets a final answer, and its call ends at once as rejected.
+** A request that an end-to-end check refuses, and that xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory] classifies as final: answered by the wire's final refusal answer, its call then ending at once as rejected, as <<req-ssr-rpc-check-at-arrival,A response completes its call only once its wire accepts it>> states.
+** Every answer, the element's own and the application's, handed to the route's wire with its request's tag.
+** Every refused request's frame released at once.
 * *heap-window*: producing each answer; on a serialized route, only the route's declared send-side allocation and release.
 
 *Rationale.*
@@ -260,7 +274,7 @@ On any other binding, the call *MUST* end at its TTL.
 ID:: `+req~ssr-peer-rpc-no-server~1+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test (with and without the capability), heap-window
+Verification:: test (with and without the capability), heap-window (a call whose request reached no server, failing at once or ending at its TTL, with no heap use on a native route, and on a serialized route none beyond what its declared class permits and setup admits and none in deciding, reporting or counting that outcome, as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode] states)
 
 *Rationale.*
 Waiting out the TTL of a request that no server received only delays an error the binding already knows, and holds the call's slot until then.
@@ -312,13 +326,17 @@ Verification:: review, test, heap-window
 * *review*
 ** The stated residual and its derivation.
 ** Each generator's stated period and refusal bounds against its code.
+** Where a configuration claims that IDs never repeat across restarts: the claim resting on a checked persistent construction, never on the entropy alone.
 * *test*
+** Each generated ID a UUIDv7, as up-spec's rules require.
 ** No repeat in a large sample, across a restart, and while the clock is unreadable.
 ** For a 32-bit sequence, an outage of 2^31^ IDs and then 2^31^ refused calls through a hook, with no repeated input.
 ** A stuck clock, a clock read only now and then, and a saturated last good time.
 ** A clock step back.
 ** A route seeded at 0 whose clock is then set to the present.
-* *heap-window*: the first ID on a cold thread.
+** Each refusal to generate counted; for a 32-bit sequence, the refusals after 2^31^ IDs within one 64 ms bucket and those while the last good time is saturated among them.
+** No panic in any of these cases, an unreadable wall clock included.
+* *heap-window*: the first ID on a cold thread, and IDs generated while the wall clock cannot be read.
 
 *Rationale.*
 up-spec requires the UUIDs in UAttributes to be UUIDv7 (xref:../../basics/uuid.adoc[UUID], `+dsn~uuid-spec~1+`).

@@ -94,10 +94,14 @@ It does not contain corrupt middleware offsets, lengths, free lists or ownership
 ID:: `+req~ssr-integrity-zero-copy~5+`
 ASIL:: B
 Allocated to:: the element
-Verification:: fault-injection, miri, heap-window, review
+Verification:: fault-injection, test, miri, heap-window, review
 * *fault-injection*
 ** A faulty publisher writing to a sample while it is read, with real processes.
 ** On a binding with two-way shared state, a port above and a port below the service's recorded level, on every port kind and on the paired event service.
+* *test*
+** A reader that demands zero-copy on a route that crosses upward, and on one whose writer's level is unknown: each refused at setup.
+** A copy route for which no source-access mechanism that is valid while a faulty writer races it can be established: refused at setup.
+** Each route's report of the form that it got.
 * *miri*, under Stacked Borrows, under Tree Borrows and with strict provenance: a racing writer thread, with a plain-read copy as the negative control, which must be reported as a data race.
 * *review*: the source-access mechanism of each copy route, and the tenure and synchronization of each view, at source level; and each statement that uses zero-copy or a zero-copy route, read with the clause "Zero-copy".
 ISO 26262:: 6-Annex D.2.3, 6-Table 3 1h (part-clause numbers only)
@@ -200,7 +204,7 @@ The copy protects the payload only, not the ingress middleware's control memory.
 ID:: `+req~ssr-integrity-carrier-crossing~2+`
 ASIL:: B
 Allocated to:: the element (carrier routes)
-Verification:: fault-injection (a writer changing a frame while it is forwarded), test (refusal of a route whose ingress has no valid source-access mechanism), heap-window, review (each ingress's source-access mechanism, at source level)
+Verification:: fault-injection (a writer changing a frame while it is forwarded), test (at setup, a route from a lending ingress whose level is lower than its egress's, or unknown, to a byte-only egress, and such a route whose ingress offers no valid source-access mechanism, each refused, naming the route and both levels, or the unknown one), heap-window, review (each ingress's source-access mechanism, at source level)
 
 *Rationale.*
 A carrier keeps a frame's bytes unchanged and makes at most one copy, into a lending egress's loan.
