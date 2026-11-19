@@ -398,3 +398,14 @@ These are in xref:../up-l2/README.adoc[the communication layer's part].
 | xref:../up-l2/interaction.adoc[RPC and message identity] | 6 | `SafetyUpRustCore`
 | xref:../up-l2/streamer.adoc[Streamer] | 20 | `SafetyStreamer`, `SafetyManual`
 |===
+
+=== Filed in the area's README
+
+This is in xref:../README.adoc[the safety area's README].
+
+[cols="4,1,3",options="header"]
+|===
+| File | Items | Tags
+
+| xref:../README.adoc[Safety requirements for traceability] | 1 | `SafetyUpRustCore`, `SafetyStreamer`, `SafetyBinding`, `SafetyWire`
+|===

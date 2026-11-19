@@ -38,7 +38,7 @@ The fixed-layout XCDR2 profile is a format with requirements of its own, stated 
 [[req-ssr-wire-serialized-format]]
 == A serialized wire reads and writes one stated format
 
-[.specitem,oft-sid="req~ssr-wire-serialized-format~1",oft-title="A serialized wire reads and writes one stated format",oft-needs="impl,utest",oft-tags="SafetyWireSerialized"]
+[.specitem,oft-sid="req~ssr-wire-serialized-format~2",oft-title="A serialized wire reads and writes one stated format",oft-needs="impl,utest",oft-tags="SafetyWireSerialized"]
 --
 *One format.*
 A serialized wire *MUST* state the one format that it writes and reads:
@@ -68,9 +68,9 @@ The wire declares those apart (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-decl
 --
 
 [horizontal]
-ID:: `+req~ssr-wire-serialized-format~1+`
+ID:: `+req~ssr-wire-serialized-format~2+`
 ASIL:: B
-Allocated to:: each serialized wire
+Allocated to:: each serialized wire, apart from the end-to-end protection wire
 Verification:: test, review
 * *test*
 ** The wire contract suite, with each expected result stated from the format before the wire runs (xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]).
@@ -95,7 +95,7 @@ The wire cannot always prevent that, so it says what does agree the type, and it
 [[req-ssr-wire-encode-decode]]
 == A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns
 
-[.specitem,oft-sid="req~ssr-wire-encode-decode~1",oft-title="A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns",oft-needs="impl,utest",oft-tags="SafetyWireSerialized"]
+[.specitem,oft-sid="req~ssr-wire-encode-decode~2",oft-title="A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns",oft-needs="impl,utest",oft-tags="SafetyWireSerialized"]
 --
 *Sizing.*
 A serialized wire *MUST* state the largest encoding that it can write for its type, or that it has none.
@@ -136,9 +136,9 @@ Each refusal is a returned error of fixed size, and none is a panic (xref:wires.
 --
 
 [horizontal]
-ID:: `+req~ssr-wire-encode-decode~1+`
+ID:: `+req~ssr-wire-encode-decode~2+`
 ASIL:: B
-Allocated to:: each serialized wire
+Allocated to:: each serialized wire, apart from the end-to-end protection wire
 Verification:: test, heap-window, review
 * *test*
 ** The largest encoding that the wire states, against a value built to reach it, and an exact size against the bytes written.

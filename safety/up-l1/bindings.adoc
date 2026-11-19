@@ -10,10 +10,10 @@ The element whose contract these duties belong to: xref:../seooc-up-rust/README.
 These are the duties of the binding contract.
 Each binding meets them in its own code, and covers them in its own repository, by running the contract suites against itself.
 
-* They carry the tag `SafetyBinding`.
-* A duty of pull-form bindings also carries `SafetyBindingPull`.
+* They carry the tag `SafetyBinding`, and an item whose statement holds a duty of pull bindings only also carries `SafetyBindingPull`.
+The tags say which repositories cover an item, not whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 * They name no middleware.
-What only one binding must meet is stated with that binding, in an item that is allocated to it alone and carries that binding's own tag (xref:README.adoc#one-binding[what is specific to one binding]).
+What only one binding must meet is stated with that binding, in an item that is allocated to it alone (xref:README.adoc#one-binding[what is specific to one binding]).
 * A transport that is not written against the element's binding contract is not bound by them.
 
 [[req-ssr-binding-no-heap]]
@@ -251,10 +251,10 @@ Verification:: test
 [[req-ssr-binding-bounded]]
 == A binding bounds its own work and its waits
 
-[.specitem,oft-sid="req~ssr-binding-bounded~3",oft-title="A binding bounds its own work and its waits",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyBindingPull"]
+[.specitem,oft-sid="req~ssr-binding-bounded~4",oft-title="A binding bounds its own work and its waits",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyBindingPull"]
 --
 *Bounded receive.*
-A binding's receive *MUST* give up at most the route's bound per call and keep the rest in a bounded queue under the route's QoS.
+A pull binding's receive *MUST* give up at most the route's bound per call and keep the rest in a bounded queue under the route's QoS.
 
 *Bounded waits.*
 A binding call *MUST NOT* wait without a bound, except as the next paragraph allows, and *MUST NOT* wait for a deferred return to complete.
@@ -273,7 +273,7 @@ A carrier ingress *MUST* take pulled or retained frames, never borrowed ones who
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-bounded~3+`
+ID:: `+req~ssr-binding-bounded~4+`
 ASIL:: B
 Allocated to:: each binding
 Verification:: fault-injection, test

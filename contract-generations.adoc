@@ -91,7 +91,7 @@ What holds whatever a route requires is selected by nothing and waived by nothin
 * *A tracing run selects coverage, never the contract.*
 A repository's tracing run names files and tags, and reports the items that it keeps (xref:safety/README.adoc#tracing[how a repository starts tracing]).
 Its file patterns and its tag filter add no item to an implementation's contract and remove none, so an item that a run does not keep binds just the same.
-An item's own tags are another matter: they name the part that the item is allocated to.
+An item's own tags are coverage data as well: whom an item binds is stated by its statement and its allocation (xref:safety/README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 * *Exact revisions.*
 A claim names each item with its revision, and its evidence is evidence for that revision.
 * *What a relation means for an implementation.*

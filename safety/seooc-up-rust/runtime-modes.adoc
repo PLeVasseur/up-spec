@@ -392,7 +392,7 @@ Every refusal stays an error, element code stays free of panics, everything setu
 [horizontal]
 ID:: `+req~ssr-mode-restart~1+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; each binding, for what a dead predecessor left
 Verification:: fault-injection (a kill and restart at every startup step and during traffic)
 ISO 26262:: 6-Table 15 (part-clause numbers only)
 

@@ -194,7 +194,7 @@ The element's deadline monitor is the receiver's mechanism.
 [horizontal]
 ID:: `+req~ssr-qos-deadline~4+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; each binding, for its middleware's own event deadlines on an ASIL deployment
 Verification:: test, miri, fault-injection
 * *test*
 ** A silent publisher.

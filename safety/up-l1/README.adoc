@@ -19,9 +19,10 @@ It does not say that every transport must meet it (xref:../README.adoc#filing[fi
 
 * *Written for one element.*
 The items here were written for the up-rust SEooC (xref:../seooc-up-rust/README.adoc[its README]) and for the transports and wires that work with it.
-They are not protocol requirements of uP-L1, and they bind no transport or SDK of another language.
-* *Bound by tag.*
-Each requirement binds the part its tag names (xref:../README.adoc#tags[the tags]): every binding written against the element's contract (`SafetyBinding`, `SafetyBindingPull`), every wire written against it (`SafetyWire`), every serialized wire (`SafetyWireSerialized`), each wire of the fixed-layout XCDR2 profile (`SafetyXcdr2`), one binding alone, where it has a tag of its own (<<one-binding>>), or the element itself (`SafetyUpRustCore`).
+They are not protocol requirements of uP-L1, and none of them names a transport or an SDK of another language.
+* *Bound by statement and allocation.*
+Each requirement binds the parts that its statement and its "Allocated to" line name (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]): every binding written against the element's contract, or the pull bindings among them, every wire written against it, every serialized wire, each wire of the fixed-layout XCDR2 profile, one binding alone (<<one-binding>>), or the element itself.
+Its tags say which repositories cover it (xref:../README.adoc#tags[the tags]).
 * *Assumptions of use.*
 The five assumptions of use filed here are that element's: three about every transport, and two about one transport, iceoryx2.
 Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].

@@ -55,7 +55,7 @@ A wire of this profile *MUST NOT* encode or decode a type that holds anything el
 [horizontal]
 ID:: `+req~ssr-xcdr2-types~1+`
 ASIL:: B
-Allocated to:: each wire of this profile
+Allocated to:: each wire of the fixed-layout XCDR2 profile
 Verification:: test, compile-fail
 * *test*: a type with a field of each kind, an array of arrays, a type with no field and an array of no elements, each encoded and decoded.
 * *test* or *compile-fail*, as the wire refuses a type at setup or when it is built: a type with each kind of field that the profile leaves out, refused as a type of the profile.
@@ -96,7 +96,7 @@ Which other inputs decode to that value is stated by <<req-ssr-xcdr2-decoding,De
 [horizontal]
 ID:: `+req~ssr-xcdr2-encoding~1+`
 ASIL:: B
-Allocated to:: each wire of this profile
+Allocated to:: each wire of the fixed-layout XCDR2 profile
 Verification:: test
 * *test*
 ** Encodings stated from this page before the wire runs, compared byte for byte with what the wire writes: a type with a field of each kind; a type with a value of 2, 4 and 8 bytes after each remainder of its alignment, among them a value of eight bytes after an offset that is a multiple of four and not of eight; an array of two-byte elements after a field of one byte; a type with no field; an array of no elements.
@@ -125,7 +125,7 @@ A wire of this profile *MUST* also state it as the exact size of every encoding 
 [horizontal]
 ID:: `+req~ssr-xcdr2-length~1+`
 ASIL:: B
-Allocated to:: each wire of this profile
+Allocated to:: each wire of the fixed-layout XCDR2 profile
 Verification:: test
 * *test*: the size that the wire states for each type in the test row of the encoding item, compared with the length computed from this page and with the number of bytes written.
 
@@ -155,7 +155,7 @@ So an input that passes the three checks decodes, and decoding makes no other ch
 [horizontal]
 ID:: `+req~ssr-xcdr2-decoding~1+`
 ASIL:: B
-Allocated to:: each wire of this profile
+Allocated to:: each wire of the fixed-layout XCDR2 profile
 Verification:: test, fault-injection
 * *test*
 ** An input one byte short and one byte long, and the empty input: each refused.
@@ -202,7 +202,7 @@ This page assigns no payload encoding identifier, and the registry has none for 
 [horizontal]
 ID:: `+req~ssr-xcdr2-identity~1+`
 ASIL:: B
-Allocated to:: each wire of this profile
+Allocated to:: each wire of the fixed-layout XCDR2 profile
 Verification:: test, review
 * *test*: two types of equal encoded length, each decoding the other's encoding without an error.
 * *review*: the wire's statement of the type that a route declares and of what it checks; the version of the profile that it states; and that neither its README nor what it declares says that it reads another list of fields.

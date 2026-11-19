@@ -205,7 +205,7 @@ A route with several wires shows each of them, never the first alone.
 [horizontal]
 ID:: `+req~ssr-heap-declared~3+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; each wire and each binding, for the classes that they state
 Verification:: test, review
 * *test*
 ** Refusal at the transition of a native route with an allocating wire or binding.

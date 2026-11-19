@@ -143,7 +143,7 @@ Each route's report states its form, and each refusal states its reason (xref:..
 [horizontal]
 ID:: `+req~ssr-payload-route-form~1+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; each binding, for the capability that it declares and its refusal in route preparation
 Verification:: test, review
 * *test*
 ** The native wire and a serialized wire, each on a lending test double and on a handoff test double: four routes, each admitted and each reported in its own form.

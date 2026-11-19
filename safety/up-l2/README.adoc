@@ -18,9 +18,10 @@ It does not say that every SDK must meet it (xref:../README.adoc#filing[filing a
 
 * *Written for one element.*
 The items here were written for the up-rust SEooC (xref:../seooc-up-rust/README.adoc[its README]), whose parts include the Streamer's data plane.
-They are not protocol requirements of uP-L2, and they bind no SDK or dispatcher of another language.
-* *Bound by tag.*
-Each requirement binds the part its tag names (xref:../README.adoc#tags[the tags]): the element (`SafetyUpRustCore`) or the Streamer (`SafetyStreamer`).
+They are not protocol requirements of uP-L2, and none of them names an SDK or a dispatcher of another language.
+* *Bound by statement and allocation.*
+Each requirement binds the parts that its statement and its "Allocated to" line name (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]): the element or the Streamer.
+Its tags say which repositories cover it (xref:../README.adoc#tags[the tags]).
 * *Assumptions of use.*
 The two assumptions of use filed here are that element's, about operating its Streamer.
 Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
