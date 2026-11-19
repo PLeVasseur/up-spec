@@ -24,7 +24,7 @@ This page holds:
 
 == Whom this page binds
 
-* The three requirements bind the element.
+* The three requirements bind the element; <<req-ssr-payload-written-once,A payload is written once, into the storage that carries it>> also binds each handoff binding, for its one copy at a hand-off, and <<req-ssr-payload-route-form,A route's form is fixed at setup, by what the route declares and never by a name>> each binding, for the capability that it declares and its refusal in route preparation.
 * Each table names the rule that governs a cell, and that rule binds whoever its own item binds.
 The tables add no duty.
 * Nothing here binds a transport or a wire that is not written against the element's contract.
@@ -32,7 +32,7 @@ The tables add no duty.
 [[req-ssr-payload-written-once]]
 == A payload is written once, into the storage that carries it
 
-[.specitem,oft-sid="req~ssr-payload-written-once~1",oft-title="A payload is written once, into the storage that carries it",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-payload-written-once~2",oft-title="A payload is written once, into the storage that carries it",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Sending.*
 The element *MUST* have a payload written exactly once, directly into the storage that carries its frame:
@@ -40,11 +40,11 @@ The element *MUST* have a payload written exactly once, directly into the storag
 * on a lending binding, the loan (xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]);
 * on a handoff binding, storage that the route reserved at setup.
 
-That binds a native payload, which its sender initializes there (xref:native-wire.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused]), and a serialized payload, which its wire encodes there (xref:serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns]).
+That holds for a native payload, which its sender initializes there (xref:native-wire.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused]), and for a serialized payload, which its wire encodes there (xref:serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns]).
 
 *Two operations, two actors.*
-The one write is the sender's or the wire's, made through the element.
-The one copy at a hand-off is the binding's: a separate operation, which a handoff binding declares and the route's report shows as handed off.
+The one write is made through the element, by the sender of a native payload or by the wire of a serialized one, as xref:native-wire.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused] and xref:serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns] state.
+The one copy at a hand-off is the binding's: a separate operation, declared with the binding's capability (<<req-ssr-payload-route-form,A route's form is fixed at setup, by what the route declares and never by a name>>) and shown as handed off in the route's report.
 Neither is counted as the other, and the element adds no third.
 
 *No staging.*
@@ -64,9 +64,9 @@ What a carrier may copy on a hop is stated with the carrier (xref:../up-l2/strea
 --
 
 [horizontal]
-ID:: `+req~ssr-payload-written-once~1+`
+ID:: `+req~ssr-payload-written-once~2+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; each handoff binding, for its one copy at a hand-off
 Verification:: test, heap-window, review
 * *test*
 ** On a lending test double: the address that the payload is written at is the loan's, for a native route and for a serialized one.
@@ -183,7 +183,7 @@ So the form is settled at setup, reported, and left alone.
 --
 *Before a wire reads.*
 The element *MUST* give a received payload only to a wire of the route whose declared payload encoding identifier equals the frame's.
-That binds a serialized wire and the native wire alike.
+That holds alike on a route with a serialized wire and on a route with the native wire.
 
 * Where no wire of the route declares the frame's identifier, the element *MUST* refuse the frame and count it once, under a cause that names the mismatch (xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 The bytes reach no wire.
@@ -205,7 +205,7 @@ A message whose payload a wire wrote carries the identifier that the wire declar
 A payload and its identifier are both present or both absent (xref:wires.adoc#encoding-identifier[the encoding identifier is the registry's]).
 
 *Reading, and nothing else.*
-This item binds a component that reads a payload as a typed value.
+This item applies where a payload is read as a typed value.
 It gives a component that only carries a payload no reason to refuse one, and it is not a carrier's encoding filter (xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
 --
 

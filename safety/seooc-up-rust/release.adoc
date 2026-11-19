@@ -9,19 +9,22 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 [[req-ssr-release-none]]
 == Nothing is released in runtime mode
 
-[.specitem,oft-sid="req~ssr-release-none~2",oft-title="Nothing is released in runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-release-none~3",oft-title="Nothing is released in runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 In runtime mode each route, role, slot table, binding resource, worker and transport *MUST* remain allocated and attached for the life of the process.
 
 * Workers created during initialization keep running and are never joined in runtime mode.
 * A route keeps its slots and its binding resources when its gate disables it.
 * A route gate (xref:../up-l2/streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate]) may change the route's state, and nothing else about it.
+
+*The Streamer.*
+What the Streamer's routes and gates, and the workers of the Streamer binary, keep in runtime mode is stated with the Streamer (xref:../up-l2/streamer.adoc#req-ssr-streamer-route-lock[Routes and subscriptions are locked at activation]; xref:../up-l2/streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate]; xref:../up-l2/streamer.adoc#req-ssr-streamer-workers[Workers are fixed at initialization]).
 --
 
 [horizontal]
-ID:: `+req~ssr-release-none~2+`
+ID:: `+req~ssr-release-none~3+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; each binding, for its resources, its workers and its transport
 Verification:: compile-fail (for the Streamer, a delete after activation), review
 ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
@@ -48,7 +51,7 @@ This *MUST* be proved for each type at compile time.
 [horizontal]
 ID:: `+req~ssr-release-inert-drop~1+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; the Streamer, for its runtime type and its gate and counter handles
 Verification:: gate (the const assertion for each handle type)
 
 *Rationale.*
@@ -159,7 +162,7 @@ A binding's frame destructor has the same duty (xref:../up-l1/bindings.adoc#req-
 [horizontal]
 ID:: `+req~ssr-release-lease-drop~5+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; each binding, for its deferred return of a retained owner
 Verification:: heap-window, test, miri, review
 * *heap-window*
 ** Lease drops inside the window on a native route.

@@ -7,7 +7,8 @@ Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 The element whose wire contract these duties belong to: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
-Each wire meets these in its own crate, and covers them in its own repository (tag `SafetyWire`).
+Each item binds the parts that its statement and its "Allocated to" line name: here, every wire (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+A wire meets them in its own crate, and covers them in its own repository.
 A wire that is not written against the element's wire contract is not bound by them.
 
 These duties name no wire format, and each wire meets them for its own format.

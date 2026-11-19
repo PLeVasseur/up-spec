@@ -38,7 +38,7 @@ Each obligation is stated in one place, and tables, indexes and safety manuals s
 * *A safety obligation of a protocol layer* goes in that layer's part here.
 A restriction that only one transport has goes in that transport's file, beneath its layer.
 * *An SDK element's own scope, boundary and implementation-specific rules* go in a directory of their own here, named `seooc-<sdk>/`.
-They are written for one element and its parts, and no other SDK has to meet them.
+They name one element and its parts, so no other SDK is bound by them.
 * *A concept or fault model that several parts rely on* is described on this page, with its scope.
 * *A part is added when it has content.*
 No empty directory mirrors a protocol chapter.
@@ -82,7 +82,7 @@ A summary names the items that state its concept and adds no duty: the items gov
 | Kind | Who meets it | How an item shows it
 
 | Software safety requirement | The parts that its statement and its "Allocated to" line name: the element, a binding, a wire, a platform backend, the Streamer or another part that it names (<<req-ssr-requirements-bind,A requirement binds the parts that it names>>) | Type `req`, with *MUST* and *MUST NOT*
-| Assumption of use | The integrator, including what its application, platform and deployment owner provide | Type `aou`, with *SHALL* and *SHALL NOT*
+| Assumption of use | The integrator that claims the element's safety-assurance scope, including what its application, platform and deployment owner provide | Type `aou`, with *SHALL* and *SHALL NOT*
 |===
 
 * *Scope.*
@@ -95,7 +95,7 @@ Every item of this area.
 [.specitem,oft-sid="req~ssr-requirements-bind~1",oft-title="A requirement binds the parts that it names",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
 --
 *Whom it binds.*
-Each software safety requirement of this area *MUST* be met by the parts that its statement and its "Allocated to" line name, under the conditions that either states.
+Each software safety requirement of this area *MUST* be met, wherever it is filed, by the parts that its statement and its "Allocated to" line name, under the conditions that either states.
 A condition in the statement limits the requirement, and a qualifier or an exclusion in the allocation limits the share of the part that it qualifies.
 It binds no other part.
 A part is one that the requirement names explicitly: the element, a binding, a wire, a platform backend, the Streamer, or another part.
@@ -372,25 +372,26 @@ A document covers it with an item of its own that covers the assumption, because
 [[tags]]
 == Tags
 
-The tags of an item name the parts whose repositories cover it in their tracing runs (<<tracing>>): a requirement carries the tag of a part that its "Allocated to" line names, and an assumption of use the tag `SafetyManual`.
+A requirement carries the tag of a part that its "Allocated to" line names, and `SafetyBindingPull` as well where its statement holds a duty of pull bindings only; an assumption of use carries the tag `SafetyManual`.
 A tag is coverage data: it adds no part to those that an item binds, and takes none away (<<req-ssr-requirements-bind,A requirement binds the parts that it names>>).
-The column "Items allocated to" summarizes the allocations of the items that carry each tag.
+The column "Items allocated to" summarizes which items carry each tag.
+An item's own "Allocated to" line governs: it may name parts that its row does not name, or only some of those that its row names.
 
 [cols="2,4,3,3",options="header"]
 |===
 | Tag | Items allocated to | Covered in | Parts that hold its items
 
-| `SafetyUpRustCore` | the element in `up-rust-core`: its runtime path, carrier routes and startup memory; and each platform backend | `up-rust`, for the element and the platform backends that it ships | `seooc-up-rust/`, `up-l1/`, `up-l2/`, this page
+| `SafetyUpRustCore` | the element in `up-rust-core`: its runtime path, carrier routes, startup memory and platform backends | `up-rust` | `seooc-up-rust/`, `up-l1/`, `up-l2/`, this page
 | `SafetyStreamer` | the Streamer's data plane and its binary | `up-streamer-rust` | `up-l2/`, `seooc-up-rust/`, this page
 | `SafetyBinding` | every binding: the duties of the binding contract | each binding's repository | `up-l1/`, this page
 | `SafetyBindingPull` | with `SafetyBinding`, an item whose statement holds a duty of pull bindings only | each pull binding's repository | `up-l1/`
-| `SafetyIceoryx2` | the iceoryx2 binding alone. A binding or a wire gets a tag of its own with the first item that is allocated to it alone | `up-transport-iceoryx2-rust` | `up-l1/iceoryx2.adoc`
+| `SafetyIceoryx2` | the iceoryx2 binding. A binding or a wire gets a tag of its own with the first item that is allocated to it alone | `up-transport-iceoryx2-rust` | `up-l1/iceoryx2.adoc`
 | `SafetyLola` | the LoLa binding alone | `up-transport-lola-rust` | `up-l1/lola.adoc` and `up-l1/lola-envelope.adoc`
 | `SafetyWire` | every wire | each wire's repository | `up-l1/`, this page
 | `SafetyWireSerialized` | every serialized wire: the duties that only a wire with an encoding has | each serialized wire's repository | `up-l1/serialized-wires.adoc`
 | `SafetyXcdr2` | each wire of the fixed-layout XCDR2 profile | the repository of each such wire | `up-l1/xcdrv2.adoc`
 | `SafetyE2eWire` | the end-to-end protection wire | `up-rust`, its `up-wire-e2e` member | `seooc-up-rust/`
-| `SafetyManual` | every assumption of use | the repository that owns the assumption, in its safety manual: `up-rust` for nineteen, `up-streamer-rust` for the Streamer's two, and `up-transport-iceoryx2-rust` for the iceoryx2 binding's two | `seooc-up-rust/`, `up-l1/`, `up-l2/`
+| `SafetyManual` | every assumption of use | the repository that owns the assumption, in its safety manual: `up-rust` for twenty, `up-streamer-rust` for the Streamer's two, and `up-transport-iceoryx2-rust` for the iceoryx2 binding's two | `seooc-up-rust/`, `up-l1/`, `up-l2/`
 |===
 
 === Gate tags

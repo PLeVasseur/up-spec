@@ -20,7 +20,7 @@ It does not say that every SDK must meet it (xref:../README.adoc#filing[filing a
 The items here were written for the up-rust SEooC (xref:../seooc-up-rust/README.adoc[its README]), whose parts include the Streamer's data plane.
 They are not protocol requirements of uP-L2, and none of them names an SDK or a dispatcher of another language.
 * *Bound by statement and allocation.*
-Each requirement binds the parts that its statement and its "Allocated to" line name (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]): the element or the Streamer.
+Each requirement binds the parts that its statement and its "Allocated to" line name (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]): the element, the Streamer or the Streamer binary.
 Its tags say which repositories cover it (xref:../README.adoc#tags[the tags]).
 * *Assumptions of use.*
 The two assumptions of use filed here are that element's, about operating its Streamer.
@@ -64,7 +64,8 @@ The item governs, and this table adds no duty.
 
 == What stays with the element
 
-Some rules reach this layer and are still filed with the element, because they are rules of its own modes, memory, build and reports.
+Some items concern this layer and are still filed with the element, because they are rules of its own modes, memory, build and reports.
+Each item binds the parts that its statement and its "Allocated to" line name, and some of these name the Streamer, its binary, a binding or the asynchronous layer, alone or beside the element (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 They are in xref:../seooc-up-rust/README.adoc[the element's part]:
 
 * QoS, TTL and deadlines of a route (xref:../seooc-up-rust/qos.adoc[`qos.adoc`]);

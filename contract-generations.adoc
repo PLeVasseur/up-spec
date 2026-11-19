@@ -78,7 +78,7 @@ Only a replacement that has landed does, and only for the implementations that i
 * *The successor contract is declared, and then followed whole.*
 An implementation of the redesigned stack that follows the successor contract declares three things:
 ** the revision of this repository whose items it follows;
-** which part it is: the element, a binding, a wire or the Streamer, as xref:safety/README.adoc#tags[the tags] name the parts;
+** which part it is, among those that xref:safety/README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names] lists: the element, a binding, a wire, a platform backend, the Streamer or another part;
 ** what it configures: its routes, their heap classes and the guarantees they require, and each optional feature that it uses, such as strict mode.
 * *What the declaration brings in.*
 From that declaration follow, with no further choice:

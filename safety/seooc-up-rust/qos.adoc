@@ -11,7 +11,7 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [.specitem,oft-sid="req~ssr-qos-declared~2",oft-title="QoS is declared per route at setup",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-Every route's QoS (reliability, overflow, depth, history, deadline, and whether priority is required) *MUST* be declared during initialization in transport-agnostic terms, or take the one documented default.
+The element *MUST* take every route's QoS (reliability, overflow, depth, history, deadline, and whether priority is required) from a declaration made during initialization in transport-agnostic terms, or give the route the one documented default.
 
 Priority and TTL stay per message.
 

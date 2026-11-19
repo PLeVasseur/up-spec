@@ -7,7 +7,7 @@ Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L2].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
-Allocated to the Streamer and its binary, in `up-streamer` (tag `SafetyStreamer`).
+The requirements here are allocated to the Streamer or to its binary: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 
 The last two sections are the two assumptions of use about operating the Streamer.
 
@@ -687,7 +687,7 @@ The client observes that outcome when it next services or waits on the call, wit
 
 *Clients that use the E2E wire.*
 On a route whose client uses the E2E wire, the response carries no end-to-end protection, because the Streamer never opens a payload.
-That client refuses it as unprotected (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call]) and counts the refusal apart from corruption, and its call ends at its TTL with an outcome that names the refusal.
+What that client then does, its refusal of the response as unprotected, the count of that refusal and the end of its call at its TTL, is stated in xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call] and xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once].
 --
 
 [horizontal]

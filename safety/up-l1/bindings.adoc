@@ -8,7 +8,8 @@ This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 The element whose contract these duties belong to: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These are the duties of the binding contract.
-Each binding meets them in its own code, and covers them in its own repository, by running the contract suites against itself.
+Each item binds the parts that its statement and its "Allocated to" line name: every binding or some of them, and the element where an item's "Allocated to" line names it (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+A binding meets those that bind it in its own code, and covers them in its own repository, by running the contract suites against itself.
 
 * They carry the tag `SafetyBinding`, and an item whose statement holds a duty of pull bindings only also carries `SafetyBindingPull`.
 The tags say which repositories cover an item, not whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
@@ -251,7 +252,7 @@ Verification:: test
 [[req-ssr-binding-bounded]]
 == A binding bounds its own work and its waits
 
-[.specitem,oft-sid="req~ssr-binding-bounded~4",oft-title="A binding bounds its own work and its waits",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyBindingPull"]
+[.specitem,oft-sid="req~ssr-binding-bounded~5",oft-title="A binding bounds its own work and its waits",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyBindingPull"]
 --
 *Bounded receive.*
 A pull binding's receive *MUST* give up at most the route's bound per call and keep the rest in a bounded queue under the route's QoS.
@@ -273,9 +274,9 @@ A carrier ingress *MUST* take pulled or retained frames, never borrowed ones who
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-bounded~4+`
+ID:: `+req~ssr-binding-bounded~5+`
 ASIL:: B
-Allocated to:: each binding
+Allocated to:: each binding; the element, for the frames that its carrier ingress takes
 Verification:: fault-injection, test
 * *fault-injection*
 ** A flood.
@@ -331,7 +332,7 @@ How one middleware recovers a predecessor's resources is described with its bind
 Each binding *MUST* keep a qualification record, versioned with the binding, that states for each revision of the binding:
 
 * every runtime guarantee that its middleware cannot make, with measured figures where they exist;
-* the permits that a deployment *MUST* waive;
+* the permits that it declares, which only a named waiver admits (xref:../seooc-up-rust/waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]);
 * its known anomalies and its other deviations, each with an identifier and a revision;
 * its known failures, apart from its limits and its known anomalies;
 * the revision of its middleware, and of every other source that an entry relies on;

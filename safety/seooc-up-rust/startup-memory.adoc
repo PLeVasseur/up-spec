@@ -38,7 +38,7 @@ Either way:
 [horizontal]
 ID:: `+req~ssr-memory-static~2+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; the Streamer, for its route table
 Verification:: test, gate, review
 * *test*
 ** A runtime path over static memory only.

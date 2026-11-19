@@ -43,7 +43,7 @@ Any async layer *MUST* sit above it, in a separate crate.
 [horizontal]
 ID:: `+req~ssr-crate-sync-path~1+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; each asynchronous layer, for its place above the runtime path, in a separate crate
 Verification:: gate (a token scan for `+async+`, `+.await+`, `+Future+`, `+Pin+`, `+Poll+`, `+Waker+` and `+Context+`, and for grouped `+use core::{…}+` paths, with a negative control for each)
 
 *Rationale.*

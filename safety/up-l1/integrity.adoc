@@ -8,7 +8,7 @@ This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These items say how the element lends or copies shared memory between integrity levels.
-They are allocated to the element (tag `SafetyUpRustCore`).
+They are allocated to the element: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 
 * A binding's part, recording and reporting the writer's level, is xref:bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level] in xref:bindings.adoc[the duties of every binding].
 * The integrator's part, assigning each transport's level, is xref:deployment.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly] in xref:deployment.adoc[what a deployment provides].

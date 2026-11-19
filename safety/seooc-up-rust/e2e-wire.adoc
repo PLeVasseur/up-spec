@@ -6,7 +6,7 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
-Allocated to the E2E wire, `up-wire-e2e` (tag `SafetyE2eWire`), except where an item says otherwise: core's error variant and route counter are the element's.
+The items here are allocated to the E2E wire, to the element or to the Streamer, alone or together: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 Using the wire is the integrator's choice (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 *Deferred.*
@@ -374,7 +374,7 @@ The protection assumes one response wire per method, which the element provides.
 [horizontal]
 ID:: `+req~ssr-e2e-rpc-echo~2+`
 ASIL:: B
-Allocated to:: the E2E wire
+Allocated to:: the E2E wire; the element, for one response wire per method
 Verification:: test, heap-window
 * *test*
 ** A request without its method fields, refused as corrupt before its counter is judged.
@@ -414,7 +414,7 @@ A response carries its server's data ID, and echoes its client's as its Source I
 [horizontal]
 ID:: `+req~ssr-e2e-data-id~4+`
 ASIL:: B
-Allocated to:: the E2E wire
+Allocated to:: the E2E wire; the element, for the derivation that it provides as a function
 Verification:: test
 * Two clients of one method.
 * An undeclared sender.

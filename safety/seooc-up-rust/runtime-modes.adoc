@@ -186,7 +186,7 @@ A refused carrier leg, for one, reports the route, the binding and the reason.
 A transport *MUST* enter runtime mode only after both of these:
 
 * the wall clock of the platform's time provider has been read successfully;
-* the provider has passed the setup check of its package's stated contract (xref:platform.adoc#req-ssr-platform-contract[Every platform backend keeps the platform's rules]).
+* the provider has passed the setup check of its package's stated contract (xref:platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules]).
 
 A provider known to fall short of that contract, such as one that supplies uptime or a fixed value as wall time, *MUST* fail the check.
 
@@ -239,7 +239,7 @@ Setup refuses, for example:
 [[req-ssr-mode-one-way]]
 == There is no way back
 
-[.specitem,oft-sid="req~ssr-mode-one-way~2",oft-title="There is no way back",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-mode-one-way~3",oft-title="There is no way back",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 An operation *MUST NOT* take a transport, a handle or the Streamer from runtime mode back to initialization mode.
 
@@ -249,9 +249,9 @@ The element *MUST NOT* provide any recovery inside the process.
 --
 
 [horizontal]
-ID:: `+req~ssr-mode-one-way~2+`
+ID:: `+req~ssr-mode-one-way~3+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; each binding, for its own operations and the runtime mode of its transport; the Streamer, for its own operations and its runtime mode
 Verification:: compile-fail (the setup value is consumed), review (no such operation exists, and no recovery inside the process)
 ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 
@@ -448,7 +448,7 @@ Liveness therefore comes from the service tick and the transport, never from a d
 [[req-ssr-mode-classic-excluded]]
 == Classic routes never enter runtime mode
 
-[.specitem,oft-sid="req~ssr-mode-classic-excluded~1",oft-title="Classic routes never enter runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-mode-classic-excluded~2",oft-title="Classic routes never enter runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 Classic `+UTransport+` and `+UMessage+` routes *MUST NOT* be able to enter runtime mode under any waiver.
 
@@ -456,9 +456,9 @@ Deployment data that puts a classic endpoint on an ASIL route, including a Strea
 --
 
 [horizontal]
-ID:: `+req~ssr-mode-classic-excluded~1+`
+ID:: `+req~ssr-mode-classic-excluded~2+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; the Streamer, for refusing a classic endpoint on one of its ASIL routes
 Verification:: compile-fail (a classic transport cannot stand where a two-mode setup is required), test (deployment data naming a classic endpoint)
 ISO 26262:: 6-7.4.8 (part-clause numbers only)
 
@@ -498,7 +498,7 @@ In runtime mode, a route *MUST* treat a missing peer as silence, under its deadl
 [horizontal]
 ID:: `+req~ssr-mode-bounded-startup~3+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; each binding, for its refusal by name of a route whose peer is missing
 Verification:: test, fault-injection (a peer that never starts; a service that never appears)
 * *test*
 ** A provider whose request can wait, reported on a route that does not require non-waiting acquisition, one that requires only non-waiting release included, and refused by name on a route that requires it.

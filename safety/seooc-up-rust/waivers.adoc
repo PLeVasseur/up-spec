@@ -62,13 +62,12 @@ So a waiver cannot carry native work into allocation, and a serialized route's p
 
 [.specitem,oft-sid="req~ssr-waiver-record~2",oft-title="Waivers are recorded and can be found",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-Each waiver *MUST*:
+The element *MUST* hold each waiver as a record compiled into the program, with a name and a scope, and for each waiver *MUST*:
 
-* be named and scoped;
-* be applied where it can be found in the code;
-* be recorded at the transition;
-* be readable in runtime mode without heap;
-* name an approver other than its author.
+* apply it only where it can be found in the code;
+* record it at the transition;
+* keep it readable in runtime mode without heap;
+* refuse it by name at the transition, unless it names an approver other than its author.
 
 In strict mode's Enforce state, the element *MUST* refuse a waiver that does not name its interference argument's kind and a reference (xref:assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]).
 

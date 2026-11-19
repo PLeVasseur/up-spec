@@ -12,7 +12,7 @@ This page states one serialized format.
 A value of a type with a fixed list of fixed-width fields is written as a four-byte prefix and its fields in order, in little-endian byte order, each field at a place that the type alone fixes.
 The profile takes its name from XCDR2, version 2 of the extended Common Data Representation, and relies on no definition of it: an implementation of XCDR2 is not assumed to read its encodings.
 
-This page holds the five requirements of the profile, allocated to each wire of the profile (tag `SafetyXcdr2`).
+This page holds the five requirements of the profile, allocated to each wire of the profile: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 
 == Whom this page binds
 

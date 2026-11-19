@@ -7,22 +7,22 @@ Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [[req-ssr-platform-contract]]
-== Every platform backend keeps the platform's rules
+== Every platform backend of the element keeps the platform's rules
 
-[.specitem,oft-sid="req~ssr-platform-contract~2",oft-title="Every platform backend keeps the platform's rules",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-platform-contract~3",oft-title="Every platform backend of the element keeps the platform's rules",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Basic rules.*
-Every runtime platform backend *MUST NOT* use the heap, panic, create a thread, or need global state that requires first-use setup.
+Every runtime platform backend of the element *MUST NOT* use the heap, panic, create a thread, or need global state that requires first-use setup.
 
 *Waits.*
 
 * Its wait *MUST NOT* lose a wake that happens after the caller observed the expected value.
-* A caller that returns from it spuriously, after an interruption or late *MUST* recheck the expected value and the time before it waits again or returns.
+* After its wait returns spuriously, after an interruption or late, in the element's deliberate idle wait as in every other wait (xref:bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded]), the element *MUST* recheck the expected value and the time before it waits again or returns.
 
 *Clock reads.*
 
 * A clock read *MUST* report a failure instead of panicking or substituting another time base.
-* A caller that obtains a monotonic reading earlier than one it already holds *MUST* treat it as a failed read.
+* The element *MUST* treat a monotonic reading earlier than one it already holds as a failed read.
 * The element *MUST* treat a failed read as fail-closed: a bounded operation that depends on it ends as expired and is counted, and a TTL check refuses the frame.
 
 *Stated contracts.*
@@ -34,9 +34,9 @@ Each supported configuration's package *MUST* state:
 --
 
 [horizontal]
-ID:: `+req~ssr-platform-contract~2+`
+ID:: `+req~ssr-platform-contract~3+`
 ASIL:: B
-Allocated to:: each platform backend; the element, for its handling of a failed read
+Allocated to:: each platform backend of the element (part E4); the element, for its recheck after its backend's wait returns and for its handling of a failed read or of a reading that steps back
 Verification:: test, review
 * *test*
 ** A platform contract test in `+test-util+`, run inside heap windows.
@@ -80,10 +80,10 @@ Handing runtime code a platform value that cannot reach back makes a call to eit
 [[req-ssr-platform-entropy]]
 == Initialization entropy comes from a declared source
 
-[.specitem,oft-sid="req~ssr-platform-entropy~2",oft-title="Initialization entropy comes from a declared source",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-platform-entropy~3",oft-title="Initialization entropy comes from a declared source",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *A named source with a stated contract.*
-Every shipped platform backend's initialization entropy *MUST* come from a source that its supported configuration's package names, with a stated contract:
+Every platform backend of the element *MUST* take its initialization entropy from a source that its supported configuration's package names, with a stated contract:
 
 * for an OS entropy source, the probability that two starts draw the same value;
 * for a persistent or counter-based source, how it is stored and advanced across restarts and resets.
@@ -99,9 +99,9 @@ Such a requirement needs a checked persistent construction.
 --
 
 [horizontal]
-ID:: `+req~ssr-platform-entropy~2+`
+ID:: `+req~ssr-platform-entropy~3+`
 ASIL:: B
-Allocated to:: each platform backend
+Allocated to:: each platform backend of the element (part E4); the element, for its handling of a failed or short source
 Verification:: test, review
 * *test*
 ** A failed read is reported and refuses setup, through a fault-injected backend.
@@ -145,7 +145,7 @@ Keeping the platform layer as the only part of the element that talks to an oper
 [[req-ssr-atomic-width]]
 == No target needs an atomic width it lacks
 
-[.specitem,oft-sid="req~ssr-atomic-width~3",oft-title="No target needs an atomic width it lacks",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-atomic-width~4",oft-title="No target needs an atomic width it lacks",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *The obligation.*
 On every supported target the element *MUST* keep the following without needing an atomic width that the target lacks:
@@ -160,7 +160,7 @@ On every supported target the element *MUST* keep the following without needing 
 The element *MUST* tell by `+target_has_atomic+`, never by a list of targets, whether a target has 32-bit atomics with compare-and-swap (xref:assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]).
 
 *Platform-specific mechanisms.*
-A target's backend *MAY* use a reviewed platform-specific mechanism behind one common SDK contract: wider atomics where the target provides them, or a private exclusion where it does not.
+A platform backend of the element *MAY* use, on its target, a reviewed platform-specific mechanism behind one common SDK contract: wider atomics where the target provides them, or a private exclusion where it does not.
 
 * Each such mechanism's supported execution contexts, memory ordering, alignment, lifetime and interruption obligations *MUST* be stated and packaged with its configuration.
 * Its source-level safety argument *MUST* cover every participant that can reach its storage.
@@ -180,9 +180,9 @@ A private interrupt mask is not a lock shared with another process, and it does 
 --
 
 [horizontal]
-ID:: `+req~ssr-atomic-width~3+`
+ID:: `+req~ssr-atomic-width~4+`
 ASIL:: B
-Allocated to:: the element; each platform backend, for its mechanism
+Allocated to:: the element; each platform backend of the element (part E4), for its mechanism
 Verification:: gate, test, review
 * *gate*
 ** Core builds for a bare-metal 32-bit target without 64-bit atomics.

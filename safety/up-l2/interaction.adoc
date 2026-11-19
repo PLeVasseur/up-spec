@@ -8,7 +8,7 @@ This layer, and whom it binds: xref:README.adoc[safety at uP-L2].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These items say what the element guarantees for an RPC call and for the identity of a message.
-They are allocated to the element (tag `SafetyUpRustCore`).
+They are allocated to the element: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 
 * How the element treats the peers of a transport is in xref:../up-l1/peers.adoc[the transport layer's part].
 * The clauses about the end-to-end protection wire bind only a route that uses it, and that wire is deferred (xref:../seooc-up-rust/e2e-wire.adoc[`e2e-wire.adoc`]).
@@ -184,7 +184,7 @@ What the refused copy owns is released as xref:../seooc-up-rust/heap.adoc#req-ss
 [[req-ssr-peer-rpc-undecodable-answered]]
 == An undecodable request is answered
 
-[.specitem,oft-sid="req~ssr-peer-rpc-undecodable-answered~5",oft-title="An undecodable request is answered",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-peer-rpc-undecodable-answered~6",oft-title="An undecodable request is answered",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *The answer.*
 This item covers a request whose header the server can parse, but:
@@ -213,7 +213,7 @@ So an end-to-end refusal never gets an error answer: an advisory refusal answer 
 * A request that passes the end-to-end check, and then fails the inner wire's decode, is answered.
 
 *Tags.*
-Every answer, the element's and the application's, is stamped by the route's wire with its request's tag, so on an E2E route it echoes that request.
+The element *MUST* hand every answer, its own and the application's, to the route's wire with its request's tag, so that on an E2E route the answer echoes that request (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call]).
 Another server's answer to a misaddressed copy carries that server's data ID, which the client refuses when it declares one server for the method.
 
 *Release.*
@@ -221,7 +221,7 @@ Every refused request's frame is released at once.
 --
 
 [horizontal]
-ID:: `+req~ssr-peer-rpc-undecodable-answered~5+`
+ID:: `+req~ssr-peer-rpc-undecodable-answered~6+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, heap-window

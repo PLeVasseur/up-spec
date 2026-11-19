@@ -11,12 +11,12 @@ This page states how the LoLa binding places one uProtocol frame in one LoLa sam
 The sample holds an envelope: a fixed header, a routing hint, the selected wire's metadata, padding and the payload, in that order.
 The page states the envelope completely, so that an implementation that has only this page can write and read it.
 
-This page holds the six requirements of the envelope, allocated to the LoLa binding (tag `SafetyLola`).
+This page holds the six requirements of the envelope, allocated to the LoLa binding: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 
 == Whom this page binds
 
 * The six requirements bind the LoLa binding of the up-rust SEooC, as the writer and as the reader of the envelope.
-* Every duty of the binding contract (xref:bindings.adoc[allocated to each binding]) and of the LoLa page holds beside them.
+* Each item of the binding contract (xref:bindings.adoc[allocated to each binding]) and of the LoLa page that binds the LoLa binding holds beside them.
 * What the metadata holds, and how it is checked, is the selected wire's and the element's; this page states where the metadata stands and what the binding reads from it.
 
 [[req-ssr-binding-lola-envelope-layout]]

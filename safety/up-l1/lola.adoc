@@ -5,7 +5,7 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
-The duties of every binding, which the LoLa binding meets too: xref:bindings.adoc[allocated to each binding].
+The binding contract, whose items bind the LoLa binding as their statements and "Allocated to" lines say: xref:bindings.adoc[allocated to each binding].
 How a payload travels on either kind of route: xref:payload-paths.adoc[payload paths, end to end].
 How the binding places a frame in a LoLa sample: xref:lola-envelope.adoc[the LoLa physical envelope].
 
@@ -23,7 +23,7 @@ So this page has no protocol counterpart, and the envelope that carries a frame 
 
 * The six requirements bind the LoLa binding of the up-rust SEooC.
 They bind no other transport and no other user of LoLa.
-* Every duty of the binding contract binds the LoLa binding in full (xref:bindings.adoc[allocated to each binding]).
+* Each item of the binding contract (xref:bindings.adoc[allocated to each binding]) binds the LoLa binding, in full, where its statement and its "Allocated to" line name it.
 This page repeats none of them: <<index>> says what each asks on LoLa, and the item governs.
 * No assumption of use is filed here.
 A deployment on LoLa is bound by the assumptions about every transport (xref:deployment.adoc[what a deployment provides for its transports]) and by the element's own (<<deployment>>).

@@ -8,7 +8,7 @@ This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These items say how the element treats the peers of a transport.
-They are allocated to the element (tag `SafetyUpRustCore`), and one of them also to each binding that carries native frames between processes (tag `SafetyBinding`).
+They are allocated to the element, and one of them also to each binding that carries native frames between processes: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 
 * Where they concern what a peer sends or writes, the faults that they hold against are stated in xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer].
 A peer's death and restart, and a peer of another ABI, are stated in the items themselves.
@@ -116,13 +116,13 @@ An explicit ABI agreement prevents interpreting one target layout as another.
 [[req-ssr-peer-stale-rejected]]
 == Stale peers are rejected
 
-[.specitem,oft-sid="req~ssr-peer-stale-rejected~3",oft-title="Stale peers are rejected",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-peer-stale-rejected~4",oft-title="Stale peers are rejected",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Stale frames.*
 A frame from an earlier incarnation of a peer *MUST* be recognized by its full incarnation and refused as stale, never treated as current, and counted.
 
 *Identity and incarnation.*
-A peer's identity is stable across its restarts, and the incarnation the element records for it only rises.
+A peer's identity is the one that its binding gives it, stable across its restarts (xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise]), and the incarnation the element records for it only rises.
 
 *One exclusive step.*
 The element *MUST* compare a frame's full peer identity and incarnation with the recorded ones, and record a newer incarnation, as one exclusive step of its configuration's mechanism, so that no concurrent classification, restart, loss or restart report can:
@@ -136,14 +136,14 @@ Classification places no limit on how many frames of one peer are classified at 
 A frame is refused only as stale, as undeclared (<<req-ssr-peer-admission,Undeclared peers cannot lock out declared ones>>), or because the table that its declaration sized is genuinely full.
 
 *Restart reports.*
-A binding's restart report fails the calls bound to older incarnations of that peer, and is counted.
+On a binding's restart report, the element fails the calls bound to older incarnations of that peer, and counts the report.
 
 *No admission from a stale incarnation.*
 No frame is admitted as current from a stale incarnation.
 --
 
 [horizontal]
-ID:: `+req~ssr-peer-stale-rejected~3+`
+ID:: `+req~ssr-peer-stale-rejected~4+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, fault-injection, review

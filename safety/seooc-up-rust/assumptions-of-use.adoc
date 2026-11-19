@@ -367,7 +367,7 @@ It adds no duty for the integrator and changes none of a binding's.
 
 [.specitem,oft-sid="aou~seooc-clock~4",oft-title="The platform provides the clocks",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
-The platform *SHALL* provide a monotonic clock and a wall clock through a time provider whose supported configuration states their units, resolution, monotonicity, adjustment and failure behaviour (xref:platform.adoc#req-ssr-platform-contract[Every platform backend keeps the platform's rules]).
+The platform *SHALL* provide a monotonic clock and a wall clock through a time provider whose supported configuration states their units, resolution, monotonicity, adjustment and failure behaviour (xref:platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules]).
 
 * *Synchronization.* The wall clock is synchronized with every peer's time base, to within an error the integrator includes in its TTL and deadline choices, before the element's TTL decisions are relied on.
 * *Wall time, not uptime.* UUIDv7 message IDs and TTL are defined in wall time, and uptime *SHALL NOT* stand in for it: a target without a synchronized wall clock supplies one through its provider.
@@ -381,7 +381,7 @@ What setup refuses where none is supplied is stated in xref:runtime-modes.adoc#r
 * A wall clock that cannot be read at the transition, and a time provider that fails its setup check, are *refused at setup*.
 * A wall clock that cannot be read in runtime mode is *counted*: the frame is refused, never processed with an unknown expiry.
 * A wall clock that reads but is wrong makes frames expire early or late, and is *undetectable*.
-* A monotonic read that fails, or that reads earlier than one already held, is treated as failed: a bounded operation that depends on it ends as expired and is *counted* (xref:platform.adoc#req-ssr-platform-contract[Every platform backend keeps the platform's rules]); a monotonic clock that reads but runs at the wrong rate is *undetectable*.
+* A monotonic read that fails, or that reads earlier than one already held, is treated as failed: a bounded operation that depends on it ends as expired and is *counted* (xref:platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules]); a monotonic clock that reads but runs at the wrong rate is *undetectable*.
 * For a generator with a 32-bit sequence, a wall clock that reads but does not move makes ID generation refuse, and count, after 2^31^ IDs within one 64 ms bucket, so it never repeats an ID; its effect on expiry is still *undetectable*.
 * For such a generator, a wall clock set more than ±4.36 years from its reading when the route was set up, as a clock that starts at zero is by its first time sync, leaves IDs from good reads unaffected, and makes an ID needed while the clock cannot be read refused and *counted*, never stamped with a time decades off.
 * A generator that keeps a 64-bit counter and the full last good time (xref:platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window]) has neither figure: an ID needed while the clock cannot be read carries the last good time, and the early expiry that follows is *undetectable* by the element (xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]).
@@ -796,7 +796,7 @@ A full-width runtime monitor needs no such servicing (xref:platform.adoc#req-ssr
 --
 A supported configuration's platform backend is its maintainers' (<<aou-seooc-target-environment,The target environment is verified>>), and an application team that selects one supplies no backend of its own. An integrator that supplies a platform for a target or configuration that no package supports *SHALL* treat it as an explicit extension, with its own authoring contract and evidence boundary, and supply:
 
-* a runtime platform that keeps the rules of xref:platform.adoc#req-ssr-platform-contract[Every platform backend keeps the platform's rules]: no heap, no panic, no thread creation and no global state that needs first-use setup; clock reads that report a failure instead of panicking or substituting another time base; a wait that never loses a wake; and the contracts that a package states, written down for this platform;
+* a runtime platform that keeps the rules of xref:platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules]: no heap, no panic, no thread creation and no global state that needs first-use setup; clock reads that report a failure instead of panicking or substituting another time base; a wait that never loses a wake; and the contracts that a package states, written down for this platform;
 * an initialization-only platform for prefault, and for entropy from a declared source with its stated contract, reported as failed rather than replaced by a fixed value (xref:platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source]);
 * a source-level safety argument for its synchronization and its atomic or exclusion mechanism, covering every participant that can reach that mechanism's storage (xref:platform.adoc#req-ssr-atomic-width[No target needs an atomic width it lacks]).
 

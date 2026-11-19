@@ -14,7 +14,7 @@ The decoded value is _owned_: its slot owns it, then the lease that an applicati
 
 This page holds:
 
-* the two requirements allocated to each serialized wire (tag `SafetyWireSerialized`), which each such wire covers in its own repository;
+* the two requirements allocated to each serialized wire apart from the end-to-end protection wire (tag `SafetyWireSerialized`), which each such wire covers in its own repository;
 * what owning means, apart from an encoding and apart from heap use (<<owning>>);
 * the rules of other pages that a serialized route rests on, in the order in which a payload meets them (<<index>>);
 * allocation and each stronger guarantee: who declares it, who requires it, who admits it and where it is reported (<<guarantees>>);
