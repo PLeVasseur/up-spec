@@ -18,6 +18,7 @@ This page holds the six requirements of the envelope, allocated to the LoLa bind
 * The six requirements bind the LoLa binding of the up-rust SEooC, as the writer and as the reader of the envelope.
 * Each item of the binding contract (xref:bindings.adoc[allocated to each binding]) and of the LoLa page that binds the LoLa binding holds beside them.
 * What the metadata holds, and how it is checked, is the selected wire's and the element's; this page states where the metadata stands and what the binding reads from it.
+* No item of this page names a panic path: the LoLa binding's account of its panic paths is xref:lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path].
 
 [[req-ssr-binding-lola-envelope-layout]]
 == On LoLa, a frame is one envelope in one sample, in a fixed order

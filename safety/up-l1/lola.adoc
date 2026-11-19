@@ -281,8 +281,8 @@ A result of LoLa that the binding cannot classify *MUST* be reported as a failur
 
 *Termination.*
 A path on which LoLa, or the binding's own C++ code, ends the process is a panic path under xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input] and xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]: a call to terminate or to abort, and an exception that nothing catches.
-This page names no allowed instance of one.
-So the LoLa binding has no allowed panic path, and each such path that a peer's input, death or restart can reach is a known failure until the binding makes it unreachable.
+This item is the LoLa binding's account of its panic paths under those rules.
+The LoLa binding has no accepted panic path, and each such path that a peer's input, death or restart can reach is a known failure of the binding.
 
 *Where it holds.*
 The binding's qualification record *MUST* state the builds of its C++ code, and the ways of loading it, for which the first two clauses are established (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
@@ -315,8 +315,7 @@ So nothing unwinds across the boundary at all: an exception becomes an error val
 
 _Termination._
 A process that LoLa ends is as lost as one that panicked, and a faulty peer must be able to cause neither (xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
-One binding has named instances of accepted middleware panic paths, each with its bounds.
-The LoLa binding has none, so the general rule stands whole for it, and a path it cannot yet exclude is recorded as a failure, never as a limit that a deployment accepts.
+So a termination path that a peer's input, death or restart can reach is a known failure of the binding, never a limit that a deployment accepts.
 
 _Builds and loading._
 Whether an exception can be caught at the boundary depends on how the C++ code was built and loaded.

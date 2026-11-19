@@ -78,7 +78,7 @@ A serialized route's declared allocation excuses no lazy first use on any path.
 [[req-ssr-binding-frame-drop]]
 == What a received frame's destructor may do
 
-[.specitem,oft-sid="req~ssr-binding-frame-drop~8",oft-title="What a received frame's destructor may do",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+[.specitem,oft-sid="req~ssr-binding-frame-drop~9",oft-title="What a received frame's destructor may do",oft-needs="impl,utest",oft-tags="SafetyBinding"]
 --
 *No blocking.*
 Dropping a binding's received frame *MUST NOT* block, with the one exception that this item states for a declared allocation domain.
@@ -109,19 +109,20 @@ Otherwise setup refuses the route by name.
 * A route that requires neither is not refused for it, and its report shows the binding's declared policy.
 
 *No panic.*
-The binding's own code cannot panic, on the drop or in the deferred return that completes it.
+The binding's own code *MUST NOT* panic, on the drop or in the deferred return that completes it.
 
-A middleware panic path that the drop or that return can reach is allowed only as a named instance (<<req-ssr-binding-no-panic,No panic on any peer input>>).
-The item that states the instance is allocated to its binding alone, says that the instance applies to a frame's drop, and gives its bounds.
+A middleware panic path that the drop or that return can reach is allowed only as an accepted instance of <<req-ssr-binding-no-panic,No panic on any peer input>>.
+The item that accepts it is allocated to its binding alone, says that the instance applies to a frame's drop, and states all five parts that the rule asks of an instance.
+Any other middleware panic path that the drop or that return can reach is a known failure of the binding.
 A binding that has no such instance has no exception to this rule.
 
-A named instance is never a waiver, and covers no other middleware panic path, no owned value's destructor and no allocator or provider failure.
+An accepted instance is never a waiver, and covers no other middleware panic path, no owned value's destructor and no allocator or provider failure.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-frame-drop~8+`
+ID:: `+req~ssr-binding-frame-drop~9+`
 ASIL:: B
-Allocated to:: each binding
+Allocated to:: each binding; the element, for the setup that admits or refuses a route by what the route requires of the release of the binding's allocation, and for that route's report of the binding's declared policy
 Verification:: test, heap-window, fault-injection, review
 * *test*
 ** The binding contract suite.
@@ -134,10 +135,10 @@ Verification:: test, heap-window, fault-injection, review
 * *heap-window*
 ** No free on a native route.
 ** On a serialized route, only the declared release.
-* *fault-injection*: for a binding with a named instance on this path, peer input, death and restart never reach it, as that binding's own item states.
+* *fault-injection*: for a binding with an accepted instance on this path, peer input, death and restart never reach it, as that binding's own item states.
 * *review*
 ** The binding's lock use, for every call sequence the element allows.
-** For a binding with a named instance on this path, the README's known-anomaly row.
+** For a binding with an accepted instance on this path, its known-anomaly entry in the binding's qualification record.
 
 *Rationale.*
 _What the destructor releases._
@@ -175,29 +176,40 @@ So this rule of every binding names no middleware, and a binding without such an
 [[req-ssr-binding-no-panic]]
 == No panic on any peer input
 
-[.specitem,oft-sid="req~ssr-binding-no-panic~7",oft-title="No panic on any peer input",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+[.specitem,oft-sid="req~ssr-binding-no-panic~8",oft-title="No panic on any peer input",oft-needs="impl,utest",oft-tags="SafetyBinding"]
 --
 *The rule.*
 Binding code *MUST NOT* panic on any frame, length or sequence a peer produces, or when a peer dies or restarts.
-A panic path inside the middleware is made unreachable by a setup check or by sizing.
+A panic path inside the middleware *MUST* be made unreachable by a setup check or by sizing, unless it is an accepted instance.
 
-*Allowed paths.*
-A path is allowed only as a named instance, stated in an item that is allocated to its binding alone, and disclosed as a known anomaly in that binding's qualification record (<<req-ssr-binding-readme,A binding's qualification record states its limits and its failures, and its README points at it>>).
+*Each binding's account.*
+A binding meets this item only where an item that is allocated to it alone states its account of the middleware panic paths that it can reach: that it has no accepted panic path, or each accepted instance by name, with the five parts below.
+
+*Accepted instances.*
+A middleware panic path is allowed only as an accepted instance.
+An instance is accepted only where its item states all five of these, and its binding's qualification record discloses it as a known anomaly (<<req-ssr-binding-readme,A binding's qualification record states its limits and its failures, and its README points at it>>):
+
+* the operation, or the path inside the middleware, that can panic;
+* the binding, profile or configuration to which it applies;
+* the conditions that can reach it;
+* the exclusions that are relevant to it, among peer input, a peer's death or restart, and the sequences of calls that an application can make through the element;
+* the setup check, sizing, invariant or limit of the target that bounds it or excludes it.
+
+One item *MAY* name several instances, each with its own scope and its own bounds, and instances whose applicability or verification differs *SHOULD* be stated in items of their own.
 None is a waiver.
-A binding that has no such item has no allowed path.
 
 *Any other path.*
-Any other middleware panic path, including another one that only a broken OS can reach, needs its own explicit acceptance decision.
+Any other middleware panic path, including another one that only a broken OS can reach, is a known failure of its binding, and so is a path whose item does not state all five parts, or that its binding's qualification record does not disclose.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-no-panic~7+`
+ID:: `+req~ssr-binding-no-panic~8+`
 ASIL:: B
 Allocated to:: each binding
-Verification:: fault-injection, test, gate
+Verification:: fault-injection, test, review
 * *fault-injection*: malformed frames; peers killed and restarted.
 * *test*: the binding contract suite.
-* *gate*: for a binding with named instances, the gate that its own item states.
+* *review*: for each binding, the item that states its account: that it says that the binding has no accepted panic path, or states each accepted instance with all five of its parts, against the source of its middleware in the configuration that the instance names; and the disclosure of each accepted instance in the binding's qualification record.
 
 *Rationale.*
 A heap waiver cannot excuse a panic.
@@ -205,8 +217,8 @@ Each accepted middleware anomaly needs its own bounded instance, and peer-trigge
 
 A faulty peer's shared-memory writes that reach a middleware panic are known failures too, whatever anomaly is acknowledged.
 
-An acceptance decision is an item of this specification that names the path.
-So the paths of one middleware are stated with its binding, and this rule of every binding lists none.
+Each binding's account is stated in an item of its own, so that no binding's silence is read as an account.
+The paths of one middleware are stated with its binding, and this rule of every binding lists none.
 How one binding makes a panic path unreachable, by which setup check or by which sizing, is that binding's to state as well.
 
 [[req-ssr-binding-peer-identity]]

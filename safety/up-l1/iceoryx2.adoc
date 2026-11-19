@@ -67,63 +67,68 @@ So the binding reads them there and checks each route against them at setup, and
 [[req-ssr-binding-iceoryx2-panic-paths]]
 == iceoryx2's allowed panic paths are named, bounded and disclosed
 
-[.specitem,oft-sid="req~ssr-binding-iceoryx2-panic-paths~2",oft-title="iceoryx2's allowed panic paths are named, bounded and disclosed",oft-needs="impl,utest",oft-tags="SafetyIceoryx2"]
+[.specitem,oft-sid="req~ssr-binding-iceoryx2-panic-paths~3",oft-title="iceoryx2's allowed panic paths are named, bounded and disclosed",oft-needs="impl,utest",oft-tags="SafetyIceoryx2"]
 --
 *What this item is.*
-These are the middleware panic paths that xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input] and xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] allow the iceoryx2 binding, each as a named instance.
-Each is disclosed as a known anomaly in the binding's README, and none is a waiver.
+This item is the iceoryx2 binding's account of its middleware panic paths under xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input] and xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
+The binding has one accepted instance, which this item names with its five parts, and every other middleware panic path that it can reach is a known failure of the binding.
 
-*The per-port mutex.*
-iceoryx2's per-port mutex, whose failure on lock or on unlock reaches a `+fatal_panic!+`, is allowed only while three things stay true:
+*The iceoryx2 release.*
+The accepted instance applies only to the iceoryx2 binding built against iceoryx2 0.9.3, with every crate of iceoryx2 at that release.
+On any other release of iceoryx2, the binding has no accepted panic path.
 
-* that failure is reachable solely through a fault of the process-private lock: corrupted process memory, a recursion-count overflow, or an OS error;
-* none of these is reachable through any peer input, sequence, death or restart, nor through any sequence of calls an application can make through the element, such as dropping a frame while the same thread holds the port;
-* it is disclosed as a known anomaly in that binding's README (`+UPD-IOX2-0001+`, revision 2).
+*The accepted instance: a queue's push counter.*
+A queue's push counter that never wraps: accepted on 64-bit targets; on a 32-bit target the binding refuses a service that keeps history.
 
-It is the one instance that applies to a frame's drop and to the deferred return that completes it (xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
-None of the other allowed paths applies there.
+* *The path.* A push into a publisher's history queue, at which the queue's counter of pushes would wrap.
+* *Where it applies.* Every sending port of a service that keeps history.
+* *What reaches it.* Only that wrap, which takes 2^64^ sends on one such port on a 64-bit target.
+* *What does not reach it.* The counter counts the port's own sends, so no peer input, death or restart advances it, and an application reaches it only through that many sends.
+* *Its bound.* A limit of the target: a 64-bit target, on which the counter has 64 bits.
+On a 32-bit target, a setup check: the binding *MUST* refuse a service that keeps history.
 
-*The other allowed paths.*
+The binding *MUST* disclose this instance as a known anomaly in its qualification record (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]), and it is no waiver.
+It does not apply to a frame's drop, or to the deferred return that completes it.
 
-* its two `+unwrap+`s in `+blocking_send+`, which only a failing OS clock call reaches, behind the clock check the binding makes at startup (`+UPD-IOX2-0002+`);
-* two invariants that its process-private reference counts keep: that no buffer goes back to its pool while still referenced, and that none is released twice (`+UPD-IOX2-0003+`);
-* a descriptor that other code in the same process closes between iceoryx2's `+socket()+` and `+fcntl+` calls, on a peer change (`+UPD-IOX2-0003+`);
-* `+close()+` or `+munmap()+` failing when it releases a departed peer's descriptor or mapping, which only a descriptor closed elsewhere, a corrupted mapping or an error that Linux does not document for these calls can cause (`+UPD-IOX2-0004+`);
-* a queue's push counter that never wraps: accepted on 64-bit targets, where it needs over 580 years at 10^9^ sends per second; on a 32-bit target the binding refuses a service that keeps history (`+UPD-IOX2-0005+`).
+*Named paths that are known failures.*
+None of these middleware panic paths is an accepted instance, and each is a known failure of the binding:
 
-*Heap exhaustion during a peer change.*
-Heap exhaustion during a peer change aborts iceoryx2's process rather than panicking it.
-It is part of the deployment's heap sizing under `+UPW-iceoryx2-1+` (`+UPD-IOX2-0006+`).
+* iceoryx2's per-port mutex, which guards each port of a service opened on iceoryx2's thread-safe service variant, and whose failure on lock or on unlock reaches a `+fatal_panic!+`.
+That failure is reachable solely through a fault of the process-private lock: corrupted process memory, a recursion-count overflow, or an OS error.
+It is the one of these paths that a frame's drop, and the deferred return that completes it, can reach.
+* iceoryx2's two `+unwrap+`s in `+blocking_send+`, which only a failing OS clock call reaches, behind the clock check the binding makes at startup.
+* Two invariants that iceoryx2's process-private reference counts keep: that no buffer goes back to its pool while still referenced, and that none is released twice.
+* A descriptor that other code in the same process closes between iceoryx2's `+socket()+` and `+fcntl+` calls, on a peer change.
+* `+close()+` or `+munmap()+` failing when iceoryx2 releases a departed peer's descriptor or mapping, which only a descriptor closed elsewhere, a corrupted mapping or an error that Linux does not document for these calls can cause.
+* Heap exhaustion during a peer change, which aborts iceoryx2's process rather than panicking it.
 
 *No other path.*
-iceoryx2's known failures are not allowed paths: <<aou-seooc-iceoryx2-limits,A deployment on iceoryx2 accepts that binding's limits, and no known failure as one>> lists them.
-Any other path needs its own explicit acceptance decision (xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input]).
+Every other middleware panic path that the binding can reach is a known failure of the binding as well.
+<<aou-seooc-iceoryx2-limits,A deployment on iceoryx2 accepts that binding's limits, and no known failure as one>> lists iceoryx2's known failures for a deployment, and none of them is an accepted limit.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-iceoryx2-panic-paths~2+`
+ID:: `+req~ssr-binding-iceoryx2-panic-paths~3+`
 ASIL:: B
 Allocated to:: the iceoryx2 binding
-Verification:: fault-injection, test, gate, review
-* *fault-injection*: peer input, death and restart never reach the per-port mutex's panic path.
-* *test*: three tests, each in a child process on real iceoryx2, that reproduce its index bug on a connection change, a full expired-connection buffer, and a completion-queue entry written before the first send.
-* *gate*: the panic inventory re-run on every iceoryx2 version change and on every binding change to its entry points.
-A new runtime panic site holds the change until it is decided.
+Verification:: review, test
 * *review*
-** The binding's lock use, for every call sequence the element allows.
-** The README's known-anomaly rows.
+** The accepted instance against the source of iceoryx2 0.9.3: its path, where it applies, what reaches it, what does not reach it, and its bound.
+** On a 32-bit target, the refusal of a service that keeps history, at source level.
+** The binding's qualification record: the known-anomaly entry of the accepted instance, and a known-failure entry for each named path.
+* *test*: on a 32-bit target, a service that keeps history refused at setup.
 
 *Rationale.*
-The upstream record to track for these paths is https://github.com/eclipse-iceoryx/iceoryx2/issues/763[iceoryx2 issue #763].
-
 Each accepted middleware anomaly needs its own bounded instance, and peer-triggered known failures cannot be reclassified as accepted anomalies.
 
-The panic sites in iceoryx2's wait path stay known failures until the binding makes them unreachable, by a binding-owned `+poll(2)+` loop or a reviewed equivalent with an argument at source level.
-The named descriptor anomaly above cannot excuse them.
+_The named paths that are known failures._
+For each named path, one of the five parts that the rule asks of an accepted instance is one that this item cannot state: what bounds an OS error of the port's lock; what bounds a clock call after the check at startup; what keeps a peer's death or restart from the reference counts; who keeps the other code of a process from closing a descriptor that it does not own; what keeps every error of `+close()+` or `+munmap()+` on a departed peer's descriptor or mapping from its panic; and what quantity of heap a peer change can take, which no item states.
+So each is a known failure, as the rule makes a path without those parts, and its description keeps it named.
 
-These instances are one binding's, so they are stated with that binding, and the two rules of every binding name none.
-Those rules allow a path only as an instance that this item names, and only where it says the instance applies.
-The binding's duties stay with the binding.
+_One release of iceoryx2._
+A middleware panic path, and what bounds it, are properties of one release's source, so this item accepts its instance for one release alone.
+
+These paths are one binding's, so they are stated with that binding, and the two rules of every binding name none.
 
 [[req-ssr-binding-iceoryx2-static-segments]]
 == On iceoryx2, every publisher has a static data segment
@@ -249,21 +254,18 @@ It guarantees no check of a domain or an OS user, because no requirement asks fo
 [[aou-seooc-iceoryx2-limits]]
 == A deployment on iceoryx2 accepts that binding's limits, and no known failure as one
 
-[.specitem,oft-sid="aou~seooc-iceoryx2-limits~2",oft-title="A deployment on iceoryx2 accepts that binding's limits, and no known failure as one",oft-needs="uman",oft-tags="SafetyManual"]
+[.specitem,oft-sid="aou~seooc-iceoryx2-limits~3",oft-title="A deployment on iceoryx2 accepts that binding's limits, and no known failure as one",oft-needs="uman",oft-tags="SafetyManual"]
 --
 *Target.*
-The iceoryx2 binding claims no 32-bit target, because iceoryx2 0.9 needs 64-bit atomics and its bare-metal port is a proof of concept.
+The iceoryx2 binding claims no 32-bit target, because iceoryx2 0.9 needs 64-bit atomics.
 
 *Accepted limits and known anomalies.*
 The integrator accepts the limits and known anomalies that each binding's qualification record states (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]; xref:deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]). For a deployment that uses iceoryx2, these include:
 
-* allocation on a peer join or restart, under the waiver (`+UPW-iceoryx2-1+`), the permit whose waiver xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument] has the deployment's owner review and file;
+* allocation on a peer join or restart, under the permit that the binding declares for it, whose waiver xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument] has the deployment's owner review and file;
 * sizing of the expired-connection buffer (<<req-ssr-binding-iceoryx2-expired-buffer,On iceoryx2, a receive route's retained budget fits twice in the expired-connection buffer>>);
 * the service depth (<<req-ssr-binding-depth-from-deployment,iceoryx2's service depth comes from deployment data>>): the service depths are part of the deployment data that xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected] covers;
-* the port mutex's panic path, on lock and on unlock, which no peer can reach (`+UPD-IOX2-0001+`, revision 2);
-* the two `+blocking_send+` `+unwrap+`s, which only a failing OS clock call reaches (`+UPD-IOX2-0002+`);
-* iceoryx2's other accepted panic paths: two process-private invariants; a descriptor that other code in the process closes while a socket is set up; `+close()+` failing on a departed peer's descriptor; and a sample counter's overflow on 64-bit targets, at over 580 years at 10^9^ sends per second (`+UPD-IOX2-0003+`, `+UPD-IOX2-0004+`, `+UPD-IOX2-0005+`);
-* heap exhaustion during a peer change, which aborts, within the deployment's heap sizing under `+UPW-iceoryx2-1+` (`+UPD-IOX2-0006+`): on iceoryx2 an allocation that fails during a peer change aborts the process, so that sizing is the one xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument], "Heap sizing", requires;
+* iceoryx2's one accepted panic path, a queue's push counter that never wraps, on 64-bit targets, only as <<req-ssr-binding-iceoryx2-panic-paths,iceoryx2's allowed panic paths are named, bounded and disclosed>> states it, within its bounds;
 * the arrival reports (<<req-ssr-binding-iceoryx2-arrival-reports,iceoryx2's arrivals are reported from its receive thread, and a failed notification is counted>>);
 * a sender preempted between `+send+` and its notification delays the report, unless the queue was empty at the previous pass; a notification that fails at the sender while the queue holds samples leaves an arrival unreported, so a miss may be counted for a gap no longer than the deadline;
 * while a new publisher's data connection is being set up, its notification can be reported while older samples are queued;
@@ -274,13 +276,17 @@ After a failed connection, until the publisher list changes and an update runs c
 * the event IDs, and the routes that setup refuses for their data ID (<<req-ssr-binding-iceoryx2-event-ids,iceoryx2's event IDs come from the event service's static config>>).
 
 *Known failures.*
-The binding's qualification record also says that a frame drop can wait for the port mutex. That is not an accepted limit, because xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] forbids it. It is the binding's known failure `+UPF-IOX2-0001+`, open until the binding returns each dropped frame to iceoryx2 through its deferred return as pending cleanup, charged and isolated as xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] requires; a thread of its own is not by itself that isolation.
+A frame drop that waits for the port mutex is not an accepted limit, because xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] forbids it, so it is a known failure of the binding wherever it occurs.
 
-iceoryx2's other known failures are not accepted limits either, because xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input] forbids them: its index bug on a connection change (`+UPF-IOX2-0002+`), until iceoryx2 fixes the index; its event-deadline panics, on QM transports only, since ASIL deployments turn those deadlines off, until iceoryx2 fixes them (`+UPF-IOX2-0005+`); and the paths through which a peer that writes values its own iceoryx2 never writes can panic its survivors, until iceoryx2 validates what peers write (`+UPF-IOX2-0004+`).
+iceoryx2's other known failures are not accepted limits either, because xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input] forbids them:
 
-The wait thread's descriptor-set panics (`+UPF-IOX2-0006+`) remain until its own poll loop replaces that set, or a reviewed equivalent with a source-backed argument is adopted in its place, and unsafe name and queue-size configuration (`+UPF-IOX2-0007+`) remains until setup refuses it.
-
-The expired-buffer failure is fixed by the twice-budget setup refusal; it is recorded separately as fixed, not as an accepted anomaly.
+* the middleware panic paths that <<req-ssr-binding-iceoryx2-panic-paths,iceoryx2's allowed panic paths are named, bounded and disclosed>> names as known failures: the port mutex's panic path, on lock and on unlock; the two `+blocking_send+` `+unwrap+`s; two process-private invariants of the reference counts; a descriptor that other code in the process closes while a socket is set up; `+close()+` or `+munmap()+` failing on a departed peer's descriptor or mapping; and heap exhaustion during a peer change, on which an allocation that fails aborts the process;
+* its index bug on a connection change;
+* its event-deadline panics, on QM transports only, since on an ASIL deployment the binding turns those deadlines off (xref:../seooc-up-rust/qos.adoc#req-ssr-qos-deadline[Deadlines are monitored]);
+* the paths through which a peer that writes values its own iceoryx2 never writes can panic its survivors;
+* the wait thread's descriptor-set panics;
+* unsafe name and queue-size configuration;
+* every other middleware panic path that <<req-ssr-binding-iceoryx2-panic-paths,iceoryx2's allowed panic paths are named, bounded and disclosed>> does not accept.
 
 *Strict mode.*
 What strict mode refuses for a known failure, route by route, is stated in xref:../seooc-up-rust/build.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision].
@@ -290,20 +296,20 @@ What strict mode refuses for a known failure, route by route, is stated in xref:
 
 * A route whose lifecycle events share its data ID, or whose data ID is above the service's range, is *refused at setup*.
 * A known anomaly accepted here is not a waiver.
-* A heap too small for the bound of `+UPW-iceoryx2-1+` aborts the process during a peer change, which is *undetectable* until then (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]).
+* A heap too small for the bound of the binding's permit for allocation on a peer change aborts the process during such a change, which is *undetectable* until then (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]).
 * In strict mode, any known failure is *refused at setup* in the Enforce state.
 
 [horizontal]
-ID:: `+aou~seooc-iceoryx2-limits~2+`
+ID:: `+aou~seooc-iceoryx2-limits~3+`
 ASIL:: B
 
 *Rationale.*
-An accepted anomaly has a bounded justification, whereas an open known failure remains a failure.
+An accepted anomaly has a bounded justification, whereas a known failure remains a failure.
 
 A faulty peer's shared-memory writes that reach a middleware panic are known failures too, whatever anomaly is acknowledged.
 
 These are one binding's limits, so they are stated with that binding, and each general duty stays in its own assumption.
-A known failure is the binding's to close: listing it here accepts nothing, and moves no duty of the binding to the integrator.
+Listing a known failure here accepts nothing, and moves no duty of the binding to the integrator.
 
 [[index]]
 == What the general rules meet on iceoryx2
@@ -324,9 +330,9 @@ This section says what each of them meets on iceoryx2, so that the binding's mai
 | <<aou-seooc-iceoryx2-level-separation,On iceoryx2, each integrity level has its own processes, domain and OS user>> | A transport runs at its process's level; one level per service; each level in its own domain, under its own OS user | The integrator
 | <<aou-seooc-iceoryx2-limits,A deployment on iceoryx2 accepts that binding's limits, and no known failure as one>> | No 32-bit target; the limits and known anomalies that the integrator accepts, each by its record; the known failures, which are not accepted limits | The integrator
 | xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], "Two-way shared state" | iceoryx2's ports write shared state both ways. So every process on one service runs at one integrity level, and a lower-integrity consumer takes a copy route | The integrator
-| xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument] | The permit `+UPW-iceoryx2-1+` needs an approved waiver, and the heap it draws on is sized for its bound. An allocation under it that fails during a peer change aborts the process. iceoryx2's port-mutex panic (`+UPD-IOX2-0001+`) is a known anomaly, not a waiver, and is never filed as one | The deployment's owner
+| xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument] | The permit that the binding declares for allocation inside iceoryx2 on a peer change needs an approved waiver, and the heap it draws on is sized for its bound. An allocation under it that fails during a peer change aborts the process, which is a known failure. iceoryx2's port-mutex panic is a known failure, not a waiver, and is never filed as one | The deployment's owner
 | xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected] | The service depths are part of the deployment data | The integrator
-| xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's], "Priority inversion through middleware locks" | iceoryx2 holds its port lock for up to a wait's bound, and takes it briefly when a frame is dropped (the binding's qualification record). Allowing for that lock accepts no frame drop that waits for it, which stays the known failure `+UPF-IOX2-0001+` of <<aou-seooc-iceoryx2-limits,A deployment on iceoryx2 accepts that binding's limits, and no known failure as one>> | The integrator
+| xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's], "Priority inversion through middleware locks" | iceoryx2 holds its port lock for up to a wait's bound, and takes it briefly when a frame is dropped (the binding's qualification record). Allowing for that lock accepts no frame drop that waits for it, which is a known failure of <<aou-seooc-iceoryx2-limits,A deployment on iceoryx2 accepts that binding's limits, and no known failure as one>> | The integrator
 |===
 
 === Rules that the binding or the element keeps
@@ -337,13 +343,13 @@ This section says what each of them meets on iceoryx2, so that the binding's mai
 
 | <<req-ssr-binding-depth-from-deployment,iceoryx2's service depth comes from deployment data>> | The service depth is taken from deployment data, and a mismatch is refused | The binding
 | <<req-ssr-binding-iceoryx2-event-ids,iceoryx2's event IDs come from the event service's static config>> | The event IDs are read from the event service's static config, and a route whose lifecycle events share its data ID, or whose data ID is above the service's `+event_id_max_value+`, is refused at setup | The binding
-| <<req-ssr-binding-iceoryx2-panic-paths,iceoryx2's allowed panic paths are named, bounded and disclosed>> | The panic paths allowed as named instances, the abort on heap exhaustion during a peer change, and the known failures that are not allowed paths | The binding
+| <<req-ssr-binding-iceoryx2-panic-paths,iceoryx2's allowed panic paths are named, bounded and disclosed>> | The binding's account of its panic paths: its one accepted instance, a queue's push counter, with where it applies, what reaches it, what does not reach it and its bound; and the named paths that are known failures, the abort on heap exhaustion during a peer change among them | The binding
 | <<req-ssr-binding-iceoryx2-static-segments,On iceoryx2, every publisher has a static data segment>> | Every publisher has a static data segment, which the binding records, requires of its own peers and checks at setup | The binding
 | <<req-ssr-binding-iceoryx2-expired-buffer,On iceoryx2, a receive route's retained budget fits twice in the expired-connection buffer>> | A receive route is refused at setup unless twice its retained budget fits in the expired-connection buffer | The binding
 | <<req-ssr-binding-iceoryx2-arrival-reports,iceoryx2's arrivals are reported from its receive thread, and a failed notification is counted>> | Arrivals are reported from the receive thread, within its period plus its pass bound, on the events that the item names; a notification that fails at the sender while the queue holds samples is counted on the sending side | The binding
 | <<req-ssr-binding-iceoryx2-degradation-handler,On iceoryx2, each port has a degradation handler>> | Each port has a degradation handler from setup, and after a failed connection the route reports only a queue that turned non-empty, until the publisher list changes and an update runs clean | The binding
-| xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input], "Allowed paths" | The iceoryx2 binding's allowed paths are those of <<req-ssr-binding-iceoryx2-panic-paths,iceoryx2's allowed panic paths are named, bounded and disclosed>> | The binding
-| xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do], "No panic" | The one named instance on a frame's drop is the per-port mutex of <<req-ssr-binding-iceoryx2-panic-paths,iceoryx2's allowed panic paths are named, bounded and disclosed>> | The binding
+| xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input], "Each binding's account" and "Accepted instances" | The iceoryx2 binding's account is <<req-ssr-binding-iceoryx2-panic-paths,iceoryx2's allowed panic paths are named, bounded and disclosed>>, and its one accepted instance is the one that the account names | The binding
+| xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do], "No panic" | No instance on a frame's drop is accepted: the per-port mutex's panic path, which a frame's drop can reach, is a known failure that <<req-ssr-binding-iceoryx2-panic-paths,iceoryx2's allowed panic paths are named, bounded and disclosed>> names | The binding
 | xref:bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization] | Creating an iceoryx2 node checks for dead nodes and cleans up their stale resources by default (https://github.com/eclipse-iceoryx/iceoryx2/blob/806442b5273d87380511bb5ffcab316d129af31c/iceoryx2/src/config.rs[`+config.rs+` in iceoryx2 0.9.2]). So the cleanup runs in the successor's initialization | The binding
 | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Refusals at setup" | iceoryx2's ports write shared state both ways. So a port whose level differs from its service's recorded level is refused at setup | The element
 | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "The copy route" | iceoryx2 maps the payload memory read-only for subscribers (https://github.com/eclipse-iceoryx/iceoryx2/issues/906[iceoryx2 issue #906]; https://github.com/eclipse-iceoryx/iceoryx2/blob/806442b5273d87380511bb5ffcab316d129af31c/iceoryx2/src/port/details/data_segment.rs[`+data_segment.rs+` in iceoryx2 0.9.2]). So the copy reads it only through loads that are valid on a read-only mapping | The element
