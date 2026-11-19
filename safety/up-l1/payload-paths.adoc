@@ -266,8 +266,8 @@ A message's wire and a route's transport are two choices, and <<req-ssr-payload-
 |===
 
 * What a lending binding owes is xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], whatever the wire.
-* What the LoLa binding adds is on xref:lola.adoc[the LoLa page], and what the iceoryx2 binding adds is on xref:iceoryx2.adoc[the iceoryx2 page].
-Neither page ties a wire to its binding.
+* What the LoLa binding adds is on xref:lola.adoc[the LoLa page] and xref:lola-envelope.adoc[the LoLa physical envelope], and what the iceoryx2 binding adds is on xref:iceoryx2.adoc[the iceoryx2 page] and xref:iceoryx2-frame.adoc[the iceoryx2 physical frame].
+None of these pages ties a wire to its binding.
 * Evidence is separate for each combination: a wire that passes on one binding has shown nothing on another (xref:deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]).
 
 [[admission]]

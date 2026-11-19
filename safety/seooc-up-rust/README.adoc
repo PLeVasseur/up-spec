@@ -288,8 +288,8 @@ The Streamer's "degraded" is a reported state: its safe state is fail-silent per
 | Provided to applications | L2 handles, the transition, bounded waits, route reports, counters and waiver records | the files of this directory from `runtime-modes.adoc` to `waivers.adoc`; `../up-l1/integrity.adoc` and `../up-l1/peers.adoc`; `../up-l2/interaction.adoc`
 | Provided to the Streamer | Carrier routes, the capacity check, park, the shared signal | `bounded-work.adoc`, `qos.adoc`, `../up-l1/integrity.adoc`, `../up-l2/streamer.adoc`
 | Provided to integrators | The end-to-end protection wire; strict mode and its compliance report; the Streamer's operator interface, mode report, watchdog hook and startup report | `../up-l2/streamer.adoc`, `e2e-wire.adoc`, `build.adoc`
-| Required from bindings | The lending or handoff contract, and the bindings' duties | `../up-l1/bindings.adoc`, `../up-l1/iceoryx2.adoc`; xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]
-| Required from wires | The wire contract, and the wires' duties | `../up-l1/wires.adoc`
+| Required from bindings | The lending or handoff contract, and the bindings' duties | The items whose allocations name a binding, most of them in `../up-l1/bindings.adoc`, `../up-l1/iceoryx2.adoc`, `../up-l1/iceoryx2-frame.adoc`, `../up-l1/lola.adoc` and `../up-l1/lola-envelope.adoc`; xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]
+| Required from wires | The wire contract, and the wires' duties | The items whose allocations name a wire, in `../up-l1/wires.adoc`, `../up-l1/serialized-wires.adoc`, `../up-l1/xcdrv2.adoc`, `e2e-wire.adoc`, `heap.adoc`, `memory-safety.adoc` and `../README.adoc`
 | Provided by the element's maintainers | Versioned supported configuration packages: backend, synchronization and execution model, startup checks, sizing, supported contexts, build settings, dependency scope, evidence and limitations | <<claims>>; `platform.adoc`; xref:assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]
 | Required from each platform backend | The platform's rules | `platform.adoc`; xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]
 | Required from the OS and hardware | Address-space isolation, or on an MCU the stated partition boundary, threads, wait and wake, a monotonic clock, a wall clock, 32-bit atomics with compare-and-swap, atomic and coherent on every core that shares them | `assumptions-of-use.adoc`
@@ -349,7 +349,7 @@ A test names what it verifies with OFT's own coverage tag, and the method after 
 |===
 | File | Items | Tags
 
-| xref:assumptions-of-use.adoc[Assumptions of use] | 16 | `SafetyManual`
+| xref:assumptions-of-use.adoc[Assumptions of use] | 17 | `SafetyManual`
 | xref:runtime-modes.adoc[Modes and the transition] | 14 | `SafetyUpRustCore`
 | xref:heap.adoc[Heap] | 5 | `SafetyUpRustCore`
 | xref:errors.adoc[Refusal, errors and reporting] | 5 | `SafetyUpRustCore`
@@ -362,8 +362,8 @@ A test names what it verifies with OFT's own coverage tag, and the method after 
 | xref:deployment-data.adoc[Deployment data] | 4 | `SafetyUpRustCore`
 | xref:memory-safety.adoc[Memory safety] | 4 | `SafetyUpRustCore`
 | xref:platform.adoc[Platform] | 6 | `SafetyUpRustCore`
-| xref:build.adoc[Build and shipped content] | 8 | `SafetyStreamer`, `SafetyUpRustCore`
-| xref:e2e-wire.adoc[The end-to-end protection wire] | 14 | `SafetyE2eWire`, `SafetyUpRustCore`, `SafetyStreamer`
+| xref:build.adoc[Build and shipped content] | 9 | `SafetyStreamer`, `SafetyUpRustCore`
+| xref:e2e-wire.adoc[The end-to-end protection wire] | 15 | `SafetyE2eWire`, `SafetyUpRustCore`, `SafetyStreamer`
 |===
 
 === Filed with the transport layer
@@ -382,7 +382,8 @@ These are in xref:../up-l1/README.adoc[the transport layer's part].
 | xref:../up-l1/payload-paths.adoc[Payload paths, end to end] | 3 | `SafetyUpRustCore`
 | xref:../up-l1/integrity.adoc[Integrity levels] | 5 | `SafetyUpRustCore`
 | xref:../up-l1/peers.adoc[Peers of a transport] | 4 | `SafetyUpRustCore`, `SafetyBinding`
-| xref:../up-l1/iceoryx2.adoc[iceoryx2] | 5 | `SafetyIceoryx2`, `SafetyManual`
+| xref:../up-l1/iceoryx2.adoc[iceoryx2] | 9 | `SafetyIceoryx2`, `SafetyManual`
+| xref:../up-l1/iceoryx2-frame.adoc[The iceoryx2 physical frame] | 6 | `SafetyIceoryx2`, `SafetyUpRustCore`
 | xref:../up-l1/lola.adoc[LoLa] | 6 | `SafetyLola`
 | xref:../up-l1/lola-envelope.adoc[The LoLa physical envelope] | 6 | `SafetyLola`
 | xref:../up-l1/deployment.adoc[What a deployment provides for its transports] | 3 | `SafetyManual`
@@ -397,7 +398,7 @@ These are in xref:../up-l2/README.adoc[the communication layer's part].
 | File | Items | Tags
 
 | xref:../up-l2/interaction.adoc[RPC and message identity] | 6 | `SafetyUpRustCore`
-| xref:../up-l2/streamer.adoc[Streamer] | 20 | `SafetyStreamer`, `SafetyManual`
+| xref:../up-l2/streamer.adoc[Streamer] | 21 | `SafetyStreamer`, `SafetyManual`
 |===
 
 === Filed in the area's README

@@ -127,4 +127,4 @@ The binding contract therefore keeps its interfaces safe, with their values chec
 It puts the one kind of claim that memory safety relies on, such as the exclusivity of lent transmit storage, behind an `+unsafe trait+`.
 
 The same pattern exists elsewhere.
-For example, up-spec's iceoryx2 chapter asks it of a Rust payload's author, through iceoryx2's `+ZeroCopySend+` (xref:../../up-l1/iceoryx2.adoc[the iceoryx2 transport]), which iceoryx2 declares as an `+unsafe trait+` (https://github.com/eclipse-iceoryx/iceoryx2/blob/806442b5273d87380511bb5ffcab316d129af31c/iceoryx2-bb/elementary-traits/src/zero_copy_send.rs[`+zero_copy_send.rs+` in iceoryx2 0.9.2]).
+For example, up-spec's iceoryx2 chapter asks it of a Rust payload's author, through iceoryx2's `+ZeroCopySend+` (xref:../../up-l1/iceoryx2.adoc[the iceoryx2 transport]), which iceoryx2 declares as an `+unsafe trait+` (https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2-bb/elementary-traits/src/zero_copy_send.rs#L32[`+zero_copy_send.rs+` in iceoryx2 0.9.3, its declaration of the trait]).
