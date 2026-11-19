@@ -383,6 +383,7 @@ These are in xref:../up-l1/README.adoc[the transport layer's part].
 | xref:../up-l1/peers.adoc[Peers of a transport] | 4 | `SafetyUpRustCore`, `SafetyBinding`
 | xref:../up-l1/iceoryx2.adoc[iceoryx2] | 5 | `SafetyIceoryx2`, `SafetyManual`
 | xref:../up-l1/lola.adoc[LoLa] | 6 | `SafetyLola`
+| xref:../up-l1/lola-envelope.adoc[The LoLa physical envelope] | 6 | `SafetyLola`
 | xref:../up-l1/deployment.adoc[What a deployment provides for its transports] | 3 | `SafetyManual`
 |===
 

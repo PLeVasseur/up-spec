@@ -7,6 +7,7 @@ Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
 The duties of every binding, which the LoLa binding meets too: xref:bindings.adoc[allocated to each binding].
 How a payload travels on either kind of route: xref:payload-paths.adoc[payload paths, end to end].
+How the binding places a frame in a LoLa sample: xref:lola-envelope.adoc[the LoLa physical envelope].
 
 This page is the contract of one binding: the binding of the up-rust SEooC to LoLa, the shared-memory communication middleware of Eclipse S-CORE.
 It holds:
@@ -16,7 +17,7 @@ It holds:
 * ten matters on which a LoLa binding's evidence or a decision of the product is still missing, each with its duty, what is missing and whose it is (<<cells>>).
 
 The protocol specification has no LoLa chapter.
-So this page has no protocol counterpart, and it defines no mapping of uProtocol messages onto LoLa for another SDK (xref:../../contract-generations.adoc#transition[the transition table]).
+So this page has no protocol counterpart, and the envelope that carries a frame in a LoLa sample is stated on xref:lola-envelope.adoc[the LoLa physical envelope].
 
 == Whom this page binds
 
