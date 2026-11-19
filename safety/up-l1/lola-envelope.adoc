@@ -44,17 +44,17 @@ Each field is an unsigned integer, least significant byte first:
 *Where each part stands.*
 The source hint starts at byte 24 and the sink hint at its end, and the metadata starts at the end of the sink hint.
 The payload starts at the offset that the header gives, and the payload's length is the header's payload length.
-A writer *MUST* write each length and the offset as the parts stand.
+The LoLa binding *MUST* write each length and the offset as the parts stand.
 
 *The version.*
 This page states version 2.
-A writer *MUST* write `02`, and a sample with another version is no envelope of this page.
+The binding *MUST* write `02`, and a sample with another version is no envelope of this page.
 
 *Padding, and what follows the payload.*
 The bytes between the metadata's end and the payload's offset are padding.
 They exist only so that the payload starts where its alignment needs it (<<req-ssr-binding-lola-envelope-checks,On LoLa, a sample that is not a well-formed envelope is refused before any of it is used>>).
 The bytes after the payload's end, to the end of the sample, are not part of the frame.
-No reader, check, comparison or other rule relies on what padding or those bytes hold.
+No reader, check, comparison or other rule, the binding among them, relies on what padding or those bytes hold.
 --
 
 [horizontal]
@@ -77,7 +77,7 @@ One version, written and checked, lets a sample of another layout be told apart 
 [.specitem,oft-sid="req~ssr-binding-lola-envelope-checks~1",oft-title="On LoLa, a sample that is not a well-formed envelope is refused before any of it is used",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
 *What is refused.*
-The binding *MUST* refuse a received sample:
+The LoLa binding *MUST* refuse a received sample:
 
 * that is shorter than the header;
 * whose first four bytes are not the identifier, or whose version is not `02`;
@@ -93,7 +93,7 @@ The binding *MUST* refuse a received sample:
 *Before any of it is used.*
 The binding *MUST* check every length and the offset with arithmetic that cannot overflow, before it forms any range from them.
 Any part of a refused sample *MUST NOT* reach a wire or an application.
-A refusal *MUST* be returned or counted as the element's rules on refused frames say (xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]), and it never panics (xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input]).
+The binding *MUST* return or count a refusal as the element's rules on refused frames say (xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]), and a refusal causes no panic (xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input]).
 --
 
 [horizontal]
@@ -117,10 +117,10 @@ Whether a frame has a payload is what its metadata says: a frame with a payload 
 The payload length gives only the length.
 
 *An absent payload.*
-A frame without a payload *MUST* be written with a payload length of zero, and the binding *MUST* report it as a frame with no payload, never as a payload of length zero.
+The LoLa binding *MUST* write a payload length of zero for a frame without a payload, and *MUST* report it as a frame with no payload, never as a payload of length zero.
 
 *A present empty payload.*
-A frame whose payload is present and empty *MUST* keep its payload encoding and be written with a payload length of zero, and the binding *MUST* report it as a present payload of length zero.
+The binding *MUST* keep the payload encoding of a frame whose payload is present and empty and write a payload length of zero for it, and *MUST* report it as a present payload of length zero.
 
 *Bytes with no encoding.*
 The binding *MUST* refuse, before it sends, payload bytes for a frame whose metadata has no payload encoding.
@@ -147,7 +147,7 @@ The source hint is never empty.
 The sink hint is empty exactly when the frame has no sink.
 
 *What a hint is for.*
-The binding *MAY* use a hint only to choose the physical queue or listener that a sample goes to, and to keep a sample that matches no current receive for a later one.
+The LoLa binding *MAY* use a hint only to choose the physical queue or listener that a sample goes to, and to keep a sample that matches no current receive for a later one.
 
 *Identity and delivery.*
 A hint is no identity.
@@ -204,7 +204,7 @@ The binding places it and reads from it only whether the frame has a payload, so
 [.specitem,oft-sid="req~ssr-binding-lola-envelope-lifetime~1",oft-title="On LoLa, a loan exposes only its payload, and a receive view lives within its sample",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
 *Transmit.*
-The binding *MUST* fix the metadata and the payload's offset when it creates a loan, and write the header, the hints, the metadata and the padding itself.
+The LoLa binding *MUST* fix the metadata and the payload's offset when it creates a loan, and write the header, the hints, the metadata and the padding itself.
 What it gives a sender to write *MUST* be the payload's extent alone, and that extent *MUST NOT* move or change size while the loan is held.
 
 *Receive.*

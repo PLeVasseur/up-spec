@@ -12,7 +12,7 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 [.specitem,oft-sid="req~ssr-memory-static~2",oft-title="ASIL-path storage is static or caller-provided",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Where storage comes from.*
-On the ASIL path, all storage the runtime path uses *MUST* be placed during initialization from static or caller-provided memory, with its size, alignment and arithmetic checked when it is placed.
+On the ASIL path, the element *MUST* have all storage the runtime path uses placed during initialization from static or caller-provided memory, with its size, alignment and arithmetic checked when it is placed.
 
 *Checks before an object is reachable.*
 Before placed storage becomes reachable as an object, placement *MUST* have established that it:
@@ -25,14 +25,15 @@ A refused placement *MUST* expose no object.
 
 *Storage covered.*
 That covers slots, startup slots, queues, peer and call tables, waker storage, route state and the Streamer's route table.
+The Streamer *MUST* have its route table placed in the same way, under the same conditions and with the same checks.
 
 *Startup memory from a heap.*
 Startup memory obtained from a heap *MUST* exist only outside the ASIL path: from `+up-rust-std+`, or from an allocation provider that the configuration declares through `+up-rust-alloc+`.
 
 Either way:
 
-* the source or provider hands core each region exclusively and for the life of the process;
-* core checks and owns the region, places from it as from any other, and never frees it in runtime mode.
+* the source or provider hands the element each region exclusively and for the life of the process;
+* the element checks and owns the region, places from it as from any other, and never frees it in runtime mode.
 --
 
 [horizontal]
@@ -64,9 +65,9 @@ Exclusivity is a property of live ownership, so a region may occupy addresses th
 
 [.specitem,oft-sid="req~ssr-memory-sealed~3",oft-title="Startup memory is sealed",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-A startup memory *MUST* be sealed when the last live setup that uses it enters runtime mode, and in any case when `+enter_runtime_all+` returns.
+The element *MUST* seal a startup memory when the last live setup that uses the memory enters runtime mode, and in any case when `+enter_runtime_all+` returns.
 
-Once it is sealed:
+Once the memory is sealed:
 
 * no further placement from it succeeds;
 * a refused placement *MUST NOT* ask a region source for memory;

@@ -47,7 +47,7 @@ No empty directory mirrors a protocol chapter.
 === Filing and scope
 
 Where an item is filed says which protocol responsibility it concerns.
-The item states whom it binds, wherever it is filed, whatever tags it carries and whichever tracing runs select it: for a requirement, <<req-ssr-requirements-bind,A requirement binds the parts that it names>>; for an assumption of use, xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+The item states whom it binds, wherever it is filed: for a requirement, <<req-ssr-requirements-bind,A requirement binds the parts that it names>>; for an assumption of use, xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 
 * *Every item here was written for the up-rust SEooC* and for the parts that work with it.
 The items name that element and those parts, so an item in `up-l1/` or `up-l2/` is no requirement on every transport, or on the SDK of another language.
@@ -86,35 +86,39 @@ Every item of this area.
 [[req-ssr-requirements-bind]]
 === A requirement binds the parts that it names
 
-[.specitem,oft-sid="req~ssr-requirements-bind~1",oft-title="A requirement binds the parts that it names",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
+[.specitem,oft-sid="req~ssr-requirements-bind~2",oft-title="A requirement binds the parts that it names",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
 --
 *Whom it binds.*
-Each software safety requirement of this area *MUST* be met, wherever it is filed, by the parts that its statement and its "Allocated to" line name, under the conditions that either states.
-A condition in the statement limits the requirement, and a qualifier or an exclusion in the allocation limits the share of the part that it qualifies.
-It binds no other part.
-A part is one that the requirement names explicitly: the element, a binding, a wire, a platform backend, the Streamer, or another part.
+The statement of each software safety requirement of this area names the part or parts that answer for each of its duties, and states the conditions, qualifiers and exclusions that determine the reach of each duty.
+The requirement binds those parts and no other part, wherever it is filed.
+Each of them *MUST* meet each duty that the statement gives it, within that duty's reach, which only the statement determines.
+A part is one that the statement names explicitly: the element, a binding, a wire, a platform backend, the Streamer, or another part.
 
-*Statement and allocation.*
-A part or a condition that one of them gives and the other contradicts is a defect of the requirement, corrected by a reviewed revision.
-
-*Filing, tracing and status.*
-The page and the directory that hold a requirement, the tags that it carries, the files and tags that a tracing run selects, the repository that covers it or holds a part, and the status of its adoption or qualification are navigation, coverage and governance data.
-The parts that a requirement binds, and the conditions under which it binds them, do not depend on these data or on any change to them.
+*The "Allocated to" line.*
+Each requirement of this area has an "Allocated to" line, its explicit, reviewable allocation.
+The line *MUST* agree with the statement and *MUST NOT* introduce a part, a condition, a qualifier or an exclusion that the statement lacks.
+A disagreement between the statement and the line is a defect of the requirement and *MUST* be corrected by a reviewed revision of this repository.
 
 *Assumptions of use.*
 Whom an assumption of use binds is stated by xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 --
 
 [horizontal]
-ID:: `+req~ssr-requirements-bind~1+`
+ID:: `+req~ssr-requirements-bind~2+`
 ASIL:: B
-Allocated to:: each part that a requirement of this area names
-Verification:: review (each requirement's statement and "Allocated to" line name the parts that it binds and its condition, so that no page, tag, tracing run or repository is needed to tell whom it binds)
+Allocated to:: each part that a requirement of this area binds
+Verification:: review (each requirement's statement names the part or parts that answer for each of its duties, with the conditions, qualifiers and exclusions that determine each duty's reach; each requirement has an "Allocated to" line that agrees with the statement and introduces nothing that the statement lacks)
 
 *Rationale.*
-A requirement is read on its own, so whom it binds has to be read from it.
+A requirement is read on its own, so whom it binds, and how far, is read from its statement.
+One text then decides that scope, and a claim or a safety manual that quotes the statement carries all of it.
+The "Allocated to" line keeps the allocation explicit, so that a review can check it against the statement.
 Pages, tags, tracing runs and repositories change as the specification is organized and traced.
 If whom a requirement binds depended on them, such a change could move a duty to another part or leave it with none.
+
+NOTE: An item's tags and tracing records are coverage data.
+Repository paths, ownership, and the status that a record keeps of an item's adoption or qualification are governance data.
+The tags, and the repositories that cover them, are listed under <<tags>>, and an implementation keeps its own record of where it implements each item (<<spec-first>>).
 
 [[req-ssr-contract-transition]]
 === What a part declares and claims, and when a replacement takes effect
@@ -357,7 +361,8 @@ So the tags, not the directories, decide what a repository covers.
 `+req~ssr-<area>-<name>~<revision>+` and `+aou~seooc-<name>~<revision>+`.
 
 * A name is never changed or reused.
-* A revision rises when the meaning of a statement changes, or when a change of its allocation changes whom it binds, and not for a wording fix.
+* A revision rises when the meaning of an item changes, and not for a wording fix.
+A repair that only brings a requirement's statement and its "Allocated to" line into agreement, and changes nothing that the requirement binds, is a wording fix.
 * An item filed in another part or file keeps its name and its revision.
 
 [[markup]]
@@ -368,7 +373,7 @@ As in the protocol chapters: a block attribute line that gives the item its `spe
 * Inside the block, a statement may use short paragraphs, labels in bold and lists.
 All of it is the statement.
 * Text after the block is not part of the statement: the `ID` row, which repeats the item's identifier for readers, the ASIL, the allocation, the verification methods, the ISO 26262 references and the rationale.
-A requirement's allocation says, with its statement, whom the requirement binds (<<req-ssr-requirements-bind,A requirement binds the parts that it names>>).
+A requirement's statement says whom the requirement binds (<<req-ssr-requirements-bind,A requirement binds the parts that it names>>).
 * A rationale gives the product or safety reason for the rule as it stands.
 It does not recount earlier revisions: an item's history is kept outside these pages (<<source>>).
 * A rationale cites only public sources: up-spec, public standards by part and clause number, and the published documents and code of other projects, each at a fixed version.
@@ -409,9 +414,9 @@ A document covers it with an item of its own that covers the assumption, because
 == Tags
 
 A requirement carries the tag of a part that its "Allocated to" line names, and `SafetyBindingPull` as well where its statement holds a duty of pull bindings only; an assumption of use carries the tag `SafetyManual`.
-A tag is coverage data, and it does not change which parts an item binds (<<req-ssr-requirements-bind,A requirement binds the parts that it names>>).
+A tag says which repositories cover an item.
 The column "Items allocated to" summarizes which items carry each tag.
-An item's own "Allocated to" line governs: it may name parts that its row does not name, or only some of those that its row names.
+A requirement's own statement governs over its row: it may name parts that the row does not name, or only some of those that the row names.
 
 [cols="2,4,3,3",options="header"]
 |===

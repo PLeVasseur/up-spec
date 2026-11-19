@@ -39,7 +39,7 @@ Non-generic types let a forwarder such as the Streamer hold transports chosen fr
 
 [.specitem,oft-sid="req~ssr-mode-no-setup-at-runtime~1",oft-title="Setup is impossible in runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-Once a transport is in runtime mode, it *MUST NOT* be possible to declare, prepare or change a route, role, wire, QoS setting, integrity level, waiver, peer list or capacity, through the transport or through any handle activated from it.
+Once a transport is in runtime mode, the element *MUST NOT* make it possible to declare, prepare or change a route, role, wire, QoS setting, integrity level, waiver, peer list or capacity, through the transport or through any handle activated from it.
 
 The API *MUST NOT* offer the operation, and *MUST NOT* let misuse compile.
 --
@@ -62,7 +62,7 @@ The transition consumes the initialization value, so no setup call can be writte
 
 [.specitem,oft-sid="req~ssr-mode-no-traffic-before-runtime~1",oft-title="Traffic is impossible before runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-A send, receive, publish, notify, invoke, respond, wait or forward operation *MUST NOT* exist on an initialization-mode value.
+The element *MUST NOT* provide a send, receive, publish, notify, invoke, respond, wait or forward operation on an initialization-mode value.
 
 A handle that can carry traffic *MUST* be obtained only by activating its setup against a transport in runtime mode.
 
@@ -112,7 +112,7 @@ A named error for each case, such as a wrong transport or a sealed region, tells
 [.specitem,oft-sid="req~ssr-mode-entry~6",oft-title="Entering runtime mode is one all-or-nothing operation",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *One operation.*
-A transport *MUST* enter runtime mode only through one operation that consumes its initialization value.
+The element *MUST* let a transport enter runtime mode only through one operation that consumes the transport's initialization value.
 
 *All or nothing, per transport.*
 The operation is all or nothing for that transport: it *MUST* succeed only when every entry condition holds for every route declared on it.
@@ -196,12 +196,12 @@ A refused carrier leg, for one, reports the route, the leg, the setting and the 
 
 [.specitem,oft-sid="req~ssr-mode-entry-clock~3",oft-title="The wall clock is read before runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-A transport *MUST* enter runtime mode only after both of these:
+The element *MUST* let a transport enter runtime mode only after both of these:
 
 * the wall clock of the platform's time provider has been read successfully;
 * the provider has passed the setup check of its package's stated contract (xref:platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules]).
 
-The setup check *MUST* fail a provider known to fall short of that contract, such as one that supplies uptime or a fixed value as wall time.
+In the setup check, the element *MUST* fail a provider known to fall short of that contract, such as one that supplies uptime or a fixed value as wall time.
 
 If the clock cannot be read, or the provider fails its check, the transition *MUST* fail with an error that says so.
 Where the target has no synchronized wall clock and its time provider supplies none, the transition *MUST* fail with an error that says so.
@@ -232,7 +232,7 @@ Simulated time and test seeds establish only the behaviour of a test harness.
 
 [.specitem,oft-sid="req~ssr-mode-entry-no-latent-refusal~1",oft-title="Nothing is refused at runtime for a reason setup already knew",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-Setup *MUST* refuse any declaration whose traffic the element would refuse in runtime mode for a reason already known at setup, naming the route and the setter, instead of admitting a route that can never carry traffic.
+The element *MUST* refuse at setup any declaration whose traffic it would refuse in runtime mode for a reason already known at setup, naming the route and the setter, instead of admitting a route that can never carry traffic.
 --
 
 [horizontal]
@@ -254,9 +254,11 @@ Setup refuses, for example:
 
 [.specitem,oft-sid="req~ssr-mode-one-way~3",oft-title="There is no way back",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-An operation *MUST NOT* take a transport, a handle or the Streamer from runtime mode back to initialization mode.
+The element, each binding and the Streamer *MUST NOT* have an operation that takes a transport, a handle or the Streamer from runtime mode back to initialization mode.
 
-Runtime mode *MUST* end only when the process ends.
+The element *MUST* let runtime mode end only when the process ends.
+Each binding *MUST* let the runtime mode of its transport end only when the process ends.
+The Streamer *MUST* let its own runtime mode end only when the process ends.
 
 The element *MUST NOT* provide any recovery inside the process.
 --
@@ -485,21 +487,22 @@ Example: In ordinary use, an application may use the classic API for a route out
 --
 *Bounded waits.*
 An initialization step of the element's own *MUST NOT* wait without a bound.
-A wait for a service or for the clock *MUST* have a bound from deployment data or from the binding's declared limit.
-When the bound expires, setup *MUST* fail with an error naming what it waited for.
+The element *MUST* give each wait for a service or for the clock a bound from deployment data or from the binding's declared limit.
+When the bound expires, the element *MUST* fail setup with an error naming what it waited for.
 
 *Waits inside a declared allocation domain.*
 A request to a memory source or allocation provider, and a destruction that a refusal performs, can wait inside the allocation domain that its declared policy names (xref:bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded]).
-That wait is the declared policy's, and setup reports it.
+That wait is the declared policy's, and the element's setup reports it.
 Each non-waiting guarantee limits its own operation in setup, and neither limits the other's (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]):
 
-* Where a route requires non-waiting acquisition, no request that setup makes for that route waits, or setup refuses the route by name.
-* Where a route or a claim requires non-waiting release of a value, setup performs no destruction of that value that could wait, and disposes of it as <<req-ssr-mode-init-failure,Initialization failure>> states.
+* Where a route requires non-waiting acquisition, no request that the element's setup makes for that route waits, or the element's setup refuses the route by name.
+* Where a route or a claim requires non-waiting release of a value, the element's setup performs no destruction of that value that could wait, and disposes of it as <<req-ssr-mode-init-failure,Initialization failure>> states.
 * A declared wait in a request stands where only non-waiting release is required, and a declared wait in a refusal's destruction stands where only non-waiting acquisition is required.
 
 *A missing peer.*
-A missing peer *MUST NOT* fail setup: its route is admitted and reports that it waits for the peer, or its binding refuses the route by name.
-In runtime mode, a route *MUST* treat a missing peer as silence, under its deadline.
+The element *MUST NOT* let a missing peer fail setup: the peer's route is admitted and reports that it waits for the peer, or the route's binding refuses the route by name.
+Each binding that refuses a route whose peer is missing *MUST* refuse it by name.
+In runtime mode, the element *MUST* treat a route's missing peer as silence, under the route's deadline.
 --
 
 [horizontal]

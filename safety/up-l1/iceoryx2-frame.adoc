@@ -37,7 +37,7 @@ Each service that carries frames *MUST* have the header as its user header and a
 
 *The header.*
 The header *MUST* be 40 bytes long, with an alignment of 8 and no byte of padding.
-The binding *MUST* write each of its fields as an unsigned integer, in the native byte order of the processor that it runs on, at the place that this table gives:
+The iceoryx2 binding *MUST* write each of its fields as an unsigned integer, in the native byte order of the processor that it runs on, at the place that this table gives:
 
 [cols="1,1,4",options="header"]
 |===
@@ -144,11 +144,11 @@ Whether a frame has a payload is what its metadata says: a frame whose metadata 
 The header's payload length gives only the length.
 
 *An absent payload.*
-A frame that the element sends without a payload *MUST* be written with a payload length of zero, and the binding *MUST NOT* give the element a payload extent to write for it.
+The iceoryx2 binding *MUST* write a payload length of zero for a frame that the element sends without a payload, and *MUST NOT* give the element a payload extent to write for it.
 The binding *MUST* report a received frame that passes the checks of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>> and has no payload encoding as a frame with no payload, never as a payload of length zero.
 
 *A present empty payload.*
-A frame whose payload is present and empty *MUST* be written with a payload length of zero, and the binding *MUST* report it as a present payload of length zero.
+The binding *MUST* write a payload length of zero for a frame whose payload is present and empty, and *MUST* report it as a present payload of length zero.
 --
 
 [horizontal]
@@ -170,7 +170,7 @@ So a frame with no payload encoding is reported with no payload even where its h
 --
 *Whose bytes.*
 The metadata is the frame's metadata, in the element's metadata format.
-The header gives its length, and the binding *MUST* carry it unchanged, from the element that writes it to the element that receives it.
+The header gives its length, and the iceoryx2 binding *MUST* carry it unchanged, from the element that writes it to the element that receives it.
 
 *What the binding takes from it.*
 From the metadata the binding *MUST* take nothing but whether the frame has a payload (<<req-ssr-binding-iceoryx2-frame-presence,On iceoryx2, an absent payload and a present empty payload stay apart>>) and the frame's source, which it uses for the frame's peer identity (xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise]).

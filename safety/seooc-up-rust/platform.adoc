@@ -21,14 +21,14 @@ Every runtime platform backend of the element *MUST NOT* use the heap, panic, cr
 
 *Clock reads.*
 
-* A clock read *MUST* report a failure instead of panicking or substituting another time base.
+* Each platform backend of the element *MUST* report a failed clock read instead of panicking or substituting another time base.
 * The element *MUST* treat a monotonic reading earlier than one it already holds as a failed read.
 * The element *MUST* treat a failed read as fail-closed: a bounded operation that depends on it ends as expired and is counted, and a TTL check refuses the frame.
 
 *Stated contracts.*
-Each supported configuration's package *MUST* state:
+Each platform backend of the element *MUST* state, in the package of each supported configuration that uses it:
 
-* its backend's clock sources, with their units, resolution, monotonicity, adjustment and failure behaviour;
+* its clock sources, with their units, resolution, monotonicity, adjustment and failure behaviour;
 * its wake protocol and memory ordering;
 * the execution contexts from which each operation may be called.
 --
@@ -61,7 +61,7 @@ The contracts a configuration states are those an integrator needs to select it 
 
 [.specitem,oft-sid="req~ssr-platform-init-only~1",oft-title="Entropy and prefault stay in initialization",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-The initialization-only platform services, entropy and prefault, *MUST NOT* be reachable from runtime mode: runtime code holds a platform value that offers neither.
+The element *MUST NOT* let its initialization-only platform services, entropy and prefault, be reachable from runtime mode: runtime code holds a platform value that offers neither.
 --
 
 [horizontal]
@@ -165,11 +165,15 @@ The element *MUST* tell by `+target_has_atomic+`, never by a list of targets, wh
 *Platform-specific mechanisms.*
 A platform backend of the element *MAY* use, on its target, a reviewed platform-specific mechanism behind one common SDK contract: wider atomics where the target provides them, or a private exclusion where it does not.
 
-* Each such mechanism's supported execution contexts, memory ordering, alignment, lifetime and interruption obligations *MUST* be stated and packaged with its configuration.
-* Its source-level safety argument *MUST* cover every participant that can reach its storage.
+* The element and each platform backend of the element that uses such a mechanism *MUST* state the mechanism's supported execution contexts, memory ordering, alignment, lifetime and interruption obligations, and package them with its configuration.
+* The element and each platform backend of the element that uses such a mechanism *MUST* make the mechanism's source-level safety argument cover every participant that can reach its storage.
 
 *Same public semantics.*
-A difference in representation *MUST NOT* change public semantics, add a `+Busy+` result or a limit on callers, or let a stale operation act on a later tenure.
+The element, and each platform backend of the element for its mechanism, *MUST NOT* let a difference in representation:
+
+* change public semantics;
+* add a `+Busy+` result or a limit on callers;
+* let a stale operation act on a later tenure.
 
 *Interrupt masks.*
 A private interrupt mask is not a lock shared with another process, and it excludes only the participants that it masks.

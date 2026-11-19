@@ -36,7 +36,7 @@ A field is one of these:
 The number can be zero.
 
 *Types outside the profile.*
-A wire of this profile *MUST NOT* encode or decode a type that holds anything else, among them:
+A wire of the fixed-layout XCDR2 profile *MUST NOT* encode or decode a type that holds anything else, among them:
 
 * a string, a sequence, a map, or any other field whose size depends on its value;
 * an optional field, a union or an enumeration;
@@ -81,7 +81,7 @@ An array of no elements takes no byte.
 
 *Padding.*
 The bytes that alignment skips are padding.
-An encoder *MUST* write each padding byte as `00`, and *MUST NOT* write any byte after the last field.
+A wire of the fixed-layout XCDR2 profile *MUST* write each padding byte as `00`, and *MUST NOT* write any byte after the last field.
 Which inputs decode to a value is stated by <<req-ssr-xcdr2-decoding,Decoding refuses a wrong length, a wrong prefix or a wrong boolean byte>>.
 --
 
@@ -111,7 +111,7 @@ Every value of the type has that length.
 
 *Stated as exact.*
 That length is the size of the largest encoding, which a serialized wire states for its type (xref:serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns], "Sizing").
-A wire of this profile *MUST* also state it as the exact size of every encoding of the type.
+A wire of the fixed-layout XCDR2 profile *MUST* also state it as the exact size of every encoding of the type.
 --
 
 [horizontal]
@@ -130,7 +130,7 @@ A route can size its storage from the type, before any value exists.
 [.specitem,oft-sid="req~ssr-xcdr2-decoding~1",oft-title="Decoding refuses a wrong length, a wrong prefix or a wrong boolean byte",oft-needs="impl,utest",oft-tags="SafetyXcdr2"]
 --
 *What is refused.*
-Decoding *MUST* refuse an input:
+A wire of the fixed-layout XCDR2 profile *MUST* refuse, in decoding, an input:
 
 * whose length is not the encoded length of the type, whether it is shorter or longer;
 * whose first four bytes are not the prefix;
@@ -182,10 +182,10 @@ Of that declaration the bytes show only the encoded length, which decoding check
 A change to the list of fields makes another type: a field added, removed, moved, renamed or given another kind, or an array given another number of elements.
 The bytes do not show such a change.
 Where the two encoded lengths are equal, a reader of one list can decode an encoding of the other without an error, and what it reads need not be what was written.
-A wire of this profile *MUST NOT* state, in its README or in what it declares, that it reads an encoding of a type with another list of fields.
+A wire of the fixed-layout XCDR2 profile *MUST NOT* state, in its README or in what it declares, that it reads an encoding of a type with another list of fields.
 
 *Its version.*
-A wire *MUST* state the version of the profile by naming its five requirements by their identifiers, each with the revision that it ends in, for example `req~ssr-xcdr2-types~1` (xref:serialized-wires.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format]).
+A wire of the profile *MUST* state the version of the profile by naming its five requirements by their identifiers, each with the revision that it ends in, for example `req~ssr-xcdr2-types~1` (xref:serialized-wires.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format]).
 
 *The identifier.*
 The registry has no payload encoding identifier for the profile, so a wire of the profile *MUST* state one of the private-use range (xref:../../basics/payload_encoding_registry.adoc[the payload encoding registry]).

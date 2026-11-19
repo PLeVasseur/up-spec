@@ -38,7 +38,7 @@ The fixed-layout XCDR2 profile is a format with requirements of its own (xref:xc
 [.specitem,oft-sid="req~ssr-wire-serialized-format~2",oft-title="A serialized wire reads and writes one stated format",oft-needs="impl,utest",oft-tags="SafetyWireSerialized"]
 --
 *One format.*
-A serialized wire *MUST* state the one format that it writes and reads:
+Each serialized wire, apart from the end-to-end protection wire, *MUST* state the one format that it writes and reads:
 
 * the payload encoding identifier of that format, which is one that the registry lets a sender originate (xref:wires.adoc#encoding-identifier[the encoding identifier is the registry's]);
 * the specification of the format at a fixed version: a public one, or, for a private-use identifier, the deployment agreement that defines it.
@@ -51,7 +51,7 @@ Decoding *MUST* accept what the format makes an encoding of a value of the type;
 Which inputs are encodings, and of which values, is the format's to say: for a malformed input, for an input that ends early, for an empty input, and for an input with elements that the type does not know.
 
 * The wire *MUST NOT* add a default or a lenient reading of its own.
-* A wire that accepts less than a public format allows *MUST* state that narrower format as its own.
+* The wire, where it accepts less than a public format allows, *MUST* state that narrower format as its own.
 
 *Type identity.*
 A format's bytes need not say which type they encode, and an encoding identifier never does.
@@ -94,11 +94,13 @@ The wire cannot always prevent that, so it says what does agree the type, and it
 
 [.specitem,oft-sid="req~ssr-wire-encode-decode~2",oft-title="A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns",oft-needs="impl,utest",oft-tags="SafetyWireSerialized"]
 --
+Each serialized wire, apart from the end-to-end protection wire, answers for each duty of this item.
+
 *Sizing.*
-A serialized wire *MUST* state the largest encoding that it can write for its type, or that it has none.
+The wire *MUST* state the largest encoding that it can write for its type, or that it has none.
 
 * A size that it reports for a value as exact *MUST* be the number of bytes that encoding that value writes.
-* A wire with no largest encoding runs only on a route that declares a payload bound.
+* The wire, where it has no largest encoding, runs only on a route that declares a payload bound.
 * A value whose encoding does not fit the route's bound, or the storage that the wire was given, *MUST* be refused before anything is sent.
 
 *Encoding.*

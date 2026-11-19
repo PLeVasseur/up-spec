@@ -187,7 +187,7 @@ What the data means, and how the item, in ISO 26262's sense, reacts to a failure
 
 * *Bindings and wires*: what each is, and whether it is part of the element, xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract] and xref:../up-l1/wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
 Their code runs inside the element's calls, but each is developed and verified on its own, against the contract suites in `test-util`.
-Each item that binds them names them in its statement and its "Allocated to" line, wherever it is filed (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+Each item that binds them says so in its statement, wherever it is filed (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts] restricts an integrator to those that pass.
 The end-to-end protection wire is a wire too, but it is shipped as the element's safety mechanism, so it is part E6, with its own items.
 * *Derive macros* (`up-rust-macros`: `ZeroSlot`, `StablePayload`, `StablePayloadInit`) are tools.

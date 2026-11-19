@@ -7,7 +7,7 @@ Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 The element whose wire contract these duties belong to: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
-Each item binds the parts that its statement and its "Allocated to" line name: here, every wire (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+Each item's statement says whom it binds: here, every wire, and the element where an item's statement gives it a duty (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 A wire meets them in its own crate, and covers them in its own repository.
 What a wire is, and what is not one: <<req-ssr-wire-scope,What a wire is, and the wire contract>>.
 

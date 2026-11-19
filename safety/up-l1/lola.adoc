@@ -20,7 +20,7 @@ The protocol specification has no LoLa chapter, and the envelope that carries a 
 == Whom the items bind
 
 * The six requirements bind the LoLa binding of the up-rust SEooC.
-* Each item of the binding contract (xref:bindings.adoc[allocated to each binding]) binds the LoLa binding, in full, where its statement and its "Allocated to" line name it.
+* Each item of the binding contract (xref:bindings.adoc[allocated to each binding]) binds the LoLa binding, in full, where its statement says so.
 <<index>> says what each asks on LoLa.
 * A deployment on LoLa is bound by the assumptions about every transport (xref:deployment.adoc[what a deployment provides for its transports]) and by the element's own (<<deployment>>).
 
@@ -156,7 +156,7 @@ The binding *MUST NOT* let what a serialized route allocates reach a native rout
 
 *What each route got.*
 Each route's report says whether it is lent, which form of receive it got, and its heap class, with a permit by name (xref:../seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got]; xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
-A refusal is reported with the capability that it names.
+A refusal is reported with the capability that it names (xref:payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]).
 --
 
 [horizontal]
@@ -276,7 +276,7 @@ The LoLa binding has no accepted panic path, and each such path that a peer's in
 
 *Where it holds.*
 The binding's qualification record *MUST* state the builds of its C++ code, and the ways of loading it, for which the first two clauses are established (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
-A binding that is built or loaded in another way claims neither.
+Where the binding is built or loaded in another way, it claims neither.
 --
 
 [horizontal]

@@ -265,7 +265,7 @@ The element *MUST* meet each rule of this item without relying on a destructor t
 Between a sender and a receiver on one transport, a native payload is copied only in two cases, each chosen at setup and reported:
 
 * on the copy route, once, into storage that the reader owns (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]);
-* on a handoff binding, once, at the hand-off.
+* on a route that runs handed off, once, at the hand-off (xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]).
 
 What a carrier copies when it forwards a native frame is stated with the carrier (xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]; xref:integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused]).
 

@@ -118,7 +118,7 @@ An explicit ABI agreement prevents interpreting one target layout as another.
 [.specitem,oft-sid="req~ssr-peer-stale-rejected~4",oft-title="Stale peers are rejected",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Stale frames.*
-A frame from an earlier incarnation of a peer *MUST* be recognized by its full incarnation and refused as stale, never treated as current, and counted.
+The element *MUST* recognize a frame from an earlier incarnation of a peer by the frame's full incarnation, refuse it as stale, never treat it as current, and count it.
 
 *Identity and incarnation.*
 A peer's identity is the one that its binding gives it, stable across its restarts (xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise]), and the incarnation the element records for it *MUST* only rise.
@@ -131,8 +131,8 @@ The element *MUST* compare a frame's full peer identity and incarnation with the
 * tie one peer's frames to another peer's entry.
 
 *Concurrent classification.*
-Classification *MUST NOT* place a limit on how many frames of one peer are classified at once.
-A frame *MUST NOT* be refused except as stale, as undeclared (<<req-ssr-peer-admission,Undeclared peers cannot lock out declared ones>>), or because the table that its declaration sized is genuinely full.
+In classification, the element *MUST NOT* place a limit on how many frames of one peer are classified at once.
+In classification, the element *MUST NOT* refuse a frame except as stale, as undeclared (<<req-ssr-peer-admission,Undeclared peers cannot lock out declared ones>>), or because the table that the declaration sized is genuinely full.
 
 *Restart reports.*
 On a binding's restart report, the element *MUST* fail the calls tied to older incarnations of that peer, and count the report.
@@ -168,10 +168,10 @@ The exclusion argument still needs the review of each mechanism (xref:../seooc-u
 
 [.specitem,oft-sid="req~ssr-peer-admission~2",oft-title="Undeclared peers cannot lock out declared ones",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-On a route with a declared list of peers, a frame from an undeclared source *MUST* be refused and counted before it takes a peer-table entry.
+On a route with a declared list of peers, the element *MUST* refuse and count a frame from an undeclared source before the frame takes a peer-table entry.
 
-* The table *MUST* be sized from the declaration, and a declaration that the table or the binding cannot hold *MUST* be refused at setup.
-* A lost peer's entry *MUST* be returned.
+* The element *MUST* size the table from the declaration, and *MUST* have any declaration that the table or the binding cannot hold refused at setup.
+* The element *MUST* return a lost peer's entry.
 * Returning it *MUST NOT* make a later peer's frames be refused as stale, whatever frames of the lost peer are in flight at that moment.
 --
 

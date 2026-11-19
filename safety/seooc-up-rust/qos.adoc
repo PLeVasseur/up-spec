@@ -42,7 +42,7 @@ The declaration lets the Enforce state tell that choice from a missing deadline.
 [.specitem,oft-sid="req~ssr-qos-no-downgrade~4",oft-title="QoS is honored or refused, never weakened",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Functional QoS.*
-Each route's QoS *MUST* be checked at setup against its binding's declared capability, before any resource is reserved.
+The element *MUST* check each route's QoS at setup against the declared capability of the route's binding, before any resource is reserved.
 If it cannot be honored, setup *MUST* be refused, naming the route and the setting.
 A QoS setting *MUST NOT* be weakened silently, at setup or in runtime mode.
 
@@ -102,8 +102,8 @@ Granting a required stronger claim without its evidence would be a silent downgr
 [.specitem,oft-sid="req~ssr-qos-overflow~3",oft-title="Overflow acts as declared",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *The policy.*
-In runtime mode a full route *MUST* apply exactly its declared overflow policy (drop the oldest, drop the newest, or wait within a bound).
-It *MUST* count every discard observable to the element or its binding, exactly once under its cause.
+In runtime mode the element *MUST* ensure that a full route applies exactly its declared overflow policy (drop the oldest, drop the newest, or wait within a bound).
+The element *MUST* count every discard observable to it or to the route's binding, exactly once under its cause.
 
 *No heap for the policy itself.*
 Choosing and applying the policy, waiting and counting *MUST NOT* acquire or release heap memory.
@@ -122,7 +122,7 @@ That ownership is released exactly once as xref:heap.adoc#req-ssr-heap-slot-type
 That release is the only heap use an overflow causes, and it releases no route, table or other runtime resource.
 
 *Discards the binding cannot observe.*
-If a discard occurs entirely inside middleware and the binding cannot observe it, the route's report *MUST* explicitly disclose that limitation and make no claim to count it (xref:errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+If a discard occurs entirely inside middleware and the binding cannot observe it, the element *MUST* explicitly disclose that limitation in the route's report and make no claim there to count it (xref:errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 --
 
 [horizontal]
@@ -179,7 +179,7 @@ So it never counts one for a true gap no longer than the deadline while each arr
 * The element *MUST* always count one for a gap longer than the threshold by more than the monitor's resolution, at most 1/512 of the threshold.
 
 *Saturation.*
-A count *MUST NOT* wrap: at the end of its range it *MUST* saturate, and the report *MUST* say so.
+A count *MUST NOT* wrap: at the end of its range it *MUST* saturate, and the element *MUST* say so in the route's report.
 
 *Suspended threads.*
 A monitor that keeps full-width timestamps and counts *MUST* keep these properties however long a thread that records, checks or reports for the route is suspended.
@@ -192,7 +192,7 @@ For the one-word tick representation that range is:
 * the route serviced at least every 2^29^ ticks of its monitor (xref:assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]);
 * every wait inside the element under 2^28^ ticks (xref:assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 
-The transport's `+wait+` *MUST* service its routes between inner waits of at most 2^28^ ticks of the shortest-scaled route on the transport.
+The element *MUST* ensure that the transport's `+wait+` services its routes between inner waits of at most 2^28^ ticks of the shortest-scaled route on the transport.
 
 *Strict mode.*
 In strict mode's Enforce state, the element *MUST* refuse at setup a declared servicing period longer than its transport's bound.
@@ -202,7 +202,7 @@ The count *MUST* be current whenever the route's counters are read after the tra
 So it does not depend on the application polling that route.
 
 *The report.*
-A monitored route's report *MUST* state its deadline D, its binding's declared arrival latency L and the monitor's resolution, each with its unit.
+The element *MUST* state in a monitored route's report the route's deadline D, the declared arrival latency L of the route's binding and the monitor's resolution, each with its unit.
 
 * Where a supported configuration establishes a finite bound J for every path that can win the count's update and publish it, including the service, check and arrival paths, contention and publication, the report *MUST* state the detection bound D + 2L + resolution + J.
 That bound runs from the last true arrival to the winning counter update and its visibility under the published read-ordering contract.
@@ -211,7 +211,7 @@ That bound runs from the last true arrival to the winning counter update and its
 An application's later read of the report adds its own delay, outside J, and places no service duty on the application.
 
 *Middleware event deadlines.*
-On an ASIL deployment the binding *MUST* turn its middleware's own event deadlines off.
+On an ASIL deployment, each binding *MUST* turn its middleware's own event deadlines off.
 The element's deadline monitor is the receiver's mechanism.
 
 *Related rules.*
@@ -272,10 +272,10 @@ So the element states the detection bound only where a supported configuration e
 [.specitem,oft-sid="req~ssr-qos-ttl~5",oft-title="Expired messages are not processed",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Expired frames.*
-A frame whose TTL has expired *MUST NOT* be delivered to the application or forwarded by a carrier, and *MUST* be counted as expired.
+The element *MUST NOT* deliver a frame whose TTL has expired to the application, or let a carrier forward it, and *MUST* count it as expired.
 
 *How expiry is judged.*
-Expiry *MUST* be judged in whole milliseconds of wall time, from the time the frame's message ID records.
+The element *MUST* judge expiry in whole milliseconds of wall time, from the time the frame's message ID records.
 Measured from that time:
 
 * a frame *MUST NOT* be refused before its TTL has passed;
@@ -285,10 +285,10 @@ An ID made while the sender's wall clock could not be read records the last good
 For a generator that keeps the last good time only to 64 ms, such a frame can be refused by up to 64 ms more (xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]).
 
 *An unreadable clock.*
-If the wall clock cannot be read at the check, the frame *MUST* be refused and counted.
+If the wall clock cannot be read at the check, the element *MUST* refuse the frame and count it.
 
 *When expiry is checked.*
-Expiry *MUST* be checked when a frame reaches its route, before its wire decodes it, as well as when it is taken.
+The element *MUST* check expiry when a frame reaches its route, before its wire decodes it, as well as when it is taken.
 So an expired frame is never decoded and changes no wire state.
 --
 
@@ -318,7 +318,7 @@ It does not bound when a descheduled reader next takes a frame, or when an appli
 
 [.specitem,oft-sid="req~ssr-qos-invalid-refused~2",oft-title="Meaningless QoS is refused at setup",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-Six QoS declarations cannot be honored as written, and each *MUST* be refused at setup, naming the route and the setting:
+Six QoS declarations cannot be honored as written, and the element *MUST* refuse each at setup, naming the route and the setting:
 
 * a zero deadline;
 * a deadline under 1,024 ns;
@@ -347,7 +347,7 @@ A deadline on a pull route whose binding cannot report arrivals is refused whate
 
 [.specitem,oft-sid="req~ssr-qos-consistent-declarations~1",oft-title="Two declarations of one route agree",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-On one transport, two declarations of the same route that differ in reliability, overflow or history *MUST* be refused at setup, naming the route and the setting.
+On one transport, the element *MUST* refuse at setup two declarations of the same route that differ in reliability, overflow or history, naming the route and the setting.
 --
 
 [horizontal]

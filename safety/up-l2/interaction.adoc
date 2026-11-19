@@ -176,12 +176,7 @@ What the refused copy owns is released as xref:../seooc-up-rust/heap.adoc#req-ss
 [.specitem,oft-sid="req~ssr-peer-rpc-undecodable-answered~6",oft-title="An undecodable request is answered",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *The answer.*
-This item covers a request whose header the server can parse, but:
-
-* whose payload it cannot decode for a reason other than an end-to-end check; or
-* whose encoding it does not admit.
-
-A server that receives such a request *MUST* answer it through the request's reply token, with commstatus `+InvalidArgument+`, producing the answer without heap, and count it.
+At a server that receives a request whose header it can parse, but whose payload it cannot decode for a reason other than an end-to-end check, or whose encoding it does not admit, the element *MUST* answer it through the request's reply token, with commstatus `+InvalidArgument+`, producing the answer without heap, and count it.
 
 *Sending the answer.*
 The answer *MUST* be sent as any response on that route is, under the route's overflow policy and heap class, including a bounded wait where the route declares one.
@@ -243,9 +238,9 @@ A serialized route whose binding allocates storage for every frame it sends need
 
 [.specitem,oft-sid="req~ssr-peer-rpc-no-server~1",oft-title="A call with no server fails at once",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-On a binding that declares that it counts its receivers exactly, a call whose request reached no server *MUST* fail at once, with an error that names the cause, instead of waiting out its TTL.
+On a binding that declares that it counts its receivers exactly, the element *MUST* fail at once a call whose request reached no server, with an error that names the cause, instead of waiting out the call's TTL.
 
-On any other binding, the call *MUST* end at its TTL.
+On any other binding, the element *MUST* end the call at its TTL.
 --
 
 [horizontal]

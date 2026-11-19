@@ -107,8 +107,8 @@ So a safe wire cannot claim more initialized bytes than it wrote.
 --
 The element's memory safety *MUST NOT* depend on a binding's safe methods returning correct values.
 
-* Where it relies on a claim from a binding, for example that lent storage is exclusive, disjoint and stable, the claim *MUST* be made through an `+unsafe+` trait with stated obligations, listed in the inventory.
-* Everything else a binding hands over, such as lengths, slices, route handles and peer references, *MUST* be checked, or treated as untrusted.
+* Where it relies on a claim from a binding, for example that lent storage is exclusive, disjoint and stable, the element *MUST* take the claim through an `+unsafe+` trait with stated obligations, listed in the inventory.
+* The element *MUST* check, or treat as untrusted, everything else that a binding hands over, such as lengths, slices, route handles and peer references.
 --
 
 [horizontal]

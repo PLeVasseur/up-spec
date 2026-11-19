@@ -12,7 +12,7 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 [.specitem,oft-sid="req~ssr-refuse-before-heap~3",oft-title="Refuse before touching the heap",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Errors for refusals.*
-An operation that cannot proceed in runtime mode *MUST* return an error.
+The element *MUST* return an error from an operation that cannot proceed in runtime mode.
 All of these *MUST* be errors:
 
 * exhaustion of slots, depth, held messages, the peer table or the call table;
@@ -165,11 +165,11 @@ A free slot released twice with no take between the two releases *MUST* be count
 One released, taken and released again is not detected.
 
 *Pull bindings.*
-A pull binding's failure to read its own queue *MUST* be counted on the route (`+receive_failed+`).
-A data connection that its middleware drops or fails to set up without an error *MUST* be counted in the same way.
+The element *MUST* count on the route (`+receive_failed+`) a pull binding's failure to read its own queue.
+The element *MUST* count in the same way a data connection that a pull binding's middleware drops or fails to set up without an error.
 
 *E2E clients.*
-An E2E client counts a response with no E2E header in a route counter of its own, `+unprotected+`, never in the E2E counter.
+For an E2E client, the element counts a response with no E2E header in a route counter of its own, `+unprotected+`, never in the E2E counter.
 --
 
 [horizontal]

@@ -11,9 +11,9 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [.specitem,oft-sid="req~ssr-waiver-required~1",oft-title="Middleware heap needs a named waiver",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-A transport with a route whose prepared heap class is allocation inside middleware *MUST* enter runtime mode only when a named waiver matches each permit its binding declares.
+The element *MUST NOT* let a transport with a route whose prepared heap class is allocation inside middleware enter runtime mode unless a named waiver matches each permit its binding declares.
 
-Otherwise the transition *MUST* be refused, naming the transport, the route and the permit.
+Otherwise the element *MUST* refuse the transition, naming the transport, the route and the permit.
 --
 
 [horizontal]
@@ -33,9 +33,9 @@ A refusal that names the transport, the route and the permit tells the deploymen
 
 [.specitem,oft-sid="req~ssr-waiver-scope~1",oft-title="A waiver covers middleware and nothing else",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-A waiver *MUST* admit allocation inside middleware only, for the operations and the bound its permit names.
+The element *MUST NOT* let a waiver admit more than allocation inside middleware, for the operations and the bound its permit names.
 
-It *MUST NOT* admit:
+The element *MUST NOT* let a waiver admit:
 
 * allocation in SDK, binding or wire code;
 * a wire that declares allocation;

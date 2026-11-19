@@ -105,7 +105,7 @@ What a route needs beyond its declaration it requires by name, and it is then ad
 
 [.specitem,oft-sid="req~ssr-heap-lazy-forced~1",oft-title="Lazy state is forced before runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-Every primitive that would allocate or initialize itself on first use *MUST* be forced during initialization, or be absent from the runtime path.
+The element *MUST* have every primitive that would allocate or initialize itself on first use forced during initialization, or absent from the runtime path.
 This covers:
 
 * the first lock of an OS lock on pthread targets;

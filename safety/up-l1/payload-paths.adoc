@@ -105,8 +105,9 @@ Among them are its envelope, its capacity and the placing of its storage, its he
 
 *Refusal, with its reason named.*
 A route that is not admitted is refused at setup, and the refusal *MUST* name the route and what is missing.
+The element answers for that duty.
 
-* A binding *MUST* refuse, in route preparation, a route that needs a capability that the binding does not have (xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]), and it *MUST* name that capability.
+* A binding *MUST* refuse, in route preparation, a route that needs a capability that the binding does not have (xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]), and it *MUST* name the route and that capability.
 The element *MUST* report that refusal with the capability that it names.
 * The element *MUST* refuse a route that fails a setup check of its own, naming the check.
 
@@ -129,11 +130,12 @@ The element *MUST* refuse at setup, by name, a route whose declaration requires 
 A route that does not require it runs handed off there, and its report says so.
 
 *Fixed for the run.*
+The element answers for each duty of this clause.
 An operation in runtime mode *MUST NOT* change a route's form, for example from native to serialized, from lent to handed off or from a view to a copy.
 Where a route cannot have the form that it declares, setup *MUST* refuse it, and it *MUST NOT* be served in another form (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-entry-no-latent-refusal[Nothing is refused at runtime for a reason setup already knew]).
 
 *Reported.*
-Each route's report *MUST* state its form (xref:../seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got]).
+The element *MUST* state each route's form in the route's report (xref:../seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got]).
 --
 
 [horizontal]
@@ -193,9 +195,11 @@ The element *MUST* give the wire the empty input, and the wire's format decides 
 * A message with no payload is no input for a wire.
 The element *MUST NOT* decode an empty input in its place, and *MUST NOT* deliver a value that it made up.
 * A value whose encoding has no bytes *MUST* be sent as a present payload of length zero, with its identifier.
+The element answers for that duty.
 
 *On sending.*
 A message whose payload a wire wrote *MUST* carry the identifier that the wire declares.
+The element answers for that duty.
 A payload and its identifier are both present or both absent (xref:wires.adoc#encoding-identifier[the encoding identifier is the registry's]).
 
 *Reading only.*

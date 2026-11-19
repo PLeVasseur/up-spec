@@ -239,7 +239,7 @@ They can park a frame from a lending ingress in fixed storage, within the route'
 
 [.specitem,oft-sid="req~ssr-streamer-containment~1",oft-title="A fault stays on its route",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
 --
-A fault on one route (a dead or slow egress, a malformed header, a flood, exhausted slots, a killed peer) *MUST* be counted on that route and *MUST NOT* delay any other route beyond its declared budget.
+The Streamer *MUST* count a fault on one route (a dead or slow egress, a malformed header, a flood, exhausted slots, a killed peer) on that route, and *MUST NOT* let the fault delay any other route beyond the other route's own declared budget.
 --
 
 [horizontal]
@@ -261,11 +261,11 @@ A bound on another route's delay in time is a timing claim of a supported config
 [.specitem,oft-sid="req~ssr-streamer-qos-per-leg~2",oft-title="Both legs are checked, at setup and per frame",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
 --
 *At setup.*
-When a route is set up, the QoS of both its legs *MUST* be checked, and a refusal *MUST* name the leg.
+When a route is set up, the Streamer *MUST* check the QoS of both of the route's legs, and *MUST* name the leg in a refusal.
 Setup *MUST* report, for each route, whether it has an encoding filter and which identifiers the filter names.
 
 *Per frame.*
-Before each frame is forwarded, it *MUST* be checked against the egress leg's own limits on every forwarding path, and against its TTL.
+Before each frame is forwarded, the Streamer *MUST* check it against the egress leg's own limits on every forwarding path, and against its TTL.
 A leg's limits are:
 
 * the payload size;
@@ -275,17 +275,17 @@ A leg's limits are:
 * the route's encoding filter, where its deployment data states one.
 
 *A native representation.*
-A frame whose header names a native representation that none of the route's wires names *MUST* be refused.
-It *MUST NOT* be carried as serialized bytes, and what names its representation *MUST NOT* be removed or changed.
+The Streamer *MUST* refuse a frame whose header names a native representation that none of the route's wires names.
+The Streamer *MUST NOT* carry such a frame as serialized bytes, and *MUST NOT* let what names the frame's representation be removed or changed.
 
 *The encoding identifier.*
 The encoding identifier of a payload that a leg carries as serialized bytes is not a limit of the leg.
-A leg *MUST NOT* refuse such a payload for its identifier, except through the route's encoding filter.
+The Streamer *MUST NOT* let a leg refuse such a payload for its identifier, except through the route's encoding filter.
 
 *An encoding filter.*
 A route's deployment data *MAY* state an encoding filter: the list of the encoding identifiers of the serialized payloads that the route forwards.
 
-* A route *MUST NOT* have a filter unless its deployment data states one.
+* The Streamer *MUST NOT* let a route have a filter unless the route's deployment data states one.
 A filter *MUST NOT* be derived from the route's wires, from the decoders that a build contains or from any other reader.
 * A route with a filter *MUST* refuse a serialized payload whose identifier the list does not name.
 It *MUST* forward one whose identifier the list names exactly as a route without a filter does, with or without a reader of that encoding.

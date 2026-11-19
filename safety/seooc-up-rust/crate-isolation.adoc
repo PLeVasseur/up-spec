@@ -35,9 +35,9 @@ That representation does not determine where a caller stores an enclosing object
 
 [.specitem,oft-sid="req~ssr-crate-sync-path~1",oft-title="Traffic is synchronous or polled",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-The runtime path *MUST* offer every traffic operation in synchronous or polled form, and *MUST* use none of `+core::future+`, `+core::task+` or `+core::pin+`.
+The element's runtime path *MUST* offer every traffic operation in synchronous or polled form, and *MUST* use none of `+core::future+`, `+core::task+` or `+core::pin+`.
 
-Any async layer *MUST* sit above it, in a separate crate.
+Any async layer *MUST* sit above the runtime path, in a separate crate, and the element *MUST* keep each one there.
 --
 
 [horizontal]
@@ -98,7 +98,7 @@ The ASIL Streamer's route table, admission, validation and forwarding loop *MUST
 
 No feature, dependency or build setting outside it can bring classic routes, `+std+`-only paths or heap use into it.
 
-The `+std+` loader *MUST* only parse deployment data, and validation happens in this crate.
+The Streamer *MUST* have the `+std+` loader only parse deployment data, and validation happens in this crate.
 
 Bindings and wires are linked by the binary that uses the crate, not by the crate.
 --

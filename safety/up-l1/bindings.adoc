@@ -8,11 +8,11 @@ This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 The element whose contract these duties belong to: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These are the duties of the binding contract.
-Each item binds the parts that its statement and its "Allocated to" line name: every binding or some of them, and the element where an item's "Allocated to" line names it (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+Each item's statement says whom it binds: every binding or some of them, and the element where an item's statement gives it a duty (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 A binding meets those that bind it in its own code, and covers them in its own repository, by running the contract suites against itself.
 
 * They carry the tag `SafetyBinding`, and an item whose statement holds a duty of pull bindings only also carries `SafetyBindingPull`.
-The tags say which repositories cover an item (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+The tags say which repositories cover an item (xref:../README.adoc#tags[the tags]).
 * They name no middleware.
 What only one binding must meet is stated with that binding, in an item that is allocated to it alone (xref:README.adoc#one-binding[what is specific to one binding]).
 * What a binding is, and what is not one: <<req-ssr-binding-scope,What a binding is, and the binding contract>>.
@@ -69,7 +69,7 @@ In runtime mode, binding code *MUST NOT* acquire or release heap memory on any p
 In runtime mode, binding code *MUST NOT* acquire or release heap memory on any other path, except as a serialized or owned route's declared heap class permits and setup admits (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 
 *Middleware.*
-Allocation inside the binding's middleware *MUST* be declared as a permit on the routes it affects, and be reported separately.
+Each binding *MUST* have any allocation inside its middleware declared as a permit on the routes that the allocation affects, and reported separately.
 
 *When the rules apply.*
 These rules bind the binding's transport from its own transition.
@@ -210,7 +210,7 @@ A panic path inside one middleware is that binding's to state, with its bounds, 
 --
 *The rule.*
 Binding code *MUST NOT* panic on any frame, length or sequence a peer produces, or when a peer dies or restarts.
-A panic path inside the middleware *MUST* be made unreachable by a setup check or by sizing, unless it is an accepted instance.
+Each binding *MUST* have each panic path inside its middleware made unreachable by a setup check or by sizing, unless the path is an accepted instance.
 
 *Each binding's account.*
 A binding meets this item only where an item that is allocated to it alone states its account of the middleware panic paths that it can reach: that it has no accepted panic path, or each accepted instance by name, with the five parts below.
@@ -308,10 +308,10 @@ Apart from a deliberate idle wait (xref:../seooc-up-rust/bounded-work.adoc#req-s
 * on a serialized or owned route whose declared heap class admits the binding's allocation, a wait inside the allocation domain that the binding's declared policy names, as xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded] states and limits.
 
 The binding's other work, its worker loops, dispatch and wake paths included, *MUST* be bounded.
-Anything that a binding call, an arrival report or a health report needs *MUST NOT* wait behind a pending release.
+A binding *MUST NOT* let anything that a binding call, an arrival report or a health report needs wait behind a pending release.
 
 *Carrier ingress.*
-A carrier ingress *MUST* take pulled or retained frames, never borrowed ones whose carriage would need a staged copy.
+The element *MUST* take pulled or retained frames at its carrier ingress, never borrowed ones whose carriage would need a staged copy.
 --
 
 [horizontal]
@@ -419,8 +419,8 @@ The SDK's E2E wire is deferred and not part of this delivery.
 
 * A lending binding *MUST* record each writer's integrity level in the shared definition of its service, where its middleware can.
 * It *MUST* report to the element the level it finds there.
-* A level it cannot record or read *MUST* be reported as unknown.
-* A publisher whose level is below the level the service records *MUST* be refused at its own setup, naming the route and both levels.
+* The lending binding *MUST* report as unknown a level that it cannot record or read.
+* Where a publisher's level is below the level the service records, the lending binding *MUST* have the publisher refused at the publisher's own setup, by a refusal that names the route and both levels.
 
 *Handoff bindings.*
 The check does not apply to a handoff binding (<<req-ssr-binding-scope,What a binding is, and the binding contract>>), and its README *MUST* say so.

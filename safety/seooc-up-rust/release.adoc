@@ -11,9 +11,11 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [.specitem,oft-sid="req~ssr-release-none~3",oft-title="Nothing is released in runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-In runtime mode each route, role, slot table, binding resource, worker and transport *MUST* remain allocated and attached for the life of the process.
+In runtime mode the element *MUST* keep each route, role, slot table, binding resource, worker and transport allocated and attached for the life of the process.
+In runtime mode each binding *MUST* keep its resources, its workers and its transport allocated and attached for the life of the process.
 
-* Workers created during initialization *MUST* keep running and *MUST NOT* be joined in runtime mode.
+* The element *MUST* keep each worker created during initialization running and *MUST NOT* let one be joined in runtime mode.
+* Each binding *MUST* keep each of its workers created during initialization running and *MUST NOT* let one be joined in runtime mode.
 
 *The Streamer.*
 What the Streamer's routes and gates, and the workers of the Streamer binary, keep in runtime mode is stated with the Streamer (xref:../up-l2/streamer.adoc#req-ssr-streamer-route-lock[Routes and subscriptions are locked at activation]; xref:../up-l2/streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate]; xref:../up-l2/streamer.adoc#req-ssr-streamer-workers[Workers are fixed at initialization]).
@@ -35,7 +37,8 @@ So disabling a route remains compatible with retaining its runtime storage.
 
 [.specitem,oft-sid="req~ssr-release-inert-drop~1",oft-title="Dropping a runtime handle does nothing",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-Every runtime-mode handle type *MUST* hold only `+'static+` data and indices, and *MUST NOT* have drop glue.
+The element *MUST* have every runtime-mode handle type hold only `+'static+` data and indices, and *MUST NOT* let one have drop glue.
+The Streamer *MUST* have its runtime type and its gate and counter handles hold only `+'static+` data and indices, and *MUST NOT* let one of them have drop glue.
 The handle types are:
 
 * the transport runtime;
@@ -43,7 +46,7 @@ The handle types are:
 * the carrier routes;
 * the Streamer with its gate and counter handles.
 
-This *MUST* be proved for each type at compile time.
+The element *MUST* have this proved for each type at compile time, and the Streamer *MUST* have it proved at compile time for its runtime type and its gate and counter handles.
 --
 
 [horizontal]
@@ -65,17 +68,17 @@ Its drop follows <<req-ssr-release-lease-drop,A lease gives back its slot and no
 [.specitem,oft-sid="req~ssr-release-lease-drop~5",oft-title="A lease gives back its slot and nothing else",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *The drop.*
-Dropping a per-message lease (a received message, an RPC call, a request, a parked frame, a loan) *MUST* give its slot back to a fixed table exactly once:
+The element *MUST* have the drop of a per-message lease (a received message, an RPC call, a request, a parked frame, a loan) give the lease's slot back to a fixed table exactly once:
 
 * at once where the slot holds nothing whose release is in progress or pending;
 * otherwise when that release completes.
 
 The element's own work in the drop *MUST NOT* block or panic.
-It *MUST NOT* take a lock that can wait.
+That work *MUST NOT* take a lock that can wait.
 A lock-free retry, bounded by other threads' progress, is allowed.
 
 *Native routes.*
-On a native route the drop *MUST NOT* do anything else: it frees no heap, it cannot panic and it never waits.
+On a native route the element *MUST NOT* let the drop do anything else: the drop frees no heap, cannot panic and never waits.
 
 *Heap-free routes.*
 On a serialized or owned route whose heap class is none, the drop frees no heap.
@@ -95,10 +98,10 @@ Whichever applies, the drop releases no route, role, table, startup region or ot
 *When a release service is needed.*
 A release service is the mechanism of non-waiting release over a dependency that can wait.
 
-* A route that requires non-waiting release, and whose release can wait, *MUST* have one, or setup refuses the route by name (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
+* The element *MUST* refuse at setup, by name, a route that requires non-waiting release, whose release can wait and that has no release service (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
 * A configuration without one refuses only a route that requires non-waiting release over such a dependency.
 
-The rest of this item binds every release service and all pending cleanup, a binding's deferred return of a retained owner included.
+The rest of this item binds the element for every release service and all pending cleanup, a binding's deferred return of a retained owner included, and each binding for its deferred return of a retained owner.
 
 *The release service.*
 A release service *MUST* be created during initialization and run for the life of the process (<<req-ssr-release-none,Nothing is released in runtime mode>>), with hand-off capacity fixed at setup.
@@ -151,7 +154,7 @@ On a route that requires non-waiting release it never shows as a drop that waits
 The hand-off to a release service or to a binding's deferred return holds ownership awaiting release, not unread traffic, so it is not a second receive queue.
 
 *Bindings.*
-A binding's frame destructor has the same duty (xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+The duties of a binding's frame destructor are stated in xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
 --
 
 [horizontal]

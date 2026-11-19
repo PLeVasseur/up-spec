@@ -20,7 +20,7 @@ Where an item is filed says which layer it concerns (xref:../README.adoc#filing[
 The items here were written for the up-rust SEooC (xref:../seooc-up-rust/README.adoc[its README]) and for the bindings and wires that work with it.
 They are not protocol requirements of uP-L1, and none of them names a transport implementation of another SDK, or an SDK of another language.
 * *Requirements.*
-Each requirement binds the parts that its statement and its "Allocated to" line name (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]): such as every binding or those among them that it names, every wire, every serialized wire apart from the end-to-end protection wire, each wire of the fixed-layout XCDR2 profile, one binding alone (<<one-binding>>), or the element itself.
+Each requirement's statement says whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]): such as every binding or those among them that it names, every wire, every serialized wire apart from the end-to-end protection wire, each wire of the fixed-layout XCDR2 profile, one binding alone (<<one-binding>>), or the element itself.
 Its tags say which repositories cover it (xref:../README.adoc#tags[the tags]).
 * *Assumptions of use.*
 The five assumptions of use filed here are that element's: three about every transport, and two about one binding and its middleware, iceoryx2.
@@ -48,7 +48,7 @@ Wires are filed with this layer, beside the bindings that carry what they write.
 |===
 | File | Items | Tags | What it holds
 
-| xref:bindings.adoc[Allocated to each binding] | 14 | `SafetyBinding`, `SafetyBindingPull` | What a binding is, and the duties of the binding contract, each for the bindings that its allocation names, among them the two of every lending binding for the storage it lends and for its shared state
+| xref:bindings.adoc[Allocated to each binding] | 14 | `SafetyBinding`, `SafetyBindingPull` | What a binding is, and the duties of the binding contract, each for the bindings that its statement names, among them the two of every lending binding for the storage it lends and for its shared state
 | xref:wires.adoc[Allocated to each wire] | 4 | `SafetyWire` | What a wire is, the duties of every wire, and a list of the rules that depend on the payload a wire carries
 | xref:native-wire.adoc[The native wire] | 3 | `SafetyUpRustCore` | What a native payload type is, that it is read only under its exactly agreed layout, apart from the encoding identifier, and that it is written and read in place, with the whole native contract step by step
 | xref:serialized-wires.adoc[Serialized wires, and the values they own] | 2 | `SafetyWireSerialized` | A serialized wire's format, its sizing, encoding and decoding, what owning means, allocation and each stronger guarantee, and one profile, Protobuf
@@ -74,7 +74,7 @@ What only one binding must meet, and what only a deployment on it provides, is s
 | Binding | Items of its own | What that means
 
 | iceoryx2 | Thirteen requirements (tag `SafetyIceoryx2`) and two assumptions of use: seven requirements and the two assumptions in xref:iceoryx2.adoc[the iceoryx2 page], and six requirements in xref:iceoryx2-frame.adoc[the iceoryx2 physical frame], one of which, on a frame's metadata, is allocated to the element as well | Its account of its panic paths, its static data segments, its service depth, its event IDs, its expired-connection buffer, its arrival reports and its degradation handler are stated in the iceoryx2 page, with the limits, known anomalies and known failures that a deployment on it accepts or sees listed, and its separation of integrity levels. The frame that the binding places in an iceoryx2 sample, what it checks before any of it is used and what it wipes are stated in the iceoryx2 physical frame
-| LoLa | Twelve requirements (tag `SafetyLola`) and no assumption of use: six in xref:lola.adoc[the LoLa page], and six in xref:lola-envelope.adoc[the LoLa physical envelope] | Both kinds of route, its counts and its storage, the boundary to LoLa's C++ code, the life of a subscription and of what LoLa is given, and LoLa's own assumptions of use are stated there, with what the general rules ask on LoLa. The LoLa binding is bound as well by each item of the binding contract whose statement and "Allocated to" line name it, and a deployment on it by the assumptions about every transport. Its account of its panic paths, under which it has no accepted panic path, is in xref:lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path]. No item of this area names a permit or an accepted limit for it, and its permits, limits and known anomalies are those that its qualification record states (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it])
+| LoLa | Twelve requirements (tag `SafetyLola`) and no assumption of use: six in xref:lola.adoc[the LoLa page], and six in xref:lola-envelope.adoc[the LoLa physical envelope] | Both kinds of route, its counts and its storage, the boundary to LoLa's C++ code, the life of a subscription and of what LoLa is given, and LoLa's own assumptions of use are stated there, with what the general rules ask on LoLa. The LoLa binding is bound as well by each item of the binding contract whose statement says so, and a deployment on it by the assumptions about every transport. Its account of its panic paths, under which it has no accepted panic path, is in xref:lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path]. No item of this area names a permit or an accepted limit for it, and its permits, limits and known anomalies are those that its qualification record states (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it])
 |===
 
 * *Bindings without a page.*
@@ -118,7 +118,7 @@ The item governs, and this table adds no duty.
 == Items filed with the element
 
 Some items that concern a transport or a wire are filed with the element, because they are rules of the element's own modes, memory and reports.
-In their statements and "Allocated to" lines, some of these name a binding or a wire beside the element (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+In their statements, some of these name a binding or a wire beside the element (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 A binding or wire author reads them in xref:../seooc-up-rust/README.adoc[the element's part]:
 
 * the heap class that every wire, binding and route declares, and the stronger resource guarantees a route may require (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]);
