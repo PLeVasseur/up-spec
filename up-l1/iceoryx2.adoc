@@ -93,7 +93,7 @@ An iceoryx2 `Sample` that is used to convey a uProtocol message *MUST* contain i
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-payload-zero-copy~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-An iceoryx2 message that is used to convey a uProtocol message *MUST* be zero-copy and shared-memory compatible:
+An iceoryx2 message that is used to convey a uProtocol message *MUST* be zero-copy and shared-memory compatible, in iceoryx2's sense:
 
 * is self contained, no heap, no pointers to external sources, no handles to external resources (files etc)
 * has a uniform memory representation

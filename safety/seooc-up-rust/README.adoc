@@ -1,10 +1,10 @@
 = up-rust SEooC: scope, modes and verification
 :toc: preamble
 
-The software safety requirements and assumptions of use of one safety element out of context (SEooC): up-rust's runtime data path, with the Streamer's data plane, the end-to-end protection wire and strict mode.
+The software safety requirements and assumptions of use of one safety element out of context (SEooC).
 
 * The element is developed for ASIL B capability, and claims it only for a supported configuration whose evidence establishes it (<<claims>>).
-* No item is known yet, so the requirements are assumed ones, and the assumptions of use say what an integrator has to provide (10-9).
+* No item in ISO 26262's sense is known yet, so the requirements are assumed ones, and the assumptions of use say what an integrator has to provide (10-9).
 
 The conventions and tags are in xref:../README.adoc[the safety area's README].
 xref:../../contract-generations.adoc[Which requirements an implementation follows] says how these items relate to the protocol chapters.
@@ -47,8 +47,8 @@ Each binding's implementation of it is not.
 a|
 * The runtime platform: `now`, `unix_time_ms`, `wait`, `wake_one`, `wake_all`.
 * The initialization-only platform: `entropy`, `prefault`.
-* The shipped backends, chosen by `cfg`: Linux; macOS; QNX, source only and future work.
-A supported configuration names the backend it uses (xref:assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]).
+* The shipped backends, chosen by `cfg`: Linux; macOS; QNX, source only.
+The backend that a supported configuration uses: xref:assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified].
 * The shared signal.
 | `up-rust-core`
 
@@ -63,8 +63,8 @@ a|
 a|
 `E2e<W>`, an opt-in wire that wraps any other wire.
 
-* It carries a data ID, a counter, its sender's incarnation and a CRC in the payload, and uses the route's deadline as its timeout.
-* Whether and where to use it is the integrator's choice (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+* What it carries and how it judges a frame: xref:e2e-wire.adoc[The end-to-end protection wire].
+* Whether and where it is used: xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection].
 * Deferred: the wire is not part of this delivery.
 Its items keep their IDs and revisions, and no gate or current obligation of another item depends on it.
 | `up-wire-e2e`, a `no_std` member of `up-rust` that depends only on `up-rust-core`
@@ -74,14 +74,65 @@ a|
 An opt-in check, in initialization mode only, of the integrator's setup against the rules that the assumptions of use name.
 
 * It has four states: Off, the default; Report; Enforce; and Locked, which is Enforce alone, under `+--cfg up_rust_strict+`.
-* Its findings name the rule, the route, the requirement IDs and the fix.
-* It accepts a deviation only when it is acknowledged by ID and revision.
-* Every run produces a compliance report (xref:build.adoc#req-ssr-strict-init-only[Strict mode checks in initialization only]; xref:build.adoc#req-ssr-strict-report[Strict mode reports on every run]).
+* Its rules: xref:build.adoc#req-ssr-strict-init-only[Strict mode checks in initialization only]; xref:build.adoc#req-ssr-strict-lock[The locked build allows only enforcement]; xref:build.adoc#req-ssr-strict-rules[The rules that strict mode checks]; xref:build.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]; xref:build.adoc#req-ssr-strict-report[Strict mode reports on every run].
 | `up-rust-strict`, a `no_std` member of `up-rust` that depends only on `up-rust-core`; in core, read-only views of each route's declarations and one hook
 |===
 
-The initialization-mode code of E1 to E7 is part of the element too: builders, admission, the validation of deployment data, and the transition.
-Its faults show before traffic starts, but a wrong admission decision becomes a runtime fault, so the transition is safety-relevant.
+[[req-ssr-element-boundary]]
+=== The parts of the element, and element code
+
+[.specitem,oft-sid="req~ssr-element-boundary~1",oft-title="The parts of the element, and element code",oft-needs="uman",oft-tags="SafetyUpRustCore"]
+--
+*The parts.*
+These parts belong to the element, each with its initialization-mode code: builders, admission, the validation of deployment data, and the transition.
+
+* E1, the runtime path of `+up-rust-core+`.
+* E2, the lending and handoff runtime contracts in `+up-rust-core+`, without any binding's implementation of them.
+* E3, startup memory, in `+up-rust-core+`.
+* E4, the platform in `+up-rust-core+`, with the backends that it chooses by `+cfg+`.
+* E5, the carrier primitives in `+up-rust-core+`, the SDK side of the Streamer's data plane.
+* E6, the end-to-end protection wire, the crate `+up-wire-e2e+`.
+* E7, strict mode: the crate `+up-rust-strict+`, and the read-only views of the routes' declarations and the hook in `+up-rust-core+` that it uses.
+
+*Element code.*
+Element code is the code of the parts that belong to the element.
+Code that runs on a runtime path but that the element does not own, such as the destructor of an owned value, an allocator's release or a dependency that they reach, is not element code.
+--
+
+[horizontal]
+ID:: `+req~ssr-element-boundary~1+`
+ASIL:: B
+Allocated to:: the element
+Verification:: review (each statement and allocation that names the element, element code or one of the parts E1 to E7, read against this item)
+
+*Rationale.*
+A statement or an allocation that names the element, element code or one of its parts is read against this item.
+The initialization-mode code is part of the element: its faults show before traffic starts, but a wrong admission decision becomes a runtime fault, so the transition is safety-relevant.
+
+[[req-ssr-element-configurations]]
+=== The ASIL path and supported configurations
+
+[.specitem,oft-sid="req~ssr-element-configurations~1",oft-title="The ASIL path and supported configurations",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer"]
+--
+*The ASIL path.*
+A configuration is on the ASIL path where an integrator claims the element's safety-assurance scope for it (xref:assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
+An ASIL application, an ASIL binary, an ASIL image and the ASIL build are the applications, binaries, final images and build of a configuration on the ASIL path.
+What ordinary use is, and what holds for it, is stated in xref:assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+
+*Supported configurations.*
+A supported configuration package is a versioned package that states a configuration's platform backend, its synchronization and execution model, startup checks, sizing, supported contexts, build settings, dependency scope, evidence and limitations.
+A supported configuration is one for which the element's maintainers provide such a package.
+--
+
+[horizontal]
+ID:: `+req~ssr-element-configurations~1+`
+ASIL:: B
+Allocated to:: the element; the Streamer
+Verification:: review (each statement and allocation that names the ASIL path, an ASIL application, binary, image or build, or a supported configuration or its package, read against this item)
+
+*Rationale.*
+The rules on storage, dependencies and qualification hold where a configuration claims the element's assurance, and ordinary use keeps the element's functional contract without them.
+A package states once what a supported configuration offers, so that an application team selects one instead of arguing its platform again.
 
 == Outside the element
 
@@ -132,14 +183,14 @@ Their integrator qualifies that code.
 * *A custom platform backend that an integrator supplies*, an explicit extension held to the platform's rules by xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules].
 * *The application's own logic and the item's safety function.*
 The element carries data.
-What the data means, and how the item reacts to a failure, are the integrator's.
+What the data means, and how the item, in ISO 26262's sense, reacts to a failure, are the integrator's.
 * *The OS, hardware, supervisor, clock source and deployment data, and the choice of routes that need end-to-end protection*: these are assumptions of use.
 
 == What the element relies on but does not contain
 
-* *Bindings and wires* are separate elements.
+* *Bindings and wires*: what each is, and whether it is part of the element, xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract] and xref:../up-l1/wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
 Their code runs inside the element's calls, but each is developed and verified on its own, against the contract suites in `test-util`.
-Each item that binds them names them in its statement and its "Allocated to" line, wherever it is filed (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]); the binding contract and the wire contract are in xref:../up-l1/bindings.adoc[`bindings.adoc`] and xref:../up-l1/wires.adoc[`wires.adoc`] of the transport layer's part.
+Each item that binds them names them in its statement and its "Allocated to" line, wherever it is filed (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]); what the binding contract and the wire contract are is stated in the same two items.
 xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts] restricts an integrator to those that pass.
 The end-to-end protection wire is a wire too, but it is shipped as the element's safety mechanism, so it is part E6, with its own items.
 * *Derive macros* (`up-rust-macros`: `ZeroSlot`, `StablePayload`, `StablePayloadInit`) are tools.
@@ -155,16 +206,14 @@ A deployment can ask for four independent properties, and each route's report ke
 * *Functional communication and monitoring*: the protocol and ownership semantics, deadline gaps counted from true arrivals, and reports that can be read whenever execution permits.
 Every supported profile offers it, with no timing or safety package.
 * *Native resource behaviour*: no heap acquired or released, and no forbidden wait, panic or corruption, on a native path and in the work it causes.
-* *A finite timing bound*: a stated endpoint reached within a bound, under a supported configuration whose execution model, workload envelope and evidence establish it.
-* *Safety assurance*: the element's contribution to an item's safety requirements, at a stated ASIL and context, with its requirements, analyses, verification, qualification and assessment.
+* *A finite timing bound*: xref:qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened].
+* *A safety-assurance scope*: xref:qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened].
 
 === The properties are not a ladder
 
 * No OS family, architecture, compiler or middleware confers a timing bound or an ASIL, and a dependency's certificate does not qualify this element.
 * A timing bound or an assurance scope that a route explicitly requires is admitted under its configuration or refused at setup by name.
 Its absence never refuses ordinary use.
-* An integrity level, an ASIL label or a strict-mode state is not such a request.
-Strict mode checks what a configuration declares before any assurance package exists, and reports assurance that is not established as Draft and unassessed.
 * A passing setup or strict-mode check shows that its observable predicates held.
 It is not a qualification or an assessment.
 
@@ -190,12 +239,12 @@ An integrity level, an ASIL label, a strict-mode state, an operating system, a t
 
 === Supported configuration packages
 
-The element's maintainers provide versioned supported configuration packages: the platform backend, its synchronization and execution model, startup checks, sizing, supported contexts, build settings, dependency scope, evidence and limitations.
+The element's maintainers provide versioned supported configuration packages (<<req-ssr-element-configurations,The ASIL path and supported configurations>>).
 
 * An application team selects a package and declares its semantic traffic, routes, payload and retention bounds and the timing and safety outcomes it requires.
 It does not invent a synchronization backend or an OS scheduling proof for supported use.
 * A custom platform is an explicit extension (xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]).
-* The item's hazards, its fault tolerant time interval, its actual workload, its safe state and everything outside the package stay the integrator's.
+* The hazards of the item, in ISO 26262's sense, its fault tolerant time interval, its actual workload, its safe state and everything outside the package stay the integrator's.
 
 === Evidence states
 
@@ -223,12 +272,7 @@ Runtime mode belongs to a transport.
 * Its transition is all or nothing for that transport alone: where several transports enter together, one that has entered stays in runtime mode if a later one is refused (xref:runtime-modes.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]).
 * Every requirement stated for runtime mode binds that transport from then on, whatever the process's other transports are doing.
 
-A process is in runtime mode once every transport it built is, and for the Streamer when `enter_runtime_all` returns.
-The process-level definition is used for three things only:
-
-* sealing shared startup memory;
-* the Streamer's startup report;
-* process-level statements for integrators.
+What a process in runtime mode is, and the three things for which the term is used, are stated in xref:runtime-modes.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation].
 
 === Initialization
 
@@ -290,10 +334,10 @@ The Streamer's "degraded" is a reported state: its safe state is fail-silent per
 | Provided to integrators | The end-to-end protection wire; strict mode and its compliance report; the Streamer's operator interface, mode report, watchdog hook and startup report | `../up-l2/streamer.adoc`, `e2e-wire.adoc`, `build.adoc`
 | Required from bindings | The lending or handoff contract, and the bindings' duties | The items whose allocations name a binding, most of them in `../up-l1/bindings.adoc`, `../up-l1/iceoryx2.adoc`, `../up-l1/iceoryx2-frame.adoc`, `../up-l1/lola.adoc` and `../up-l1/lola-envelope.adoc`; xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]
 | Required from wires | The wire contract, and the wires' duties | The items whose allocations name a wire, in `../up-l1/wires.adoc`, `../up-l1/serialized-wires.adoc`, `../up-l1/xcdrv2.adoc`, `e2e-wire.adoc`, `heap.adoc`, `memory-safety.adoc` and `../README.adoc`
-| Provided by the element's maintainers | Versioned supported configuration packages: backend, synchronization and execution model, startup checks, sizing, supported contexts, build settings, dependency scope, evidence and limitations | <<claims>>; `platform.adoc`; xref:assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]
+| Provided by the element's maintainers | Versioned supported configuration packages | <<req-ssr-element-configurations,The ASIL path and supported configurations>>; `platform.adoc`; xref:assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]
 | Required from each platform backend | The platform's rules | `platform.adoc`; xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]
 | Required from the OS and hardware | Address-space isolation, or on an MCU the stated partition boundary, threads, wait and wake, a monotonic clock, a wall clock, 32-bit atomics with compare-and-swap, atomic and coherent on every core that shares them | `assumptions-of-use.adoc`
-| Required from the integrator | Supervisor and deployment data; waiver approval; the selection of a supported configuration and the item's timing budgets; the choice of routes that need end-to-end protection; peer rates; the build order and the build profile; operator access | `assumptions-of-use.adoc`, which indexes every assumption and links to the four that a layer part states
+| Required from the integrator | Supervisor and deployment data; waiver approval; the selection of a supported configuration and the timing budgets of the item, in ISO 26262's sense; the choice of routes that need end-to-end protection; peer rates; the build order and the build profile; operator access | `assumptions-of-use.adoc`, which indexes every assumption and links to the four that a layer part states
 |===
 
 == Verification methods
@@ -319,9 +363,9 @@ A line that asks for another platform, compiler, model or target says so in word
 
 A heap window on macOS is pthread evidence: it catches lazy first-use allocation that Linux futexes hide.
 
-=== The shipped profile
+=== The ASIL profile
 
-Evidence lanes (heap windows, fault injection and the panic-link gate) run the ASIL profile: `panic = "abort"` and `overflow-checks = true`.
+Evidence lanes (heap windows, fault injection and the panic-link gate) run the ASIL profile (xref:build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]).
 
 Contract suites that rely on catching a panic run on an unwinding test profile, for diagnosis only, and their evidence counts only as part of an item's evidence.
 
@@ -349,6 +393,7 @@ A test names what it verifies with OFT's own coverage tag, and the method after 
 |===
 | File | Items | Tags
 
+| This page | 2 | `SafetyUpRustCore`, `SafetyStreamer`
 | xref:assumptions-of-use.adoc[Assumptions of use] | 17 | `SafetyManual`
 | xref:runtime-modes.adoc[Modes and the transition] | 14 | `SafetyUpRustCore`
 | xref:heap.adoc[Heap] | 5 | `SafetyUpRustCore`
@@ -374,8 +419,8 @@ These are in xref:../up-l1/README.adoc[the transport layer's part].
 |===
 | File | Items | Tags
 
-| xref:../up-l1/bindings.adoc[Allocated to each binding] | 13 | `SafetyBinding`, `SafetyBindingPull`
-| xref:../up-l1/wires.adoc[Allocated to each wire] | 3 | `SafetyWire`
+| xref:../up-l1/bindings.adoc[Allocated to each binding] | 14 | `SafetyBinding`, `SafetyBindingPull`
+| xref:../up-l1/wires.adoc[Allocated to each wire] | 4 | `SafetyWire`
 | xref:../up-l1/native-wire.adoc[The native wire] | 3 | `SafetyUpRustCore`
 | xref:../up-l1/serialized-wires.adoc[Serialized wires, and the values they own] | 2 | `SafetyWireSerialized`
 | xref:../up-l1/xcdrv2.adoc[The fixed-layout XCDR2 profile] | 5 | `SafetyXcdr2`
@@ -398,7 +443,7 @@ These are in xref:../up-l2/README.adoc[the communication layer's part].
 | File | Items | Tags
 
 | xref:../up-l2/interaction.adoc[RPC and message identity] | 6 | `SafetyUpRustCore`
-| xref:../up-l2/streamer.adoc[Streamer] | 21 | `SafetyStreamer`, `SafetyManual`
+| xref:../up-l2/streamer.adoc[Streamer] | 22 | `SafetyStreamer`, `SafetyUpRustCore`, `SafetyManual`
 |===
 
 === Filed in the area's README

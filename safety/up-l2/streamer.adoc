@@ -7,7 +7,7 @@ Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom it binds: xref:README.adoc[safety at uP-L2].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
-The requirements here are allocated to the Streamer or to its binary: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+The requirements here are allocated to the Streamer or to its binary, and one of them to the element as well: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 
 The last two sections are the two assumptions of use about operating the Streamer.
 
@@ -40,7 +40,7 @@ A frame *MUST NOT* be forwarded before activation.
 ID:: `+req~ssr-streamer-route-lock~3+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: compile-fail (add or delete after activation; forward before activation; activate with a setup value), test (a live subscription source is refused)
+Verification:: compile-fail (add or delete after activation; forward before activation; activate with an initialization value), test (a live subscription source is refused)
 ISO 26262:: 6-7.4.3, 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
@@ -91,7 +91,7 @@ The Streamer's own code *MUST NOT* acquire or release heap memory in runtime mod
 * a full egress;
 * a failed egress;
 * a refused or expired frame;
-* a disabled route;
+* a route whose gate is not enabled;
 * a peer dying or restarting.
 --
 
@@ -110,6 +110,33 @@ An ASIL route through the Streamer is only as sound as the Streamer, so it canno
 
 A serialized leg's declared allocation belongs to that leg's wire or binding and is reported per route.
 It never reaches the Streamer's own forwarding paths, or a native leg (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
+
+[[req-ssr-carrier-route]]
+== A carrier route takes each frame at its ingress and sends it at its egress
+
+[.specitem,oft-sid="req~ssr-carrier-route~1",oft-title="A carrier route takes each frame at its ingress and sends it at its egress",oft-needs="uman",oft-tags="SafetyStreamer,SafetyUpRustCore"]
+--
+*Carrier routes and their legs.*
+A carrier route is a route that takes each frame at its ingress and sends it at its egress, each on a transport.
+Its ingress and its egress are its legs.
+
+*Kinds of leg.*
+A lending leg is a leg whose transport's binding is a lending binding (xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]), and a lending ingress and a lending egress are such legs.
+A byte-only egress is an egress that has no loan to copy the ingress bytes into.
+
+*A hop.*
+A hop is one forwarding of a frame by a carrier route, from its ingress to its egress.
+--
+
+[horizontal]
+ID:: `+req~ssr-carrier-route~1+`
+ASIL:: B
+Allocated to:: the element; the Streamer
+Verification:: review (each statement and allocation that uses a word that this item defines, read with this item)
+
+*Rationale.*
+Requirements of the element, of the bindings and of the Streamer name carrier routes, their legs and their hops.
+Each of these words has its meaning once, here, so that a rule for a carrier route binds what it is meant to bind.
 
 [[req-ssr-streamer-byte-identity]]
 == Carriage keeps the bytes
@@ -485,7 +512,7 @@ So a gate silences one route while every other route carries on (<<req-ssr-strea
 
 The gate is the only route state that changes in runtime mode (<<req-ssr-streamer-route-lock,Routes and subscriptions are locked at activation>>), and fixed storage lets it change without heap (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
 
-A gated request is answered `+Unavailable+` where the reverse route can carry it.
+A request on a route whose gate is not enabled is answered `+Unavailable+` where the reverse route can carry it.
 So a client without the E2E wire can learn of the outage from that answer, without waiting out its TTL (<<req-ssr-streamer-rpc-error-response,An RPC request that cannot be dispatched is answered, best effort>>).
 
 With its cause counted, each change shows in the reports as an operator's disable or as a monitor's trip (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>; <<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>).
@@ -515,7 +542,7 @@ So the only way to do it at run time is declared at setup, bounded and shown in 
 Who may use it is the integrator's to restrict (<<aou-seooc-operator-access,Only authorized operators reach the Streamer's operator interface>>).
 
 Only an operator's re-enable clears a monitor's trip (<<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>).
-So a tripped route that the interface does not name stays disabled until the Streamer restarts.
+So a tripped route that the interface does not name stays tripped until the Streamer restarts.
 
 [[req-ssr-streamer-monitors]]
 == Worker and transport monitors trip routes
@@ -548,7 +575,7 @@ A trip:
 
 *A trip latches.*
 A trip *MUST* latch: a monitor *MUST NOT* re-enable a route, even once its condition clears, and only an operator's re-enable clears it (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>).
-A tripped route that the operator interface does not name stays disabled until the Streamer restarts, and <<aou-seooc-monitor-thresholds,Monitor thresholds allow for peers' restarts>> gives the integrator's part.
+A tripped route that the operator interface does not name stays tripped until the Streamer restarts, and <<aou-seooc-monitor-thresholds,Monitor thresholds allow for peers' restarts>> gives the integrator's part.
 
 *Reaction bound.*
 Where a configuration claims a safety reaction, its bound from the fault to the safe state is that configuration's claim.
@@ -568,7 +595,7 @@ Verification:: fault-injection, test
 ** An egress killed.
 ** A peer restarted within and beyond a monitor's threshold.
 * *test*
-** A tripped route that the operator interface does not name stays disabled.
+** A tripped route that the operator interface does not name stays tripped.
 ** A trip keeps its routes' storage.
 ** The report without a reaction claim.
 ** In strict mode's Enforce state, a threshold below the declared restart time of a peer on its monitor's routes: refused by setup, and not refused for that reason where `+outage_on_restart+` names the accepted outage.
@@ -673,7 +700,7 @@ A retry, parked-frame resend and best-effort error answer each retain their sepa
 --
 *The error response.*
 When the Streamer cannot dispatch an RPC request, it *MUST* send the client an error response, as up-spec's dispatcher chapter requires, with the commstatus code that chapter gives for the cause.
-A request that arrives on a gated route counts as one it cannot dispatch, and gets `+Unavailable+`.
+A request that arrives on a route whose gate is not enabled counts as one it cannot dispatch, and gets `+Unavailable+`.
 
 *Best effort.*
 The response is best effort:
@@ -699,7 +726,7 @@ Allocated to:: the Streamer
 Verification:: test (each cause; a full egress; a full reverse route; a call whose error response was not sent ends as expired), heap-window
 
 *Rationale.*
-The dispatcher can report a known delivery failure promptly without forwarding through a disabled route.
+The dispatcher can report a known delivery failure promptly without forwarding through a route whose gate is not enabled.
 The response is best effort and the request TTL remains the bound.
 
 That bound is logical (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded]): it decides the call's outcome, while when a descheduled client sees it depends on the client running.
@@ -754,9 +781,9 @@ What the Enforce state refuses with those restart times, and what strict mode's 
 
 * A threshold below a peer's worst-case restart trips the route on that restart.
 * The trip is *counted* with its cause, and the mode report shows degraded.
-* The route stays disabled until an operator re-enables it, or, where the operator interface does not name it, until the Streamer restarts.
+* The route stays tripped until an operator re-enables it, or, where the operator interface does not name it, until the Streamer restarts.
 * In strict mode, a threshold below a peer's declared restart time is *refused at setup* in the Enforce state, unless `+outage_on_restart+` names the accepted outage.
-* Whether that outage is acceptable for the item is *undetectable* by the element.
+* Whether that outage is acceptable for the item, in ISO 26262's sense, is *undetectable* by the element.
 
 [horizontal]
 ID:: `+aou~seooc-monitor-thresholds~3+`
@@ -765,7 +792,7 @@ ASIL:: B
 *Rationale.*
 A peer recovers from a fault by restarting, since the element has no recovery inside a process (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-one-way[There is no way back]; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
 A monitor's trip holds until an operator re-enables the route (<<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>).
-So a threshold below a peer's worst-case restart turns that peer's normal restart into an outage of the route, and only the item's own analysis can say whether that outage is acceptable.
+So a threshold below a peer's worst-case restart turns that peer's normal restart into an outage of the route, and only the analysis of the item itself, in ISO 26262's sense, can say whether that outage is acceptable.
 
 Declared restart times make the duty checkable.
 Setup can compare every threshold with them, and refuse a short one unless its outage is accepted by name, before any route carries traffic (<<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>).

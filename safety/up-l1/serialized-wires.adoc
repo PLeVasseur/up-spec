@@ -9,7 +9,7 @@ The duties of every wire: xref:wires.adoc[allocated to each wire].
 The other kind of wire: xref:native-wire.adoc[the native wire].
 Both kinds, end to end and on either kind of transport: xref:payload-paths.adoc[payload paths, end to end].
 
-A serialized wire encodes a value into the bytes of a format, and decodes such bytes into a value.
+A serialized wire encodes a value into the bytes of a format, and decodes such bytes into a value (xref:wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]).
 The decoded value is _owned_: its slot owns it, then the lease that an application holds, and it borrows nothing from the frame that it came from.
 
 This page holds:
@@ -106,7 +106,7 @@ A serialized wire *MUST* state the largest encoding that it can write for its ty
 Nothing is cut short.
 
 *Encoding.*
-Encoding *MUST* write the value once, in order, through the writer that the element gives it, into the storage that carries the frame (xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]).
+Encoding *MUST* write the value once, in order, through the payload writer that the element gives it, into the storage that carries the frame (xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]).
 
 * The wire does not build the encoding in storage of its own and copy it out.
 * A value that the format cannot represent is an error, and nothing is sent.

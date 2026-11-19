@@ -144,7 +144,7 @@ It keeps the heap restrictions of the crate that holds the element's runtime pat
 [[req-ssr-e2e-detects]]
 == The E2E wire detects each fault
 
-[.specitem,oft-sid="req~ssr-e2e-detects~5",oft-title="The E2E wire detects each fault",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
+[.specitem,oft-sid="req~ssr-e2e-detects~6",oft-title="The E2E wire detects each fault",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
 --
 *Header, CRC and data ID first.*
 Decoding through the E2E wire *MUST* first check each frame's header, its CRC and its data ID.
@@ -163,7 +163,7 @@ On every route but a response route, the counter is then judged, for each declar
 * a frame of the reference's incarnation is judged by its counter against the highest one delivered, through the window of <<req-ssr-e2e-replay-window,A sliding window judges a reference's counters>>.
 ** Each incarnation's counter starts at 0 and never wraps (<<req-ssr-e2e-sender-state,E2E sending state is one counter per wire value>>).
 ** A greater counter is delivered, and the counters it skips open one gap, counted at once, so the frame that reveals a gap is delivered.
-** A counter that has arrived is a repeat, and is refused.
+** A counter that has arrived, inside the window and at or above the floor, is a repeat, and is refused.
 ** A smaller counter that has not arrived is delivered late on a request route, and refused as late on a topic, while it is inside the window and at or above its floor; otherwise it is refused as below the floor or out of the window.
 ** None of these frames is ever adopted;
 * a frame of another incarnation is judged by <<req-ssr-e2e-resync,A restart resynchronizes, stale frames are refused, and no arrival order locks a sender out>>.
@@ -180,7 +180,7 @@ The E2E wire's timeout *MUST* be its route's deadline (xref:qos.adoc#req-ssr-qos
 --
 
 [horizontal]
-ID:: `+req~ssr-e2e-detects~5+`
+ID:: `+req~ssr-e2e-detects~6+`
 ASIL:: B
 Allocated to:: the E2E wire
 Verification:: test, fault-injection, heap-window
@@ -192,6 +192,7 @@ Verification:: test, fault-injection, heap-window
 ** A repeat is refused, and named.
 ** A reordered frame inside the window is delivered late on a request route and refused as late on a topic.
 ** A frame below the floor and one more than 63 counters back are refused, and named.
+** A counter that has arrived and lies below the floor is refused as below the floor, not as a repeat.
 ** Corruption and an undeclared data ID are refused.
 ** A request whose method fields fail is refused as corrupt.
 ** Each header check refuses, and changes no state.
@@ -368,8 +369,8 @@ Otherwise the client refuses the response, naming the cause: corrupt, undeclared
 A copy that another server answers is refused as an undeclared data ID when the client declares one server for the method.
 Where a client declares several servers for one method, an answer from another declared server to a misaddressed copy is accepted (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
-*Assumption.*
-The protection assumes one response wire per method, which the element provides.
+*One response wire per method.*
+The protection rests on one response wire per method, which the element provides.
 --
 
 [horizontal]
@@ -389,7 +390,7 @@ Verification:: test, heap-window
 
 *Rationale.*
 A response sequence alone does not identify the outstanding call.
-Echoing the protected request identity binds the answer to that call.
+Echoing the protected request identity ties the answer to that call.
 
 [[req-ssr-e2e-data-id]]
 == One data ID per sender and route
@@ -435,10 +436,10 @@ So each data ID is derived from its sender and, where the route has one, from th
 
 [.specitem,oft-sid="req~ssr-e2e-sender-state~2",oft-title="E2E sending state is one counter per wire value",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
 --
-*State lives in the wire value.*
-The E2E wire *MUST* keep its sending state in the wire value: one counter and one incarnation per E2E value.
+*State lives in the E2E value.*
+The E2E wire *MUST* keep its sending state in the E2E value: one counter and one incarnation per E2E value.
 
-* The SDK never gives one wire value to two roles.
+* The SDK never gives one E2E value to two roles.
 * An `+E2e+` value cannot be cloned, so it cannot be a transport default.
 * A publisher, a notifier, and an RPC client on its request route each send on one route, so the value's counter is that route's.
 

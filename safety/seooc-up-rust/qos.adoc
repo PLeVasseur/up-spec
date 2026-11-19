@@ -39,7 +39,7 @@ The declaration lets the Enforce state tell that choice from a missing deadline.
 [[req-ssr-qos-no-downgrade]]
 == QoS is honored or refused, never weakened
 
-[.specitem,oft-sid="req~ssr-qos-no-downgrade~3",oft-title="QoS is honored or refused, never weakened",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-qos-no-downgrade~4",oft-title="QoS is honored or refused, never weakened",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Functional QoS.*
 Each route's QoS *MUST* be checked at setup against its binding's declared capability, before any resource is reserved.
@@ -48,10 +48,13 @@ No QoS setting is weakened silently, at setup or in runtime mode.
 
 *Timing and assurance are separate claims.*
 A finite timing bound and a safety-assurance scope are claims separate from a route's functional QoS.
+A finite timing bound is a stated endpoint reached within a bound, under a supported configuration whose execution model, workload envelope and evidence establish it.
+A safety-assurance scope is the element's contribution to the safety requirements of an item, in ISO 26262's sense, at a stated ASIL and context, with its requirements, analyses, verification, qualification and assessment.
 
 * A route that explicitly requires either *MUST* receive it only under the declared conditions of a supported configuration whose evidence establishes it.
 Otherwise setup *MUST* refuse the route, naming the route, the claim and the missing condition.
 * Neither claim is inferred from an OS family, an architecture or a compiler.
+* An integrity level, an ASIL label or a strict-mode state is no request for either claim.
 * The absence of an optional timing bound or assurance scope *MUST NOT* refuse a route that requires only functional QoS.
 * Where a configuration offers no finite bound for an endpoint, the element *MUST* still operate and report functionally.
 A route that explicitly requires that bound is refused, as the first entry states.
@@ -68,15 +71,16 @@ A report *MUST NOT* present a passed setup check as a safety qualification.
 --
 
 [horizontal]
-ID:: `+req~ssr-qos-no-downgrade~3+`
+ID:: `+req~ssr-qos-no-downgrade~4+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test
+Verification:: test, review (each statement that uses a finite timing bound or a safety-assurance scope, read with the clause "Timing and assurance are separate claims")
 * The QoS contract suite on real iceoryx2 and on in-memory bindings.
 * The iceoryx2 binding's QoS tests.
 * The native lanes.
 * A route that requires a timing bound or an assurance scope its configuration does not establish is refused by name.
 * The same route without that requirement is admitted on a configuration that has no timing or assurance package.
+* A route at an ASIL integrity level that requires neither claim is not refused for want of a timing bound or an assurance scope, in any strict-mode state, on a configuration that has no timing or assurance package.
 * On a configuration that offers no finite bound for an endpoint, a route that does not require that bound operates and reports functionally.
 * In the Enforce state, a route whose detection bound exceeds its declared reaction budget is refused, and one whose bound equals the budget is not.
 
@@ -127,7 +131,7 @@ Verification:: test, heap-window
 * *test*
 ** The QoS contract suite, observing what an application receives from the documented read call alone, with no drain loop first.
 ** Observable discards counted once under their cause.
-** A binding with middleware-unobservable discards explicitly discloses the limitation and makes no complete-count claim.
+** A binding with discards that the element cannot see explicitly discloses the limitation and makes no complete-count claim.
 ** On a serialized route that admits owning values, one release per evicted, refused or timed-out frame.
 * *heap-window*
 ** Every overflow policy inside the window.

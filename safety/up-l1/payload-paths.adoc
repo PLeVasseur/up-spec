@@ -27,7 +27,7 @@ This page holds:
 * The three requirements bind the element; <<req-ssr-payload-written-once,A payload is written once, into the storage that carries it>> also binds each handoff binding, for its one copy at a hand-off, and <<req-ssr-payload-route-form,A route's form is fixed at setup, by what the route declares and never by a name>> each binding, for the capability that it declares and its refusal in route preparation.
 * Each table names the rule that governs a cell, and that rule binds whoever its own item binds.
 The tables add no duty.
-* Nothing here binds a transport or a wire that is not written against the element's contract.
+* Nothing here binds a transport implementation that is not a binding, or a codec that is not a wire (xref:bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]; xref:wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]).
 
 [[req-ssr-payload-written-once]]
 == A payload is written once, into the storage that carries it

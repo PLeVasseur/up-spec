@@ -14,16 +14,20 @@ They are allocated to the element: each item's statement and "Allocated to" line
 * The integrator's part, assigning each transport's level, is xref:deployment.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly] in xref:deployment.adoc[what a deployment provides].
 * The integrator's duties for access and for a zero-copy writer are xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], on the same page.
 * The integrator's duties for data above ASIL B, and for the element inside an ASIL C or D process or partition, are xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element] in xref:../seooc-up-rust/assumptions-of-use.adoc[the element's assumptions of use].
-* What a level is, and what it is not, is in xref:../README.adoc#concepts[the shared concepts].
+* What a level is, its values, their order and its default: <<req-ssr-integrity-declared,Each transport declares one integrity level>>; what a level is not: xref:../README.adoc#concepts[Shared concepts and fault models].
 
 [[req-ssr-integrity-declared]]
 == Each transport declares one integrity level
 
-[.specitem,oft-sid="req~ssr-integrity-declared~3",oft-title="Each transport declares one integrity level",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-integrity-declared~4",oft-title="Each transport declares one integrity level",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *One level per transport.*
-Each transport *MUST* declare one integrity level: QM, A, B, C or D, in that order, with QM as the default.
+Each transport *MUST* declare one integrity level: QM, A, B, C or D, in that order, from the lowest to the highest, with QM as the default.
 Every route on the transport *MUST* carry that level, with no per-route override.
+
+*Words that a level gives.*
+A transport or a route at A, B, C or D is an ASIL transport or an ASIL route, and one at QM is a QM transport or a QM route.
+The same holds for each kind of route: an ASIL receive route, for one, is a receive route at A, B, C or D.
 
 *Refusal at setup.*
 At setup, a route on which a reader would see shared memory written below its own level, or at a level its binding reports as unknown, *MUST* be refused by name, as QoS is, unless it takes the copy route of <<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>.
@@ -33,10 +37,10 @@ Recording and reporting the writer's level is the binding's duty (xref:bindings.
 --
 
 [horizontal]
-ID:: `+req~ssr-integrity-declared~3+`
+ID:: `+req~ssr-integrity-declared~4+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test, fault-injection
+Verification:: test, fault-injection, review (each statement that uses a word of the clause "Words that a level gives", read with that clause)
 ISO 26262:: 6-7.4.8, 9-6 (part-clause numbers only)
 
 *Rationale.*
@@ -49,8 +53,11 @@ QM as the default means an undeclared transport claims nothing.
 [[req-ssr-integrity-zero-copy]]
 == Zero-copy only from a writer at or above the reader
 
-[.specitem,oft-sid="req~ssr-integrity-zero-copy~4",oft-title="Zero-copy only from a writer at or above the reader",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-integrity-zero-copy~5",oft-title="Zero-copy only from a writer at or above the reader",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
+*Zero-copy.*
+A zero-copy route is a route that gives its reader a view into shared memory, and a reader gets zero-copy where it is given such a view.
+
 *When a view is allowed.*
 A reader *MUST* get a view into shared memory only when all of these hold:
 
@@ -84,15 +91,15 @@ It does not contain corrupt middleware offsets, lengths, free lists or ownership
 --
 
 [horizontal]
-ID:: `+req~ssr-integrity-zero-copy~4+`
+ID:: `+req~ssr-integrity-zero-copy~5+`
 ASIL:: B
 Allocated to:: the element
 Verification:: fault-injection, miri, heap-window, review
 * *fault-injection*
 ** A faulty publisher writing to a sample while it is read, with real processes.
-** On a two-way binding, a port above and a port below the service's recorded level, on every port kind and on the paired event service.
+** On a binding with two-way shared state, a port above and a port below the service's recorded level, on every port kind and on the paired event service.
 * *miri*, under Stacked Borrows, under Tree Borrows and with strict provenance: a racing writer thread, with a plain-read copy as the negative control, which must be reported as a data race.
-* *review*: the source-access mechanism of each copy route, and the tenure and synchronization of each view, at source level.
+* *review*: the source-access mechanism of each copy route, and the tenure and synchronization of each view, at source level; and each statement that uses zero-copy or a zero-copy route, read with the clause "Zero-copy".
 ISO 26262:: 6-Annex D.2.3, 6-Table 3 1h (part-clause numbers only)
 
 *Rationale.*
@@ -101,7 +108,7 @@ So the reader works only on a copy in storage it owns, checked after the copy is
 
 The copy is held in storage reserved at setup, like every other runtime buffer, so it needs no heap (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
 
-A lending middleware can map its payload memory read-only for readers.
+The middleware of a lending binding can map its payload memory read-only for readers.
 So the copy reads it only through loads that are valid on a read-only mapping.
 Where one middleware does so is stated on its binding's page (xref:iceoryx2.adoc#index[what the general rules meet on iceoryx2]).
 
@@ -199,7 +206,7 @@ Verification:: fault-injection (a writer changing a frame while it is forwarded)
 A carrier keeps a frame's bytes unchanged and makes at most one copy, into a lending egress's loan.
 So that copy is the one place where a frame from a lower writer can be held still and checked.
 
-A byte-only egress receives the ingress bytes directly, with no loan to copy into.
+A byte-only egress (xref:../up-l2/streamer.adoc#req-ssr-carrier-route[A carrier route takes each frame at its ingress and sends it at its egress]) has no loan to copy into, so it receives the ingress bytes directly.
 
 An unknown level counts as lower, as it does on a receive route (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>), because a writer whose level nobody can state cannot be trusted to be at or above the reader.
 

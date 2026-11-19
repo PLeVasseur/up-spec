@@ -40,7 +40,7 @@ xref:streamer.adoc#req-ssr-streamer-rpc-error-response[An RPC request that canno
 | File | Items | Tags | What it holds
 
 | xref:interaction.adoc[RPC and message identity] | 6 | `SafetyUpRustCore` | How an RPC call ends and is answered, how a response reaches its own call, and how message IDs stay unique
-| xref:streamer.adoc[Streamer] | 21 | `SafetyStreamer`, `SafetyManual` | The Streamer's routes, forwarding, gates, monitors and reports, and the two assumptions of use about operating it
+| xref:streamer.adoc[Streamer] | 22 | `SafetyStreamer`, `SafetyUpRustCore`, `SafetyManual` | What a carrier route is, the Streamer's routes, forwarding, gates, monitors and reports, and the two assumptions of use about operating it
 |===
 
 == Responsibilities at this layer

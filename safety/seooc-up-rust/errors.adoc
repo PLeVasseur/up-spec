@@ -109,7 +109,7 @@ A frame whose header or envelope cannot be parsed gives the element nothing it c
 
 No waiver can cover a panic: a waiver covers allocation inside middleware only (xref:waivers.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
 
-Code that runs on a runtime path but that the element does not own is not element code.
+Code that runs on a runtime path is not always element code (xref:README.adoc#req-ssr-element-boundary[The parts of the element, and element code], "Element code").
 Examples are the destructor of an owned value, an allocator's release or a dependency they reach.
 
 * The element keeps memory safe whatever that code does (xref:heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors]).

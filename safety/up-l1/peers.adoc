@@ -129,14 +129,14 @@ The element *MUST* compare a frame's full peer identity and incarnation with the
 
 * make a stale incarnation current;
 * move the recorded incarnation back; or
-* bind one peer's frames to another peer's entry.
+* tie one peer's frames to another peer's entry.
 
 *No limit on concurrent classification.*
 Classification places no limit on how many frames of one peer are classified at once.
 A frame is refused only as stale, as undeclared (<<req-ssr-peer-admission,Undeclared peers cannot lock out declared ones>>), or because the table that its declaration sized is genuinely full.
 
 *Restart reports.*
-On a binding's restart report, the element fails the calls bound to older incarnations of that peer, and counts the report.
+On a binding's restart report, the element fails the calls tied to older incarnations of that peer, and counts the report.
 
 *No admission from a stale incarnation.*
 No frame is admitted as current from a stale incarnation.
@@ -188,4 +188,4 @@ Verification:: fault-injection (strangers first, then declared clients; a lost p
 
 *Rationale.*
 An undeclared source that could take a peer-table entry could fill the table, which is sized for the declared peers, and lock them out.
-Reuse that lost an entry's identity under concurrency could bind a lost peer's frames to a later peer, or have a later peer's frames refused as stale.
+Reuse that lost an entry's identity under concurrency could tie a lost peer's frames to a later peer, or have a later peer's frames refused as stale.

@@ -55,19 +55,31 @@ In this section we will elaborate on the requirements of the platform Dispatcher
 
 NOTE: These communication layer requirements are still for point-2-point uEntity communication to and from a dispatcher
 
-* *MUST* support At-least-once delivery policy, this means that the dispatcher will make every attempt to dispatch the UMessage to the intended Receiver
+[.specitem,oft-sid="dsn~dispatcher-at-least-once~1",oft-needs="impl,utest"]
+--
+* A dispatcher *MUST* support At-least-once delivery policy, this means that the dispatcher will make every attempt to dispatch the UMessage to the intended Receiver
   ** *MUST* queue UMessages not successfully acknowledged (transport level at-least-once delivery confirmation described above)
   ** *MUST* attempt to retry transmission of the UMessage. Retry policy is specific to the dispatcher implementation
   ** Dispatcher *MUST NOT* discard UMessages unless either UMessage has expired, or the egress queue is full. UMessages that cannot be delivered are sent to a Dead Letter Office Topic
+
+NOTE: These communication layer requirements are still for point-2-point uEntity communication to and from a dispatcher
+--
 
 * *MAY* support additional UMessage delivery policies in general or per topic in the future
 * *SHOULD* maintain the (relative) order that messages have been received in, when dispatching messages to receivers
 * *SHOULD* consider a received UMessage's xref:../../basics/upriority.adoc[priority class] in their message dispatching strategy
 * *MAY* batch UMessages when delivering to the Receiver
-* UMessages that cannot be delivered *MUST* be sent to the Dead Letter topic (DLT)
+
+[.specitem,oft-sid="dsn~dispatcher-dead-letter-topic~1",oft-needs="impl,utest"]
+--
+* A dispatcher *MUST* send UMessages that cannot be delivered to the Dead Letter topic (DLT)
   ** DLT *MUST* include at least the UMessage header, SHOULD contain the full UMessage
   ** DLT *MUST* include the reason for the failed delivery attempt using  error codes defined in google.rpc.Code
   ** uEntities MUST be able to subscribe to the DLT to be notified of message deliver failures
+
+NOTE: These communication layer requirements are still for point-2-point uEntity communication to and from a dispatcher
+--
+
 * *MUST* forward attributes from the UMessage header
 
 If the uP-L1 delivery method is push:
@@ -77,6 +89,8 @@ If the uP-L1 delivery method is push:
 
 == RPC Error Handling
 
+[.specitem,oft-sid="dsn~dispatcher-rpc-error-response~1",oft-needs="impl,utest"]
+--
 When a dispatcher is unable to dispatch an event for a given reason (queue full, etc...), the dispatcher is responsible to generate an RPC Response message and send it to the originator of the request. The status code is populated in the xref:../../basics/uattributes.adoc#response-attributes[`commstatus`] attribute of the response message using the <<commstatus-codes>> defined below.
 
 .commstatus Codes
@@ -109,6 +123,7 @@ When a dispatcher is unable to dispatch an event for a given reason (queue full,
 |`Internal`
 |A serious error has occurred that is not covered by any of the error codes mentioned above.
 !===
+--
 
 <<rpc-error-flow>> figure below illustrates the sequence of messages for RPC flows and the role dispatchers play in error handling.
 

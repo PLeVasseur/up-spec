@@ -43,7 +43,7 @@ An https://en.wikipedia.org/wiki/Architectural_pattern[architectural pattern] us
 |Protocol |A set of rules governing the exchange or transmission of data between software components
 |https://aws.amazon.com/what-is/routing/#:~:text=Routing%20is%20the%20process%20of,place%20through%20many%20different%20paths[Routing] |Routing is the process of path selection in any network
 |Packet |A block of data transmitted across a network
-|https://www.computerhope.com/jargon/b/bind.htm[Binding ] |Creating a connection between two software entities for a specified amount of time to allow data to be sent and/or received
+|Binding |See _communication protocol binding_ in xref:up-l1/README.adoc[Transport & Session Layer (uP-L1)], and a binding of the up-rust SEooC in xref:safety/up-l1/bindings.adoc[uP-L1 safety: Allocated to each binding].
 |https://byjusexamprep.com/application-layer-protocols-dns-smtp-pop-ftp-http-i[Communication Protocol] |Is a set of rules that allows two or more entities of a https://en.wikipedia.org/wiki/Communications_system[communications system] to transmit https://en.wikipedia.org/wiki/Information[information] via any kind of variation of a https://en.wikipedia.org/wiki/Physical_quantity[physical quantity]. The protocol defines the rules, https://en.wikipedia.org/wiki/Syntax[syntax], https://en.wikipedia.org/wiki/Semantics_(computer_science)[semantics] and https://en.wikipedia.org/wiki/Synchronization[synchronization] of https://en.wikipedia.org/wiki/Communication[communication] and possible https://en.wikipedia.org/wiki/Error_detection_and_correction[error recovery methods]. Protocols may be implemented by https://en.wikipedia.org/wiki/Computer_hardware[hardware], https://en.wikipedia.org/wiki/Software[software], or a combination of both.
 |https://byjusexamprep.com/application-layer-protocols-dns-smtp-pop-ftp-http-i[Application Protocol] a|
 An application layer protocol defines how processes (clients and servers), running on same or different end systems, pass messages to each other. In particular, an application layer protocol defines:
@@ -74,7 +74,7 @@ _socket_ is also used for the software endpoint of node-internal https://en.wiki
 |*D2C* |Device-2-Cloud Communication
 |*D2D* |Device-2-Device Communication
 |*uDevice* |Independent software execution environment that will implement uProtocol and contain a collection of uEntities along with dispatcher(s)
-|*Device Proxy Router (DPR)* |Proxies D2D communication when devices are unable to connect directly with each other
+|*Device Proxy Router (DPR)* |See xref:up-l2/dispatchers/README.adoc#dispatcher-types[Types of Dispatchers]
 |*uDomain* |Collection of uDevices using DNS nomenclature
 |*Message* |Protobuf defined data structure used for communication in the uProtocol
 |*Property* |An attribute, quality, or characteristic of a uThing that are stored in the uDiscovery database
@@ -82,7 +82,7 @@ _socket_ is also used for the software endpoint of node-internal https://en.wiki
 Something that can be manipulated/controlled/exposed by a service. Resources are unique when prepended with device and service.
 *Static Topic:* Resource that is declared in the service proto in Resource enum and known at compile time (ex. door, window, etc...)
 *Dynamic Topic:* Created at runtime and not defined in the service proto (ex. geo-fence locations)
-|*uBus* |Message bus that dispatches CEs between uEntities over a common transport. It provides multicast and forwarding functionality (works like a network switch) 
+|*uBus* |See xref:up-l2/dispatchers/README.adoc#dispatcher-types[Types of Dispatchers]
 |*uStreamer* |Device-2-Device event dispatcher to enable seamless communication between uEntities on different devices which might talk different transport layer protocols. Performs various additional functionality such as file transfer, event buffering and more. i.e. when events need to move form one transport to the next it flows through the streamer (can be equated to an IP router) 
 |*uDiscovery* |Provides a means for uEntities to discover each other, their location (address), properties, and more.
 |*Topic* |What applications subscribe to and services publish to. It is represented as a uProtocol URI containing authority, sw entity, and resource information

@@ -15,7 +15,47 @@ A binding meets those that bind it in its own code, and covers them in its own r
 The tags say which repositories cover an item, not whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 * They name no middleware.
 What only one binding must meet is stated with that binding, in an item that is allocated to it alone (xref:README.adoc#one-binding[what is specific to one binding]).
-* A transport that is not written against the element's binding contract is not bound by them.
+* What a binding is, and what is not one: <<req-ssr-binding-scope,What a binding is, and the binding contract>>.
+
+[[req-ssr-binding-scope]]
+== What a binding is, and the binding contract
+
+[.specitem,oft-sid="req~ssr-binding-scope~1",oft-title="What a binding is, and the binding contract",oft-needs="uman",oft-tags="SafetyBinding"]
+--
+*What a binding is.*
+A binding is a uP-L1 transport implementation that is written against the element's lending or handoff runtime contract, part E2 of the element (xref:../seooc-up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
+It adapts the element to one middleware.
+
+*The binding contract.*
+The binding contract is that runtime contract with the duties that the items allocated to each binding state, those allocated to each binding of one kind, such as each lending binding, included.
+The duties of an item allocated to one binding alone are added to that binding only, and are not part of the binding contract.
+
+*What is not a binding.*
+A transport implementation that is not written against that runtime contract is not a binding.
+The in-memory bindings of `+test-util+` are test doubles, not bindings.
+
+*Lending and handoff.*
+A lending binding is one on which a reader can be given shared memory that a writer wrote.
+A handoff binding hands the element a private copy.
+
+*Middleware and binding code.*
+A binding's middleware is the communication software that it adapts the element to.
+Binding code is the binding's own code, and the middleware's code is not binding code.
+
+*A separate element.*
+A binding is not part of the element.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-scope~1+`
+ASIL:: B
+Allocated to:: each binding
+Verification:: review (each statement and allocation that uses a word that this item defines, read with this item)
+
+*Rationale.*
+Whom a duty of a binding binds depends on what a binding is, and of which kind it is.
+The items use these words in their statements and allocations, so each word has its meaning once, here.
+A binding's code runs in the element's process, inside the element's calls and on threads that it starts, but each binding is developed and verified on its own, against the binding contract suite.
 
 [[req-ssr-binding-no-heap]]
 == Binding code allocates nothing in runtime mode
@@ -82,7 +122,7 @@ A serialized route's declared allocation excuses no lazy first use on any path.
 --
 *No blocking.*
 Dropping a binding's received frame *MUST NOT* block, with the one exception that this item states for a declared allocation domain.
-It takes no lock that can wait behind other work, in the binding or in the underlying transport, and any retry is lock-free and bounded by other threads' progress.
+It takes no lock that can wait behind other work, in the binding or in its middleware, and any retry is lock-free and bounded by other threads' progress.
 
 *Native and heap-free routes.*
 On a native route, and on any route whose heap class is none, it *MUST* free no heap.
@@ -96,7 +136,7 @@ On a serialized or owned route whose declared heap class admits the binding's al
 It releases no other binding resource and revokes no retained owner.
 
 *Deferred return.*
-Where the underlying transport's own release of a retained frame can wait, the drop instead hands the frame, without waiting, to the binding's deferred return.
+Where the middleware's own release of a retained frame can wait, the drop instead hands the frame, without waiting, to the binding's deferred return.
 
 A release that the deferred return performs is pending cleanup, charged until it completes and isolated as xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states.
 On a native route it frees no heap and never frees the backing that the frame lives in.
@@ -127,7 +167,7 @@ Verification:: test, heap-window, fault-injection, review
 * *test*
 ** The binding contract suite.
 ** On a serialized route that admits the binding's allocation, one release per frame of exactly what the binding allocated for it.
-** A retained frame whose release in the underlying transport can wait, taken off the drop through the deferred return, on every route.
+** A retained frame whose release in the middleware can wait, taken off the drop through the deferred return, on every route.
 ** On a route that does not require non-waiting release, the release of the binding's allocation on the drop's own path under the declared policy.
 ** On a route that requires it, a release of that allocation that can wait taken off the drop through the deferred return.
 ** A route that requires panic-free cleanup, whose binding allocation's release is not established not to panic, refused at setup by name, and the same route admitted without that requirement.
@@ -154,16 +194,16 @@ So a middleware lock that can wait is still a blocking operation even when its u
 
 Where the middleware's own release can wait, the binding defers it.
 The drop hands the retained owner over without waiting, and the binding's deferred return performs the release as pending cleanup.
-A lock-free queue whose capacity covers every admitted retained owner is one hand-off that meets this.
+A lock-free queue whose capacity covers every admitted retained owner is one hand-off to the deferred return that meets this.
 The statement requires the outcome, and no particular mechanism.
-Whatever the mechanism, every clause of the statement binds it, and so does every clause of xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] that binds pending cleanup, a binding's deferred return included: the hand-off does not wait, it has room for every retained owner that the route admits, ownership passes exactly once, and the owner stays charged until its return completes.
+Whatever the mechanism, every clause of the statement binds it, and so does every clause of xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] that binds pending cleanup, a binding's deferred return included: the hand-off to that return does not wait, it has room for every retained owner that the route admits, ownership passes exactly once, and the owner stays charged until its return completes.
 
 _Isolation._
 A worker of its own is not by itself the isolation that pending cleanup needs.
 While a deferred return waits for a lock, it holds nothing that a binding call, an arrival report or the return of an owner that does not need that lock needs.
 
 _Not a second queue._
-The hand-off holds ownership awaiting return, never unread traffic, so it is not a second receive queue.
+The hand-off to the deferred return holds ownership awaiting return, never unread traffic, so it is not a second receive queue.
 A stalled return shows as counted capacity pressure, never as a drop that waits.
 
 A measured lock delay is not an accepted wait.
@@ -392,7 +432,7 @@ The SDK's E2E wire is deferred and not part of this delivery.
 * A publisher whose level is below the level the service records *MUST* be refused at its own setup, naming the route and both levels.
 
 *Handoff bindings.*
-A handoff binding hands the element a private copy, so the check does not apply to it, and its README *MUST* say so.
+The check does not apply to a handoff binding (<<req-ssr-binding-scope,What a binding is, and the binding contract>>), and its README *MUST* say so.
 --
 
 [horizontal]

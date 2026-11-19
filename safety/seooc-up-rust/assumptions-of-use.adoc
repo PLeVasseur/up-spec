@@ -10,7 +10,7 @@ Each assumption of use is something the integrator must provide or guarantee.
 It stays assumed until the integrator validates it for the item.
 
 This page indexes the element's twenty-four assumptions of use, and states seventeen of them.
-The other seven are stated in the layer part that their duty concerns: three with the transports, two with the one transport they bind, iceoryx2, and two with the Streamer (<<summary>>).
+The other seven are stated in the layer part that their duty concerns: three with the transports, two with one binding and its middleware, iceoryx2, and two with the Streamer (<<summary>>).
 
 [[who]]
 == Who these assumptions bind
@@ -51,9 +51,9 @@ If either could stand in for the other, a duty could be left with nobody.
 
 A violation shows up in one of three classes:
 
-* *Refused at setup*: the element detects it during initialization and refuses with a named error, so runtime mode is never reached.
+* *Refused at setup*: the element detects it during initialization and refuses it with the error that xref:runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure] states.
 A build that fails counts here too.
-* *Counted*: the element detects it in runtime mode, and returns an error or increments a route counter, without heap.
+* *Counted*: the element detects it in runtime mode, and returns or counts it as xref:errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] and xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap] state.
 * *Undetectable*: the element cannot see it.
 Only the integrator's own measures can cover it.
 
@@ -133,7 +133,7 @@ A "Strict mode" clause is the element's own, and is not listed.
 | Assumption and clause | Part it concerns | Who acts | Where that part states it
 
 | <<aou-seooc-process-isolation,Processes or partitions are isolated>>, "Shared memory" | uP-L1: shared memory that a binding maps | The integrator | xref:../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport] in xref:../up-l1/deployment.adoc[what a deployment provides]; xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]
-| <<aou-seooc-capability-ceiling,Data above ASIL B relies on measures outside the element>>, "The level itself" | uP-L1: the level a transport is given | The integrator | xref:../up-l1/deployment.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly] in xref:../up-l1/deployment.adoc[what a deployment provides]; xref:../README.adoc#integrity-level[integrity levels]
+| <<aou-seooc-capability-ceiling,Data above ASIL B relies on measures outside the element>>, "The level itself" | uP-L1: the level a transport is given | The integrator | xref:../up-l1/deployment.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly] in xref:../up-l1/deployment.adoc[what a deployment provides]; xref:../up-l1/integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]
 | <<aou-seooc-timing-budgets,Timing claims rest on a supported configuration, and the item's budgets are the integrator's>>, "TTL resolution" | uP-L2: the time that a message ID records | The element stamps and checks; the integrator allows for the early refusal | xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique] in xref:../up-l2/interaction.adoc[RPC and message identity]; xref:qos.adoc#req-ssr-qos-ttl[Expired messages are not processed] in xref:qos.adoc[QoS, TTL and deadlines]
 | <<aou-seooc-timing-budgets,Timing claims rest on a supported configuration, and the item's budgets are the integrator's>>, "Refused RPC copies on the E2E wire" | uP-L2: an RPC call, on a route that selects the deferred E2E wire | The element gives the slot back; the integrator allows for the TTL | xref:../up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it] in xref:../up-l2/interaction.adoc[RPC and message identity]
 | <<aou-seooc-timing-budgets,Timing claims rest on a supported configuration, and the item's budgets are the integrator's>>, "When an RPC failure is seen" | uP-L2: the outcome of an RPC call | The element sets the outcome; when the application observes it is a timing claim of its configuration | xref:../up-l2/interaction.adoc[RPC and message identity]; xref:../up-l2/streamer.adoc#req-ssr-streamer-rpc-error-response[An RPC request that cannot be dispatched is answered, best effort] in xref:../up-l2/streamer.adoc[the Streamer's page]
@@ -468,7 +468,7 @@ ID:: `+aou~seooc-resource-guarantees~2+`
 ASIL:: B
 
 *Rationale.*
-The element admits ordinary owning wires and gives a stronger resource guarantee only where a route requires it (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
+The element admits owning wires under ordinary ownership and gives a stronger resource guarantee only where a route requires it (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
 An item that relies on such a guarantee therefore has to ask for it.
 
 _Why this duty is an assumption of its own._
@@ -534,15 +534,15 @@ _Every route._
 _A route that selects the E2E wire, once it is delivered._
 
 * A corrupt frame, an undeclared data ID, a repeat, an out-of-sequence frame and a stale frame are refused and *counted* (xref:e2e-wire.adoc#req-ssr-e2e-detects[The E2E wire detects each fault]; xref:e2e-wire.adoc#req-ssr-e2e-resync[A restart resynchronizes, stale frames are refused, and no arrival order locks a sender out]), and lost frames, gaps, restarts and resyncs are *counted* per sender in the wire's storage.
-* On RPC responses, a corrupt, misaddressed, stale or unprotected response, one for another call, and one whose status does not match, are refused at arrival and *counted*, and the slot is given back to await a later acceptable response or protected final answer; if neither arrives, the call ends at its TTL naming the refusal.
+* On RPC responses, a corrupt, misaddressed, stale or unprotected response, one for another call, and one whose status does not match, are refused at arrival and *counted*, and the call slot is given back to await a later acceptable response or protected final answer; if neither arrives, the call ends at its TTL naming the refusal.
 * A refused request is answered, final or advisory, and *counted* at the server by kind; only a corrupt one goes unanswered.
 * Delay and silence are *counted* by the route's deadline monitor where a deadline is declared, and are *undetectable* where none is.
 * A second decoding thread, or a second sending thread, makes in-order frames look reordered or contended: they are refused and *counted*, never corrupted, and on a client a call that receives no later acceptable response or protected final answer ends at its TTL.
-* A second live sender under one data ID, or a colliding ID, can take the slot: its frames are delivered as the declared sender's, which is *undetectable* by the wire, and the declared sender's frames are refused as stale, *counted*.
+* A second live sender under one data ID, or a colliding ID, can take the receiving slot: its frames are delivered as the declared sender's, which is *undetectable* by the wire, and the declared sender's frames are refused as stale, *counted*.
 * A false declaration of increasing starts lets a dead incarnation's late frames retire a live incarnation that is the reference when the first of them arrives.
 Those late frames are then delivered as new data, which is *undetectable* by the wire, and the live incarnation is refused as stale, and *counted*, until it restarts; the deadline shows the silence.
 * In default mode, a live incarnation that is not the reference at that frame is not locked out: it costs `+resync_frames+` refused frames, *counted*.
-* On a strict ASIL RPC request route on the wire, every incarnation older than the newest adopted instead stays refused regardless of the run; every valid refused request is answered and counted, with finality only under the stated non-delivery proof.
+* On a strict ASIL RPC request route with the E2E wire, every incarnation older than the newest adopted instead stays refused regardless of the run; every valid refused request is answered and counted, with finality only under the stated non-delivery proof.
 * An undetected corruption of a frame's header is *undetectable* by the wire.
 The refusals that follow it are *counted*, and the deadline shows the silence.
 * An adopted late run is *counted* as a resync.
@@ -770,7 +770,7 @@ What `+wait+` services, and what a full-width monitor needs, is stated in xref:q
 *Violation:*
 
 * Every refusal and loss the element can see is reported, as an error or a *count*.
-* Losses it cannot see are declared, not counted.
+* Losses it cannot see are disclosed, not counted.
 * An application that ignores either is *undetectable*.
 * On a one-word tick monitor, a route not serviced for 2^29^ of its ticks can leave a silence uncounted, and arrivals unrecorded for up to 2^30^ ticks after it: *undetectable*.
 Without servicing, that is 0.54 s at the shortest admitted threshold (1.024 µs), 4.3 s at 10 µs, 34 s at 100 µs, 4.6 minutes at 1 ms, 73 minutes at 10 ms and 9.8 hours at 100 ms.
@@ -814,7 +814,7 @@ What the Enforce state refuses without it, and what strict mode's report lists o
 * Entropy that repeats across starts more often than its stated contract allows is *undetectable* by the element.
 On a route with the deferred E2E wire, once it is delivered, its incarnations can then be equal at a restart, so the new incarnation's frames are refused and *counted* as out of sequence until its counter passes the old one's.
 Message IDs can also repeat across restarts (xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]).
-* In strict mode, an integrator platform without contract-test evidence is *refused at setup* in the Enforce state.
+* In strict mode, a custom platform without contract-test evidence is *refused at setup* in the Enforce state.
 
 [horizontal]
 ID:: `+aou~seooc-integrator-platform~5+`
@@ -841,7 +841,7 @@ The element has no per-peer quota.
 
 *Violation:*
 
-* Observable discards are *counted*; middleware-unobservable losses are disclosed, not counted.
+* Observable discards are *counted*; losses that the element cannot see are disclosed, not counted.
 * Starvation of one peer while another keeps the route arriving is *undetectable* by the aggregate route deadline, even when a deadline is declared.
 * General drop counts may reveal congestion but do not identify, or guarantee detection of, the starved peer.
 * Required detection depends on the integrator's peer-specific progress checks or deployment and scheduling measures.

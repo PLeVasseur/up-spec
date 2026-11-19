@@ -9,7 +9,7 @@ The duties of every wire: xref:wires.adoc[allocated to each wire].
 The other kind of wire: xref:serialized-wires.adoc[serialized wires, and the values they own].
 Both kinds, end to end and on either kind of transport: xref:payload-paths.adoc[payload paths, end to end].
 
-A native wire carries a value as it lies in memory.
+The native wire carries a value as it lies in memory (xref:wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]).
 A sender initializes the value in the storage that carries it, and a receiver borrows it there.
 Nothing is encoded and nothing is decoded.
 
@@ -38,11 +38,11 @@ It is a separate element, and its integrator qualifies that code (xref:deploymen
 == Words
 
 * A *native type* is a type that <<req-ssr-native-type,A native payload type holds its whole value in one fixed layout>> admits.
-* A *native route* is a route whose wire carries a native type in place.
-* A *layout identity* is everything that decides how the bytes of a native type are read: which type it is, and its complete layout (<<req-ssr-native-agreement,A native type is read only under its exactly agreed layout, apart from the encoding identifier>>).
-* An *agreement* is a deployment's statement of the native types that its routes carry, with the layout identity of each and the payload encoding identifier of their frames.
+* A *native route*: xref:wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract], "Native and serialized routes".
+* A *layout identity*: <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout, apart from the encoding identifier>>, "Layout identity".
+* A *native agreement*, or *agreement* on this page: <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout, apart from the encoding identifier>>, "Agreed by the deployment".
 * The *Rust-only native domain* is defined in <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout, apart from the encoding identifier>>, "Only between binaries that use the element".
-* A *view* is a typed, read-only borrow of the storage in which a frame arrived (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
+* A *view* is a typed, read-only borrow of the storage in which a frame arrived (<<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>, "Receiving").
 
 [[req-ssr-native-type]]
 == A native payload type holds its whole value in one fixed layout

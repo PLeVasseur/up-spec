@@ -76,11 +76,11 @@ Whether the call's slot keeps that ownership until the release completes or hand
 A response *MUST* be delivered only to the call that sent its request.
 A response that arrives after its call has ended, including one that arrives at a slot a later call now uses, is refused and counted, and is never delivered to the later call.
 
-*Binding to the slot's tenure.*
-The element *MUST* bind the following to the slot's current tenure, atomically with claiming the slot for the response:
+*Tied to the slot's tenure.*
+The element *MUST* tie the following to the slot's current tenure, atomically with claiming the slot for the response:
 
 * the response's full request ID;
-* for a call bound to a peer, that peer's full identity and incarnation.
+* for a call tied to a peer, that peer's full identity and incarnation.
 
 It does so in one of two ways:
 
@@ -90,7 +90,7 @@ It does so in one of two ways:
 Either way no reuse, wrap or delay lets a response complete another call, on every route.
 
 *Order.*
-That binding comes before any wire check, so on an E2E route the echo never sees such a response.
+That tie comes before any wire check, so on an E2E route the echo never sees such a response.
 
 *E2E routes.*
 On an RPC route with the E2E wire, a response *MUST* also answer its call exactly (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call]; <<req-ssr-rpc-check-at-arrival,A response completes its call only once its wire accepts it>>).
@@ -107,20 +107,20 @@ Verification:: test, review
 * *test*
 ** A response after expiry, at a reused slot.
 ** A response for an earlier tenure of a reused slot, refused with nothing recorded.
-** A response from another peer, or from an older incarnation of the bound peer, refused.
+** A response from another peer, or from an older incarnation of the peer tied to the call, refused.
 * *review*: the claim's source argument for each configuration's mechanism: the comparison and the claim in one exclusive step, or the recheck after the claim and its give-back.
 ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 
 *Rationale.*
 A reused slot can carry a later call.
-Binding the response's full request identity to the slot's current tenure as the slot is claimed prevents a delayed response from completing that later call.
+Tying the response's full request identity to the slot's current tenure as the slot is claimed prevents a delayed response from completing that later call.
 
 _An outcome, not a mechanism._
 The item states the outcome and admits either form of mechanism.
-One that compares the full request ID and the bound peer, and claims the slot, in one exclusive step needs no recheck.
+One that compares the full request ID and the peer tied to the call, and claims the slot, in one exclusive step needs no recheck.
 One that claims before it compares keeps the recheck after the claim, and its give-back.
 
-Whether the request ID and the bound peer are kept at full width is a fact about a representation (xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window]).
+Whether the request ID and the peer tied to the call are kept at full width is a fact about a representation (xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window]).
 
 _Scope._
 The clauses about the E2E wire bind only a route that uses it, and that wire is deferred and not part of this delivery.
@@ -131,8 +131,8 @@ The identity binding and the refusal of a late response bind every route now.
 
 [.specitem,oft-sid="req~ssr-rpc-check-at-arrival~2",oft-title="A response completes its call only once its wire accepts it",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-*First, the binding to the call.*
-When a response arrives, the element *MUST* first bind it to the call's current tenure as <<req-ssr-peer-rpc-correlation,A response reaches only its own call>> requires.
+*First, the tie to the call.*
+When a response arrives, the element *MUST* first tie it to the call's current tenure as <<req-ssr-peer-rpc-correlation,A response reaches only its own call>> requires.
 A response that does not match completes and records nothing, and a slot claimed for it is given back.
 
 *Then, the wire check.*
@@ -171,7 +171,7 @@ Verification:: test, miri, heap-window
 Completing a call before checking its wire would let a corrupt first copy exclude a later intact response.
 
 The item prescribes no check of the slot after the claim.
-The identity can equally be bound in the step that claims the slot, as <<req-ssr-peer-rpc-correlation,A response reaches only its own call>> allows.
+The identity can equally be tied in the step that claims the slot, as <<req-ssr-peer-rpc-correlation,A response reaches only its own call>> allows.
 
 Refusal answers come only from a wire that protects calls, which in this delivery means none: the E2E wire that would send them is deferred.
 

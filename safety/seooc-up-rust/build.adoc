@@ -12,7 +12,7 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 [.specitem,oft-sid="req~ssr-build-panic-abort~4",oft-title="The ASIL build aborts on panic and checks overflow",oft-needs="impl,utest,uman",oft-tags="SafetyUpRustCore,SafetyStreamer"]
 --
 *Profile settings.*
-The ASIL release profile *MUST* set `+panic = "abort"+` and `+overflow-checks = true+`.
+The ASIL profile *MUST* set `+panic = "abort"+` and `+overflow-checks = true+`.
 
 *The binary refuses an unwinding build.*
 A build of the ASIL Streamer binary *MUST* refuse to compile unless `+cfg(panic = "abort")+` holds.
@@ -36,7 +36,7 @@ ASIL:: B
 Allocated to:: the Streamer binary; the element, for its ASIL build check for an application's own binary
 Verification:: gate
 * A build of the binary with unwinding fails to compile.
-* The release profile's settings.
+* The ASIL profile's settings.
 * `+cargo test+` on the workspace still compiles.
 * `+cargo build+`, `+cargo clippy --all-targets+` and `+cargo doc+` on the workspace still compile.
 * An application's own binary that carries the element's ASIL build check fails to compile with unwinding, and compiles with `+panic = "abort"+`.
@@ -86,7 +86,7 @@ An ASIL image would contain them unless they are left out, as the element's own 
 
 [.specitem,oft-sid="req~ssr-no-test-hooks~1",oft-title="The shipped element contains no test hook",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-Every item of the element that exists only for tests *MUST* compile only under the `+up_rust_test_hooks+` configuration, which no shipped build sets.
+Every code item of the element that exists only for tests *MUST* compile only under the `+up_rust_test_hooks+` configuration, which no shipped build sets.
 
 The async layer's seam is not a test hook; <<req-ssr-async-seam,The asynchronous interface has a written, executor-independent contract>> states it.
 --
@@ -343,7 +343,7 @@ In its Enforce state, strict mode *MUST* refuse at setup:
 * C or D data whose only protection is an end-to-end mechanism of ASIL B capability, unless `+decomposition+` names the argument (xref:assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element]);
 * an ASIL route over a transport that the integrator classifies as a black channel, with no protection named (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
 * an ASIL RPC route that selects the E2E wire and whose clients are not declared increasing from a counter (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
-* an integrator platform that names no contract-test evidence (xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]);
+* a custom platform that names no contract-test evidence (xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]);
 * a setup still alive and not entered when `+enter_runtime_all+` returns (xref:assumptions-of-use.adoc#aou-seooc-build-order[Applications build every transport and role before the last transition]);
 * a binding or wire that is not on the integrator's qualified list (xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]).
 
@@ -436,7 +436,7 @@ The report also holds:
 * both duties for data above ASIL B, the integrator's measures and the argument for a decomposition (xref:assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element]);
 * the coherence duty on multi-core parts, and the stack-sizing duty (xref:assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]);
 * overflow checks, as a checklist item (xref:assumptions-of-use.adoc#aou-seooc-build-configuration[The ASIL binary is built from its claimed graph, with the ASIL profile]);
-* for an integrator platform, the entropy duty and the platform contract test (xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]).
+* for a custom platform, the entropy duty and the platform contract test (xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]).
 
 *Warnings.*
 The report also holds:
@@ -464,7 +464,7 @@ Verification:: test, review
 ** A monitored route with and without an established J.
 ** A route's requested and admitted claims.
 ** An ASIL-labelled configuration with no assurance package, reported Draft and unassessed and not refused.
-** Each entry of the lists on routes, on the deployment and on duties, on a configuration that has what it lists, and an entry with a condition, such as a declared time-sync source or an integrator platform, with and without that condition.
+** Each entry of the lists on routes, on the deployment and on duties, on a configuration that has what it lists, and an entry with a condition, such as a declared time-sync source or a custom platform, with and without that condition.
 ** Each warning, on a configuration that draws it and on one that does not.
 * *review*: the report's fields against this item.
 

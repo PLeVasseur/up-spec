@@ -13,7 +13,7 @@ These are the three assumptions of use of the up-rust SEooC whose duty is about 
 Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 * Each "Violation" text uses the three classes of xref:../seooc-up-rust/assumptions-of-use.adoc#violation-classes[how a violation shows up].
 * The safety manual of the SDK states them, and they carry `SafetyManual` and the gate tag `SafetyGateUpRust` (xref:../seooc-up-rust/assumptions-of-use.adoc#coverage[tags and coverage]).
-* What only one transport adds is stated with that transport (xref:README.adoc#one-binding[what is specific to one binding]).
+* What only one binding adds is stated with that binding (xref:README.adoc#one-binding[what is specific to one binding]).
 * The index of all the element's assumptions is in xref:../seooc-up-rust/assumptions-of-use.adoc[its assumptions of use].
 
 == Which part each clause concerns
@@ -38,7 +38,7 @@ The table classifies and links, and adds no duty.
 | <<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>, "Cores without coherent atomics" | The element: its target | The integrator | xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]
 | <<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>, the paragraph on a wire or binding from elsewhere | The element: the inventory of `+unsafe+` | The integrator qualifies that code | xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified] in xref:../seooc-up-rust/memory-safety.adoc[memory safety]
 | <<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>, the strict-mode paragraph | The element: strict mode | The element refuses, where strict mode is used | xref:../seooc-up-rust/build.adoc#req-ssr-strict-report[Strict mode reports on every run] in xref:../seooc-up-rust/build.adoc[build and shipped content]
-| Each assumption's sentence on what one binding adds | One transport | The integrator | The page of that binding (xref:README.adoc#one-binding[what is specific to one binding])
+| Each assumption's sentence on what one binding adds | One binding | The integrator | The page of that binding (xref:README.adoc#one-binding[what is specific to one binding])
 |===
 
 The software's side of the clauses that concern this layer:
@@ -109,7 +109,7 @@ Each process declares the level it was built to, and is developed to at least th
 * On a lending binding that records the writer's level in the shared definition, a writer below a zero-copy reader's level is *refused at setup*, naming the route.
 * On a binding whose ports write shared state both ways, a port whose level differs from the service's recorded level is *refused at setup* (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 * On a handoff binding the check does not apply, because the reader gets a private copy.
-* A lending binding that cannot record levels reports them as unknown, and an ASIL reader then gets the copy route.
+* A lending binding that cannot record levels reports them as unknown, and a reader whose writer's level is unknown then gets the copy route (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 * A process that declares a level it was not built to is *undetectable*.
 
 [horizontal]

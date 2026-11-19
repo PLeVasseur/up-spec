@@ -22,7 +22,7 @@ So this page has no protocol counterpart, and the envelope that carries a frame 
 == Whom this page binds
 
 * The six requirements bind the LoLa binding of the up-rust SEooC.
-They bind no other transport and no other user of LoLa.
+They bind no other binding and no other user of LoLa.
 * Each item of the binding contract (xref:bindings.adoc[allocated to each binding]) binds the LoLa binding, in full, where its statement and its "Allocated to" line name it.
 This page repeats none of them: <<index>> says what each asks on LoLa, and the item governs.
 * No assumption of use is filed here.
@@ -75,7 +75,7 @@ So nothing on this page rests on one.
 LoLa publishes assumptions of use for whoever uses it, and the binding is such a user.
 The table quotes those that this page relies on, each from `+aou.trlc+` at the commit above, and names the duty that it meets here.
 A quotation keeps the meaning that LoLa gives it: the last column says what the binding does about it, and reads nothing more into it.
-The table is no list of all that LoLa publishes: <<req-ssr-binding-lola-assumptions,The LoLa binding keeps each of LoLa's assumptions of use, or names who does>> binds the binding to every one that applies to it.
+The table is no list of all that LoLa publishes: <<req-ssr-binding-lola-assumptions,The LoLa binding keeps each of LoLa's assumptions of use, or names who does>> requires the binding to keep, or to name who keeps, every one that applies to it.
 
 [cols="3,5,4",options="header"]
 |===
@@ -498,7 +498,7 @@ Some assumptions are about how LoLa's interface is called: how many loans a prod
 An application reaches LoLa only through safe calls of the element, so only the binding can keep these, and it keeps them whatever the application does.
 Others are about the system: that timing is supervised, or what the system does after a failure.
 The binding cannot keep those, so it names them for the integrator.
-The integrator already reacts to what the element reports (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]), and the item's timing budgets are the integrator's (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+The integrator already reacts to what the element reports (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]), and the timing budgets of the item, in ISO 26262's sense, are the integrator's (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 
 _Not a rule for safe code._
 A rule that an application had to follow in order to keep LoLa safe would be a condition of memory safety that safe code could break.

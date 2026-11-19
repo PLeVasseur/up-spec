@@ -36,7 +36,7 @@ The following specification will elaborate on how uProtocol shall be mapped to S
 
 == Transport Layer Translation
 
-xref:./README.adoc#utransport[Transport layer (uP-L1)] specifies how xref:../basics/umessage.adoc[uMessages] are sent and received over a _wire_ between *uEntities* or between devices. In this section we will cover the SOME/IP communication protocol binding and event mapping.
+xref:README.adoc[Transport & Session Layer (uP-L1)] specifies how xref:../basics/umessage.adoc[uMessages] are sent and received between *uEntities* or between devices. In this section we will cover the SOME/IP communication protocol binding and event mapping.
 
 Mapping of uTransport APIs to SOME/IP specific library *APIs* shall not be covered in this document given there are multiple open source libraries available for SOME/IP.
 
@@ -105,7 +105,6 @@ The following sections highlight the mapping of xref:../basics/uattributes.adoc[
 
 * SOME/IP `REQUEST` *SHOULD* not be sent if incoming UMessage `ttl` has already expired.
 * Remaining time from `ttl` *SHOULD* be used to limit the time a `REQUEST` is kept in the cache for correlation with a `RESPONSE`.
-* If needed `ttl=0` *MAY* be used to indicate `REQUEST_NO_RETURN` (currently not allowed)
 
 Check `ttl` xref:#note-ttl[NOTE] below.
 

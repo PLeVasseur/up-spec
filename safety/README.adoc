@@ -23,9 +23,9 @@ Each obligation is stated in one place, and tables, indexes and safety manuals s
 
 | This page | The conventions, and the shared concepts and fault models, each with its scope (<<concepts>>) | xref:../basics/README.adoc[The basics]
 | xref:up-l1/README.adoc[`up-l1/`] | What a transport and a wire guarantee, how shared memory is lent or copied between integrity levels, and what a deployment provides for its transports | xref:../up-l1/README.adoc[The transport layer (uP-L1)]
-| xref:up-l1/iceoryx2.adoc[`up-l1/iceoryx2.adoc`] | What is specific to one transport, iceoryx2 | xref:../up-l1/iceoryx2.adoc[The iceoryx2 transport]
+| xref:up-l1/iceoryx2.adoc[`up-l1/iceoryx2.adoc`] | What is specific to one binding and its middleware, iceoryx2 | xref:../up-l1/iceoryx2.adoc[The iceoryx2 transport]
 | xref:up-l1/iceoryx2-frame.adoc[`up-l1/iceoryx2-frame.adoc`] | How the iceoryx2 binding places a frame in an iceoryx2 sample | xref:../up-l1/iceoryx2.adoc[The iceoryx2 transport]
-| xref:up-l1/lola.adoc[`up-l1/lola.adoc`] | What is specific to one transport, LoLa | None: the protocol specification has no LoLa chapter
+| xref:up-l1/lola.adoc[`up-l1/lola.adoc`] | What is specific to one binding and its middleware, LoLa | None: the protocol specification has no LoLa chapter
 | xref:up-l1/lola-envelope.adoc[`up-l1/lola-envelope.adoc`] | How the LoLa binding places a frame in a LoLa sample | None: the protocol specification has no LoLa chapter
 | xref:up-l1/xcdrv2.adoc[`up-l1/xcdrv2.adoc`] | One serialized format, the fixed-layout XCDR2 profile | None: the protocol specification has no chapter for it
 | xref:up-l2/README.adoc[`up-l2/`] | RPC and message identity, and forwarding by the Streamer | xref:../up-l2/README.adoc[The communication layer (uP-L2)] and xref:../up-l2/dispatchers/README.adoc[its dispatchers]
@@ -36,7 +36,7 @@ Each obligation is stated in one place, and tables, indexes and safety manuals s
 
 * *Protocol requirements*, which every SDK of a kind must meet, stay in the protocol chapters (`basics/`, `up-l1/`, `up-l2/`, `up-l3/`), tagged as those chapters tag them.
 * *A safety obligation of a protocol layer* goes in that layer's part here.
-A restriction that only one transport has goes in that transport's file, beneath its layer.
+A restriction that only one binding has goes in that binding's file, beneath its layer.
 * *An SDK element's own scope, boundary and implementation-specific rules* go in a directory of their own here, named `seooc-<sdk>/`.
 They name one element and its parts, so no other SDK is bound by them.
 * *A concept or fault model that several parts rely on* is described on this page, with its scope.
@@ -174,10 +174,8 @@ Every transport of the up-rust SEooC, and every route on it.
 * *A level is a label.*
 Setup checks it.
 It neither raises an element's capability nor qualifies the process that declares it.
-* *A level is not a request.*
-An integrity level or an ASIL label requests no timing bound and no assurance scope, and it is neither a request nor evidence for a resource guarantee.
 * *Stated in.*
-xref:up-l1/integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level] for the software, xref:up-l1/deployment.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly] for the integrator's assignment, xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element] for data above ASIL B and for the element inside an ASIL C or D process or partition, and xref:seooc-up-rust/README.adoc#claims[the SEooC's claims] for what a label is not.
+xref:up-l1/integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level] for the software, xref:up-l1/deployment.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly] for the integrator's assignment, xref:up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], xref:up-l1/integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused] and xref:up-l1/bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level] for what levels decide of routes and crossings, xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element] for data above ASIL B and for the element inside an ASIL C or D process or partition, and xref:seooc-up-rust/qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened] and xref:seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name] for what a level does not request.
 
 [[faulty-peer]]
 === The faulty-peer model
@@ -332,8 +330,7 @@ The items here say what an implementation must satisfy.
 An implementation's code, tests and reviews trace to the items, never the other way round.
 
 * No statement, rationale or verification entry rests on an implementation's source files, internal names, review records or current state.
-* A rationale gives the product or safety reason for its statement.
-It cites other items of up-spec, public standards and the published contracts of other projects.
+* A rationale gives the product or safety reason for its statement, and cites what <<markup>> allows.
 * A statement may name something the element must provide, such as an operation, a setting, a counter or a crate.
 That name is part of the specification, not a citation of code.
 * An SDK that implements an item keeps its own record of where it does so, outside this repository, as non-normative traceability.
@@ -369,6 +366,7 @@ So the tags, not the directories, decide what a repository covers.
 * A revision rises when the meaning of a statement changes, or when a change of its allocation changes whom it binds, and not for a wording fix.
 * Filing an item in another part or file changes neither its name nor its revision.
 
+[[markup]]
 === Markup
 
 As in the protocol chapters: a block attribute line that gives the item its `specitem` role and its `oft-sid`, `oft-title`, `oft-needs` and `oft-tags` attributes, then an open block that holds the statement.
@@ -423,7 +421,7 @@ An item's own "Allocated to" line governs: it may name parts that its row does n
 
 [cols="2,4,3,3",options="header"]
 |===
-| Tag | Items allocated to | Covered in | Parts that hold its items
+| Tag | Items allocated to | Covered in | Parts of this area that hold its items
 
 | `SafetyUpRustCore` | the element in `up-rust-core`: its runtime path, carrier routes, startup memory and platform backends | `up-rust` | `seooc-up-rust/`, `up-l1/`, `up-l2/`, this page
 | `SafetyStreamer` | the Streamer's data plane and its binary | `up-streamer-rust` | `up-l2/`, `seooc-up-rust/`, this page

@@ -185,7 +185,7 @@ The element's own waits are a different matter.
 Each, apart from the idle wait, takes a logical deadline on every route, and an operation's outcome is decided by that deadline whatever an allocation domain did meanwhile.
 
 _Why pending cleanup has no deadline._
-A release that waits behind an allocator's or an underlying transport's own lock cannot observe a deadline from inside that call.
+A release that waits behind an allocator's or a middleware's own lock cannot observe a deadline from inside that call.
 Running it on another thread does not make it deadline-aware.
 So no operation waits for it, and it is kept apart from everything this item bounds.
 What it owns stays charged until it completes, instead of being given a completion deadline that it cannot keep (xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).

@@ -9,11 +9,55 @@ The element whose wire contract these duties belong to: xref:../seooc-up-rust/RE
 
 Each item binds the parts that its statement and its "Allocated to" line name: here, every wire (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 A wire meets them in its own crate, and covers them in its own repository.
-A wire that is not written against the element's wire contract is not bound by them.
+What a wire is, and what is not one: <<req-ssr-wire-scope,What a wire is, and the wire contract>>.
 
 These duties name no wire format, and each wire meets them for its own format.
 What depends on the kind of payload a wire carries is listed in <<one-wire>>.
 Each kind of wire has a page of its own: xref:native-wire.adoc[the native wire] and xref:serialized-wires.adoc[serialized wires, and the values they own].
+
+[[req-ssr-wire-scope]]
+== What a wire is, and the wire contract
+
+[.specitem,oft-sid="req~ssr-wire-scope~1",oft-title="What a wire is, and the wire contract",oft-needs="uman",oft-tags="SafetyWire"]
+--
+*What a wire is.*
+A wire is the part through which a route writes a payload into the storage that carries its frame, and reads a payload that has arrived.
+It is written against the interface between the element and a wire, whose side in the element is in part E1 of the element (xref:../seooc-up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
+
+*The wire contract.*
+The wire contract is that interface with the duties that the items allocated to each wire state.
+The duties of an item allocated to the wires of one kind or of one profile, or to one wire, are added to those wires only, and are not part of the wire contract.
+
+*What is not a wire.*
+A codec that is not written against that interface is not a wire.
+
+*Kinds of wire.*
+
+* A serialized wire encodes a value into the bytes of a format, and decodes such bytes into a value.
+* The native wire carries a native representation: the value of a native type as it lies in memory (xref:native-wire.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout]).
+
+*Native and serialized routes.*
+A native route is a route whose wire carries a native type in place.
+A serialized route is a route whose wire carries an encoding of the value in one stated format.
+
+*Ordinary and sequenced.*
+A sequenced wire deliberately changes its encoding from one encode to the next.
+Every other wire is an ordinary wire.
+
+*A separate element.*
+Each wire other than the native wire and the end-to-end protection wire is not part of the element.
+--
+
+[horizontal]
+ID:: `+req~ssr-wire-scope~1+`
+ASIL:: B
+Allocated to:: each wire
+Verification:: review (each statement and allocation that uses a word that this item defines, read with this item)
+
+*Rationale.*
+Whom a duty of a wire binds, and which rules a payload meets, depend on what a wire is and of which kind it is.
+The items use these words in their statements and allocations, so each word has its meaning once, here.
+A wire's code runs inside the element's calls, but each wire that is not part of the element is developed and verified on its own, against the wire contract suite; a sequenced wire passes the sequenced wire contract, which tests its sequence of encodings.
 
 [[req-ssr-wire-no-panic]]
 == Encoding and decoding never panic
@@ -119,7 +163,7 @@ Verification:: heap-window, test
 ** The sequenced check's interface: a sender factory that is given a start value, a receiver factory and the restart bound, with receivers' slot storage made outside the heap windows.
 
 *Rationale.*
-A sequenced wire deliberately changes its encoding.
+A sequenced wire deliberately changes its encoding (<<req-ssr-wire-scope,What a wire is, and the wire contract>>).
 So its contract tests must check that sequence rather than require identical bytes on every encode.
 
 The item binds the directions in which a wire claims no heap use.
@@ -209,7 +253,7 @@ a|
 * xref:xcdrv2.adoc#req-ssr-xcdr2-identity[The bytes name no type, and a changed type is another type]
 a|
 * Each wire of the profile.
-* The integrator, for requiring by name each stronger guarantee the item relies on.
+* The integrator, for requiring by name each stronger guarantee that the item, in ISO 26262's sense, relies on.
 
 | End-to-end protection around another wire's payload
 a|

@@ -489,7 +489,7 @@ The route's report thereby states, for each destruction the route can perform, w
 Nothing promises a completion deadline for a destruction.
 
 *Element state around a destruction.*
-A destructor, and each wire, binding or provider operation that a destruction reaches, is code the element does not control.
+A destructor, and each wire, binding or provider operation that a destruction reaches, is code that the element does not own.
 It may wait, call back into the element, unwind or never return.
 
 The element *MUST* call it only with its own invariants restored and while holding no lock or exclusion of its own.
@@ -580,7 +580,7 @@ An ordinary allocator's release can take a lock that waits.
 On a route that does not require non-waiting release, that wait is the declared policy's, on a path of that route: the path that ended the value or, where that path is native or shared work, a later operation of the same route.
 A route that requires non-waiting release moves it off that path, in the same way as a retained owner's deferred return (xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 
-That hand-off holds ownership awaiting destruction, not unread traffic, so it is not a second receive queue.
+That hand-off to the route's release service holds ownership awaiting destruction, not unread traffic, so it is not a second receive queue.
 Deferral bounds nothing: the release may still wait behind the allocator's own lock, which no deadline can interrupt from outside.
 The value therefore stays owned and charged while it is pending (xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
 

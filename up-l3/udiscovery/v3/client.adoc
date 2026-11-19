@@ -51,7 +51,7 @@ Each link:../languages.adoc[uProtocol Language Library] *MUST* implement the cli
 
 === FindServices()
 
-The FindServices() API is used to find service instances matching search criteria like authority, instance ID and (major) version. The only mandatory part of the provided (search) URI is the uEntity ID (`ue_id`), the rest can be discovered. The `recursive` flag can be used to include the uDiscovery service instance's parent nodes in the search.
+The FindServices() API is used to find service instances matching search criteria like authority, instance ID and (major) version. The only mandatory part of the provided (search) URI is the uEntity ID (`ue_id`), the rest can be discovered. What the `recursive` flag does is stated in xref:service.adoc[uDiscovery Service].
 
 [.specitem,oft-sid="dsn~discovery-findservices-error-notfound~1",oft-needs="impl,test"]
 --

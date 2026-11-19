@@ -9,18 +9,24 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 [[req-ssr-mode-two-types]]
 == Two modes, as two types
 
-[.specitem,oft-sid="req~ssr-mode-two-types~1",oft-title="Two modes, as two types",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-mode-two-types~2",oft-title="Two modes, as two types",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
+*What a transport is.*
+A transport is what the element builds over one binding.
+Routes and roles are declared on it in initialization mode, and the handles that carry traffic are activated from it in runtime mode.
+A lending transport is one whose binding is a lending binding, and a handoff transport one whose binding is a handoff binding (xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]).
+
+*Two types.*
 Each lending and each handoff transport *MUST* have an initialization mode and a runtime mode, and each mode *MUST* be a distinct non-generic type.
 
 A transport built directly in code and one built from deployment data *MUST* have the same types, so transports chosen at run time can sit in one list.
 --
 
 [horizontal]
-ID:: `+req~ssr-mode-two-types~1+`
+ID:: `+req~ssr-mode-two-types~2+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test, review
+Verification:: test, review (each statement that names a transport, a lending transport or a handoff transport, read with the clause "What a transport is")
 ISO 26262:: 6-6.4.2 g, 6-7.4.5 (part-clause numbers only)
 
 *Rationale.*
@@ -49,7 +55,7 @@ ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 Runtime mode runs only what setup admitted and placed.
 A change after the transition could be neither checked nor given storage without the work of initialization (<<req-ssr-mode-entry-admission,Every route is admitted before runtime mode>>).
 
-The transition consumes the setup value, so no setup call can be written afterwards (<<req-ssr-mode-entry,Entering runtime mode is one all-or-nothing operation>>).
+The transition consumes the initialization value, so no setup call can be written afterwards (<<req-ssr-mode-entry,Entering runtime mode is one all-or-nothing operation>>).
 
 [[req-ssr-mode-no-traffic-before-runtime]]
 == Traffic is impossible before runtime mode
@@ -104,7 +110,7 @@ A named error for each case, such as a wrong transport or a sealed region, tells
 [[req-ssr-mode-entry]]
 == Entering runtime mode is one all-or-nothing operation
 
-[.specitem,oft-sid="req~ssr-mode-entry~5",oft-title="Entering runtime mode is one all-or-nothing operation",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-mode-entry~6",oft-title="Entering runtime mode is one all-or-nothing operation",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *One operation.*
 A transport *MUST* enter runtime mode only through one operation that consumes its initialization value.
@@ -117,13 +123,21 @@ Otherwise it returns an error, no runtime-mode value exists for that transport, 
 Where several transports enter together, each one's transition is its own.
 A transport that has entered stays in runtime mode if a later one is refused, and its runtime duties bind it from its own transition.
 
+*A process in runtime mode.*
+A process is in runtime mode once every transport that it built is in runtime mode, and the Streamer's process when `+enter_runtime_all+` returns.
+That process-level definition is used for three things only:
+
+* sealing shared startup memory;
+* the Streamer's startup report;
+* process-level statements for integrators.
+
 *The entry conditions.*
 The entry conditions are these, each a requirement of its own, named here without its revision:
 
 * every route admitted, with its storage placed (`+req~ssr-mode-entry-admission+`);
 * the wall clock read, from a time provider that passed its setup check (`+req~ssr-mode-entry-clock+`);
 * no declaration admitted whose traffic would be refused for a reason setup already knows (`+req~ssr-mode-entry-no-latent-refusal+`);
-* every heap class declared and admissible for its route, and no decoded type that owns heap on a route whose class forbids it (`+req~ssr-heap-declared+`, `+req~ssr-heap-slot-types+`);
+* every heap class declared and admissible for its route, and every decoded type admitted as its route's class admits (`+req~ssr-heap-declared+`, `+req~ssr-heap-slot-types+`);
 * lazy state forced, in the SDK and in each binding (`+req~ssr-heap-lazy-forced+`, `+req~ssr-binding-lazy-forced+`);
 * a waiver for every permit, complete and approved by someone other than its author (`+req~ssr-waiver-required+`, `+req~ssr-waiver-record+`);
 * QoS that can be honored, means something, and agrees between declarations, and every timing or assurance claim that a route requires admitted under its configuration (`+req~ssr-qos-no-downgrade+`, `+req~ssr-qos-invalid-refused+`, `+req~ssr-qos-consistent-declarations+`);
@@ -133,15 +147,17 @@ The entry conditions are these, each a requirement of its own, named here withou
 --
 
 [horizontal]
-ID:: `+req~ssr-mode-entry~5+`
+ID:: `+req~ssr-mode-entry~6+`
 ASIL:: B
 Allocated to:: the element
-Verification:: compile-fail, test
-* *compile-fail*: the setup value is consumed.
+Verification:: compile-fail, test, review
+* *compile-fail*: the initialization value is consumed.
 * *test*
 ** A refused transition leaves no runtime-mode value for that transport and starts no traffic on it.
 ** One refusal for each condition.
 ** With several transports entering together, a later refusal leaves an entered transport in runtime mode under its own duties.
+** A process whose transports have not all entered runtime mode is not in runtime mode, and is in runtime mode once the last of them has entered.
+* *review*: each statement that speaks of a process in runtime mode, against the three uses that the clause "A process in runtime mode" names.
 ISO 26262:: 6-6.4.2 g, 6-7.4.5 (part-clause numbers only)
 
 *Rationale.*
@@ -253,7 +269,7 @@ The element *MUST NOT* provide any recovery inside the process.
 ID:: `+req~ssr-mode-one-way~3+`
 ASIL:: B
 Allocated to:: the element; each binding, for its own operations and the runtime mode of its transport; the Streamer, for its own operations and its runtime mode
-Verification:: compile-fail (the setup value is consumed), review (no such operation exists, and no recovery inside the process)
+Verification:: compile-fail (the initialization value is consumed), review (no such operation exists, and no recovery inside the process)
 ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
@@ -459,7 +475,7 @@ Deployment data that puts a classic endpoint on an ASIL route, including a Strea
 ID:: `+req~ssr-mode-classic-excluded~2+`
 ASIL:: B
 Allocated to:: the element; the Streamer, for refusing a classic endpoint on one of its ASIL routes
-Verification:: compile-fail (a classic transport cannot stand where a two-mode setup is required), test (deployment data naming a classic endpoint)
+Verification:: compile-fail (a classic `+UTransport+` cannot stand where a two-mode setup is required), test (deployment data naming a classic endpoint)
 ISO 26262:: 6-7.4.8 (part-clause numbers only)
 
 *Rationale.*

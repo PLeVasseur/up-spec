@@ -9,7 +9,8 @@ The binding contract, whose items bind the iceoryx2 binding as their statements 
 How the binding places a frame in an iceoryx2 sample: xref:iceoryx2-frame.adoc[the iceoryx2 physical frame].
 
 This page is the safety counterpart of xref:../../up-l1/iceoryx2.adoc[the iceoryx2 transport chapter].
-It holds what is specific to one transport:
+It holds what is specific to one binding and its middleware, iceoryx2:
+
 
 * seven requirements allocated to the iceoryx2 binding alone (tag `SafetyIceoryx2`), which `up-transport-iceoryx2-rust` covers, beside the six on its frame in xref:iceoryx2-frame.adoc[the iceoryx2 physical frame];
 * the two assumptions of use that bind only a deployment on iceoryx2 (tag `SafetyManual`), which that binding's safety manual states;
@@ -17,10 +18,10 @@ It holds what is specific to one transport:
 
 == Whom this page binds
 
-* The seven requirements bind the iceoryx2 binding of the up-rust SEooC, and no other transport.
+* The seven requirements bind the iceoryx2 binding of the up-rust SEooC, and no other binding.
 * The two assumptions bind a deployment on that binding, as each states.
 They are the up-rust SEooC's assumptions, as `seooc` in their IDs says. Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
-* Nothing here binds an iceoryx2 transport written for another SDK, or changes the protocol's iceoryx2 chapter.
+* Nothing here binds an iceoryx2 transport implementation written for another SDK, or changes the protocol's iceoryx2 chapter.
 That chapter names version 0.6.1 of the iceoryx2 protocol, and the items here target iceoryx2 0.9.3.
 * An entry of <<index>> binds whoever its own item binds.
 
@@ -359,7 +360,7 @@ This section links those to read for iceoryx2, so that the binding's maintainers
 
 === Where iceoryx2 is only the test bed or the example
 
-Verification lines and rationales of other items name iceoryx2 as the real transport a test runs on, or as the source of an example.
+Verification lines and rationales of other items name iceoryx2 as the real middleware a test runs on, or as the source of an example.
 
 * Those mentions restrict nothing, and they are not listed here.
 * A test that runs on real iceoryx2 is evidence on iceoryx2.

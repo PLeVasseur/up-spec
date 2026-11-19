@@ -27,7 +27,7 @@ For more information, please refer to https://mqtt.org/
 
 This document defines how MQTT 5 PUBLISH packets can be used to transfer uProtocol messages (UMessages) between uEntities for the following use cases:
 
-1. *uEntity-2-uEntity* (E2E): Communication between uEntities within the same vehicle by means of an _in-vehicle_ MQTT broker.
+1. *uEntity-2-uEntity*: Communication between uEntities within the same vehicle by means of an _in-vehicle_ MQTT broker.
 2. *Device-2-Device* (D2D): Communication between uEntities in vehicles and a (cloud) back end system by means of an _off-vehicle_ MQTT broker, e.g. running in the back end. MQTT brokers running on cloud infrastructure often have limitations regarding the number of topics that can be subscribed and the number of segments those topics may contain. The mapping for this use case therefore uses a coarser grained topic structure than the one for in-vehicle only communication.
 
 == UMessage Mapping
@@ -60,26 +60,26 @@ a| The uProtocol version being used
 
 | _id_
 | User Property [key: _1_]
-a| The unique identifier of the message
+a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the https://www.rfc-editor.org/rfc/rfc4122.html#section-3[hyphenated string representation] of the UUID.
 
 | _type_
 | User Property [key: _2_]
-a| The message type
+a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the value of the _uprotocol.ce_name_ option defined for the
 link:../up-core-api/uprotocol/uattributes.proto[UMessageType enum].
 
 | _source_
 | User Property [key: _3_]
-a| The origin (address) of the message
+a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the xref:../basics/uri.adoc#uri-definition[string serialization of the UUri]
 
 | _sink_
 | User Property [key: _4_]
-a| The destination (address) of the message
+a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the xref:../basics/uri.adoc#uri-definition[string serialization of the UUri]
 
@@ -94,7 +94,7 @@ link:../up-core-api/uprotocol/uattributes.proto[UPriority enum].
 | User Property [key: _6_] +
 _Message Expiry Interval_
 
-a| The amount of time after which this message must no longer be delivered/processed.
+a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 If _ttl_ is `0`, the message has no expiration. The _Message Expiry Interval_
 and TTL User Property *MUST NOT* be set in this case. An omitted message expiry
@@ -122,31 +122,31 @@ lifetime from a finite expiry interval.
 
 | _permissionLevel_
 | User Property [key: _7_]
-a| The service consumer's permission level as defined in xref:../up-l2/permissions.adoc#_code_based_access_permissions_caps[Code-Based uEntity Access Permissions (CAPs)]
+a| The service consumer's permission level as defined in xref:../basics/permissions.adoc#_code_based_access_permissions_caps[Code-Based Access Permissions (CAPs)]
 
-* *MUST* be set to the xref:../up-l2/permissions.adoc#_code_based_access_permissions_caps[CAP] value's decimal string representation. 
+* *MUST* be set to the xref:../basics/permissions.adoc#_code_based_access_permissions_caps[CAP] value's decimal string representation. 
 
 | _commStatus_
 | User Property [key: _8_]
-a| A UCode indicating an error that has occurred during the delivery of either an RPC Request or Response message
+a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the link:../up-core-api/uprotocol/v1/ustatus.proto[UCode enum] integer value's decimal string representation.
 
 | _reqId_
 | _Correlation Data_
-a| The identifier that a service consumer can use to correlate an RPC response message with its RPC request
+a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the UUID's 16 byte representation in big endian order.
 
 | _token_
 | User Property [key: _10_]
-a| The service consumer's access token
+a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the token value.
 
 | _traceparent_
 | User Property [key: _11_]
-a| A tracing identifier to use for correlating messages across the system
+a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the traceparent value.
 

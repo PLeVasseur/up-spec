@@ -216,8 +216,8 @@ Both are documented with the element and with each supported configuration whose
 
 A value kept at full width for the element's lifetime, or closed explicitly before its range is exhausted, has no window.
 
-*Identity stays bound to tenure.*
-A representation *MUST NOT* drop the binding of a full identity to the tenure an operation acts on.
+*Identity stays tied to tenure.*
+A representation *MUST NOT* drop the tie between a full identity and the tenure an operation acts on.
 Wherever an operation claims a call slot, a peer entry or another reusable record, or ends or fails the tenure it names, the full identity and tenure it names *MUST* be compared with the record's current ones atomically with that claim or change:
 
 * either in the same exclusive step;
@@ -230,7 +230,7 @@ Every supported profile, host and MCU alike, keeps these values at full width:
 
 * the deadline record's origin and count;
 * a peer's identity and incarnation;
-* a call slot's request ID and bound peer;
+* a call slot's request ID and the peer tied to its call;
 * the message-ID generator's counter and last good time.
 
 *The windows that remain.*
@@ -265,7 +265,7 @@ Allocated to:: the element
 Verification:: test, review
 * *test*
 ** Each remaining window's boundary driven through a test hook: a flow counter's wrap, a fault counter's and the deadline count's saturation, a pool retired before its reuse count or a slot's generation wraps.
-** The identity binding at each claim and at each expiry, peer failure and retirement.
+** The tie of identity to tenure at each claim and at each expiry, peer failure and retirement.
 ** The one-word monitor's boundaries and an arrival racing a refresh, under Miri, as a model.
 * *review*
 ** The documented list against the code of every profile, host and MCU.
@@ -281,5 +281,5 @@ The list in the statement describes the representation that the supported profil
 These are facts about the representation.
 They are not a proof of its exclusion, interruption, long-suspension, coherence or arithmetic argument, which the review of each mechanism supplies.
 
-Binding a full identity to its tenure is what keeps a wrap or a stalled operation from acting on a later call or tenure, so no representation may drop it.
+Tying a full identity to its tenure is what keeps a wrap or a stalled operation from acting on a later call or tenure, so no representation may drop it.
 A mechanism that compares inside the claim needs no recheck after it, and one that claims first keeps the recheck.

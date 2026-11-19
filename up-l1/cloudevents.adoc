@@ -45,7 +45,7 @@ Support for using CloudEvents is available for many programming languages by mea
 
 The https://cloudevents.io/[CloudEvents] project has defined a set of *Formats* which describe how events can be expressed using https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/json-format.md[JSON], https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/protobuf-format.md[Protobuf] or https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/avro-format.md[Apache Avro].
 
-The accompanying *Bindings* describe how events can be sent via well-known transport protocols like https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/http-protocol-binding.md[HTTP], https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/mqtt-protocol-binding.md[MQTT] etc.
+The accompanying CloudEvents *protocol bindings* describe how events can be sent via well-known transport protocols like https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/http-protocol-binding.md[HTTP], https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/mqtt-protocol-binding.md[MQTT] etc.
 
 [.specitem,oft-sid="dsn~cloudevents-umessage-mapping~3",oft-needs="impl,utest",oft-title="Mapping of UMessages to CloudEvents"]
 == uMessage Mapping
@@ -77,7 +77,7 @@ a|CloudEvent specification version. This is *NOT* the uProtocol version
 |`type`
 |https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#type[`type`]
 |String
-a|The type of the message
+a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the value of the `uprotocol.ce_name` option defined for the
 link:../up-core-api/uprotocol/uattributes.proto[UMessageType enum].
@@ -86,7 +86,7 @@ link:../up-core-api/uprotocol/uattributes.proto[UMessageType enum].
 |`id`
 |https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#id[`id`]
 |String
-a|Unique identifier for the message
+a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the https://www.rfc-editor.org/rfc/rfc4122.html#section-3[hyphenated string representation] of the UUID.
 
@@ -94,7 +94,7 @@ a|Unique identifier for the message
 |`source`
 |https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#source-1[source]
 |Uri-Reference
-a|The origin (address) of the message
+a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to either the long or short form xref:../basics/uri.adoc[serialization of the URI]
 
@@ -102,7 +102,7 @@ a|The origin (address) of the message
 |`sink`
 |`sink`
 |Uri-Reference
-a|The destination (address) of the message
+a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to either the long or short form xref:../basics/uri.adoc[serialization of the URI]
 
@@ -125,7 +125,7 @@ a|The amount of time (in milliseconds) after which this message MUST no longer b
 |`token`
 |`token`
 |String
-a|The service consumer's access token.
+a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 |`permission_level`
 |`plevel`
@@ -136,21 +136,21 @@ a|The service consumer's access token.
 |`reqid`
 |`reqid`
 |String 
-a|The identifier that a service consumer can use to correlate an RPC Repsonse message with its RPC Request.
+a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * MUST be set to the https://www.rfc-editor.org/rfc/rfc4122.html#section-3[hyphenated string representation] of the UUID.
 
 |`commstatus`
 |`commstatus`
 |Integer
-a|A code indicating an error that has occurred during the delivery of either an RPC Request or Response message.
+a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * MUST be set to the link:../up-core-api/uprotocol/ustatus.proto[UCode]'s integer value
 
 |`traceparent`
 |https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/extensions/distributed-tracing.md#traceparent[traceparent]
 |String
-|A tracing identifier to use for correlating messages across the system.
+|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 |`payload_encoding_id`
 |`pformat`

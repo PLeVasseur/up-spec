@@ -18,7 +18,7 @@ This page holds the six requirements of the frame, allocated to the iceoryx2 bin
 * The six requirements bind the iceoryx2 binding of the up-rust SEooC, as the writer and as the reader of the frame, and one of them binds the element as well, for its check of a frame's metadata.
 * The duties of the binding contract that bind the iceoryx2 binding (xref:bindings.adoc[allocated to each binding]), and the items of xref:iceoryx2.adoc[the iceoryx2 page], hold beside them.
 * No item of this page names a panic path: the iceoryx2 binding's account of its panic paths is xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-panic-paths[iceoryx2's allowed panic paths are named, bounded and disclosed].
-* Nothing here binds an iceoryx2 transport written for another SDK, or changes xref:../../up-l1/iceoryx2.adoc[the iceoryx2 transport chapter].
+* Nothing here binds an iceoryx2 transport implementation written for another SDK, or changes xref:../../up-l1/iceoryx2.adoc[the iceoryx2 transport chapter].
 
 == Words used on this page
 
