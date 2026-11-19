@@ -166,7 +166,7 @@ This item asks the same of a wire.
 == What depends on the payload a wire carries
 
 The three duties above bind every wire.
-The rules that depend on what a wire carries are stated with their owner: for a native representation on xref:native-wire.adoc[the native wire's page], and for a serialized encoding on xref:serialized-wires.adoc[the page of serialized wires].
+The rules that depend on what a wire carries are stated with their owner: for a native representation on xref:native-wire.adoc[the native wire's page], and for a serialized encoding on xref:serialized-wires.adoc[the page of serialized wires], with the rules of one format on xref:xcdrv2.adoc[the fixed-layout XCDR2 profile].
 No requirement is allocated to the Protobuf wire alone: Protobuf is one profile of the rules for serialized wires (xref:serialized-wires.adoc#protobuf[one profile: Protobuf]).
 This table lists the rules.
 It adds no duty, and each item governs.
@@ -201,6 +201,16 @@ a|
 a|
 * The wire, for stating its heap class in each direction, allocation included.
 * The element, for admitting the route and reporting its class.
+
+| A serialized encoding in the fixed-layout XCDR2 profile
+a|
+* xref:xcdrv2.adoc#req-ssr-xcdr2-types[The profile encodes structures of fixed-width fields, and nothing else]
+* xref:xcdrv2.adoc#req-ssr-xcdr2-encoding[An encoding is a four-byte prefix and the fields in order, little-endian and aligned]
+* xref:xcdrv2.adoc#req-ssr-xcdr2-length[The encoded length of a type is exact]
+* xref:xcdrv2.adoc#req-ssr-xcdr2-decoding[Decoding refuses a wrong length, a wrong prefix or a wrong boolean byte]
+* xref:xcdrv2.adoc#req-ssr-xcdr2-identity[The bytes name no type, and a changed type is another type]
+a|
+* Each wire of the profile.
 * The integrator, for requiring by name each stronger guarantee the item relies on.
 
 | End-to-end protection around another wire's payload

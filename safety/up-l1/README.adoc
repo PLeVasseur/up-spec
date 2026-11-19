@@ -23,7 +23,7 @@ It does not say that every transport must meet it (xref:../README.adoc#filing[fi
 The items here were written for the up-rust SEooC (xref:../seooc-up-rust/README.adoc[its README]) and for the transports and wires that work with it.
 They are not protocol requirements of uP-L1, and they bind no transport or SDK of another language.
 * *Bound by tag.*
-Each requirement binds the part its tag names (xref:../README.adoc#tags[the tags]): every binding written against the element's contract (`SafetyBinding`, `SafetyBindingPull`), every wire written against it (`SafetyWire`), every serialized wire (`SafetyWireSerialized`), one binding alone, where it has a tag of its own (<<one-binding>>), or the element itself (`SafetyUpRustCore`).
+Each requirement binds the part its tag names (xref:../README.adoc#tags[the tags]): every binding written against the element's contract (`SafetyBinding`, `SafetyBindingPull`), every wire written against it (`SafetyWire`), every serialized wire (`SafetyWireSerialized`), each wire of the fixed-layout XCDR2 profile (`SafetyXcdr2`), one binding alone, where it has a tag of its own (<<one-binding>>), or the element itself (`SafetyUpRustCore`).
 * *Assumptions of use.*
 The five assumptions of use filed here are that element's: three about every transport, and two about one transport, iceoryx2.
 They bind an integrator that claims its safety-assurance scope (xref:../seooc-up-rust/assumptions-of-use.adoc#who[who the assumptions bind]).
@@ -49,7 +49,7 @@ The *copy route* gives it a validated copy in storage the reader owns (xref:inte
 
 == Files
 
-47 items in 10 files.
+52 items in 11 files.
 
 [cols="3,1,3,4",options="header"]
 |===
@@ -59,6 +59,7 @@ The *copy route* gives it a validated copy in storage the reader owns (xref:inte
 | xref:wires.adoc[Allocated to each wire] | 3 | `SafetyWire` | The duties of every wire, and a list of the rules that depend on the payload a wire carries
 | xref:native-wire.adoc[The native wire] | 3 | `SafetyUpRustCore` | What a native payload type is, that it is read only under its exactly agreed layout, apart from the encoding identifier, and that it is written and read in place, with the whole native contract step by step
 | xref:serialized-wires.adoc[Serialized wires, and the values they own] | 2 | `SafetyWireSerialized` | A serialized wire's format, its sizing, encoding and decoding, what owning means, allocation and each stronger guarantee, and one profile, Protobuf
+| xref:xcdrv2.adoc[The fixed-layout XCDR2 profile] | 5 | `SafetyXcdr2` | One serialized format: the types that it encodes, its bytes, its exact length, what decoding refuses, and what agrees a type
 | xref:payload-paths.adoc[Payload paths, end to end] | 3 | `SafetyUpRustCore` | One write of a payload, the admission of a route or its refusal for a named reason, a route's form fixed at setup and the encoding check before a wire reads, with both kinds of route on both kinds of binding side by side
 | xref:integrity.adoc[Integrity levels] | 5 | `SafetyUpRustCore` | One level per transport, the zero-copy rule, the copy route and in-place types
 | xref:peers.adoc[Peers of a transport] | 4 | `SafetyUpRustCore`, `SafetyBinding` | A peer's failure, staleness and admission, and the ABI of a native representation
@@ -105,6 +106,7 @@ The item governs, and this table adds no duty.
 | Encoding and decoding without a panic, a heap-free claim that is tested, and a README that says what the format is and what it cannot detect | Each wire | xref:wires.adoc[`wires.adoc`]
 | A serialized payload: one stated format, one encoding into the storage that carries it, and a decoded value that its slot owns | Each serialized wire | xref:serialized-wires.adoc[`serialized-wires.adoc`]
 | A native payload: its type, its exactly agreed layout, and writing and reading it in place | The element | xref:native-wire.adoc[`native-wire.adoc`]
+| One serialized format with requirements of its own | Each wire of the fixed-layout XCDR2 profile | xref:xcdrv2.adoc[`xcdrv2.adoc`]
 | One write of a payload, the admission of a declared route or its refusal for a named reason, a route's form fixed at setup, and the encoding check before a wire reads | The element | xref:payload-paths.adoc[`payload-paths.adoc`]
 | Lent storage that is exclusive, disjoint and stable, and a statement of which way a binding's ports write shared state | Each lending binding | xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held] and xref:bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state] in xref:bindings.adoc[`bindings.adoc`]
 | One integrity level per transport; a view only from a writer at or above the reader; otherwise the copy route or a refusal at setup | The element | xref:integrity.adoc[`integrity.adoc`]

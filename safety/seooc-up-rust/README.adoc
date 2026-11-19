@@ -346,7 +346,7 @@ A test names what it verifies with OFT's own coverage tag, and the method after 
 [[files]]
 == Files
 
-172 items in 27 files: 99 in the 15 files of this directory, and 73 in the 12 files of the two layer parts.
+177 items in 28 files: 99 in the 15 files of this directory, and 78 in the 13 files of the two layer parts.
 
 === In this directory
 
@@ -383,6 +383,7 @@ These are in xref:../up-l1/README.adoc[the transport layer's part].
 | xref:../up-l1/wires.adoc[Allocated to each wire] | 3 | `SafetyWire`
 | xref:../up-l1/native-wire.adoc[The native wire] | 3 | `SafetyUpRustCore`
 | xref:../up-l1/serialized-wires.adoc[Serialized wires, and the values they own] | 2 | `SafetyWireSerialized`
+| xref:../up-l1/xcdrv2.adoc[The fixed-layout XCDR2 profile] | 5 | `SafetyXcdr2`
 | xref:../up-l1/payload-paths.adoc[Payload paths, end to end] | 3 | `SafetyUpRustCore`
 | xref:../up-l1/integrity.adoc[Integrity levels] | 5 | `SafetyUpRustCore`
 | xref:../up-l1/peers.adoc[Peers of a transport] | 4 | `SafetyUpRustCore`, `SafetyBinding`

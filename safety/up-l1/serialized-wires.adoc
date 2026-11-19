@@ -33,6 +33,7 @@ The item binds whether or not that evidence exists yet, and no test of a format 
 * A serialized route runs on any binding whose capability serves it, lending or handoff, and it is tied to no middleware (xref:payload-paths.adoc#independent[a wire and a transport are chosen apart]).
 * Nothing here is the definition of one format.
 Protobuf is a profile of these rules (<<protobuf>>), and a wire of another format reads the same rules for its own format.
+The fixed-layout XCDR2 profile is a format with requirements of its own, stated on a page of its own (xref:xcdrv2.adoc[the fixed-layout XCDR2 profile]).
 
 [[req-ssr-wire-serialized-format]]
 == A serialized wire reads and writes one stated format
