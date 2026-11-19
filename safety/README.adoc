@@ -419,11 +419,11 @@ An item's own "Allocated to" line governs: it may name parts that its row does n
 
 | `SafetyUpRustCore` | the element in `up-rust-core`: its runtime path, carrier routes, startup memory and platform backends | `up-rust` | `seooc-up-rust/`, `up-l1/`, `up-l2/`, this page
 | `SafetyStreamer` | the Streamer's data plane and its binary | `up-streamer-rust` | `up-l2/`, `seooc-up-rust/`, this page
-| `SafetyBinding` | every binding: the duties of the binding contract | each binding's repository | `up-l1/`, this page
+| `SafetyBinding` | every binding: the duties of the binding contract | each binding's repository | `up-l1/`, `seooc-up-rust/README.adoc`, this page
 | `SafetyBindingPull` | with `SafetyBinding`, an item whose statement holds a duty of pull bindings only | each pull binding's repository | `up-l1/`
 | `SafetyIceoryx2` | the iceoryx2 binding. A binding or a wire gets a tag of its own with the first item that is allocated to it alone | `up-transport-iceoryx2-rust` | `up-l1/iceoryx2.adoc` and `up-l1/iceoryx2-frame.adoc`
 | `SafetyLola` | the LoLa binding alone | `up-transport-lola-rust` | `up-l1/lola.adoc` and `up-l1/lola-envelope.adoc`
-| `SafetyWire` | every wire | each wire's repository | `up-l1/`, this page
+| `SafetyWire` | every wire | each wire's repository | `up-l1/`, `seooc-up-rust/README.adoc`, this page
 | `SafetyWireSerialized` | every serialized wire: the duties that only a wire with an encoding has | each serialized wire's repository | `up-l1/serialized-wires.adoc`
 | `SafetyXcdr2` | each wire of the fixed-layout XCDR2 profile | the repository of each such wire | `up-l1/xcdrv2.adoc`
 | `SafetyE2eWire` | the end-to-end protection wire | `up-rust`, its `up-wire-e2e` member | `seooc-up-rust/`

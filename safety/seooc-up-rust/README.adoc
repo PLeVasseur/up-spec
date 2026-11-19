@@ -337,47 +337,79 @@ The Streamer's "degraded" is a reported state: its safe state is fail-silent per
 | Required from the integrator | Supervisor and deployment data; waiver approval; the selection of a supported configuration and the timing budgets of the item, in ISO 26262's sense; the choice of routes that need end-to-end protection; peer rates; the build order and the build profile; operator access | `assumptions-of-use.adoc`, which indexes every assumption and links to the four that a layer part states
 |===
 
-== Verification methods
+[[req-ssr-verification-methods]]
+== The verification methods, and what a Verification line asks for
 
-Each item's "Verification" names methods from this table.
+[.specitem,oft-sid="req~ssr-verification-methods~1",oft-title="The verification methods, and what a Verification line asks for",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
+--
+*The methods.*
+The "Verification" line of each requirement of this area *MUST* name one or more methods of this table, and no other method:
 
-* A method named alone asks for what the last column says.
-A line that asks for another platform, compiler, model or target says so in words, after the method or in the list below it.
-* Where an item's methods need detail, the line names the methods and a list below it says what each one covers.
-
-[cols="2,5,3",options="header"]
+[cols="2,5,4",options="header"]
 |===
-| Method | Meaning | By default
+| Method | What it shows | Default scope
 
-| `compile-fail` | A case that must not compile, with the compiler's diagnostic checked against the one expected. It shows that an operation is absent from a type | With the current stable compiler, and with the minimum supported version
-| `heap-window` | A test that counts every allocation and every free on all threads, with the Rust allocation guard and the C-level observer. The window opens when that transport's own transition returns, and a positive control shows that the gate fires | On Linux, with the current stable compiler and with the minimum supported version. On macOS, with the current stable compiler. Each with both observers
-| `miri` | The test run under Miri | Under Stacked Borrows and under Tree Borrows, on Linux. The toolchain that Miri needs is a tool only
-| `fault-injection` | A test that injects the fault the item covers: a peer process killed or restarted, a malformed or hostile frame, a flood, a publisher writing to a sample while it is read, a primitive left lazy on purpose | On Linux, with the current stable compiler
+| `compile-fail` | A case that fails to compile, with the compiler's diagnostic checked against the one expected. It shows that the use that the case attempts is ruled out at compile time, such as an operation that is absent from a type | With the current stable compiler, and with the minimum supported version
+| `heap-window` | A test that counts every allocation and every free on all threads, with an observer at the Rust global allocator and another at the C library's allocation functions. The window opens when the transition of the transport under test returns. A positive control, a deliberate heap use inside the window, makes the window fail | On Linux, whose OS locks are built on futexes, with the current stable compiler and with the minimum supported version. On macOS, a pthread target, with the current stable compiler. Each with both observers
+| `miri` | The test, run under Miri | Under Stacked Borrows and under Tree Borrows, on Linux. The toolchain that Miri needs is a tool only
+| `fault-injection` | A test that injects a fault that the line's requirement covers, such as a peer process killed or restarted, a malformed or hostile frame, a flood, a publisher writing to a sample while it is read, or a primitive left lazy on purpose | On Linux, with the current stable compiler
 | `test` | A requirements-based test of behaviour, with boundary values | On Linux, with the current stable compiler and with the minimum supported version
-| `gate` | A static check in CI over source or build output: a sysroot without `alloc` or `std`, the panic-link check, a symbols check, the `unsafe` inventory, a token scan, manifest checks, compile-time assertions, workspace lints | With the current stable compiler, and with the minimum supported version
-| `review` | An inspection, recorded in a review log | a record
+| `gate` | A static check in CI over source or build output, such as a build on a sysroot without `alloc` or `std`, the panic-link check, a symbols check, the `unsafe` inventory check, a token scan, manifest checks, compile-time assertions or workspace lints | With the current stable compiler, and with the minimum supported version
+| `review` | An inspection, recorded in a review log | A record
 |===
 
-A heap window on macOS is pthread evidence: it catches lazy first-use allocation that Linux futexes hide.
+*A method with no qualifier.*
+A method that a "Verification" line names with no qualifier has the default scope of its row.
+A case that no qualifier holds for has the default scope of its method's row.
 
-=== The ASIL profile
+*Qualifiers, paths and cases.*
+A line details a method in words after it, or in the list under the line.
+An entry of the list that begins with a method details that method, which the line names, together with the entries under it.
+Any other entry details each method that the line names.
+Words that state where or how the method is applied, by naming a platform, a target or a class of either, a compiler, or a model such as Stacked Borrows, are a qualifier of that method.
+Words that name a kind of target as the condition that a case puts under test, without stating where the method is applied, name that case.
+The other words name the paths or cases of the line's requirement that the method covers, or say how those cases run.
+A method whose line names no path or case for it covers the paths and cases that its requirement's statement names.
+A qualifier holds for the case whose words hold it.
+A qualifier that stands apart from every case, after the method or at the head of an entry, holds for every case of the method or of that entry.
+In each case that it holds for, a qualifier changes the method's scope as its words state, for what it names, and for the rest the method keeps the default scope of its row.
 
-Evidence lanes (heap windows, fault injection and the panic-link gate) run the ASIL profile (xref:build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]).
+*Profiles and toolchains.*
+The scope of a heap window, under whichever method a line names it, of a test that a line names under `fault-injection` or whose words say that it injects a fault, and of the panic-link check includes the ASIL profile (xref:build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]), whatever a qualifier states.
+A contract suite that relies on catching a panic runs on an unwinding test profile in place of the ASIL profile, for diagnosis only, and its result counts only as part of a requirement's evidence.
+A run that a line places under Miri uses the toolchain that Miri needs, in place of the compilers of its method's row.
 
-Contract suites that rely on catching a panic run on an unwinding test profile, for diagnosis only, and their evidence counts only as part of an item's evidence.
+*The evidence.*
+Each part that a requirement of this area names *MUST* show, in its evidence for the duties that the requirement gives it, each method that the requirement's "Verification" line names, in the scope that the method has for the requirement, applied to the paths and cases of those duties that the method covers.
+A requirement is verified only when its evidence shows each method of its line, in the scope that the method has for the requirement, applied to the paths and cases that the method covers, and those methods between them cover every path and case that its statement names.
+A result on another path is no evidence for the requirement.
+--
 
-=== When an item is verified
+[horizontal]
+ID:: `+req~ssr-verification-methods~1+`
+ASIL:: B
+Allocated to:: each part that a requirement of this area names
+Verification:: review
+* Each "Verification" line of this area, against the table: it names one or more of the table's methods, and no other.
+* Each qualifier: the scope that it states, against the default scope of its method's row.
+* For each requirement, its evidence: each method of the requirement's line, in its scope, applied to the paths and cases that the method covers, with the methods between them covering every path and case that its statement names.
+* For each part, the evidence that its records give for the duties of each requirement that names it.
+ISO 26262:: 8-6.4.3.2 c, 8-9.4.1.1, 8-9.4.2.1, 8-9.4.3.1 (part-clause numbers only)
 
-An item is verified only when each method it lists has evidence for the paths it names.
-A test that passes on another path is not evidence.
+*Rationale.*
+Every "Verification" line of this area names its methods by a word, so each word needs one meaning, stated once, and in an item that meaning has a revision that rises when it changes.
+Several repositories verify the parts that this area binds, each with its own runs, runners and tool versions, which change from one release to the next; a default that names compilers by their role, and no run, runner or tool version, holds for all of them.
+A heap window on a pthread target catches lazy first-use allocation that OS locks built on futexes hide, so the default of the heap window has a platform of each kind.
+In the ASIL profile a panic ends the process and an arithmetic overflow panics, so a heap window, a test that injects a fault or the panic-link check shows how the ASIL build behaves only when it uses that profile.
+A suite that catches a panic needs unwinding, which that profile turns off.
+A result shows how the path that ran behaves, and another path can run other code under other conditions.
 
-=== How a test names what it verifies
-
-A test names what it verifies with OFT's own coverage tag, and the method after it on the same line, for example `+// [utest->req~ssr-qos-ttl~5] method: test+`.
-
-* OFT reads the bracket.
-* The method is for the check that each listed method has its evidence, which OFT does not do.
-* Code that meets an item carries `+// [impl->req~ssr-qos-ttl~5]+`.
+.A case and a qualifier in one Verification line
+====
+A line may read `+test (a service that keeps history refused at setup, on a 32-bit target)+`.
+The words "a service that keeps history refused at setup" name the case, and "on a 32-bit target" is a qualifier.
+The test then runs on a 32-bit target, with the current stable compiler and with the minimum supported version.
+====
 
 [[files]]
 == Files
@@ -390,7 +422,7 @@ A test names what it verifies with OFT's own coverage tag, and the method after 
 |===
 | File | Items | Tags
 
-| This page | 2 | `SafetyUpRustCore`, `SafetyStreamer`
+| This page | 3 | `SafetyUpRustCore`, `SafetyStreamer`, `SafetyBinding`, `SafetyWire`
 | xref:assumptions-of-use.adoc[Assumptions of use] | 17 | `SafetyManual`
 | xref:runtime-modes.adoc[Modes and the transition] | 14 | `SafetyUpRustCore`
 | xref:heap.adoc[Heap] | 5 | `SafetyUpRustCore`
