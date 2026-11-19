@@ -10,9 +10,7 @@ Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC'
 These are the three assumptions of use of the up-rust SEooC whose duty is about every transport: who can reach a transport's resources, which integrity level each transport is given, and which bindings and wires a deployment uses.
 
 * They are that element's assumptions, as `seooc` in their IDs says.
-They bind an integrator that claims its safety-assurance scope, and no deployment of another SDK or transport (xref:../seooc-up-rust/assumptions-of-use.adoc#who[who the assumptions bind]).
-* They are deployment duties.
-No software requirement of this layer is met by them, and they replace none.
+Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 * Each "Violation" text uses the three classes of xref:../seooc-up-rust/assumptions-of-use.adoc#violation-classes[how a violation shows up].
 * The safety manual of the SDK states them, and they carry `SafetyManual` and the gate tag `SafetyGateUpRust` (xref:../seooc-up-rust/assumptions-of-use.adoc#coverage[tags and coverage]).
 * What only one transport adds is stated with that transport (xref:README.adoc#one-binding[what is specific to one binding]).

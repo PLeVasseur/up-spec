@@ -26,7 +26,7 @@ They are not protocol requirements of uP-L1, and they bind no transport or SDK o
 Each requirement binds the part its tag names (xref:../README.adoc#tags[the tags]): every binding written against the element's contract (`SafetyBinding`, `SafetyBindingPull`), every wire written against it (`SafetyWire`), every serialized wire (`SafetyWireSerialized`), each wire of the fixed-layout XCDR2 profile (`SafetyXcdr2`), one binding alone, where it has a tag of its own (<<one-binding>>), or the element itself (`SafetyUpRustCore`).
 * *Assumptions of use.*
 The five assumptions of use filed here are that element's: three about every transport, and two about one transport, iceoryx2.
-They bind an integrator that claims its safety-assurance scope (xref:../seooc-up-rust/assumptions-of-use.adoc#who[who the assumptions bind]).
+Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 * *The protocol chapter stays in force for whoever follows it.*
 No item here lifts a requirement of uP-L1, its security requirements included, from an implementation that follows it.
 Where an item here differs from that chapter, or stands beside it with no stated relation, xref:../../contract-generations.adoc#transition[the transition table] says so: for an empty payload, for a native representation, for the iceoryx2 version, for a transport on LoLa and for the interface between an SDK and a transport.

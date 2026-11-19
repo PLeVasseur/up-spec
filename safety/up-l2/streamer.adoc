@@ -12,9 +12,7 @@ Allocated to the Streamer and its binary, in `up-streamer` (tag `SafetyStreamer`
 The last two sections are the two assumptions of use about operating the Streamer.
 
 * They are the up-rust SEooC's assumptions, as `seooc` in their IDs says.
-They bind an integrator that claims its safety-assurance scope (xref:../seooc-up-rust/assumptions-of-use.adoc#who[who the assumptions bind]).
-* They are deployment duties.
-No requirement on the Streamer is met by them, and they replace none.
+Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 * Each "Violation" text uses the three classes of xref:../seooc-up-rust/assumptions-of-use.adoc#violation-classes[how a violation shows up].
 * They carry `SafetyManual` only (xref:../seooc-up-rust/assumptions-of-use.adoc#coverage[tags and coverage]).
 * Their sentences about strict mode concern the element's strict mode, and apply where it is used (xref:../seooc-up-rust/build.adoc#req-ssr-strict-report[Strict mode reports on every run] in xref:../seooc-up-rust/build.adoc[build and shipped content]).

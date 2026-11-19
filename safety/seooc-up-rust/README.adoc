@@ -210,8 +210,7 @@ QNX 7.1 and 8.x are future work, source only, each its own profile.
 
 === Whom the assumptions of use bind
 
-The assumptions of use bind an integrator that claims safety assurance for a configuration.
-Ordinary use need not carry out safety integration procedures.
+Whom the assumptions of use bind, and that they replace no requirement: xref:assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 
 A safety manual states the integration contract.
 It is not a safety case, an assessment or a certificate.

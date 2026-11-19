@@ -17,8 +17,8 @@ It holds what is specific to one transport:
 == Whom this page binds
 
 * The three requirements bind the iceoryx2 binding of the up-rust SEooC, and no other transport.
-* The two assumptions bind an integrator that deploys on that binding and claims the element's safety-assurance scope (xref:../seooc-up-rust/assumptions-of-use.adoc#who[who the assumptions bind]).
-They are the up-rust SEooC's assumptions, as `seooc` in their IDs says, and they are deployment duties: no requirement on the binding is met by them, and they replace none.
+* The two assumptions bind a deployment on that binding, as each states.
+They are the up-rust SEooC's assumptions, as `seooc` in their IDs says. Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 * Nothing here binds an iceoryx2 transport written for another SDK, or changes the protocol's iceoryx2 chapter.
 That chapter names version 0.6.1 of the iceoryx2 protocol, and the items here are written against iceoryx2 0.9.
 How the two relate is open (xref:../../contract-generations.adoc#transition[the transition table]).

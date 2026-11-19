@@ -61,8 +61,7 @@ The kind of claim does not say when an item binds.
 Some requirements state no condition.
 Others name one: a native route, a route that requires a guarantee, allocation inside middleware, strict mode in a state that checks.
 Each binds the part it is allocated to whenever that condition holds, with or without a safety claim.
-* *An assumption of use is a duty of an integrator* that claims the element's safety-assurance scope (xref:safety/seooc-up-rust/assumptions-of-use.adoc#who[who the assumptions bind]).
-It is no software requirement, and it makes no software requirement wait for that claim.
+* *An assumption of use*: xref:safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 
 The successor's own account of its claims is xref:safety/seooc-up-rust/README.adoc#claims[the SEooC's claims].
 

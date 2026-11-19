@@ -58,7 +58,7 @@ Which items an implementation follows comes from what it is and what it declares
 An item in `up-l1/` or `up-l2/` is therefore no requirement on every transport, or on the SDK of another language.
 Another SDK or transport is bound by one only once it declares that it follows the successor contract (xref:../contract-generations.adoc#selection[which contract an implementation follows]), whose items its repository then covers under their tags.
 * *An assumption of use keeps `seooc` in its ID wherever it is filed.*
-It is that element's assumption, and it binds an integrator that claims that element's safety-assurance scope.
+It is that element's assumption (xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
 * *A language-agnostic safety requirement*, if one is added, gets a tag of its own and says whom it binds.
 * *The protocol chapters stay in force for whoever follows them.*
 No item here lifts a requirement of the protocol chapters, a security requirement included, from an implementation that follows that requirement.
@@ -124,11 +124,7 @@ At this revision <<faulty-peer>> is the one normative definition here.
 
 * *Scope.*
 Every item of this area.
-* *The two do not stand in for each other.*
-A deployment's promise meets no software requirement, and the software discharges no deployment duty.
-* *An assumption of use obliges no software.*
-Where one describes what the software does, the description is a summary for the integrator.
-A software obligation is stated only by a requirement.
+* *The two do not stand in for each other*: xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 
 [[integrity-level]]
 === Integrity levels

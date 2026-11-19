@@ -9,19 +9,42 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 Each assumption of use is something the integrator must provide or guarantee.
 It stays assumed until the integrator validates it for the item.
 
-This page indexes the element's twenty-three assumptions of use, and states sixteen of them.
+This page indexes the element's twenty-four assumptions of use, and states seventeen of them.
 The other seven are stated in the layer part that their duty concerns: three with the transports, two with the one transport they bind, iceoryx2, and two with the Streamer (<<summary>>).
 
 [[who]]
 == Who these assumptions bind
 
-These assumptions bind an integrator that claims the element's safety-assurance scope for a configuration (xref:README.adoc#claims[the SEooC's claims]).
+[[aou-seooc-assumptions-bind]]
+=== An assumption of use binds the integrator who claims the scope, and replaces no requirement
 
+[.specitem,oft-sid="aou~seooc-assumptions-bind~1",oft-title="An assumption of use binds the integrator who claims the scope, and replaces no requirement",oft-needs="uman",oft-tags="SafetyManual"]
+--
+*Whom it binds.*
+Each assumption of use of this area *SHALL* be met, wherever it is filed, by the integrator that claims the element's safety-assurance scope for a configuration (xref:README.adoc#claims[the SEooC's claims]), including what that integrator's application, platform and deployment owner provide.
+It is no duty of another SDK, of another transport, or of a deployment that does not use the element.
+
+*Ordinary use.*
 Ordinary use, which claims no such scope, need not carry out these integration procedures.
 The element's functional semantics, its honest reports and its native resource rules hold for it all the same.
 
-An assumption binds that same integrator wherever it is filed.
-Filing one in a layer part makes it no duty of another SDK, of another transport or of a deployment that does not use the element.
+*No requirement is replaced.*
+An assumption of use replaces no software safety requirement, and no software safety requirement is met by it.
+What the element, a binding, a wire, a platform backend or the Streamer does, including what it does when the condition of an assumption holds, is stated by a software safety requirement.
+An assumption that names such an act points at that requirement.
+--
+
+*Violation:*
+
+* An integrator that claims the scope and does not meet an assumption: each assumption's own "Violation" text says how that shows up.
+
+[horizontal]
+ID:: `+aou~seooc-assumptions-bind~1+`
+ASIL:: B
+
+*Rationale.*
+A duty of the integrator and a software safety requirement are met by different parties, with different evidence.
+If either could stand in for the other, a duty could be left with nobody.
 
 [[violation-classes]]
 == How a violation shows up

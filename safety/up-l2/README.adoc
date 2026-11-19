@@ -25,7 +25,7 @@ They are not protocol requirements of uP-L2, and they bind no SDK or dispatcher 
 Each requirement binds the part its tag names (xref:../README.adoc#tags[the tags]): the element (`SafetyUpRustCore`) or the Streamer (`SafetyStreamer`).
 * *Assumptions of use.*
 The two assumptions of use filed here are that element's, about operating its Streamer.
-They bind an integrator that claims its safety-assurance scope (xref:../seooc-up-rust/assumptions-of-use.adoc#who[who the assumptions bind]).
+Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 * *The protocol chapter stays in force for whoever follows it.*
 No item here lifts a requirement of uP-L2 or of its dispatchers from an implementation that follows it.
 * *Five items meet rules of the dispatcher chapter.*
