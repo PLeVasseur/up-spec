@@ -114,7 +114,7 @@ The copy is held in storage reserved at setup, like every other runtime buffer, 
 
 The middleware of a lending binding can map its payload memory read-only for readers.
 So the copy reads it only through loads that are valid on a read-only mapping.
-Where one middleware does so is stated on its binding's page (xref:iceoryx2.adoc#index[what the general rules meet on iceoryx2]).
+Where one middleware does so is described with its binding.
 
 Copying raced bytes with ordinary references or a plain memory copy is a data race.
 So the copy is sound only through a mechanism defined for racing access, and a route without one has no sound form.

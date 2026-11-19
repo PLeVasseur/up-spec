@@ -338,8 +338,7 @@ An implementation's code, tests and reviews trace to the items.
 * A rationale cites what <<markup>> allows.
 * A statement may name something the element must provide, such as an operation, a setting, a counter or a crate.
 That name is part of the specification, not a citation of code.
-
-NOTE: An SDK that implements an item keeps its own record of where it does so, outside this repository, as non-normative traceability.
+* An SDK that implements an item keeps its own record of where it does so, outside this repository, as non-normative traceability.
 
 == Why this area cannot break an SDK's run
 

@@ -348,8 +348,7 @@ Verification:: test, review
 * *review*: every path of the binding that unsubscribes a proxy event or destroys one or its proxy, at source level, against every way a sample can still be held.
 
 *Rationale.*
-LoLa publishes that a proxy event is not to be unsubscribed, and its proxy not to be destroyed, while a sample that it provided is still held (<<lola-assumptions>>, `+EventSubscriptionActiveWhileHoldingSamplePtr+`).
-This page reads that as the condition under which the memory that the sample points to stays valid.
+LoLa publishes that a proxy event is not unsubscribed, and its proxy not destroyed, while a sample it provided is still held, because unsubscribing invalidates the memory that the sample points to (<<lola-assumptions>>, `+EventSubscriptionActiveWhileHoldingSamplePtr+`).
 
 A frame that the element retains on a native route is a view into that memory (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 If the subscription ended first, safe code would hold a view of invalid memory, which xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] forbids.
@@ -501,8 +500,7 @@ The limit is LoLa's, at one revision and in one configuration.
 The element has no such limit, and another binding, or another revision of LoLa, may serve more.
 
 _An error from allocating._
-LoLa publishes that the system is to go to a safe state when allocating returns an error (<<lola-assumptions>>, `+CheckForAllocationError+`).
-This page reads that as a failure that is not recovered from.
+LoLa publishes that an error from allocating means a failure that is not recovered from (<<lola-assumptions>>, `+CheckForAllocationError+`).
 A binding that retried it, or reported it as a route that is briefly full, would keep the application from the reaction that LoLa asks for.
 
 [[index]]
