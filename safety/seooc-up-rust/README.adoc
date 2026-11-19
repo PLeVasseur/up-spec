@@ -165,12 +165,12 @@ The QM convenience crates are:
 * `up-wire-protobuf` and the other `std` wires;
 * `test-util`.
 
-On the ASIL path an application links only its claimed safety dependency graph (xref:crate-isolation.adoc#req-ssr-crate-core-only-binary[An ASIL binary needs no crate outside its claimed graph at run time]).
+On the ASIL path an application links only its claimed safety dependency graph (xref:assumptions-of-use.adoc#aou-seooc-build-configuration[The ASIL binary is built from its claimed graph, with the ASIL profile]).
 
 * The graph is judged by what each crate actually brings into the image, with its features and target-selected paths, never by its name.
 `up-rust` as published brings dependencies outside that graph, and a compatibility re-export is judged by the graph it brings.
 * Ordinary use keeps all of them.
-* An optional layer joins a claimed graph only where a configuration admits it with its own allocated requirements and evidence (xref:crate-isolation.adoc#req-ssr-crate-core-only-binary[An ASIL binary needs no crate outside its claimed graph at run time]).
+* An optional layer joins a claimed graph only where a configuration admits it with its own allocated requirements and evidence (xref:assumptions-of-use.adoc#aou-seooc-build-configuration[The ASIL binary is built from its claimed graph, with the ASIL profile]).
 At this revision none does.
 * `up-rust-core` itself has no dependencies, no Cargo features and no `alloc`.
 The optional `alloc`, `std` and application layers are separate crates.

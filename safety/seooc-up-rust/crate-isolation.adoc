@@ -54,60 +54,31 @@ This item does not rest on any one such scope.
 Neither the availability of a language feature nor a successful build is a qualification of the compiler or the library.
 
 [[req-ssr-crate-core-only-binary]]
-== An ASIL binary needs no crate outside its claimed graph at run time
+== The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it
 
-[.specitem,oft-sid="req~ssr-crate-core-only-binary~2",oft-title="An ASIL binary needs no crate outside its claimed graph at run time",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-crate-core-only-binary~3",oft-title="The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-*The claimed graph.*
-An application on the ASIL path *MUST* depend at run time only on the crates of its claimed safety dependency graph:
+The element *MUST* keep its checked policy in the safety crate and usable without any optional allocation, host, application, scheduler or memory-provider layer.
 
-* the safety crate;
-* the bindings, wires and platform backends that its configuration qualifies as separate elements (xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]);
-* any optional layer of the element that its configuration admits with that layer's own allocated requirements and evidence.
-
-*Checked policy stays in the safety crate.*
-The element's checked policy *MUST* be in the safety crate and usable without any optional allocation, host, application, scheduler or memory-provider layer.
-
-An optional layer *MUST NOT* bypass or reimplement those checks.
-It joins a claimed graph by its admitted evidence, never by its name or by its dependency on the safety crate.
-
-*The graph is stated and checked.*
-The graph *MUST* be stated with the configuration and checked against the final image, and the image *MUST NOT* contain code from a crate outside it.
-The check judges a package by what it actually brings into the image, not by its name.
-
-*What isolation does not do.*
-The safety crate's isolation does not qualify any middleware or other crate in the graph.
-
-*Derives.*
-Derives come from `+up-rust-macros+` at compile time, and the `+unsafe+` they generate *MUST* be held to the same inventory.
+An optional layer that a configuration admits *MUST NOT* bypass or reimplement that policy.
 --
 
 [horizontal]
-ID:: `+req~ssr-crate-core-only-binary~2+`
+ID:: `+req~ssr-crate-core-only-binary~3+`
 ASIL:: B
-Allocated to:: the element
-Verification:: gate, test
-* *gate*: a symbols and dependency check of a final image against its stated graph.
-* *test*
-** A link fixture that uses only the safety crate and a qualified binding and wire.
-** A fixture whose image brings in code from a crate outside its graph is refused.
+Allocated to:: the element; each optional layer that a configuration admits, for not bypassing or reimplementing the checked policy
+Verification:: test, review
+* *test*: a link fixture that uses only the safety crate, a binding and a wire.
+* *review*: each check of the element's checked policy, which stands in the safety crate; each optional layer that a configuration admits, which neither bypasses those checks nor reimplements them.
 
 *Rationale.*
-A crate outside the claimed graph in the final image would run beside the element without meeting its requirements.
-
-_What an application links._
-
-* An ASIL application depends directly on `+up-rust-core+` and imports its `+up_rust_core::+` paths.
-An explicit dependency alias may change that local spelling.
-* The re-exports in the separate `+up-rust+` package do not make its crate root available without linking that package.
-Linking it brings that package's dependencies into the graph, which the check then judges.
-* An application also links the bindings and wires it uses, which are separate elements qualified on their own.
-So the graph names them instead of pretending the safety crate is the whole image.
-* A derive runs at compile time and leaves only generated code in the image, and that code's `+unsafe+` is inventoried like the crate's own (xref:memory-safety.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]).
+The safety crate's own build, and so the checked policy in it, cannot be changed by another crate's features (<<req-ssr-crate-isolated,The safety crate cannot be tainted>>).
+Usable without any optional layer, the policy applies in full to a configuration that admits none.
 
 _Optional layers._
-The statement keeps the checked policy in the safety crate, and does not require everything the element provides to sit there.
-That leaves a way to admit an independently specified optional layer, such as an allocation-aware or asynchronous layer, into a claimed configuration.
+With the checked policy in the safety crate, a claimed configuration can admit an independently specified optional layer, such as an allocation-aware or asynchronous layer, for functions outside that policy.
+A layer that bypassed the policy would let a configuration run without its checks, and a layer that reimplemented it would run checks that the element's requirements and evidence do not cover.
+A layer that no configuration admits stays out of every claimed graph (xref:assumptions-of-use.adoc#aou-seooc-build-configuration[The ASIL binary is built from its claimed graph, with the ASIL profile]; xref:build.adoc#req-ssr-strict-lock[The locked build allows only enforcement]).
 An admitted optional layer carries its own allocated requirements and evidence.
 
 No configuration admits an optional layer at this revision.
