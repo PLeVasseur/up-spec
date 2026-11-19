@@ -415,7 +415,7 @@ The test then runs on a 32-bit target, with the current stable compiler and with
 [[files]]
 == Files
 
-177 items in 28 files: 99 in the 15 files of this directory, and 78 in the 13 files of the two layer parts.
+206 items in 32 files: 105 in the 16 files of this directory, 98 in the 15 files of the two layer parts, and 3 in the area's README.
 
 === In this directory
 
