@@ -62,7 +62,7 @@ NOTE: These communication layer requirements are still for point-2-point uEntity
   ** *MUST* attempt to retry transmission of the UMessage. Retry policy is specific to the dispatcher implementation
   ** Dispatcher *MUST NOT* discard UMessages unless either UMessage has expired, or the egress queue is full. UMessages that cannot be delivered are sent to a Dead Letter Office Topic
 
-NOTE: These communication layer requirements are still for point-2-point uEntity communication to and from a dispatcher
+NOTE: This item applies to point-2-point uEntity communication to and from a dispatcher
 --
 
 * *MAY* support additional UMessage delivery policies in general or per topic in the future
@@ -77,7 +77,7 @@ NOTE: These communication layer requirements are still for point-2-point uEntity
   ** DLT *MUST* include the reason for the failed delivery attempt using  error codes defined in google.rpc.Code
   ** uEntities MUST be able to subscribe to the DLT to be notified of message deliver failures
 
-NOTE: These communication layer requirements are still for point-2-point uEntity communication to and from a dispatcher
+NOTE: This item applies to point-2-point uEntity communication to and from a dispatcher
 --
 
 * *MUST* forward attributes from the UMessage header

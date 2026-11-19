@@ -25,7 +25,7 @@ Verification:: gate (the manifest has no `+[features]+` and no `+[dependencies]+
 
 *Rationale.*
 Cargo turns a crate's feature on for the whole build once any crate asks for it (source: the Cargo Book, Rust 1.98.1, chapter Features, section Feature unification).
-So only a crate with no features and no dependencies cannot have `+std+` switched on inside it by another.
+So only a crate with neither features nor dependencies keeps `+std+` off inside it, whatever other crates ask for.
 
 With no `+alloc+`, the crate's URIs keep their authority inline, so this crate does not allocate a separate heap-owned authority representation.
 That representation does not determine where a caller stores an enclosing object.
@@ -50,7 +50,6 @@ Verification:: gate (a token scan for `+async+`, `+.await+`, `+Future+`, `+Pin+`
 Offering traffic in synchronous or polled form, with no futures, tasks or pinning, keeps it independent of any executor and of library modules that a given qualification scope may not cover.
 
 Which compiler releases, targets, library modules and options a qualification covers is stated by its supplier for an exact release (for example https://ferrous-systems.com/blog/ferrocene-26-05-0/[the Ferrocene 26.05.0 release notes]).
-This item does not rest on any one such scope.
 Neither the availability of a language feature nor a successful build is a qualification of the compiler or the library.
 
 [[req-ssr-crate-core-only-binary]]
@@ -99,7 +98,7 @@ The ASIL Streamer's route table, admission, validation and forwarding loop *MUST
 
 No feature, dependency or build setting outside it can bring classic routes, `+std+`-only paths or heap use into it.
 
-The `+std+` loader only parses deployment data, and validation happens in this crate.
+The `+std+` loader *MUST* only parse deployment data, and validation happens in this crate.
 
 Bindings and wires are linked by the binary that uses the crate, not by the crate.
 --

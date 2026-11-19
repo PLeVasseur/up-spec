@@ -35,7 +35,7 @@ To achieve the above mentioned objectives, we have split the specifications into
 
 * xref:up-l3/README.adoc[*Application Layer (uP-L3):*] Service contracts for subscription management, service/device discovery, and event caching that is common across all deployments (implementations) of uProtocol.
 
-* xref:safety/README.adoc[*Requirements of the up-rust SEooC:*] It holds the requirements of the up-rust SEooC and of the wires, transports and Streamer that work with it, laid out by the layers above: their ordinary functional contract, their resource and fault obligations, and their safety requirements and assumptions of use. Its requirements bind only the parts that their statements and allocations name, and its assumptions of use only the integrator that claims the up-rust SEooC's safety-assurance scope.
+* xref:safety/README.adoc[*Requirements of the up-rust SEooC:*] It holds the requirements of the up-rust SEooC and of the wires, transports and Streamer that work with it, laid out by the layers above: their ordinary functional contract, their resource and fault obligations, and their safety requirements and assumptions of use. Whom its requirements and assumptions of use bind is stated in xref:safety/README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names] and xref:safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 
 * xref:contract-generations.adoc[*Which requirements an implementation follows:*] How those requirements relate to the chapters above.
 

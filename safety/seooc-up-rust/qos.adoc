@@ -43,19 +43,19 @@ The declaration lets the Enforce state tell that choice from a missing deadline.
 --
 *Functional QoS.*
 Each route's QoS *MUST* be checked at setup against its binding's declared capability, before any resource is reserved.
-If it cannot be honored, setup is refused, naming the route and the setting.
-No QoS setting is weakened silently, at setup or in runtime mode.
+If it cannot be honored, setup *MUST* be refused, naming the route and the setting.
+A QoS setting *MUST NOT* be weakened silently, at setup or in runtime mode.
 
-*Timing and assurance are separate claims.*
+*Timing and assurance.*
 A finite timing bound and a safety-assurance scope are claims separate from a route's functional QoS.
 A finite timing bound is a stated endpoint reached within a bound, under a supported configuration whose execution model, workload envelope and evidence establish it.
 A safety-assurance scope is the element's contribution to the safety requirements of an item, in ISO 26262's sense, at a stated ASIL and context, with its requirements, analyses, verification, qualification and assessment.
 
 * A route that explicitly requires either *MUST* receive it only under the declared conditions of a supported configuration whose evidence establishes it.
 Otherwise setup *MUST* refuse the route, naming the route, the claim and the missing condition.
-* Neither claim is inferred from an OS family, an architecture or a compiler.
+* Each claim *MUST NOT* be inferred from an OS family, an architecture or a compiler.
 * An integrity level, an ASIL label or a strict-mode state is no request for either claim.
-* The absence of an optional timing bound or assurance scope *MUST NOT* refuse a route that requires only functional QoS.
+* The element *MUST NOT* refuse a route that requires only functional QoS for want of an optional timing bound or assurance scope.
 * Where a configuration offers no finite bound for an endpoint, the element *MUST* still operate and report functionally.
 A route that explicitly requires that bound is refused, as the first entry states.
 * In strict mode's Enforce state, the element *MUST* refuse at setup a route whose detection bound exceeds the reaction budget declared for it (<<req-ssr-qos-deadline,Deadlines are monitored>>; xref:assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
@@ -86,7 +86,7 @@ Verification:: test, review
 ** On a configuration that offers no finite bound for an endpoint, a route that does not require that bound operates and reports functionally.
 ** In the Enforce state, a route whose detection bound exceeds its declared reaction budget is refused, and one whose bound equals the budget is not.
 ** Each route's report, stating apart its admitted functional QoS, any admitted finite timing bound with the configuration it rests on, and any admitted assurance scope, and presenting no passed setup check as a safety qualification.
-* *review*: no path on which a finite timing bound or a safety-assurance scope is inferred from an OS family, an architecture or a compiler; and each statement that uses a finite timing bound or a safety-assurance scope, read with the clause "Timing and assurance are separate claims".
+* *review*: no path on which a finite timing bound or a safety-assurance scope is inferred from an OS family, an architecture or a compiler; and each statement that uses a finite timing bound or a safety-assurance scope, read with the clause "Timing and assurance".
 
 *Rationale.*
 Silently substituting a supported policy would leave the application relying on a guarantee the route does not provide.
@@ -122,9 +122,7 @@ That ownership is released exactly once as xref:heap.adoc#req-ssr-heap-slot-type
 That release is the only heap use an overflow causes, and it releases no route, table or other runtime resource.
 
 *Discards the binding cannot observe.*
-If a discard occurs entirely inside middleware and the binding cannot observe it, the route's report *MUST* explicitly disclose that limitation instead of claiming to count it (xref:errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
-This exception concerns observation only.
-It does not permit a different overflow policy or excuse an observable discard from counting.
+If a discard occurs entirely inside middleware and the binding cannot observe it, the route's report *MUST* explicitly disclose that limitation and make no claim to count it (xref:errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 --
 
 [horizontal]
@@ -144,13 +142,12 @@ Verification:: test, heap-window
 *Rationale.*
 Counting observable discards gives the application a local congestion signal.
 
-Discards hidden inside middleware require an explicit route-report limitation.
-The presence of counter fields does not establish that a binding can observe the events needed to increment them.
+Counter fields can be present for events that a binding cannot observe.
 
 _Heap use on overflow._
 The policy, any wait and the counting are heap-free on every route.
 Only the release of the ownership that the policy ends, under the route's declared class, may touch the heap.
-Without that, a serialized route that admits owning values could not destroy an evicted value at all.
+Destroying an evicted value on a serialized route that admits owning values can touch the heap.
 
 [[req-ssr-qos-deadline]]
 == Deadlines are monitored
@@ -165,44 +162,43 @@ The threshold is the deadline plus its binding's declared arrival latency, which
 An arrival is every frame that reaches the route's queue, including one the overflow policy discards and one refused when it is read.
 Bad data is reported by its own refusal counters.
 
-* On a push binding the element records an arrival at delivery.
-* On a pull binding the element records an arrival when the binding reports it.
-* Neither a read nor a carrier's take records one, and a wake hint is not one.
+* On a push binding the element *MUST* record an arrival at delivery.
+* On a pull binding the element *MUST* record an arrival when the binding reports it.
+* A read or a carrier's take *MUST NOT* record one, and a wake hint is not one.
 * A frame refused before it enters the queue is not an arrival.
 On a push binding that includes a frame whose time-to-live has already run out.
 
-*Each gap is counted once.*
-Each gap longer than the threshold is counted exactly once: by a check during the gap, or by the arrival that ends it.
-A gap that is counted late is still counted as a miss.
+*One count per gap.*
+Each gap longer than the threshold *MUST* be counted exactly once: by a check during the gap, or by the arrival that ends it.
 
 *Accuracy.*
 Measured between recorded arrival times:
 
-* The element never counts a miss for a gap no longer than the threshold.
+* The element *MUST NOT* count a miss for a gap no longer than the threshold.
 So it never counts one for a true gap no longer than the deadline while each arrival is recorded within the declared latency.
-* The element always counts one for a gap longer than the threshold by more than the monitor's resolution, at most 1/512 of the threshold.
+* The element *MUST* always count one for a gap longer than the threshold by more than the monitor's resolution, at most 1/512 of the threshold.
 
 *Saturation.*
-A count *MUST NOT* wrap: at the end of its range it saturates, and the report says so.
+A count *MUST NOT* wrap: at the end of its range it *MUST* saturate, and the report *MUST* say so.
 
 *Suspended threads.*
 A monitor that keeps full-width timestamps and counts *MUST* keep these properties however long a thread that records, checks or reports for the route is suspended.
-A resumed operation never counts a gap twice, never credits a later gap with a stale observation and never publishes a torn count.
+A resumed operation *MUST NOT* count a gap twice, credit a later gap with a stale observation or publish a torn count.
 
 *Finite-range representations.*
-A monitor representation that is wrap-aware over a finite range of ticks keeps these properties only within the servicing and waiting range that its supported configuration states.
+For a monitor representation that is wrap-aware over a finite range of ticks, these properties hold only within the servicing and waiting range that its supported configuration states.
 For the one-word tick representation that range is:
 
 * the route serviced at least every 2^29^ ticks of its monitor (xref:assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]);
 * every wait inside the element under 2^28^ ticks (xref:assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 
-The transport's `+wait+` services its routes between inner waits of at most 2^28^ ticks of the shortest-scaled route on the transport.
+The transport's `+wait+` *MUST* service its routes between inner waits of at most 2^28^ ticks of the shortest-scaled route on the transport.
 
 *Strict mode.*
 In strict mode's Enforce state, the element *MUST* refuse at setup a declared servicing period longer than its transport's bound.
 
 *When the count is current.*
-The count is current whenever the route's counters are read after the transport's receive, wait or service operations.
+The count *MUST* be current whenever the route's counters are read after the transport's receive, wait or service operations.
 So it does not depend on the application polling that route.
 
 *The report.*
@@ -214,12 +210,14 @@ That bound runs from the last true arrival to the winning counter update and its
 
 An application's later read of the report adds its own delay, outside J, and places no service duty on the application.
 
+*Middleware event deadlines.*
+On an ASIL deployment the binding *MUST* turn its middleware's own event deadlines off.
+The element's deadline monitor is the receiver's mechanism.
+
 *Related rules.*
 
 * The deadlines setup refuses are stated in <<req-ssr-qos-invalid-refused,Meaningless QoS is refused at setup>>.
 * What setup does with a route that declares no deadline is stated in <<req-ssr-qos-declared,QoS is declared per route at setup>>.
-* On an ASIL deployment the binding turns its middleware's own event deadlines off.
-The element's deadline monitor is the receiver's mechanism.
 --
 
 [horizontal]
@@ -252,16 +250,14 @@ Verification:: test, miri, fault-injection, review
 Arrival-based monitoring observes communication independently of application reads.
 An overflowed or undecodable frame still arrived, with observable discards or refusals reported separately.
 
-On a shared route another peer can keep this aggregate deadline refreshed while one peer is starved.
-Absence of a deadline miss is not evidence of that peer's progress (xref:assumptions-of-use.adoc#aou-seooc-peer-rates[Peer rates on shared routes are the integrator's]).
+On a shared route another peer can keep this aggregate deadline refreshed while one peer is starved (xref:assumptions-of-use.adoc#aou-seooc-peer-rates[Peer rates on shared routes are the integrator's]).
 
 _Full width._
 A monitor that keeps full-width origins and a saturating full-width count has no wrap window.
 That is why the statement requires its properties to hold however long a thread that records, checks or reports for the route is suspended, with no watchdog and no servicing range.
 Full width removes the wrap window only.
-Neither full width nor a monitor backend's exclusion, long-suspension and arithmetic argument bounds J.
 
-Where a representation needs a servicing range, the range is stated with its configuration instead of being assumed everywhere.
+Where a representation needs a servicing range, the range is stated with its configuration and applies to that configuration only.
 
 _Minimum deadline and resolution._
 The 1,024 ns minimum deadline and the 1/512 resolution stay until a separately proved representability and resolution contract replaces them.
@@ -289,7 +285,7 @@ An ID made while the sender's wall clock could not be read records the last good
 For a generator that keeps the last good time only to 64 ms, such a frame can be refused by up to 64 ms more (xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]).
 
 *An unreadable clock.*
-If the wall clock cannot be read at the check, the frame *MUST* be refused and counted, never processed with an unknown expiry.
+If the wall clock cannot be read at the check, the frame *MUST* be refused and counted.
 
 *When expiry is checked.*
 Expiry *MUST* be checked when a frame reaches its route, before its wire decodes it, as well as when it is taken.
@@ -312,7 +308,6 @@ The check also reads the current time in whole milliseconds, so it can see up to
 The bound allows for that millisecond.
 
 A sender that cannot read its clock reuses the last good time in its IDs, so they keep working (xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]).
-The statement discloses the early refusal this can cause.
 
 Expiry is judged at the element's checks, when a frame reaches its route and when it is taken.
 TTL decides which frames those checks accept.
@@ -340,12 +335,12 @@ Allocated to:: the element
 Verification:: test (each of the six refusals)
 
 *Rationale.*
-A declaration outside the monitor or binding capability must be diagnosed before activation instead of becoming a different policy at runtime.
+Diagnosing a declaration outside the monitor or binding capability before activation keeps it from becoming a different policy at runtime.
 
 The 1,024 ns minimum follows from the monitor's threshold quantization.
 It stays until a separately proved resolution contract for the actual implementation replaces it.
 
-A deadline on a pull route whose binding cannot report arrivals stays refused whatever timing claim the route makes: no label can stand in for the arrivals that the binding cannot report.
+A deadline on a pull route whose binding cannot report arrivals is refused whatever timing claim the route makes, because the monitor counts from the arrivals that the binding reports.
 
 [[req-ssr-qos-consistent-declarations]]
 == Two declarations of one route agree

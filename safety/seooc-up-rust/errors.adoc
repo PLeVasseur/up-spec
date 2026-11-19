@@ -11,7 +11,7 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 
 [.specitem,oft-sid="req~ssr-refuse-before-heap~3",oft-title="Refuse before touching the heap",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-*Refusals are errors.*
+*Errors for refusals.*
 An operation that cannot proceed in runtime mode *MUST* return an error.
 All of these *MUST* be errors:
 
@@ -34,7 +34,7 @@ On a native route, and on any route whose heap class is none, a refusal does not
 On a serialized or owned route, some refusals are reached only after the operation acquired heap memory under its declared heap class.
 Examples are a check after decode, a failed allocation at a declared allocation point, or a wire check whose acceptance event falls after its deadline.
 Such a refusal acquires nothing more.
-It ends the ownership already created, and what that ownership holds is released exactly once as xref:heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors] and xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
+It *MUST* end the ownership already created, and what that ownership holds is released exactly once as xref:heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors] and xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
 That release is the route's declared heap use, not part of producing the refusal.
 
 *Exhaustion of a declared allocation.*
@@ -62,13 +62,7 @@ Runtime errors are fixed-size values with no heap data (<<req-ssr-error-fixed-si
 
 _Refusals after an admitted value._
 Not every refusal can come before the heap is touched.
-A serialized route that has already admitted an owned value must still end it on a refusal after decode, or on a response first accepted after its deadline, and ending it frees what the route's wire allocated.
-
-So this item keeps three things apart:
-
-* deciding, reporting and counting a refusal is heap-free on every route;
-* every refusal that can come first comes ahead of the first allocation;
-* the release of what was already admitted belongs to the route's declared class (xref:heap.adoc#req-ssr-heap-none[No heap in runtime mode]), so it is that route's declared heap use and never the refusal's.
+A serialized route that has already admitted an owned value still ends it on a refusal after decode, or on a response first accepted after its deadline, and ending it frees what the route's wire allocated.
 
 A declaration does not make an allocation call that can end the process on exhaustion return an error instead.
 
@@ -79,9 +73,9 @@ A declaration does not make an allocation call that can end the process on exhau
 --
 Element code reachable in runtime mode *MUST NOT* panic or abort:
 
-* not for any bytes, length or sequence a peer sends;
-* not for any clock reading;
-* not for any sequence of calls through the public API.
+* for any bytes, length or sequence a peer sends;
+* for any clock reading;
+* for any sequence of calls through the public API.
 
 Arithmetic on runtime paths *MUST* be checked, saturating or wrapping by intent, and *MUST NOT* reach an overflow panic.
 
@@ -113,10 +107,9 @@ Code that runs on a runtime path is not always element code (xref:README.adoc#re
 Examples are the destructor of an owned value, an allocator's release or a dependency they reach.
 
 * The element keeps memory safe whatever that code does (xref:heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors]).
-* It promises nothing about that code's panics on a route that does not require panic-free cleanup: the guarantee is not admitted there, and the route's report states separately whether evidence establishes it.
+* On a route that does not require panic-free cleanup, that guarantee is not admitted, and the route's report states separately whether evidence establishes it.
 * On a route that requires it, setup admits such code only where it is established that it cannot panic or abort in any context that runs it, and refuses the route by name otherwise (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
 
-Moving such work to another thread does not change this.
 A panic in element code is a defect on every route, whatever the route requires.
 
 [[req-ssr-error-fixed-size]]
@@ -150,31 +143,30 @@ Text for people is produced only from initialization errors, where formatting is
 
 [.specitem,oft-sid="req~ssr-error-no-silent-loss~4",oft-title="No silent loss, and each loss counted once",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-*Every loss is returned or counted.*
+*Each loss.*
 Every frame the element refuses, drops, evicts or expires in runtime mode *MUST* be either returned to its caller as an error, or counted exactly once in its route's fixed counters, under a counter that names the cause.
 
 * A retry is not a drop.
-* The counters can be read in runtime mode without heap.
+* The counters *MUST* be readable in runtime mode without heap.
 
 *Losses the element cannot see.*
 A loss that the element cannot see, such as a drop-oldest eviction inside the middleware, is not a counted event.
 Its route's report *MUST* explicitly disclose the unobservable-loss limitation.
 
 Observable overflow discards *MUST* be counted as specified by xref:qos.adoc#req-ssr-qos-overflow[Overflow acts as declared].
-This exception does not excuse missing observable counts.
 
 *Counter behaviour.*
 
-* A fault counter saturates at 2^32^ − 1 and stays there, and an increment below that is never dropped.
-* A flow counter (`+carried+`, `+busy+`, `+parked+`) wraps, and readers take differences (xref:assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]).
+* A fault counter *MUST* saturate at 2^32^ − 1 and stay there, and an increment below that *MUST NOT* be dropped.
+* A flow counter (`+carried+`, `+busy+`, `+parked+`) *MUST* wrap, and readers take differences (xref:assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]).
 
 *Double release.*
-A free slot released twice with no take between the two releases is counted as a fault, never absorbed silently.
+A free slot released twice with no take between the two releases *MUST* be counted as a fault.
 One released, taken and released again is not detected.
 
 *Pull bindings.*
-A pull binding's failure to read its own queue is counted on the route (`+receive_failed+`).
-So is a data connection that its middleware drops or fails to set up without an error.
+A pull binding's failure to read its own queue *MUST* be counted on the route (`+receive_failed+`).
+A data connection that its middleware drops or fails to set up without an error *MUST* be counted in the same way.
 
 *E2E clients.*
 An E2E client counts a response with no E2E header in a route counter of its own, `+unprotected+`, never in the E2E counter.

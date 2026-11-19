@@ -13,16 +13,16 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 --
 *The bound.*
 Each runtime operation *MUST* examine at most a number of frames, slots and loop iterations fixed by setup data: route depth, slot count and table capacity.
-However much a peer sends, it cannot make one call run longer than that bound.
+However much a peer sends, it cannot make one call do more work than that bound.
 
 *Documented use.*
 
-* No documented use requires repeating an operation until a peer stops sending.
-* The documented drain makes at most a number of calls set by setup data.
+* A documented use *MUST NOT* require repeating an operation until a peer stops sending.
+* The documented drain *MUST* make at most a number of calls set by setup data.
 * Frames still queued after it stay with the transport, under the route's policy.
 
 *Lock-free retries.*
-Lock-free retry loops depend only on other threads' progress, never on a peer's data.
+Lock-free retry loops *MUST* depend only on other threads' progress, never on a peer's data.
 
 *A producer that stalls.*
 Whatever a configuration's representation, the element *MUST* deliver a frame queued behind a producer that stalls before linking its own frame, when that producer resumes.
@@ -48,7 +48,7 @@ It is not a bound on time:
 Those are timing claims of a supported configuration (<<req-ssr-bound-wait,Every wait is bounded>>).
 
 _A producer that stalls._
-The bound limits the work a call does, not how long a producer stalls, so it does not limit when the frames queued behind that producer are delivered.
+The bound leaves open how long a producer stalls, and so when the frames queued behind that producer are delivered.
 Where the item relies on such a frame within a time, bounding the stall is the integrator's (xref:assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 
 [[req-ssr-bound-wait]]
@@ -77,13 +77,12 @@ On a serialized or owned route whose declared heap class admits allocation, an a
 Such a wait is the allocation domain's, not a wait of the element's own, and it cannot observe a deadline.
 
 * It *MUST* be one that the declared policy states, and the route's report *MUST* show it.
-A wait there that the policy does not state is a defect.
 * On a route that requires non-waiting acquisition, no acquisition waits.
 On a route that requires non-waiting release, a release that could wait leaves the path that ended its value as pending cleanup (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
 * Each of the two limits its own operation only.
 On a route that does not require non-waiting acquisition, an acquisition's wait runs on the path that performs it.
 On a route that does not require non-waiting release, a release's wait runs on the path that performs it.
-The element promises no time for either.
+How long either wait takes is the allocation domain's.
 * It never occurs in a native operation, in the work one causes or in work that a native route shares (xref:heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
 * The element holds no lock or exclusion of its own across it (xref:heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors]).
 
@@ -92,9 +91,9 @@ The operation's outcome is decided as this item states, however long the allocat
 
 *Pending cleanup.*
 Pending cleanup, as xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] defines and isolates it, may wait for the dependency that its policy names without a finite completion deadline.
-No bounded operation, deadline, expiry or health observation waits for pending cleanup.
+A bounded operation, deadline, expiry or health observation *MUST NOT* wait for pending cleanup.
 
-*What these two cover.*
+*Waits without a deadline.*
 A wait inside a declared allocation domain and pending cleanup are the only waits, apart from the idle wait, that take no finite logical deadline.
 They cover none of the following:
 
@@ -106,25 +105,24 @@ They cover none of the following:
 *What a deadline decides.*
 A deadline that passes while the operation is still pending makes its documented terminal outcome due:
 
-* The operation exposes that outcome when it next runs.
-* The operation accepts no completion whose acceptance event falls after the deadline on the clock the deadline uses.
-* Neither that outcome nor a committed one depends on the release of what the operation owned.
+* The operation *MUST* expose that outcome when it next runs.
+* The operation *MUST NOT* accept a completion whose acceptance event falls after the deadline on the clock the deadline uses.
+* That outcome and a committed one *MUST NOT* depend on the release of what the operation owned.
 It is decided and recorded before that release starts, and the release then runs as its route's class and guarantees state (xref:heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors]).
 
-A result that the operation committed at its acceptance event before the deadline stands.
-Observing it later, because the caller was descheduled, never turns it into expiry or overwrites it.
+A result that the operation committed at its acceptance event before the deadline *MUST* stand, however late a descheduled caller observes it.
 
 *Acceptance event and clock.*
-Each operation's contract states its acceptance event and its clock:
+Each operation's contract *MUST* state its acceptance event and its clock:
 
 * A wait's timeout and a setup bound are compared with the platform's monotonic clock.
 The acceptance event is the observation of the awaited state.
 * An RPC call's TTL is compared in wall time from the request's creation (xref:qos.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
 The acceptance event is the element's completion of the call with a response that its wire check accepted (xref:../up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
 
-This holds for every logical deadline in the element, a wait's timeout, an RPC call's TTL and a setup bound alike: the deadline decides the outcome, not when a descheduled caller observes it.
+For every logical deadline in the element, a wait's timeout, an RPC call's TTL and a setup bound alike, the deadline decides the outcome.
 
-*Physical timing is a separate claim.*
+*Physical timing.*
 A finite bound on when the caller physically resumes, or on when a callback or reaction runs, is a separate timing claim.
 It is made only under a supported configuration whose timing analysis establishes it.
 
@@ -171,27 +169,26 @@ _QoS waits and idle waiters._
 * A route with nothing to report stays quiet.
 If waiters were woken whether or not anything was due, idle waiters would wake each other for ever.
 
-_Logical, not physical._
+_Logical deadlines._
 A timeout is logical.
 Correct code can resume after it if the OS stopped the process, a virtual machine was paused or a higher-priority task did not yield.
-So the statement bounds what the element waits for and how it recovers, and leaves a physical return bound to a configuration that can establish one.
+So the element bounds what it waits for and how it recovers, and a physical return bound is a timing claim of a configuration that can establish one.
 An idle wait with nothing due needs no timeout, provided the wake that makes work due cannot be lost.
 
-_Waits the element does not own._
+_Waits inside a declared allocation domain._
 An ordinary allocator can take a lock, in an acquisition as in a release.
 The element can neither give that lock a deadline nor see inside it.
 Forbidding it would forbid ordinary serialized communication, and hiding it would misstate what a route does.
 So the wait is declared, reported and kept out of native work, and the element holds nothing of its own across it.
 A route that cannot accept it requires the guarantee that excludes it (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
 
-The element's own waits are a different matter.
-Each, apart from the idle wait, takes a logical deadline on every route, and an operation's outcome is decided by that deadline whatever an allocation domain did meanwhile.
+Each of the element's own waits, apart from the idle wait, takes a logical deadline on every route, and an operation's outcome is decided by that deadline whatever an allocation domain did meanwhile.
 
-_Why pending cleanup has no deadline._
+_Pending cleanup._
 A release that waits behind an allocator's or a middleware's own lock cannot observe a deadline from inside that call.
 Running it on another thread does not make it deadline-aware.
-So no operation waits for it, and it is kept apart from everything this item bounds.
-What it owns stays charged until it completes, instead of being given a completion deadline that it cannot keep (xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
+So no operation waits for it.
+What it owns stays charged until it completes (xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
 
 [[req-ssr-bound-no-cross-process-lock]]
 == No lock shared with another process

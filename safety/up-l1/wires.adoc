@@ -4,14 +4,13 @@
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
+This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 The element whose wire contract these duties belong to: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 Each item binds the parts that its statement and its "Allocated to" line name: here, every wire (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 A wire meets them in its own crate, and covers them in its own repository.
 What a wire is, and what is not one: <<req-ssr-wire-scope,What a wire is, and the wire contract>>.
 
-These duties name no wire format, and each wire meets them for its own format.
 What depends on the kind of payload a wire carries is listed in <<one-wire>>.
 Each kind of wire has a page of its own: xref:native-wire.adoc[the native wire] and xref:serialized-wires.adoc[serialized wires, and the values they own].
 
@@ -33,7 +32,7 @@ A codec that is not written against that interface is not a wire.
 
 *Kinds of wire.*
 
-* A serialized wire encodes a value into the bytes of a format, and decodes such bytes into a value.
+* A serialized wire is one that encodes a value into the bytes of a format, and decodes such bytes into a value.
 * The native wire carries a native representation: the value of a native type as it lies in memory (xref:native-wire.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout]).
 
 *Native and serialized routes.*
@@ -41,7 +40,7 @@ A native route is a route whose wire carries a native type in place.
 A serialized route is a route whose wire carries an encoding of the value in one stated format.
 
 *Ordinary and sequenced.*
-A sequenced wire deliberately changes its encoding from one encode to the next.
+A sequenced wire is one that deliberately changes its encoding from one encode to the next.
 Every other wire is an ordinary wire.
 
 *A separate element.*
@@ -56,7 +55,7 @@ Verification:: review (each statement and allocation that uses a word that this 
 
 *Rationale.*
 Whom a duty of a wire binds, and which rules a payload meets, depend on what a wire is and of which kind it is.
-The items use these words in their statements and allocations, so each word has its meaning once, here.
+The items use these words in their statements and allocations.
 A wire's code runs inside the element's calls, but each wire that is not part of the element is developed and verified on its own, against the wire contract suite; a sequenced wire passes the sequenced wire contract, which tests its sequence of encodings.
 
 [[req-ssr-wire-no-panic]]
@@ -74,14 +73,13 @@ An input that the format makes an encoding of some value of the type is not such
 
 *An empty input.*
 The wire's format decides whether an empty input is an encoding, and of which value.
-Nothing else does: not the wire's own encoder, and not a default.
 
 * Where the format gives the type no empty encoding, an empty input *MUST* be an error.
 * Where the format makes the empty input the encoding of a value of the type, decoding it *MUST* yield that value, whether or not the wire's own encoder writes that value as empty.
 * A wire *MUST NOT* accept an empty input for any other reason.
 
-*A frame's envelope is not a wire's input.*
-A wire decodes a payload's bytes.
+*A frame's envelope.*
+The input that a wire decodes is a payload's bytes.
 A frame's header and envelope are the element's to parse and to refuse (xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]), and a frame that lacks them is malformed whatever its wire.
 --
 
@@ -107,11 +105,9 @@ So a panic on bad input would let any faulty peer end the receiving process (xre
 
 _What is valid is the format's._
 Which inputs are encodings is defined by the wire's format, which a message names through its payload encoding (xref:../../basics/payload_encoding_registry.adoc[the payload encoding registry]).
-This item restates no format.
-It adds the safety constraint: whatever the format does not define is an error, and nothing is a panic.
 
 A format can make a shortened input, or an input with further elements, an encoding of another value.
-No decoder can refuse such an input, so this item asks for no refusal of it.
+No decoder can refuse such an input.
 Whoever needs such a change detected supplies end-to-end protection (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 _Empty inputs._
@@ -202,16 +198,13 @@ Verification:: review (the README against the wire's declarations and against th
 An integrator chooses a wire for a message, and decides which routes need end-to-end protection (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 Both choices need to know what the wire's format can and cannot show, and what the wire costs.
 A binding's qualification record states what its middleware cannot guarantee (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
-This item asks a wire for the same kind of statement, in its README.
+A wire's README holds the same kind of statement.
 
 [[one-wire]]
 == What depends on the payload a wire carries
 
-The three duties above bind every wire.
 The rules that depend on what a wire carries are stated with their owner: for a native representation on xref:native-wire.adoc[the native wire's page], and for a serialized encoding on xref:serialized-wires.adoc[the page of serialized wires], with the rules of one format on xref:xcdrv2.adoc[the fixed-layout XCDR2 profile].
-No requirement is allocated to the Protobuf wire alone: Protobuf is one profile of the rules for serialized wires (xref:serialized-wires.adoc#protobuf[one profile: Protobuf]).
-This table lists the rules.
-It adds no duty, and each item governs.
+Protobuf is one profile of the rules for serialized wires (xref:serialized-wires.adoc#protobuf[one profile: Protobuf]).
 
 [cols="2,5,3",options="header"]
 |===
@@ -270,17 +263,16 @@ A wire that declares allocation in a direction is bound by <<req-ssr-wire-heap-c
 === The encoding identifier is the registry's
 
 Whatever a wire carries, the identifier that says how its payload is encoded is one of xref:../../basics/payload_encoding_registry.adoc[the payload encoding registry].
-This area assigns no identifier and has no registry of its own.
-The sentences below point to the protocol chapters, which govern, and they add no duty to a wire.
+The protocol chapters govern the identifier.
 
 * *Originating.*
 The registry's rules for whoever originates an identifier apply to a message sent through a wire: an identifier that the registry has assigned, a private-use one whose meaning a deployment agreement defines, or `0` where an applicable contract defines the encoding (xref:../../basics/payload_encoding_registry.adoc#allocation[the payload encoding registry, "Allocation and Origination"]).
 * *Presence.*
 A payload and its identifier are both present or both absent, and a present zero-length payload is a present payload (xref:../../basics/uattributes.adoc#common-attributes[UAttributes], `payloadEncodingId`).
-* *Not a type or a layout.*
+* *Type and layout.*
 The identifier does not say which type, schema or memory layout a payload has (xref:../../basics/payload_encoding_registry.adoc#type-identity[the payload encoding registry, "Encoding Identity versus Type Identity"]).
 For a native representation, the rules in the first row of the table above establish what is agreed, and a matching identifier establishes none of it.
-* *Not a resource claim.*
+* *Resources.*
 The identifier says nothing about heap use, about ownership or about any resource guarantee.
 A route's heap class, and each stronger guarantee that a route requires, are declared apart from it (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
 * *Reading and carrying.*

@@ -4,13 +4,12 @@
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
+This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These are the three assumptions of use of the up-rust SEooC whose duty is about every transport: who can reach a transport's resources, which integrity level each transport is given, and which bindings and wires a deployment uses.
 
-* They are that element's assumptions, as `seooc` in their IDs says.
-Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+* Whom they bind: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 * Each "Violation" text uses the three classes of xref:../seooc-up-rust/assumptions-of-use.adoc#violation-classes[how a violation shows up].
 * The safety manual of the SDK states them, and they carry `SafetyManual` and the gate tag `SafetyGateUpRust` (xref:../seooc-up-rust/assumptions-of-use.adoc#coverage[tags and coverage]).
 * What only one binding adds is stated with that binding (xref:README.adoc#one-binding[what is specific to one binding]).
@@ -18,10 +17,7 @@ Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assu
 
 == Which part each clause concerns
 
-Each assumption below is one item, and its duty concerns this layer.
 The clauses in this table name a rule that another part states.
-Each stays in its item because it qualifies that item's own duty, and the item governs.
-The table classifies and links, and adds no duty.
 
 [cols="3,3,2,4",options="header"]
 |===
@@ -55,12 +51,12 @@ The software's side of the clauses that concern this layer:
 --
 The integrator *SHALL* restrict access to every transport's resources (shared-memory segments, sockets, service names) to the processes deployed to use them, with OS permissions or equivalent.
 
-* *The fault model.* What a faulty peer within that restriction may do, and the boundary between safety and security, are stated once, for every part, in xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer].
-* *Two-way shared state.* On a binding whose ports write shared state both ways, every process on one service runs at one integrity level, and a lower-integrity consumer takes a copy route.
+* *The fault model.* What a faulty peer within that restriction may do, and the boundary between safety and security, are stated in xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer].
+* *Two-way shared state.* On a binding whose ports write shared state both ways, every process on one service *SHALL* run at one integrity level, and a lower-integrity consumer *SHALL* take a copy route.
 The refusal of any other at setup, by name, is stated in xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] and xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure].
 What one such binding adds is stated with that binding.
 * *Zero-copy routes.* On a zero-copy route, the element relies on the writer, developed to at least the reader's level, never writing a sample it has sent.
-* *Message IDs.* Message IDs are unique only to a stated residual (xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]), and they are not secret, so nothing may rely on them for authentication.
+* *Message IDs.* Message IDs are unique only to a stated residual (xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]), and they are not secret, so nothing *SHALL* rely on them for authentication.
 * *Strict mode.* What strict mode's report lists of each route's declared peers and of the shared-memory permissions that its binding requests, and its warning of an ASIL receive route that admits undeclared peers, are stated in xref:../seooc-up-rust/build.adoc#req-ssr-strict-report[Strict mode reports on every run].
 --
 
@@ -85,10 +81,7 @@ A shared reference cannot remain valid against an uncontrolled concurrent writer
 _What this assumption leaves to other items._
 It states the integrator's duties and no one else's.
 
-* What a faulty peer may do is stated once, for every part, because requirements of several parts rest on it.
 * A restriction that only one binding has is stated with that binding.
-* The refusal of a port at another level than its service, and what strict mode reports, are acts of the element, so the element's requirements state them.
-The refusal is by name because every refusal at setup names its cause, the route where there is one, and the setter to change.
 
 [[aou-seooc-integrity-levels]]
 == Each transport's integrity level is assigned correctly
@@ -97,11 +90,11 @@ The refusal is by name because every refusal at setup names its cause, the route
 --
 The integrator *SHALL* give each transport one integrity level in the deployment data: QM, A, B, C or D, in that order.
 What the element does with that level, on every route of the transport and at setup, is stated in xref:integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level].
-Each process declares the level it was built to, and is developed to at least that level.
+Each process *SHALL* declare the level it was built to, and *SHALL* be developed to at least that level.
 
 * *One transport's restrictions.* What one binding adds to the assignment is stated with that binding.
 * *Above ASIL B.* The duties for a level or for data above ASIL B are xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element].
-* *A level is a label.* A declared level is a label: it neither raises the element's capability nor qualifies the process that declares it.
+* *Declared levels.* A declared level is a label: it neither raises the element's capability nor qualifies the process that declares it.
 --
 
 *Violation:*
@@ -120,14 +113,6 @@ ISO 26262:: 6-7.4.8, 9-6 (part-clause numbers only)
 *Rationale.*
 A declared integrity level supports setup admission but cannot prove how a process was developed.
 
-_What this assumption leaves to other items._
-The assignment of a level binds every transport, so it is filed with the transports.
-Two neighbouring duties bind only some deployments, and each is an assumption of its own:
-
-* what one binding adds to the assignment, which binds only a deployment on that binding;
-* the element's capability ceiling and the duties that follow from it (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element]).
-They bind only where data above ASIL B crosses the element, or where the element runs inside an ASIL C or D process or partition, whatever the level of its own data.
-
 [[aou-seooc-qualified-bindings-and-wires]]
 == Bindings and wires pass their contracts
 
@@ -135,7 +120,6 @@ They bind only where data above ASIL B crosses the element, or where the element
 --
 The integrator *SHALL* use on the ASIL path only bindings and wires that pass the contract suites (the binding contract suite, the QoS contract suite and the wire contract suite) on the integrator's own target, at the exact versions and configuration whose evidence its supported configuration records, and *SHALL NOT* take evidence of one state, compiled, linked, exercised, source-reviewed, composition-verified or qualified, for another.
 
-* *32-bit targets.* On a 32-bit target, those are only the bindings and wires whose contracts pass on that target.
 * *Pull bindings and deadlines.* A pull binding used for a route with a deadline reports an arrival through the runtime port only with evidence that a frame entered the route's queue, or that the queue's overflow policy discarded one, and within the arrival-report latency it declares in its QoS support.
 It never reports one on a wake hint alone.
 It reports each failure to read its own queue through the runtime port's receive-failure report.
@@ -145,13 +129,13 @@ The element's side of these reports is stated in xref:../seooc-up-rust/qos.adoc#
 A pull binding needs nothing (xref:../up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
 * *Cores without coherent atomics.* A route between cores whose atomics are not coherent with each other (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]) uses a transport whose qualification covers that.
 
-The integrator accepts the limits and known anomalies that each binding's qualification record states (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
+The integrator *SHALL* accept the limits and known anomalies that each binding's qualification record states (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
 Where an assumption of one binding lists them, it lists apart that binding's known failures, which are not accepted limits.
 
-A wire or binding from elsewhere with `+unsafe+` code of its own, such as a wire over a C codec, is a separate element, and the integrator qualifies its `+unsafe+` (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]).
+A wire or binding from elsewhere with `+unsafe+` code of its own, such as a wire over a C codec, is a separate element, and the integrator *SHALL* qualify its `+unsafe+` (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]).
 The inventory that a binding this project ships keeps is stated in xref:bindings.adoc#req-ssr-binding-unsafe-inventory[A binding this project ships inventories its own `+unsafe+`].
 
-In strict mode, every binding and wire that the integrator uses is on its qualified list.
+In strict mode, every binding and wire that the integrator uses *SHALL* be on its qualified list.
 In strict mode, the Enforce state refuses an ASIL process that reaches a deviation not acknowledged at its current revision (xref:../seooc-up-rust/build.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]).
 The refusal of each route that a known failure affects is stated in xref:../seooc-up-rust/build.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision].
 What strict mode otherwise refuses for bindings and wires, and what its report lists of each binding's limits, deviations and known failures, is stated in xref:../seooc-up-rust/build.adoc#req-ssr-strict-rules[The rules that strict mode checks] and xref:../seooc-up-rust/build.adoc#req-ssr-strict-report[Strict mode reports on every run].
@@ -173,11 +157,5 @@ A declaration of capability needs target-specific contract evidence.
 An accepted anomaly has a bounded justification, whereas a known failure remains a failure.
 
 Evidence attaches to the exact pins and configuration it was produced on.
-A newer middleware release or a private variant does not inherit it, compiling is not running, and a source review is not a timing analysis.
-
-_What this assumption leaves to other items._
-The qualification duty holds for the ASIL path of every deployment.
-Two neighbouring duties bind only some, and each is an assumption of its own:
-
-* requiring a stronger resource guarantee by name, which binds only an item that relies on one (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-resource-guarantees[A resource guarantee the item relies on is required by name]);
-* the limits, known anomalies and known failures of one binding, which bind only a deployment on that binding.
+A newer middleware release or a private variant does not inherit it.
+Evidence that code compiles does not show that it runs, and a source review does not show its timing.

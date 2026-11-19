@@ -41,7 +41,7 @@ Non-generic types let a forwarder such as the Streamer hold transports chosen fr
 --
 Once a transport is in runtime mode, it *MUST NOT* be possible to declare, prepare or change a route, role, wire, QoS setting, integrity level, waiver, peer list or capacity, through the transport or through any handle activated from it.
 
-The API *MUST NOT* offer the operation, and misuse *MUST NOT* compile.
+The API *MUST NOT* offer the operation, and *MUST NOT* let misuse compile.
 --
 
 [horizontal]
@@ -53,7 +53,7 @@ ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
 Runtime mode runs only what setup admitted and placed.
-A change after the transition could be neither checked nor given storage without the work of initialization (<<req-ssr-mode-entry-admission,Every route is admitted before runtime mode>>).
+A change after the transition would need the work of initialization to be checked and given storage (<<req-ssr-mode-entry-admission,Every route is admitted before runtime mode>>).
 
 The transition consumes the initialization value, so no setup call can be written afterwards (<<req-ssr-mode-entry,Entering runtime mode is one all-or-nothing operation>>).
 
@@ -66,7 +66,7 @@ A send, receive, publish, notify, invoke, respond, wait or forward operation *MU
 
 A handle that can carry traffic *MUST* be obtained only by activating its setup against a transport in runtime mode.
 
-Misuse *MUST NOT* compile.
+The API *MUST NOT* let misuse compile.
 --
 
 [horizontal]
@@ -91,7 +91,7 @@ This covers:
 
 * activating a handle against another transport's runtime;
 * placing from startup memory after it is sealed;
-* any C ABI entry point added later.
+* any C ABI entry point.
 --
 
 [horizontal]
@@ -103,7 +103,6 @@ Verification:: test
 *Rationale.*
 Types keep the modes apart inside Rust, but they cannot follow a call through a C ABI.
 Every transport's runtime also has the same type (<<req-ssr-mode-two-types,Two modes, as two types>>).
-So those cases need a check when the call is made.
 
 A named error for each case, such as a wrong transport or a sealed region, tells the caller which rule the call broke.
 
@@ -116,7 +115,7 @@ A named error for each case, such as a wrong transport or a sealed region, tells
 A transport *MUST* enter runtime mode only through one operation that consumes its initialization value.
 
 *All or nothing, per transport.*
-The operation is all or nothing for that transport: it succeeds only when every entry condition holds for every route declared on it.
+The operation is all or nothing for that transport: it *MUST* succeed only when every entry condition holds for every route declared on it.
 Otherwise it returns an error, no runtime-mode value exists for that transport, and that transport starts no traffic.
 
 *Several transports.*
@@ -163,10 +162,8 @@ ISO 26262:: 6-6.4.2 g, 6-7.4.5 (part-clause numbers only)
 *Rationale.*
 The list is in the statement, and a new condition raises this item's revision.
 
-The transition is a conjunction of its prerequisites.
-Checking only some of them cannot establish readiness for runtime.
+Checking only some of the entry conditions cannot establish readiness for runtime.
 
-All or nothing holds for each transport, not for a group.
 A transport that has entered runtime mode cannot be taken back (<<req-ssr-mode-one-way,There is no way back>>), so a group's later refusal does not roll it back, and the element is designed on the assumption that the application then exits so that its supervisor restarts it (xref:assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
 
 [[req-ssr-mode-entry-admission]]
@@ -204,7 +201,7 @@ A transport *MUST* enter runtime mode only after both of these:
 * the wall clock of the platform's time provider has been read successfully;
 * the provider has passed the setup check of its package's stated contract (xref:platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules]).
 
-A provider known to fall short of that contract, such as one that supplies uptime or a fixed value as wall time, *MUST* fail the check.
+The setup check *MUST* fail a provider known to fall short of that contract, such as one that supplies uptime or a fixed value as wall time.
 
 If the clock cannot be read, or the provider fails its check, the transition *MUST* fail with an error that says so.
 Where the target has no synchronized wall clock and its time provider supplies none, the transition *MUST* fail with an error that says so.
@@ -224,7 +221,6 @@ Reading the clock once before the transition makes a clock that cannot be read f
 
 A board without a synchronized wall clock is a real configuration.
 Quietly using uptime there would make every TTL decision wrong while appearing to work.
-So every transition requires the provider to pass the setup check of its package's stated contract, and a known substitution fails that check.
 Such a board supplies a synchronized wall clock through its time provider (xref:assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]).
 Where its provider supplies none, every TTL decision would rest on a wall clock that nothing keeps in step with the peers' time bases, so the transition fails.
 A wall clock that reads but is wrong still passes the setup check, and only the integrator's own measures cover it (xref:assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]).
@@ -290,15 +286,15 @@ So a process recovers by a restart of the whole process or partition, which a su
 
 [.specitem,oft-sid="req~ssr-mode-init-failure~4",oft-title="Initialization failure",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-*Refusals are errors.*
+*Errors for refusals.*
 Every refusal during initialization or the transition, including one that a memory source, region helper or allocation provider used by setup reports, *MUST* be returned as an error that names its cause, the route where there is one, and the setter to change.
 
 *No panic or abort.*
 Element code in initialization *MUST NOT* panic or abort.
-Where setup relies on a memory source, helper or provider, its stated contract, not the shape of its interface, decides what a request to it can do.
+Where setup relies on a memory source, helper or provider, its stated contract decides what a request to it can do, whatever the shape of its interface.
 
 * A request that the contract lets panic or end the process, for a condition that setup can check, *MUST NOT* be sent unless setup has first excluded that condition, such as by checking the request against the limit the contract states.
-Otherwise setup refuses it by name before relying on it.
+Otherwise setup *MUST* refuse it by name before relying on it.
 * An outcome that the contract permits and that setup cannot exclude, such as an allocator that may end the process on exhaustion or wait for a lock, is that provider's declared policy (xref:heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 Setup reports it, and *MUST* refuse by name a configuration that requires the guarantee it violates (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
 
@@ -318,17 +314,17 @@ A value that a caller handed to setup is returned to that caller untouched, or t
 * _Destroyed._
 Setup destroys a value itself, once, within setup and on the refusing path, and the refusal then says that setup destroyed it.
 It does so only in one of two cases:
-** nothing in the configuration requires panic-free cleanup or non-waiting release of that value (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]), and then what the destruction does is the value's own, under its declared policy where it has one, and the element establishes nothing about it;
+** nothing in the configuration requires panic-free cleanup or non-waiting release of that value (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]), and then what the destruction does is the value's own, under its declared policy where it has one;
 ** a route or a claim requires one of those guarantees of the value, and the guarantee is established for it.
 * _Retained._
 Setup retains only startup storage and what is placed in it, where every other duty of this item holds.
 
 Where none of these is available for a value, setup *MUST* refuse before taking it.
-A refusal never reports a value as untouched or turned away where setup has destroyed it or still owns it.
+A refusal *MUST NOT* report a value as untouched or turned away where setup has destroyed it or still owns it.
 
 *No release service for a refusal.*
 Setup *MUST NOT* hand anything to a release service, or leave it as pending cleanup, to dispose of a refusal.
-It returns the refusal itself within setup's logical bound.
+It *MUST* return the refusal itself within setup's logical bound.
 
 *What a refusal leaves behind.*
 A refusal *MUST NOT*:
@@ -348,7 +344,7 @@ Verification:: test, review, fault-injection
 ** Each refusal returned as an error that names its cause, its route where there is one, and the setter to change.
 ** A refusal injected at each placement and provider request, with every acquired value returned, destroyed once or retained as stated and no storage of a successful owner released.
 ** A refused caller input returned untouched, refused before it was taken, or destroyed once and reported as destroyed.
-** Where a route requires panic-free cleanup or non-waiting release, no value for which it is not established destroyed by setup.
+** Where a route requires panic-free cleanup or non-waiting release, only values for which it is established destroyed by setup.
 ** Nothing handed to a release service.
 ** A refusal at each step of initialization and at the transition, leaving no runtime-mode value and starting no traffic.
 ** A request that a provider's contract lets panic for a condition setup can check prevented, or the provider refused by name.
@@ -367,7 +363,6 @@ An error that names its cause, its route and the setter to change tells the inte
 Leaving nothing that stops a successor from initializing lets the successor start cleanly, since it recovers what a dead predecessor left before it prepares a route (<<req-ssr-mode-restart,A restart is an initialization>>).
 
 _Dispositions._
-The fate of what a failed setup had acquired is stated, never left open.
 A refusal may hand a value back to its caller, destroy one it took, or leave startup storage claimed, because startup memory is never given back in the process (xref:startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
 Each is acceptable only when it is the stated one and also meets this item's other duties:
 
@@ -389,9 +384,6 @@ So a provider's own contract decides what setup can rely on.
 * An outcome that no check excludes is the provider's stated behaviour.
 An ordinary configuration runs with it reported, and a route that requires the guarantee which that outcome violates is refused by name, and no other route.
 
-_Groups of transports._
-This item does not ask a refused group of transports to roll back one that has already entered runtime mode (<<req-ssr-mode-entry,Entering runtime mode is one all-or-nothing operation>>).
-
 _No release service for a refusal._
 Using pending cleanup would let a setup failure leave work running after its refusal.
 So a destruction that setup performs runs within setup, on the refusing path.
@@ -399,7 +391,7 @@ Where a route requires non-waiting release and the destruction could wait, the v
 
 _Ordinary setup._
 An ordinary owning input and an ordinary allocator cannot show panic-free cleanup, non-waiting release or recoverable exhaustion.
-So setup is not refused for want of those guarantees where no route or claim requires them.
+So setup is refused for want of those guarantees only where a route or claim requires them.
 Every refusal stays an error, element code stays free of panics, everything setup acquired gets one honest disposition, and the cleanup and exhaustion guarantees apply where a route or claim requires them.
 
 [[req-ssr-mode-restart]]
@@ -428,7 +420,6 @@ Recovering through the one initialization path keeps a single tested way to star
 A binding that cannot recover its predecessor refuses setup.
 
 A peer that stayed up sees another process's death and restart only as silence, counted deadline misses, call errors, or a reported peer loss or restart (xref:../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
-So the restart, which a supervisor outside the process makes (xref:assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]), revokes no storage that such a peer still retains.
 
 Other systems recover the same way:
 
@@ -459,14 +450,14 @@ So a property that needed one would fail exactly when a peer fails.
 
 Even without a crash, Rust does not promise that destructors run: `+mem::forget+` is safe, and `+process::exit+` skips them (https://doc.rust-lang.org/1.88.0/std/mem/fn.forget.html[Rust's `+mem::forget+` documentation]).
 
-Liveness therefore rests on the transport's receive, wait and service operations, never on a destructor.
+Liveness therefore rests on the transport's receive, wait and service operations.
 
 [[req-ssr-mode-classic-excluded]]
 == Classic routes never enter runtime mode
 
 [.specitem,oft-sid="req~ssr-mode-classic-excluded~2",oft-title="Classic routes never enter runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-Classic `+UTransport+` and `+UMessage+` routes *MUST NOT* be able to enter runtime mode under any waiver.
+The element *MUST NOT* let a classic `+UTransport+` or `+UMessage+` route enter runtime mode under any waiver.
 
 Deployment data that puts a classic endpoint on an ASIL route, including a Streamer route, *MUST* be refused at setup by name.
 --
@@ -483,9 +474,9 @@ The classic API allocates in the SDK's own code.
 A waiver covers allocation inside a binding's middleware only, never in SDK or binding code (xref:waivers.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
 So no waiver can admit a classic route.
 
-The item keeps classic routes out of the two-mode contract.
-It does not withdraw the classic API, which stays available for ordinary use outside that contract.
 A two-mode type is not a classic route, whichever crate re-exports it.
+
+Example: In ordinary use, an application may use the classic API for a route outside the two-mode contract.
 
 [[req-ssr-mode-bounded-startup]]
 == Setup never waits without a bound
@@ -504,7 +495,7 @@ Each non-waiting guarantee limits its own operation in setup, and neither limits
 
 * Where a route requires non-waiting acquisition, no request that setup makes for that route waits, or setup refuses the route by name.
 * Where a route or a claim requires non-waiting release of a value, setup performs no destruction of that value that could wait, and disposes of it as <<req-ssr-mode-init-failure,Initialization failure>> states.
-* Requiring one refuses nothing for the other: a declared wait in a request stands where only non-waiting release is required, and a declared wait in a refusal's destruction stands where only non-waiting acquisition is required.
+* A declared wait in a request stands where only non-waiting release is required, and a declared wait in a refusal's destruction stands where only non-waiting acquisition is required.
 
 *A missing peer.*
 A missing peer *MUST NOT* fail setup: its route is admitted and reports that it waits for the peer, or its binding refuses the route by name.
@@ -521,7 +512,7 @@ Verification:: test, fault-injection (a peer that never starts; a service that n
 ** A refusal's destruction that can wait, performed and reported where nothing requires non-waiting release of the value, a route that requires only non-waiting acquisition included, and not performed where that guarantee is required of the value and not established.
 
 *Rationale.*
-Processes start and restart in any order, so a peer that is not up yet is normal input, not a fault, as a peer that has died or restarted is (xref:../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
+Processes start and restart in any order, so a peer that is not up yet is normal input, as a peer that has died or restarted is (xref:../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
 
 A wait without a bound would leave a process stuck in initialization with nothing to report.
 A bound that expires ends setup with an error naming what was missing.
@@ -533,5 +524,4 @@ A destruction that setup performs on a refusal runs within setup, on the refusin
 Setup hands nothing to a release service to dispose of a refusal (<<req-ssr-mode-init-failure,Initialization failure>>), so pending cleanup (xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]) does not reach it.
 
 _An allocation domain's wait._
-The bound is on the element's own waits.
 A wait inside a declared allocation domain, an allocator's own lock included, is treated as xref:bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded] states, because an ordinary provider cannot promise a bound for it.

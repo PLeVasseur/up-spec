@@ -4,11 +4,11 @@
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom it binds: xref:README.adoc[safety at uP-L2].
+This layer, and whom its items bind: xref:README.adoc[safety at uP-L2].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These items say what the element guarantees for an RPC call and for the identity of a message.
-They are allocated to the element: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+They are allocated to the element (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 
 * How the element treats the peers of a transport is in xref:../up-l1/peers.adoc[the transport layer's part].
 * The clauses about the end-to-end protection wire bind only a route that uses it, and that wire is deferred (xref:../seooc-up-rust/e2e-wire.adoc[`e2e-wire.adoc`]).
@@ -18,18 +18,18 @@ They are allocated to the element: each item's statement and "Allocated to" line
 
 [.specitem,oft-sid="req~ssr-peer-rpc-ends~3",oft-title="RPC calls always end",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-*Every call has a deadline.*
+*The deadline.*
 Every RPC call *MUST* have a deadline, so a call whose server has vanished or never answers completes with an error by its TTL.
 A server can answer a request only within the request's TTL, counted from when the request was created.
 
 *A failure the element can report.*
 Where the element can report a call's failure, the element *MUST* set the call's outcome as soon as the element's answer arrives (<<req-ssr-peer-rpc-no-server,A call with no server fails at once>>; <<req-ssr-peer-rpc-undecodable-answered,An undecodable request is answered>>; xref:streamer.adoc#req-ssr-streamer-rpc-error-response[An RPC request that cannot be dispatched is answered, best effort]).
 
-*Completion ends the call's tenure.*
-A call's completion, by a response, by its TTL, by its cancellation or by a peer's failure, ends its tenure, so no later response completes it.
+*Completion.*
+A call's completion, by a response, by its TTL, by its cancellation or by a peer's failure, *MUST* end its tenure, so no later response completes it.
 The completion *MUST NOT* wait for the release of what the call owned.
 
-*The slot returns when nothing is pending.*
+*The slot's return.*
 The call's slot then returns to the table once it holds nothing whose release is pending:
 
 * A decoded response or a retained owner that the call held is released as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors] and xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] state.
@@ -56,19 +56,10 @@ Each call's outcome is set as soon as the answer arrives, without waiting out it
 A vanished server cannot release its client resources, so the client needs its own expiration path and a reusable call slot.
 Waiting out the TTL of a call whose failure is already known would only delay the error.
 
-_The TTL is a logical deadline_ (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded]).
+The TTL is a logical deadline (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded]).
 
-* Once it has passed while the call is still pending, the call's outcome is its expiry and no response accepted after it completes the call.
-The client observes that outcome when it next services or waits on the call.
-* A response the element accepted before the TTL completes the call even if the client, descheduled, observes it later.
-Observing late never turns it into expiry.
-* When that observation happens is a timing claim of a supported configuration, not of this item.
-
-_Outcome and release._
-A call's outcome and tenure end at once.
-The release of what it owned may still be in progress or pending, and is a separate matter.
-A call that still holds a decoded owned response, or a retained owner whose return is pending, cannot give its slot back when it ends without reusing storage that is still owned.
-Whether the call's slot keeps that ownership until the release completes or hands it to a release service follows what the route requires (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]), and the capacity covers it either way.
+_The slot's return._
+Giving the slot back when the call ends, while the call still holds a decoded owned response or a retained owner whose return is pending, would reuse storage that is still owned.
 
 [[req-ssr-peer-rpc-correlation]]
 == A response reaches only its own call
@@ -77,7 +68,7 @@ Whether the call's slot keeps that ownership until the release completes or hand
 --
 *Delivery.*
 A response *MUST* be delivered only to the call that sent its request.
-A response that arrives after its call has ended, including one that arrives at a slot a later call now uses, is refused and counted, and is never delivered to the later call.
+A response that arrives after its call has ended, including one that arrives at a slot a later call now uses, *MUST* be refused and counted.
 
 *Tied to the slot's tenure.*
 The element *MUST* tie the following to the slot's current tenure, atomically with claiming the slot for the response:
@@ -85,7 +76,7 @@ The element *MUST* tie the following to the slot's current tenure, atomically wi
 * the response's full request ID;
 * for a call tied to a peer, that peer's full identity and incarnation.
 
-It does so in one of two ways:
+It *MUST* do so in one of two ways:
 
 * it compares them in the same exclusive step that claims the slot; or
 * where its mechanism claims first, it compares them again after the claim and gives the slot back, recording nothing, on a mismatch.
@@ -119,12 +110,7 @@ ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 A reused slot can carry a later call.
 Tying the response's full request identity to the slot's current tenure as the slot is claimed prevents a delayed response from completing that later call.
 
-_An outcome, not a mechanism._
-The item states the outcome and admits either form of mechanism.
-One that compares the full request ID and the peer tied to the call, and claims the slot, in one exclusive step needs no recheck.
-One that claims before it compares keeps the recheck after the claim, and its give-back.
-
-Whether the request ID and the peer tied to the call are kept at full width is a fact about a representation (xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window]).
+The width at which a representation keeps the request ID and the peer tied to the call is stated in xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window].
 
 _Scope._
 The clauses about the E2E wire bind only a route that uses it, and that wire is deferred and not part of this delivery.
@@ -140,10 +126,10 @@ When a response arrives, the element *MUST* first tie it to the call's current t
 A response that does not match completes and records nothing, and a slot claimed for it is given back.
 
 *Then, the wire check.*
-It then runs the route's wire check on the bytes the call keeps, before the call completes.
+It *MUST* then run the route's wire check on the bytes the call keeps, before the call completes.
 
-* A refused response completes nothing: it is counted on its route, and the call stays open for another copy.
-* A call that receives no accepted response ends at its TTL, naming the last refusal it recorded.
+* A refused response *MUST* complete nothing: it *MUST* be counted on its route, and the call *MUST* stay open for another copy.
+* A call that receives no accepted response *MUST* end at its TTL, naming the last refusal it recorded.
 
 *Refusal answers.*
 A refusal answer is checked like any response:
@@ -152,12 +138,12 @@ A refusal answer is checked like any response:
 * an advisory one is given back, so the call stays open and, if it ends at its TTL, names that kind.
 
 *The call's tag.*
-The element records the call's tag before its request is sent, and refuses a response that arrives before then.
+The element *MUST* record the call's tag before its request is sent, and refuse a response that arrives before then.
 
 *Concurrency.*
 
-* The arrival checks of one response route run one at a time, so a copy is never refused because another copy of the same response is being checked.
-* A peer failure that finds a call's response being checked fails the call at once if that response is refused.
+* The arrival checks of one response route *MUST* run one at a time, so a copy is never refused because another copy of the same response is being checked.
+* Where a peer failure finds a call's response being checked, the element *MUST* fail the call at once if that response is refused.
 --
 
 [horizontal]
@@ -177,14 +163,11 @@ Verification:: test, miri, heap-window
 *Rationale.*
 Completing a call before checking its wire would let a corrupt first copy exclude a later intact response.
 
-The item prescribes no check of the slot after the claim.
-The identity can equally be tied in the step that claims the slot, as <<req-ssr-peer-rpc-correlation,A response reaches only its own call>> allows.
-
 Refusal answers come only from a wire that protects calls, which in this delivery means none: the E2E wire that would send them is deferred.
 
 A call that ends at its TTL ends logically (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded]).
 
-Giving a claim back returns the call to waiting for another copy and releases nothing early.
+Giving a claim back returns the call to waiting for another copy.
 What the refused copy owns is released as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors] states, and storage that an unfinished release still holds is not reused (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
 
 [[req-ssr-peer-rpc-undecodable-answered]]
@@ -198,16 +181,15 @@ This item covers a request whose header the server can parse, but:
 * whose payload it cannot decode for a reason other than an end-to-end check; or
 * whose encoding it does not admit.
 
-A server that receives such a request *MUST* answer it through the request's reply token, with commstatus `+InvalidArgument+`, producing the answer without heap, and counts it.
+A server that receives such a request *MUST* answer it through the request's reply token, with commstatus `+InvalidArgument+`, producing the answer without heap, and count it.
 
 *Sending the answer.*
-The answer is sent as any response on that route is, under the route's overflow policy and heap class, including a bounded wait where the route declares one.
-The client's call then ends with that error instead of waiting out its TTL.
+The answer *MUST* be sent as any response on that route is, under the route's overflow policy and heap class, including a bounded wait where the route declares one.
 
 *Requests that get no answer.*
 
-* A request whose header cannot be parsed has no reply address: it is refused and counted, and its call ends at its TTL.
-* So does a call whose answer cannot be sent, and that is counted too.
+* A request whose header cannot be parsed has no reply address: it *MUST* be refused and counted, and its call ends at its TTL.
+* So does a call whose answer cannot be sent, and that *MUST* be counted too.
 
 *End-to-end refusals.*
 A request that an end-to-end check refuses is counted (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once]) and answered by the wire's refusal answer, final or advisory (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory]), except a corrupt one, which is never answered.
@@ -220,10 +202,9 @@ So an end-to-end refusal never gets an error answer: an advisory refusal answer 
 
 *Tags.*
 The element *MUST* hand every answer, its own and the application's, to the route's wire with its request's tag, so that on an E2E route the answer echoes that request (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call]).
-Another server's answer to a misaddressed copy carries that server's data ID, which the client refuses when it declares one server for the method.
 
 *Release.*
-Every refused request's frame is released at once.
+Every refused request's frame *MUST* be released at once.
 --
 
 [horizontal]
@@ -249,16 +230,13 @@ Verification:: test, heap-window
 
 *Rationale.*
 A known decoding failure can be reported immediately.
-But an answer to a duplicate must not falsely terminate the call whose original request may still produce a response.
 
 _Scope._
 The end-to-end clauses bind only a route with the E2E wire, which is deferred and not part of this delivery.
 The `+InvalidArgument+` answer to an undecodable request, its counting and the release of every refused frame bind every route now.
 
 _Heap use of the answer._
-Producing the answer is heap-free on every route.
-Sending it follows the route's own heap class, which on a native route is none (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
-A serialized route whose binding allocates storage for every frame it sends could not send an answer that had to use no heap.
+A serialized route whose binding allocates storage for every frame it sends needs heap to send an answer.
 
 [[req-ssr-peer-rpc-no-server]]
 == A call with no server fails at once
@@ -286,29 +264,28 @@ Waiting out the TTL of a request that no server received only delays an error th
 --
 *Format and source.*
 Every message ID the element generates *MUST* be a UUIDv7, as up-spec's rules require.
-Its 74 bits beyond the millisecond come from one generator per route, seeded once from initialization-only entropy (xref:../seooc-up-rust/platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source]).
+Its 74 bits beyond the millisecond *MUST* come from one generator per route, seeded once from initialization-only entropy (xref:../seooc-up-rust/platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source]).
 
 *The stated residual.*
 Two IDs of one source can therefore collide by chance.
-The element states that residual, with its derivation: the probability that two IDs collide,
+The element *MUST* state that residual, with its derivation: the probability that two IDs collide,
 
 * per pair within one millisecond;
 * within one route;
 * across a source's routes;
 * across the source process's restarts, including while the wall clock cannot be read and the last good time is reused.
 
-The residual is a probability.
 Where a configuration claims that IDs never repeat across restarts, it *MUST* rest that claim on a checked persistent construction, never on the entropy alone.
 
 *Cost of generating.*
 Generating an ID uses no heap and does not panic, also when the wall clock cannot be read, and the first ID on a thread needs no first-use setup.
 
-*Refuse rather than repeat.*
-A generator *MUST* refuse to generate, and count the refusal, rather than repeat an ID's input within its stated period.
+*Refusal to generate.*
+A generator *MUST* refuse to generate, and count the refusal, where generating would repeat an ID's input within its stated period.
 Its supported configuration's package *MUST* state its period and refusal bounds.
 
 *Bounds for a generator with a 32-bit sequence.*
-For a generator with a 32-bit sequence they are these:
+For a generator with a 32-bit sequence they *MUST* be these:
 
 * Within one route, an ID's input repeats only when the same millisecond recurs and a multiple of 2^32^ IDs separates the two IDs.
 * Generation is refused, and counted, after 2^31^ IDs within one 64 ms bucket of the time the IDs carry, whether the wall clock cannot be read or reads but does not move.
@@ -345,10 +322,8 @@ Correlation depends on distinguishing requests across time and reuse.
 A finite generator needs explicit refusal bounds when its clock cannot advance.
 
 The period and the bucket limits are properties of a generator's sequence width.
-So they are stated with the generator a configuration uses rather than for every target.
-A wider sequence moves them, and the rule that a generator refuses rather than repeats stays.
+A wider sequence moves them.
 
 Random seeding gives a quantified collision probability, not a guarantee that two starts differ.
-So a claim of non-repetition across restarts needs a construction that can be checked.
 
 A generator that keeps a 64-bit counter and the full last good time has a period of 2^64^ IDs of one route (xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window]).

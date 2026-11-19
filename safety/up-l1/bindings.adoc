@@ -4,7 +4,7 @@
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
+This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 The element whose contract these duties belong to: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These are the duties of the binding contract.
@@ -12,7 +12,7 @@ Each item binds the parts that its statement and its "Allocated to" line name: e
 A binding meets those that bind it in its own code, and covers them in its own repository, by running the contract suites against itself.
 
 * They carry the tag `SafetyBinding`, and an item whose statement holds a duty of pull bindings only also carries `SafetyBindingPull`.
-The tags say which repositories cover an item, not whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+The tags say which repositories cover an item (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 * They name no middleware.
 What only one binding must meet is stated with that binding, in an item that is allocated to it alone (xref:README.adoc#one-binding[what is specific to one binding]).
 * What a binding is, and what is not one: <<req-ssr-binding-scope,What a binding is, and the binding contract>>.
@@ -36,7 +36,7 @@ The in-memory bindings of `+test-util+` are test doubles, not bindings.
 
 *Lending and handoff.*
 A lending binding is one on which a reader can be given shared memory that a writer wrote.
-A handoff binding hands the element a private copy.
+A handoff binding is one that hands the element a private copy.
 
 *Middleware and binding code.*
 A binding's middleware is the communication software that it adapts the element to.
@@ -54,7 +54,7 @@ Verification:: review (each statement and allocation that uses a word that this 
 
 *Rationale.*
 Whom a duty of a binding binds depends on what a binding is, and of which kind it is.
-The items use these words in their statements and allocations, so each word has its meaning once, here.
+The items use these words in their statements and allocations.
 A binding's code runs in the element's process, inside the element's calls and on threads that it starts, but each binding is developed and verified on its own, against the binding contract suite.
 
 [[req-ssr-binding-no-heap]]
@@ -82,11 +82,11 @@ Allocated to:: each binding
 Verification:: heap-window
 * For each binding, over native traffic with errors, cancellation, retirement and deferred release, with middleware allocation reported apart under its permit.
 * On every other path, a serialized or owned route's included: binding code acquiring and releasing heap memory only as a route's declared heap class permits and setup admits, and not at all where no class admits it.
-* On a serialized route, the binding's declared allocation reported, never hidden, as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
+* On a serialized route, the binding's declared allocation reported, as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
 
 *Rationale.*
 Binding code runs inside the process on every runtime path.
-So heap use there on a native path breaks runtime mode as surely as heap use in the element (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
+So heap use there on a native path breaks runtime mode, as heap use in the element does (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
 
 A serialized or owned route may allocate where it declares it and setup admits it.
 That permission cannot reach native work or metadata a native route shares.
@@ -123,21 +123,21 @@ A serialized route's declared allocation excuses no lazy first use on any path.
 --
 *No blocking.*
 Dropping a binding's received frame *MUST NOT* block, with the one exception that this item states for a declared allocation domain.
-It takes no lock that can wait behind other work, in the binding or in its middleware, and any retry is lock-free and bounded by other threads' progress.
+It *MUST NOT* take a lock that can wait behind other work, in the binding or in its middleware, and any retry *MUST* be lock-free and bounded by other threads' progress.
 
 *Native and heap-free routes.*
 On a native route, and on any route whose heap class is none, it *MUST* free no heap.
 
 *Routes that admit the binding's allocation.*
-On a serialized or owned route whose declared heap class admits the binding's allocation (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), it releases, exactly once, only the storage the binding allocated for that frame under that class:
+On a serialized or owned route whose declared heap class admits the binding's allocation (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), it *MUST* release, exactly once, only the storage the binding allocated for that frame under that class:
 
 * on a route that does not require non-waiting release (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]), on the drop's own path under the binding's declared policy, where it may wait inside the allocation domain that the policy names, the one wait a drop may meet;
 * on a route that requires it, at once only where it is established that this release cannot wait, and otherwise through the binding's deferred return, as for a retained owner.
 
-It releases no other binding resource and revokes no retained owner.
+It *MUST NOT* release any other binding resource or revoke a retained owner.
 
 *Deferred return.*
-Where the middleware's own release of a retained frame can wait, the drop instead hands the frame, without waiting, to the binding's deferred return.
+Where the middleware's own release of a retained frame can wait, the drop *MUST* instead hand the frame, without waiting, to the binding's deferred return.
 
 A release that the deferred return performs is pending cleanup, charged until it completes and isolated as xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states.
 On a native route it frees no heap and never frees the backing that the frame lives in.
@@ -147,7 +147,7 @@ Releasing the binding's allocation is part of the route's cleanup.
 
 * Where the route requires panic-free cleanup or non-waiting release, setup admits that allocation only where the guarantee is established for it, through the allocator and every dependency the release reaches (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
 Otherwise setup refuses the route by name.
-* A route that requires neither is not refused for it, and its report shows the binding's declared policy.
+* A route that requires neither is not refused for it, and its report *MUST* show the binding's declared policy.
 
 *No panic.*
 The binding's own code *MUST NOT* panic, on the drop or in the deferred return that completes it.
@@ -155,7 +155,6 @@ The binding's own code *MUST NOT* panic, on the drop or in the deferred return t
 A middleware panic path that the drop or that return can reach is allowed only as an accepted instance of <<req-ssr-binding-no-panic,No panic on any peer input>>.
 The item that accepts it is allocated to its binding alone, says that the instance applies to a frame's drop, and states all five parts that the rule asks of an instance.
 Any other middleware panic path that the drop or that return can reach is a known failure of the binding.
-A binding that has no such instance has no exception to this rule.
 
 An accepted instance is never a waiver, and covers no other middleware panic path, no owned value's destructor and no allocator or provider failure.
 --
@@ -196,22 +195,13 @@ So a middleware lock that can wait is still a blocking operation even when its u
 Where the middleware's own release can wait, the binding defers it.
 The drop hands the retained owner over without waiting, and the binding's deferred return performs the release as pending cleanup.
 A lock-free queue whose capacity covers every admitted retained owner is one hand-off to the deferred return that meets this.
-The statement requires the outcome, and no particular mechanism.
 Whatever the mechanism, every clause of the statement binds it, and so does every clause of xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] that binds pending cleanup, a binding's deferred return included: the hand-off to that return does not wait, it has room for every retained owner that the route admits, ownership passes exactly once, and the owner stays charged until its return completes.
-
-_Isolation._
-A worker of its own is not by itself the isolation that pending cleanup needs.
-While a deferred return waits for a lock, it holds nothing that a binding call, an arrival report or the return of an owner that does not need that lock needs.
-
-_Not a second queue._
-The hand-off to the deferred return holds ownership awaiting return, never unread traffic, so it is not a second receive queue.
-A stalled return shows as counted capacity pressure, never as a drop that waits.
 
 A measured lock delay is not an accepted wait.
 
 _Panics._
 The binding's own code has no exception.
-A panic path inside one middleware is that binding's to state, with its bounds, in an item of its own, so this rule of every binding names no middleware.
+A panic path inside one middleware is that binding's to state, with its bounds, in an item of its own.
 
 [[req-ssr-binding-no-panic]]
 == No panic on any peer input
@@ -226,7 +216,6 @@ A panic path inside the middleware *MUST* be made unreachable by a setup check o
 A binding meets this item only where an item that is allocated to it alone states its account of the middleware panic paths that it can reach: that it has no accepted panic path, or each accepted instance by name, with the five parts below.
 
 *Accepted instances.*
-A middleware panic path is allowed only as an accepted instance.
 An instance is accepted only where its item states all five of these, and its binding's qualification record discloses it as a known anomaly (<<req-ssr-binding-readme,A binding's qualification record states its limits and its failures, and its README points at it>>):
 
 * the operation, or the path inside the middleware, that can panic;
@@ -258,7 +247,7 @@ Each accepted middleware anomaly needs its own bounded instance, and peer-trigge
 A faulty peer's shared-memory writes that reach a middleware panic are known failures too, whatever anomaly is acknowledged.
 
 Each binding's account is stated in an item of its own, so that no binding's silence is read as an account.
-The paths of one middleware are stated with its binding, and this rule of every binding lists none.
+The paths of one middleware are stated with its binding.
 A setup check or a sizing that makes one middleware's panic path unreachable is likewise stated with that binding.
 
 [[req-ssr-binding-peer-identity]]
@@ -318,8 +307,8 @@ Apart from a deliberate idle wait (xref:../seooc-up-rust/bounded-work.adoc#req-s
 * a release that its deferred return performs as pending cleanup (<<req-ssr-binding-frame-drop,What a received frame's destructor may do>>), isolated as xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states;
 * on a serialized or owned route whose declared heap class admits the binding's allocation, a wait inside the allocation domain that the binding's declared policy names, as xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded] states and limits.
 
-The binding's other work, its worker loops, dispatch and wake paths included, is bounded.
-Nothing that a binding call, an arrival report or a health report needs waits behind a pending release.
+The binding's other work, its worker loops, dispatch and wake paths included, *MUST* be bounded.
+Anything that a binding call, an arrival report or a health report needs *MUST NOT* wait behind a pending release.
 
 *Carrier ingress.*
 A carrier ingress *MUST* take pulled or retained frames, never borrowed ones whose carriage would need a staged copy.
@@ -374,7 +363,7 @@ Verification:: fault-injection (a peer killed; a restart with its leftovers pres
 Cleanup in runtime mode would put work of unknown size, and perhaps the heap, on a survivor's runtime path, while initialization may do both (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-restart[A restart is an initialization]).
 So the binding contract places that recovery in the binding's construction, before any route.
 
-The rule names no means of recovery, because the means depend on the middleware.
+The means of recovery depend on the middleware.
 
 [[req-ssr-binding-readme]]
 == A binding's qualification record states its limits and its failures, and its README points at it
@@ -394,7 +383,7 @@ Each binding *MUST* keep a qualification record, versioned with the binding, tha
 The record is the authoritative statement of each of these.
 
 *Shared memory.*
-For shared memory, the record discloses that:
+For shared memory, the record *MUST* disclose that:
 
 * a write racing a zero-copy read is undefined behaviour even for a type that accepts every bit pattern;
 * the setup integrity check catches misdeployment, not a peer that lies about its level;
@@ -467,6 +456,8 @@ Verification:: gate (the binding's copy of the inventory check, with a negative 
 A binding's `+unsafe+` code runs on the same runtime paths as the element's.
 So its obligations need the same record and the same gate (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]).
 
+Example: A binding may keep its unsafe-site inventory in its repository and run the inventory check there.
+
 [[req-ssr-binding-lent-storage]]
 == Lent storage is exclusive, disjoint and stable for as long as it is held
 
@@ -497,8 +488,7 @@ For as long as a frame is held, the binding *MUST* keep its storage:
 * valid for reads of the frame's whole length, in one piece, at an address with the route's alignment;
 * unwritten by the binding and by its middleware in this process.
 
-What another process writes there is not the binding's to prevent.
-xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] and xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport] cover it.
+What another process writes there is covered by xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] and xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport].
 
 *How a loan and a frame end.*
 Three transitions end a held loan or frame.
@@ -511,24 +501,24 @@ Each one that happens *MUST* end it exactly once:
 The binding *MUST NOT* end a loan or a frame in any other way.
 
 *A forgotten lease.*
-None of these transitions happens for a loan or a frame whose lease safe code forgot, and nothing requires one to.
+None of these transitions happens for a loan or a frame whose lease safe code forgot.
 The binding cannot tell a forgotten lease from one that is still in use, and it treats both alike.
 The binding *MUST* keep such a loan or frame charged to its route for the life of the process.
 The binding *MUST NOT* lend or deliver its storage again, give it a second owner, or return or destroy it by another path.
-No property of this item depends on a destructor running.
+Each property of this item *MUST NOT* depend on a destructor running.
 
 *Fixed before the transition.*
 The binding *MUST* have sized and mapped the storage that it lends from before its transition returns.
 Where its middleware can enlarge, move or map again such storage while a process is in runtime mode, the binding *MUST* turn that off, or refuse in route preparation every route that would use it.
 
 *An empty payload.*
-A loan or a frame of zero bytes still has an address that is not null and has the route's alignment.
+A loan or a frame of zero bytes *MUST* still have an address that is not null and has the route's alignment.
 
 *How the claim is made.*
 A binding states these properties to the element only through the `+unsafe+` interface of the binding contract, and each site that makes the claim is in its inventory (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]; <<req-ssr-binding-unsafe-inventory,A binding this project ships inventories its own `+unsafe+`>>).
 A declaration, a capability value or a passed test does not establish them.
 
-*A binding that cannot.*
+*Refusal to lend.*
 A binding that cannot keep these properties for a route *MUST* refuse to lend for it, in route preparation, naming the route and the property.
 It *MUST NOT* present storage that it copies into or out of as lent (<<req-ssr-binding-qos-capability,A binding honors or refuses each declared setting>>).
 --
@@ -551,43 +541,41 @@ Verification:: test, miri, review
 
 *Rationale.*
 The element builds a writer on a loan and a typed view on a received frame.
-Both are sound only if the storage is what the binding says: there, alone, and unmoved.
+Both are sound only if the storage is exclusive, disjoint and stable, as the binding says.
 Safe code cannot check that, so the element takes it only through an `+unsafe+` interface with stated obligations (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]).
-This item states those obligations once, for every lending binding.
 
-_Once, or never._
+_A forgotten lease._
 A loan or a frame ends once, by the send, the give-back or the return.
 Forgetting a lease is safe code, and it runs no destructor (source: the standard library documentation, Rust 1.98.1, `+std::mem::forget+`, with its section Safety).
-So a forgotten loan or frame never ends: its route pays a slot for good, and the storage is never handed out again.
+So a forgotten loan or frame never ends, its slot stays charged to its route, and its storage is never handed out again.
 The element's own leases follow the same rule (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors]).
 
-_A test is not the argument._
+_The source-level argument._
 A suite shows the loans that it took.
 Whether two loans can ever overlap, or a frame's storage can go back twice, is a property of every path of the binding, and it is argued at the source.
-So the verification asks for both, and neither a capability value nor a passed suite stands in for the argument.
 
 _Fixed before the transition._
 Nothing is set up in runtime mode (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
 A middleware that grew or moved its storage there would do set-up work on a runtime path, and could move a frame under a view.
 One binding meets this with a check of its own that this area names.
-The duty is every lending binding's, and the means are each binding's.
+Each lending binding chooses the means by which it meets this duty.
 
 [[req-ssr-binding-shared-state]]
 == A lending binding says which way its ports write shared state
 
 [.specitem,oft-sid="req~ssr-binding-shared-state~1",oft-title="A lending binding says which way its ports write shared state",oft-needs="impl,utest",oft-tags="SafetyBinding"]
 --
-*The statement.*
+*The binding's statement.*
 A lending binding *MUST* state, for each kind of port that it opens, whether that port writes shared state that another process of the same service reads.
 
 * A binding on which a receiving port writes such state is a binding whose ports write shared state both ways.
-* The binding states it to the element at setup, and its README repeats it (<<req-ssr-binding-readme,A binding's qualification record states its limits and its failures, and its README points at it>>).
+* The binding *MUST* state it to the element at setup, and its README *MUST* repeat it (<<req-ssr-binding-readme,A binding's qualification record states its limits and its failures, and its README points at it>>).
 
 *Where it is not established.*
 Where it is not established which way a kind of port writes, the binding *MUST* state that its ports write both ways.
 
 *What rests on it.*
-The element applies the refusals for two-way shared state from this statement (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]), and a deployment applies its rule for such a binding from it (xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]).
+The element's refusals for two-way shared state (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]) and a deployment's rule for such a binding (xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]) rest on this statement.
 --
 
 [horizontal]
@@ -605,7 +593,7 @@ Verification:: test, review
 
 *Rationale.*
 A process that writes shared state which a higher process reads can corrupt that process, whatever the payload rules say.
-The rules for that case exist, and they bind "a binding whose ports write shared state both ways".
+The rules for that case are stated for "a binding whose ports write shared state both ways".
 Only the binding knows whether its middleware is one, and until this item no duty made a binding say so.
 
 An answer that is not established is given as the unfavourable one, as an unknown writer's level is (<<req-ssr-binding-integrity-level,A lending binding records and reports the writer's level>>).

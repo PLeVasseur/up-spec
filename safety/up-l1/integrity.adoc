@@ -4,11 +4,11 @@
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
+This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These items say how the element lends or copies shared memory between integrity levels.
-They are allocated to the element: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+They are allocated to the element (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 
 * A binding's part, recording and reporting the writer's level, is xref:bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level] in xref:bindings.adoc[the duties of every binding].
 * The integrator's part, assigning each transport's level, is xref:deployment.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly] in xref:deployment.adoc[what a deployment provides].
@@ -25,7 +25,7 @@ They are allocated to the element: each item's statement and "Allocated to" line
 Each transport *MUST* declare one integrity level: QM, A, B, C or D, in that order, from the lowest to the highest, with QM as the default.
 Every route on the transport *MUST* carry that level, with no per-route override.
 
-*Words that a level gives.*
+*ASIL and QM.*
 A transport or a route at A, B, C or D is an ASIL transport or an ASIL route, and one at QM is a QM transport or a QM route.
 The same holds for each kind of route: an ASIL receive route, for one, is a receive route at A, B, C or D.
 
@@ -40,7 +40,7 @@ Recording and reporting the writer's level is the binding's duty (xref:bindings.
 ID:: `+req~ssr-integrity-declared~4+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test, fault-injection, review (each statement that uses a word of the clause "Words that a level gives", read with that clause)
+Verification:: test, fault-injection, review (each statement that uses a word of the clause "ASIL and QM", read with that clause)
 ISO 26262:: 6-7.4.8, 9-6 (part-clause numbers only)
 
 *Rationale.*
@@ -85,9 +85,9 @@ The copy route *MUST* read through a source-access mechanism that is valid while
 Each route's report *MUST* say which form it got.
 All of it *MUST* be heap-free.
 
-*What the copy does not protect.*
+*What the copy protects.*
 A copy, or a check over it, protects the payload only.
-It does not contain corrupt middleware offsets, lengths, free lists or ownership records, which need containment of their own against a faulty peer (xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
+Corrupt middleware offsets, lengths, free lists and ownership records need containment of their own against a faulty peer (xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
 --
 
 [horizontal]
@@ -116,7 +116,7 @@ The middleware of a lending binding can map its payload memory read-only for rea
 So the copy reads it only through loads that are valid on a read-only mapping.
 Where one middleware does so is stated on its binding's page (xref:iceoryx2.adoc#index[what the general rules meet on iceoryx2]).
 
-Copying raced bytes with ordinary references or a plain memory copy is itself a data race.
+Copying raced bytes with ordinary references or a plain memory copy is a data race.
 So the copy is sound only through a mechanism defined for racing access, and a route without one has no sound form.
 
 The level rule protects what a reader borrows.
@@ -127,7 +127,7 @@ Middleware control memory that a faulty peer can corrupt lies outside that rule 
 
 [.specitem,oft-sid="req~ssr-integrity-any-bits~1",oft-title="In-place types accept every bit pattern",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-A type read in place from shared memory *MUST NOT* have invalid bit patterns: no `+bool+`, no `+char+`, no enum, nothing else with invalid values.
+A type read in place from shared memory *MUST NOT* have invalid bit patterns: no `+bool+`, `+char+`, enum or anything else with invalid values.
 
 Such fields *MUST* be integers with checked getters, and the derive *MUST* refuse a type that breaks this.
 
@@ -145,12 +145,11 @@ Verification:: compile-fail (the derive refuses such fields), test
 A typed view of in-place bytes is sound only once every invalid bit pattern has been rejected.
 A check made once cannot hold while a faulty writer can still change the bytes.
 
-With no invalid bit patterns, a later bad write can only leave a wrong value, which a checked getter or an end-to-end check can report.
+With no invalid bit patterns, a later bad write can only leave a wrong value, which a checked getter or whatever end-to-end protection the system supplies can report.
 
 That prevents an invalid value from being constructed.
-The rule is no permission for a write that races a read through an ordinary Rust reference, which zero-copy excludes by the writer-at-or-above rule and the view's synchronization (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>).
+The writer-at-or-above rule and the view's synchronization exclude a write that races a read through an ordinary Rust reference (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>).
 
-The end-to-end check meant here is whatever protection the system supplies.
 The SDK's own E2E wire is deferred and not part of this delivery.
 
 [[req-ssr-integrity-checked-at-admission]]
@@ -177,7 +176,6 @@ Because in-place types accept every bit pattern (<<req-ssr-integrity-any-bits,In
 
 Checking once is sound only for a frame that the reader's view keeps still.
 A frame whose writer is below the reader's level, or of unknown level, could still be changed by that writer, so it takes the copy route and is validated on the copy (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>).
-The check replaces none of the view's alignment, tenure and synchronization obligations.
 
 [[req-ssr-integrity-carrier-crossing]]
 == Upward carrier crossings copy once, or are refused
@@ -196,7 +194,7 @@ Each of these routes *MUST* be refused at setup, naming the route and both level
 * such a route to a byte-only egress, which has nothing to copy into;
 * a route whose ingress offers no such source-access mechanism, which cannot copy soundly.
 
-*What the copy does not protect.*
+*What the copy protects.*
 The copy protects the payload only, not the ingress middleware's control memory.
 --
 
@@ -214,5 +212,5 @@ A byte-only egress (xref:../up-l2/streamer.adoc#req-ssr-carrier-route[A carrier 
 
 An unknown level counts as lower, as it does on a receive route (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>), because a writer whose level nobody can state cannot be trusted to be at or above the reader.
 
-A copy made with ordinary loads from memory that a writer races is a data race, not a validation point.
-So the source access must be valid for racing writes.
+A copy made with ordinary loads from memory that a writer races is a data race.
+So the copy is sound only through a source-access mechanism that is valid while the writer races it.

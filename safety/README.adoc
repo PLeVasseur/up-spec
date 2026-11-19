@@ -4,7 +4,7 @@
 This area holds the requirements of the up-rust SEooC, and of the transports, wires and Streamer that work with it, which their repositories trace with OpenFastTrace (OFT).
 It is laid out like the protocol specification: what is shared comes first, then a part for each protocol layer, then a part for each SDK element.
 
-* *Not only safety material.*
+* *What the area holds.*
 The area is named for its safety requirements and assumptions of use.
 It also holds what they rest on: the up-rust SEooC's ordinary functional contract, and its resource and fault obligations.
 * *Beside the protocol chapters.*
@@ -38,26 +38,25 @@ Each obligation is stated in one place, and tables, indexes and safety manuals s
 * *A safety obligation of a protocol layer* goes in that layer's part here.
 A restriction that only one binding has goes in that binding's file, beneath its layer.
 * *An SDK element's own scope, boundary and implementation-specific rules* go in a directory of their own here, named `seooc-<sdk>/`.
-They name one element and its parts, so no other SDK is bound by them.
+They name one element and its parts.
 * *A concept or fault model that several parts rely on* is described on this page, with its scope.
 * *A part is added when it has content.*
 No empty directory mirrors a protocol chapter.
 
 [[filing]]
-=== Filing an item does not widen it
+=== Filing and scope
 
 Where an item is filed says which protocol responsibility it concerns.
-Whom it binds is a separate matter, which the item itself states: for a requirement, <<req-ssr-requirements-bind,A requirement binds the parts that it names>>; for an assumption of use, xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+The item states whom it binds, wherever it is filed, whatever tags it carries and whichever tracing runs select it: for a requirement, <<req-ssr-requirements-bind,A requirement binds the parts that it names>>; for an assumption of use, xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 
-* *Neither a tag nor a tracing run decides it.*
-Which items bind a part comes from their statements and allocations, and the revision that its claims rest on from its declaration, never from the tags that a tracing run keeps (<<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>).
 * *Every item here was written for the up-rust SEooC* and for the parts that work with it.
 The items name that element and those parts, so an item in `up-l1/` or `up-l2/` is no requirement on every transport, or on the SDK of another language.
 An SDK or a transport that no requirement of this area names is bound by one only once it declares that it follows the items of this area, which its repository then covers under their tags.
 * *An assumption of use keeps `seooc` in its ID wherever it is filed.*
 It is that element's assumption (xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
 * *A language-agnostic safety requirement*, if one is added, gets a tag of its own and says whom it binds.
-* *The protocol chapters stay in force for what they cover*: <<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>.
+* *The protocol chapters.*
+The protocol chapters stay in force for what they cover (<<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>).
 
 [[concepts]]
 == Shared concepts and fault models
@@ -77,13 +76,12 @@ A summary names the items that state its concept and adds no duty: the items gov
 |===
 | Kind | Who meets it | How an item shows it
 
-| Software safety requirement | The parts that its statement and its "Allocated to" line name: the element, a binding, a wire, a platform backend, the Streamer or another part that it names (<<req-ssr-requirements-bind,A requirement binds the parts that it names>>) | Type `req`, with *MUST* and *MUST NOT*
-| Assumption of use | The integrator that claims the element's safety-assurance scope, including what its application, platform and deployment owner provide | Type `aou`, with *SHALL* and *SHALL NOT*
+| Software safety requirement | <<req-ssr-requirements-bind,A requirement binds the parts that it names>> | Type `req`, with *MUST* and *MUST NOT*
+| Assumption of use | xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement] | Type `aou`, with *SHALL* and *SHALL NOT*
 |===
 
 * *Scope.*
 Every item of this area.
-* *The two do not stand in for each other*: xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 
 [[req-ssr-requirements-bind]]
 === A requirement binds the parts that it names
@@ -96,12 +94,12 @@ A condition in the statement limits the requirement, and a qualifier or an exclu
 It binds no other part.
 A part is one that the requirement names explicitly: the element, a binding, a wire, a platform backend, the Streamer, or another part.
 
-*The statement and the allocation agree.*
+*Statement and allocation.*
 A part or a condition that one of them gives and the other contradicts is a defect of the requirement, corrected by a reviewed revision.
 
-*What does not decide it.*
+*Filing, tracing and status.*
 The page and the directory that hold a requirement, the tags that it carries, the files and tags that a tracing run selects, the repository that covers it or holds a part, and the status of its adoption or qualification are navigation, coverage and governance data.
-None of them adds a part to those that a requirement binds, or takes one away, and a change to any of them changes no requirement's applicability.
+The parts that a requirement binds, and the conditions under which it binds them, do not depend on these data or on any change to them.
 
 *Assumptions of use.*
 Whom an assumption of use binds is stated by xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
@@ -115,7 +113,8 @@ Verification:: review (each requirement's statement and "Allocated to" line name
 
 *Rationale.*
 A requirement is read on its own, so whom it binds has to be read from it.
-Pages, tags, tracing runs and repositories change as the specification is organized and traced, and such a change must not move a duty to another part or leave it with none.
+Pages, tags, tracing runs and repositories change as the specification is organized and traced.
+If whom a requirement binds depended on them, such a change could move a duty to another part or leave it with none.
 
 [[req-ssr-contract-transition]]
 === What a part declares and claims, and when a replacement takes effect
@@ -125,23 +124,23 @@ Pages, tags, tracing runs and repositories change as the specification is organi
 *The declaration.*
 A part that a requirement of this area names is bound by it as <<req-ssr-requirements-bind,A requirement binds the parts that it names>> states, at the revision in force for that part, whether or not it has declared; a claim of a safety-assurance scope changes whom a requirement binds only where the requirement's own stated condition names such a claim.
 Each such part *MUST* declare which part it is, the adopted revision of this repository that its claims rest on, and each named profile that it follows.
-What a part declares adds no requirement to those that bind it and takes none away.
-A named profile is one that an item of this repository names, with each of its items by identifier or link, and a declaration names no other; the profile's own statement of its version is read at the declared revision.
+What a part declares does not change which requirements bind it.
+A named profile is one that an item of this repository names, with each of its items by identifier or link, and a declaration *MUST NOT* name any other; the profile's own statement of its version is read at the declared revision.
 The dependency closure of an item is each item that its statement names or links, and each item that those name or link in turn; that of a named profile is that of its items.
 For the part's claims, the declared revision fixes the revision of each item and of its closure, and the closure adds no duty.
 
 *Claims.*
 A claim of conformance to the items of this area *MUST* name the part's declaration and each item that it rests on, at the revision that the declared revision of this repository states.
-A claim that rests on an item rests on its dependency closure too, and a claim that rests on fewer than all the requirements that bind the part rests on a named profile that the part declares.
+A claim that rests on an item rests on its dependency closure too, and a claim that rests on fewer than all the requirements that bind the part *MUST* rest on a named profile that the part declares.
 Its evidence is evidence for those revisions only.
-A tracing or coverage run adds no item of this area to those that bind a part and takes none away.
+A tracing or coverage run does not change which items of this area bind a part.
 
 *Replacement.*
 A rule of the protocol chapters, or an item of this area at a revision, stays in force for the implementations and the behaviour that it covers until an adopted replacement takes effect for them.
 A replacement is an item of this area, or a change of a protocol chapter, that names the rule that it replaces or retires, and the implementations and the behaviour for which it does, and it takes effect only for those.
 A new revision of an item replaces its earlier revision for each part that both revisions name; for a part that only the earlier revision names, the earlier revision stays in force until a text retires it for that part.
 A text is adopted when it is stated in a revision of this repository that normal adoption produced; that is no status of its adoption in the sense of <<req-ssr-requirements-bind,A requirement binds the parts that it names>>, and no status that a record keeps decides it.
-No item of this area that is not such a replacement lifts a rule of the protocol chapters, a security requirement included.
+An item of this area lifts a rule of the protocol chapters, a security requirement included, only where it is such a replacement.
 A rule of the protocol chapters keeps its own reach, whether or not an implementation that it covers also follows the items of this area.
 
 *Where an item meets a chapter's rule.*
@@ -162,7 +161,7 @@ Verification:: review (each part's declaration names the part, the revision of t
 *Rationale.*
 A claim is read against an exact text, so it names that text and the part that it is made for.
 The protocol chapters cover implementations that the items of this area do not name, so only a text that names a rule, and those for whom it replaces it, can lift that rule.
-A tracing run is arranged for coverage, and arranging it differently must not change what binds a part.
+A tracing run is arranged for coverage, so what binds a part does not depend on how a run is arranged.
 
 [[integrity-level]]
 === Integrity levels
@@ -183,7 +182,6 @@ xref:up-l1/integrity.adoc#req-ssr-integrity-declared[Each transport declares one
 Requirements and assumptions of several parts rely on this model, and one item states it: <<req-ssr-peer-fault-model,The requirements hold against a faulty peer>>.
 
 The list below indexes items known to rely on it.
-It is navigation and adds no duty, and it is not asserted to be complete.
 
 * *The integrator's side.*
 ** xref:up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport].
@@ -226,11 +224,10 @@ Every peer is treated as faulty, never malicious.
 
 * A peer may send any content, at any time and in any volume, and may choose any source URI.
 * A faulty peer includes one that writes values its own middleware never writes, into shared memory it can write.
-* A peer below a reader's level may write its own shared memory at any moment, and the requirements hold against that: the route that its reader then takes is stated in xref:up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader].
+* A peer below a reader's level may write its own shared memory at any moment, and the route that its reader then takes is stated in xref:up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader].
 
-*The requirements hold against all of it.*
-Every requirement of this area holds against everything that the model allows.
-Each part *MUST* meet, against all of it, each requirement of this area that binds it: the element, each platform backend, each binding, each wire, the Streamer, and any other part that such a requirement names.
+*The duty.*
+Each bound part *MUST* meet each requirement of this area that binds it, for every peer input and shared-memory write allowed by this model.
 
 *The model's scope.*
 The peers of the up-rust SEooC, on every transport.
@@ -240,11 +237,10 @@ The model applies within the access restriction that the integrator provides: on
 Only deliberate exploitation, such as engineering a peer-ID hash collision, is out of scope, as security.
 That exclusion is the model's boundary between safety and security: it does not say that a peer that exploits deliberately is harmless, or that the requirements hold against it.
 
-*What the model does not relax.*
-The model bounds the safety argument and nothing else.
-It lifts no security requirement of the protocol: a transport still provides the means against address spoofing and unauthorized access that xref:../up-l1/README.adoc[uP-L1] requires.
+*Rules left in force.*
+The model bounds only the safety argument.
+It leaves in force the protocol's security requirements, such as those of xref:../up-l1/README.adoc[uP-L1] against address spoofing and unauthorized access.
 It also does not make a lower-assurance process harmless because it runs apart: the rules for lending and copying cover what such a process can write into shared memory.
-The sentence on the protocol's security requirements and the sentence on a lower-assurance process say what the model leaves as it is, and give no part a duty of their own.
 --
 
 [horizontal]
@@ -270,8 +266,6 @@ Peers run in other processes, often over middleware this project does not contro
 A requirement that held only for well-formed input would leave a process open to every peer that fails.
 
 The element, the bindings, the wires and the Streamer handle the same frames and the same shared memory, so a fault that one of them does not withstand reaches the others.
-
-Deliberate exploitation is a matter of security, and the safety argument does not answer it.
 
 [[process-failure]]
 === Process failure and restart
@@ -324,13 +318,13 @@ It is that element's model, and no rule of a protocol layer.
 xref:seooc-up-rust/README.adoc#claims[The SEooC's claims] and xref:seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name].
 
 [[spec-first]]
-== The specification comes first
+== Specification and implementation
 
 The items here say what an implementation must satisfy.
-An implementation's code, tests and reviews trace to the items, never the other way round.
+An implementation's code, tests and reviews trace to the items.
 
 * No statement, rationale or verification entry rests on an implementation's source files, internal names, review records or current state.
-* A rationale gives the product or safety reason for its statement, and cites what <<markup>> allows.
+* A rationale cites what <<markup>> allows.
 * A statement may name something the element must provide, such as an operation, a setting, a counter or a crate.
 That name is part of the specification, not a citation of code.
 * An SDK that implements an item keeps its own record of where it does so, outside this repository, as non-normative traceability.
@@ -364,7 +358,7 @@ So the tags, not the directories, decide what a repository covers.
 
 * A name is never changed or reused.
 * A revision rises when the meaning of a statement changes, or when a change of its allocation changes whom it binds, and not for a wording fix.
-* Filing an item in another part or file changes neither its name nor its revision.
+* An item filed in another part or file keeps its name and its revision.
 
 [[markup]]
 === Markup
@@ -374,8 +368,8 @@ As in the protocol chapters: a block attribute line that gives the item its `spe
 * Inside the block, a statement may use short paragraphs, labels in bold and lists.
 All of it is the statement.
 * Text after the block is not part of the statement: the `ID` row, which repeats the item's identifier for readers, the ASIL, the allocation, the verification methods, the ISO 26262 references and the rationale.
-The allocation is part of what a requirement says all the same: with the statement, it says whom the requirement binds (<<req-ssr-requirements-bind,A requirement binds the parts that it names>>).
-* A rationale gives the reason for the rule as it stands.
+A requirement's allocation says, with its statement, whom the requirement binds (<<req-ssr-requirements-bind,A requirement binds the parts that it names>>).
+* A rationale gives the product or safety reason for the rule as it stands.
 It does not recount earlier revisions: an item's history is kept outside these pages (<<source>>).
 * A rationale cites only public sources: up-spec, public standards by part and clause number, and the published documents and code of other projects, each at a fixed version.
 It does not cite the code of the SDK that implements the item (<<spec-first>>).
@@ -387,7 +381,7 @@ Text that refers to an item links to it, and the text of the link is the item's 
 * *To the item as it stands.*
 The link points at the item's anchor, which is its type and name without its revision: `req-ssr-heap-declared` for `+req~ssr-heap-declared~N+`.
 So a reference always means the current revision of the item.
-* *Identifiers stay with the item and with tracing.*
+* *Identifiers.*
 An item's identifier and revision are in its block attribute line and in its `ID` row.
 Code and tests cite that identifier in their coverage tags (<<tracing>>).
 * *A change of meaning is reviewed with its references.*
@@ -415,7 +409,7 @@ A document covers it with an item of its own that covers the assumption, because
 == Tags
 
 A requirement carries the tag of a part that its "Allocated to" line names, and `SafetyBindingPull` as well where its statement holds a duty of pull bindings only; an assumption of use carries the tag `SafetyManual`.
-A tag is coverage data: it adds no part to those that an item binds, and takes none away (<<req-ssr-requirements-bind,A requirement binds the parts that it names>>).
+A tag is coverage data, and it does not change which parts an item binds (<<req-ssr-requirements-bind,A requirement binds the parts that it names>>).
 The column "Items allocated to" summarizes which items carry each tag.
 An item's own "Allocated to" line governs: it may name parts that its row does not name, or only some of those that its row names.
 

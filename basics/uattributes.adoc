@@ -184,8 +184,7 @@ xref:payload_encoding_registry.adoc[payload-encoding registry].
 --
 *Presence:* This property and the UMessage's `payload` field *MUST* either both be present or
 both be absent. Payload presence is determined by whether the optional `payload` field is
-explicitly set, not by the number of bytes it contains. An explicitly set
-zero-length byte sequence is therefore a present payload.
+explicitly set. An explicitly set zero-length byte sequence is therefore a present payload.
 
 *Range:* If present, the value *MUST* be between `0x0000` and `0xFFFF`.
 Message validation *MUST NOT* reject it because the identifier is reserved,

@@ -2,9 +2,7 @@
 :toc: preamble
 
 This page says which requirements of this repository an implementation follows.
-It exists because the repository holds two rules for some behaviours: one in a protocol chapter, and one in an item filed under `safety/`.
-
-It selects no behaviour.
+For some behaviours the repository holds two rules: one in a protocol chapter, and one in an item filed under `safety/`.
 
 == Where the rules are stated, and who follows them
 
@@ -23,18 +21,17 @@ It selects no behaviour.
 
 * *One implementation family.*
 The items of the safety area are written for the up-rust SEooC and for the parts that work with it.
-They are not a new version of uProtocol for everyone.
-* *More than safety.*
-They are filed under `safety/`, and they are not only safety material (<<claims>>).
-* *Mostly additions.*
+* *Kinds of claim.*
+They are filed under `safety/`, and they make claims of more than one kind (<<claims>>).
+* *Relation to the chapters.*
 Most items add to the protocol chapters.
 Some state a chapter's rule again with more precision, and some differ from a chapter's rule on purpose.
 
 [[claims]]
-== Two separate questions
+== Responsibility and kind of claim
 
 A rule answers two questions.
-Neither answer follows from the other, or from the directory that a rule is filed in.
+The answer to one question cannot be derived from the answer to the other, or from the directory that a rule is filed in.
 
 [cols="2,5",options="header"]
 |===
@@ -49,7 +46,7 @@ Neither answer follows from the other, or from the directory that a rule is file
 
 So an item under `safety/` can state ordinary functional behaviour of the up-rust SEooC.
 
-The kind of claim does not say when an item binds.
+These items state when an item binds, whatever its kind of claim:
 
 * *A software requirement*: xref:safety/README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names].
 * *An assumption of use*: xref:safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].

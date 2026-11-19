@@ -4,25 +4,18 @@
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
+This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 The duties of every wire: xref:wires.adoc[allocated to each wire].
 The duties of every serialized wire: xref:serialized-wires.adoc[serialized wires, and the values they own].
 
 This page states one serialized format.
-A value of a type with a fixed list of fixed-width fields is written as a four-byte prefix and its fields in order, in little-endian byte order, each field at a place that the type alone fixes.
 The profile takes its name from XCDR2, version 2 of the extended Common Data Representation, and relies on no definition of it: an implementation of XCDR2 is not assumed to read its encodings.
 
-This page holds the five requirements of the profile, allocated to each wire of the profile: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+== Whom the items bind
 
-== Whom this page binds
-
-* The five requirements bind each wire that is written against the element's wire contract and states this profile as its format (xref:serialized-wires.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format]).
+* The five requirements bind each wire that is written against the element's wire contract and states this profile as its format (xref:serialized-wires.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format]; xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 * The duties of every wire and of every serialized wire hold beside them.
-Where an item here cites one of those duties, it says what that duty is for this profile, and the length item also has every size stated as exact.
-* A verification row says how a wire shows that it meets an item.
-The item binds whether or not that evidence exists.
-* The profile is a serialized format.
-It states no rule for a native type, whose rules the native wire's page states (xref:native-wire.adoc[the native wire]).
+* The rules of a native type: xref:native-wire.adoc[the native wire].
 
 [[req-ssr-xcdr2-types]]
 == The profile encodes structures of fixed-width fields, and nothing else
@@ -42,7 +35,7 @@ A field is one of these:
 * an array of a fixed number of elements that all have one type of this list, an array of such elements included.
 The number can be zero.
 
-*Nothing else.*
+*Types outside the profile.*
 A wire of this profile *MUST NOT* encode or decode a type that holds anything else, among them:
 
 * a string, a sequence, a map, or any other field whose size depends on its value;
@@ -89,8 +82,7 @@ An array of no elements takes no byte.
 *Padding.*
 The bytes that alignment skips are padding.
 An encoder *MUST* write each padding byte as `00`, and *MUST NOT* write any byte after the last field.
-So an encoder writes one encoding of each value.
-Which other inputs decode to that value is stated by <<req-ssr-xcdr2-decoding,Decoding refuses a wrong length, a wrong prefix or a wrong boolean byte>>.
+Which inputs decode to a value is stated by <<req-ssr-xcdr2-decoding,Decoding refuses a wrong length, a wrong prefix or a wrong boolean byte>>.
 --
 
 [horizontal]
@@ -144,10 +136,10 @@ Decoding *MUST* refuse an input:
 * whose first four bytes are not the prefix;
 * in which the byte of a boolean, as a field or as an element of an array, is neither `00` nor `01`.
 
-*Padding is not examined.*
+*Padding.*
 Decoding *MUST* accept any value in a padding byte: an input whose padding is not zero decodes to the same value.
 
-*Every other input is a value.*
+*Other inputs.*
 Every bit pattern of an integer and of a floating-point number is a value, and decoding *MUST* yield the value with exactly the bit pattern of its bytes.
 So an input that passes the three checks decodes, and decoding makes no other check of its bytes.
 --
@@ -178,25 +170,25 @@ One rule for every reader keeps them the same.
 
 [.specitem,oft-sid="req~ssr-xcdr2-identity~1",oft-title="The bytes name no type, and a changed type is another type",oft-needs="impl,utest",oft-tags="SafetyXcdr2"]
 --
-*The bytes name no type.*
-An encoding holds no name, no identifier and no description of its type.
+*What the bytes hold.*
+An encoding holds no name, identifier or description of its type.
 The prefix is the same for every type.
 
 *What agrees the type.*
 The type of a payload is the type that its route declares at the sender and at the receiver.
 Of that declaration the bytes show only the encoded length, which decoding checks (<<req-ssr-xcdr2-decoding,Decoding refuses a wrong length, a wrong prefix or a wrong boolean byte>>).
 
-*A changed type is another type.*
+*Changed lists of fields.*
 A change to the list of fields makes another type: a field added, removed, moved, renamed or given another kind, or an array given another number of elements.
 The bytes do not show such a change.
 Where the two encoded lengths are equal, a reader of one list can decode an encoding of the other without an error, and what it reads need not be what was written.
 A wire of this profile *MUST NOT* state, in its README or in what it declares, that it reads an encoding of a type with another list of fields.
 
 *Its version.*
-A wire states the version of the profile by naming its five requirements by their identifiers, each with the revision that it ends in, for example `req~ssr-xcdr2-types~1` (xref:serialized-wires.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format]).
+A wire *MUST* state the version of the profile by naming its five requirements by their identifiers, each with the revision that it ends in, for example `req~ssr-xcdr2-types~1` (xref:serialized-wires.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format]).
 
 *The identifier.*
-This page assigns no payload encoding identifier, and the registry has none for the profile, so a wire of the profile states one of the private-use range (xref:../../basics/payload_encoding_registry.adoc[the payload encoding registry]).
+The registry has no payload encoding identifier for the profile, so a wire of the profile *MUST* state one of the private-use range (xref:../../basics/payload_encoding_registry.adoc[the payload encoding registry]).
 --
 
 [horizontal]
@@ -208,5 +200,4 @@ Verification:: test, review
 * *review*: the wire's statement of the type that a route declares and of what it checks; the version of the profile that it states; and that neither its README nor what it declares says that it reads another list of fields.
 
 *Rationale.*
-Nothing in the bytes names their type, and their length tells apart only types of different lengths.
 A decode that succeeds shows that the bytes fit the reader's type, and nothing about what the sender meant.

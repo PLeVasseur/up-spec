@@ -4,34 +4,28 @@
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
-The binding contract, whose items bind the LoLa binding as their statements and "Allocated to" lines say: xref:bindings.adoc[allocated to each binding].
+This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
+The binding contract: xref:bindings.adoc[allocated to each binding].
 How a payload travels on either kind of route: xref:payload-paths.adoc[payload paths, end to end].
 How the binding places a frame in a LoLa sample: xref:lola-envelope.adoc[the LoLa physical envelope].
 
-This page is the contract of one binding: the binding of the up-rust SEooC to LoLa, the shared-memory communication middleware of Eclipse S-CORE.
-It holds:
+This page holds what is specific to the binding of the up-rust SEooC to LoLa, the shared-memory communication middleware of Eclipse S-CORE:
 
 * the six requirements allocated to the LoLa binding alone (tag `SafetyLola`), which `up-transport-lola-rust` covers;
 * what each rule of every binding, of the element and of every deployment asks on LoLa (<<index>>);
 * ten matters on which a LoLa binding's evidence or a decision of the product is still missing, each with its duty, what is missing and whose it is (<<cells>>).
 
-The protocol specification has no LoLa chapter.
-So this page has no protocol counterpart, and the envelope that carries a frame in a LoLa sample is stated on xref:lola-envelope.adoc[the LoLa physical envelope].
+The protocol specification has no LoLa chapter, and the envelope that carries a frame in a LoLa sample is stated on xref:lola-envelope.adoc[the LoLa physical envelope].
 
-== Whom this page binds
+== Whom the items bind
 
 * The six requirements bind the LoLa binding of the up-rust SEooC.
-They bind no other binding and no other user of LoLa.
 * Each item of the binding contract (xref:bindings.adoc[allocated to each binding]) binds the LoLa binding, in full, where its statement and its "Allocated to" line name it.
-This page repeats none of them: <<index>> says what each asks on LoLa, and the item governs.
-* No assumption of use is filed here.
-A deployment on LoLa is bound by the assumptions about every transport (xref:deployment.adoc[what a deployment provides for its transports]) and by the element's own (<<deployment>>).
-* Nothing here changes LoLa, asks anything of its maintainers or reports a defect of it.
-* An entry of <<index>> binds whoever its own item binds.
+<<index>> says what each asks on LoLa.
+* A deployment on LoLa is bound by the assumptions about every transport (xref:deployment.adoc[what a deployment provides for its transports]) and by the element's own (<<deployment>>).
 
 [[status]]
-== What this page states, and what it does not
+== Kinds of sentence
 
 This page keeps four kinds of sentence apart.
 
@@ -50,10 +44,10 @@ A choice about the product that this specification has not made.
 Each one is named in <<cells>>, with whose it is, and the duties are written so that they hold under every answer.
 
 No LoLa binding has been accepted against this page.
-What a binding's code does at a given revision is stated by its qualification record, not here (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
+What a binding's code does at a given revision is stated by its qualification record (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
 
 [[lola]]
-== LoLa, as this page uses the word
+== LoLa
 
 LoLa is the `mw::com` communication middleware of Eclipse S-CORE, in the repository https://github.com/eclipse-score/communication[`eclipse-score/communication`].
 
@@ -67,7 +61,6 @@ They speak of a proxy event that a consumer subscribes to, and that provides eac
 On this page a _loan_ is storage held through an `+AllocateePtr+`, and a _sample_ is what a `+SamplePtr+` holds.
 * *Qualification.*
 LoLa's README says that the safety qualification of its elements "is not provided" (https://github.com/eclipse-score/communication/blob/72fe936e4d1e091181134ebdb8dbfed7f6574dc9/README.md[`+README.md+` at that commit]).
-So nothing on this page rests on one.
 
 [[lola-assumptions]]
 === LoLa's published assumptions of use
@@ -75,7 +68,7 @@ So nothing on this page rests on one.
 LoLa publishes assumptions of use for whoever uses it, and the binding is such a user.
 The table quotes those that this page relies on, each from `+aou.trlc+` at the commit above, and names the duty that it meets here.
 A quotation keeps the meaning that LoLa gives it: the last column says what the binding does about it, and reads nothing more into it.
-The table is no list of all that LoLa publishes: <<req-ssr-binding-lola-assumptions,The LoLa binding keeps each of LoLa's assumptions of use, or names who does>> requires the binding to keep, or to name who keeps, every one that applies to it.
+<<req-ssr-binding-lola-assumptions,The LoLa binding keeps each of LoLa's assumptions of use, or names who does>> requires the binding to keep, or to name who keeps, every one of LoLa's assumptions of use that applies to it.
 
 [cols="3,5,4",options="header"]
 |===
@@ -137,7 +130,7 @@ Binding code still acquires and releases no heap memory on a native path (xref:b
 * Where the route needs a capability that the binding or LoLa does not have, the binding *MUST* refuse the route in route preparation, naming the route and that capability.
 
 *What is a reason to refuse.*
-A reason is always something that the route declares and that the binding, or LoLa, does not have, and the refusal names it.
+A reason is always something that the route declares and that the binding, or LoLa, does not have.
 The reasons are those that the items of the binding contract and of this page state.
 Among them are:
 
@@ -149,16 +142,16 @@ Among them are:
 
 The element's own checks refuse for their own reasons, which xref:payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name] names.
 
-*What is no reason to refuse.*
+*Excluded reasons.*
 The binding *MUST NOT* admit, refuse or change a route because of the name of its wire or of its payload encoding.
 It *MUST NOT* refuse a serialized route because its wire declares allocation, or because its decoded values own heap memory (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]).
 
-*No route as another.*
+*Native routes.*
 
 * The binding *MUST NOT* serve a route that is declared native by a serialized encoding, by a staged copy or by storage that LoLa did not lend.
 * The binding *MUST NOT* report or count a copied or serialized route as a native one.
 
-*A serialized route's allocation stays its own.*
+*A serialized route's allocation.*
 The binding *MUST NOT* let what a serialized route allocates reach a native route on the same transport, or work that the two share (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 
 *What each route got.*
@@ -185,23 +178,19 @@ Verification:: test, heap-window, review
 
 *Rationale.*
 A deployment on shared memory mostly sends values as they lie in memory, and it also carries serialized messages on the same transport.
-So the binding carries both kinds of route, and neither stands in for the other.
 
-_Carried, or refused for a stated reason._
+_Capability and declarations._
 To be able to carry both kinds of route is the binding's capability.
 Whether one declared route is carried depends on what that route asks: a payload that is larger than LoLa's storage for it cannot be carried, whichever wire wrote it.
-So the binding compares the route's declarations with its own, and a refusal names the one that does not fit.
-A wire that allocates asks nothing of LoLa's storage that a binding could lack, so a wire's allocation is never the reason.
+A wire that allocates asks nothing of LoLa's storage that a binding could lack.
 
-_The wire is chosen for a message._
+_Choice of wire._
 Which wire a message uses is decided where the message is declared, and the same wire runs on another transport (xref:payload-paths.adoc#independent[a wire and a transport are chosen apart]).
 A binding that admitted routes by the name of a wire would tie the two together.
-So the binding looks at what a route declares, never at the name of its wire.
 
 _Genuine native routes._
 A native route that was served by a copy would still deliver correct values, and nothing in a test of values would show the difference.
 Its resource behaviour would differ, and a deployment that relies on a route being native relies on that behaviour.
-So the binding refuses what it cannot carry natively, and the report says what each route got.
 
 [[req-ssr-binding-lola-capacity]]
 == On LoLa, a route's counts are declared and its storage is established at setup
@@ -226,11 +215,11 @@ Where that storage does not, or where the binding cannot establish it, the bindi
 *In runtime mode.*
 
 * The binding *MUST NOT* obtain more storage from LoLa.
-* A request beyond a route's count is a returned error (xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]).
+* A request beyond a route's count *MUST* be a returned error (xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]).
 * What a full route does with a new frame is its declared overflow policy.
 The binding honors that policy, or it refused the route at setup (xref:../seooc-up-rust/qos.adoc#req-ssr-qos-overflow[Overflow acts as declared]; xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]).
 
-*No count is fixed here.*
+*Count values and meanings.*
 This item fixes no count and no meaning of one.
 --
 
@@ -258,10 +247,9 @@ A number of loans, a number of retained samples and a number of samples that LoL
 A figure that a route is sure of and a figure that it cannot exceed are different promises.
 A report that gave one for the other would let a deployment size against a number that means something else.
 
-_Why no count is fixed._
+_Count values._
 How many loans or samples a route needs is a deployment's choice, and what LoLa serves is a fact of the revision that the binding is built against.
 What a declared count obliges of any middleware's storage is not decided, for every binding (<<lola-cell-6>>).
-So this item fixes no count and no meaning of one, and has the binding state what it serves.
 
 [[req-ssr-binding-lola-foreign-boundary]]
 == Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path
@@ -276,7 +264,7 @@ The binding *MUST NOT* let a call across that boundary, in either direction, be 
 * Rust code of the binding that LoLa calls back *MUST NOT* panic.
 
 *Errors.*
-An error that crosses the boundary is a fixed-size value.
+An error that crosses the boundary *MUST* be a fixed-size value.
 The binding *MUST* return it as the refusal of the operation that met it, or count it on its route (xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 It *MUST NOT* turn it into a panic, and *MUST NOT* drop it.
 A result of LoLa that the binding cannot classify *MUST* be reported as a failure, and never as the more favourable reading.
@@ -308,15 +296,13 @@ Verification:: test, fault-injection, review
 
 *Rationale.*
 The rule of every binding speaks of a panic.
-A middleware written in C++ does not panic: it throws, or it ends the process.
-This item says how that rule reads there.
+In place of a panic, a middleware written in C++ throws, or it ends the process.
 
 _Unwinding._
 Rust code and C++ code unwind in different ways, and an unwind that crosses from one into the other is not defined for the Rust code unless the boundary is declared for it (source: the Rust Reference, Rust 1.98.1, chapter Panic, section Unwinding across FFI boundaries, rule panic.unwind.ffi.undefined).
-So nothing unwinds across the boundary at all: an exception becomes an error value where it is still C++, and the element sees an ordinary refusal.
 
 _Termination._
-A process that LoLa ends is as lost as one that panicked, and a faulty peer must be able to cause neither (xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
+A process that LoLa ends is as lost as one that panicked, and xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer] requires that a faulty peer be able to cause neither.
 So a termination path that a peer's input, death or restart can reach is a known failure of the binding, never a limit that a deployment accepts.
 
 _Builds and loading._
@@ -329,7 +315,8 @@ So the binding's qualification record names the builds and the ways of loading f
 [.specitem,oft-sid="req~ssr-binding-lola-sample-lifetime~1",oft-title="On LoLa, no subscription ends while one of its samples is held",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
 *The rule.*
-While any sample that a LoLa subscription provided is still held, the LoLa binding *MUST NOT* end that subscription: it does not unsubscribe the proxy event, and it does not destroy the proxy event or its proxy.
+While any sample that a LoLa subscription provided is still held, the LoLa binding *MUST NOT* end that subscription.
+Unsubscribing the proxy event ends it, and so does destroying the proxy event or its proxy.
 
 *Held.*
 A sample is held from the moment LoLa provides it until the binding has returned it to LoLa.
@@ -339,12 +326,12 @@ That covers:
 * a frame whose return is pending cleanup (xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]);
 * a frame whose lease safe code forgot, which is held for the life of the process.
 
-*Whatever the application does.*
-The rule *MUST* hold for every sequence of safe calls, in any order and from any thread.
-It *MUST NOT* rest on an application returning its frames first.
+*Any sequence of calls.*
+The binding *MUST* keep the rule for every sequence of safe calls, in any order and from any thread.
+It *MUST NOT* rely on an application returning its frames first.
 
 *In runtime mode.*
-In runtime mode the binding ends no subscription, as every binding resource stays attached there (xref:../seooc-up-rust/release.adoc#req-ssr-release-none[Nothing is released in runtime mode]).
+A subscription is a binding resource, which stays attached in runtime mode (xref:../seooc-up-rust/release.adoc#req-ssr-release-none[Nothing is released in runtime mode]).
 --
 
 [horizontal]
@@ -367,7 +354,6 @@ If the subscription ended first, safe code would hold a view of invalid memory, 
 
 LoLa addresses that assumption to its user, and the binding is that user.
 An application can hold a frame for as long as it likes, and can forget one.
-So the binding cannot pass the assumption on to the application: it keeps it itself, for every sequence of calls.
 
 [[req-ssr-binding-lola-callbacks]]
 == What the LoLa binding gives LoLa stays valid for as long as LoLa can use it
@@ -384,10 +370,10 @@ LoLa can no longer use a callable from a _no-use point_: a point that LoLa's own
 * Where LoLa's documentation names a no-use point for a callable, the binding *MUST* keep the callable, and what it uses, valid until that point at least.
 * Where it names none, the binding *MUST* keep them valid until the process is gone.
 
-*What is not a no-use point.*
+*Excluded points.*
 
 * A statement of how long a callable has to stay valid at least is not one.
-It is a minimum, and the binding keeps it as well.
+It is a minimum, and the binding *MUST* keep it as well.
 * What one revision of LoLa is seen to do, in a test or in its source, is not one.
 
 The binding's memory safety *MUST NOT* rest on LoLa giving a callable up at any other point.
@@ -421,7 +407,7 @@ Verification:: test, review
 A callable that LoLa holds is a pointer into the binding that only LoLa decides when to follow.
 If what it points to has ended, the next call uses invalid memory, and the application's safe code caused it (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour]).
 
-_A minimum is not an end._
+_The published minimum._
 LoLa publishes that every callback passed to it is to be valid for as long as its proxy is alive (<<lola-assumptions>>, `+ValidCallbacksWhileProxyAlive+`).
 That is a minimum: it says for how long the binding owes validity at least.
 It does not say that LoLa stops invoking a callback when its proxy ends, or at any other point.
@@ -433,7 +419,6 @@ The element offers no shutdown, and a process in runtime mode leaves by exit, cr
 An exit runs handlers and destructors while other threads still run (source: the standard library documentation, Rust 1.98.1, `+std::process::exit+`, on the exit handlers that it runs).
 A thread of LoLa that then called into state the binding had already destroyed would corrupt the process while it still shares memory with its peers.
 So what such a thread can reach outlives it, whatever the order of destruction.
-The item fixes no means of arranging that.
 How the binding arranges that, and how the process then ends, is not fixed here (<<lola-cell-5>>).
 
 [[req-ssr-binding-lola-assumptions]]
@@ -441,7 +426,7 @@ How the binding arranges that, and how the process then ends, is not fixed here 
 
 [.specitem,oft-sid="req~ssr-binding-lola-assumptions~1",oft-title="The LoLa binding keeps each of LoLa's assumptions of use, or names who does",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
-*Each assumption has a keeper.*
+*Who keeps each assumption.*
 LoLa publishes assumptions of use for whoever uses it.
 For each one that applies to the revision and the configuration of LoLa that the binding is built against, the binding *MUST* do one of two things:
 
@@ -452,7 +437,7 @@ For each one that applies to the revision and the configuration of LoLa that the
 The binding *MUST* keep itself every assumption that code of the element or of an application could otherwise break through safe calls.
 It keeps it for every sequence of safe calls, in any order and from any thread, and *MUST NOT* leave it to the order in which an application calls it.
 
-*Never a rule for safe code.*
+*What the binding passes on.*
 An assumption that the integrator keeps is a duty about the system, such as supervising time or reacting to a failure that the binding reports.
 The binding *MUST NOT* pass an assumption on as a rule about how an application calls the element.
 
@@ -462,7 +447,7 @@ Where keeping an assumption limits what a route can be served, the binding *MUST
 * in route preparation, by name, where the route's declaration shows it;
 * as a returned error otherwise (xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]).
 
-*A limit of LoLa, and of nothing else.*
+*Where a limit applies.*
 A limit that follows from an assumption binds routes on LoLa, for the revision and the configuration to which LoLa applies that assumption.
 The binding *MUST* report it as a limit of its own.
 It is no limit of the element, of another binding or of a route on another transport.
@@ -503,18 +488,17 @@ Others are about the system: that timing is supervised, or what the system does 
 The binding cannot keep those, so it names them for the integrator.
 The integrator already reacts to what the element reports (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]), and the timing budgets of the item, in ISO 26262's sense, are the integrator's (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 
-_Not a rule for safe code._
+_What the binding passes on._
 A rule that an application had to follow in order to keep LoLa safe would be a condition of memory safety that safe code could break.
 So no assumption reaches an application as a rule: the binding enforces it, or the integrator arranges the system for it.
 
-_A limit is declared, not hidden, and not made general._
+_Limits on a route._
 An assumption can make LoLa serve less than a route asks: one loan at a time, for example (<<lola-assumptions>>, `+OneProducerOnlyOneAllocateePtr+`).
 The binding then says so as its capability and refuses the rest.
-It neither breaks the assumption nor serves the route in another way out of sight.
 The limit is LoLa's, at one revision and in one configuration.
 The element has no such limit, and another binding, or another revision of LoLa, may serve more.
 
-_A failure is reported as one._
+_An error from allocating._
 LoLa publishes that the system is to go to a safe state when allocating returns an error (<<lola-assumptions>>, `+CheckForAllocationError+`).
 This page reads that as a failure that is not recovered from.
 A binding that retried it, or reported it as a route that is briefly full, would keep the application from the reaction that LoLa asks for.
@@ -730,7 +714,6 @@ That withholds the claim that a row is met, and it withholds no duty.
 [[errors]]
 === What a result of LoLa becomes
 
-The outcome that each row requires is settled.
 The name of the refusal or of the counter is the binding's to state, and no name is fixed here (<<lola-cell-8>>).
 
 [cols="3,5,3",options="header"]
@@ -1054,8 +1037,7 @@ The duty is stated for every lending binding, and the means are the binding's.
 * *Until then.*
 No claim that the LoLa binding needs no such check.
 
-== Evidence stays with the binding
+== Evidence for the LoLa binding
 
 * A test that runs on real iceoryx2 is evidence on iceoryx2, and none for the LoLa binding.
 * The LoLa binding covers the duties of every binding, and its six own, in `up-transport-lola-rust`, by running the contract suites against itself on real LoLa.
-* A build for a target is not a run on it.

@@ -4,7 +4,7 @@
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
+This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 The duties of every wire: xref:wires.adoc[allocated to each wire].
 The other kind of wire: xref:native-wire.adoc[the native wire].
 Both kinds, end to end and on either kind of transport: xref:payload-paths.adoc[payload paths, end to end].
@@ -15,25 +15,22 @@ The decoded value is _owned_: its slot owns it, then the lease that an applicati
 This page holds:
 
 * the two requirements allocated to each serialized wire apart from the end-to-end protection wire (tag `SafetyWireSerialized`), which each such wire covers in its own repository;
-* what owning means, apart from an encoding and apart from heap use (<<owning>>);
+* encoding, owning and heap use (<<owning>>);
 * the rules of other pages that a serialized route rests on, in the order in which a payload meets them (<<index>>);
 * allocation and each stronger guarantee: who declares it, who requires it, who admits it and where it is reported (<<guarantees>>);
 * what fails, where, and with which outcome (<<failures>>);
 * one profile, Protobuf (<<protobuf>>);
 * what is not decided (<<open>>).
 
-== Whom this page binds
+== Whom the items bind
 
 * The two requirements bind each serialized wire that is written against the element's wire contract, beside the duties of every wire (xref:wires.adoc[allocated to each wire]).
-* They do not bind the native wire.
 They do not bind the deferred end-to-end protection wire, whose items are its own (xref:../seooc-up-rust/e2e-wire.adoc[the end-to-end protection wire]).
-* A rule that <<index>> lists binds whoever its own item binds.
 * A verification row says how a wire shows that it meets an item.
 The item binds whether or not that evidence exists yet, and no test of a format is a condition for the item.
 * A serialized route runs on any binding whose capability serves it, lending or handoff, and it is tied to no middleware (xref:payload-paths.adoc#independent[a wire and a transport are chosen apart]).
-* Nothing here is the definition of one format.
-Protobuf is a profile of these rules (<<protobuf>>), and a wire of another format reads the same rules for its own format.
-The fixed-layout XCDR2 profile is a format with requirements of its own, stated on a page of its own (xref:xcdrv2.adoc[the fixed-layout XCDR2 profile]).
+* Protobuf is a profile of these rules (<<protobuf>>), and a wire of another format reads the same rules for its own format.
+The fixed-layout XCDR2 profile is a format with requirements of its own (xref:xcdrv2.adoc[the fixed-layout XCDR2 profile]).
 
 [[req-ssr-wire-serialized-format]]
 == A serialized wire reads and writes one stated format
@@ -48,7 +45,7 @@ A serialized wire *MUST* state the one format that it writes and reads:
 
 *Only that format.*
 Every encoding that the wire writes *MUST* be an encoding, in that format, of the value that it was given.
-Decoding accepts what the format makes an encoding of a value of the type, and refuses everything else (xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]).
+Decoding *MUST* accept what the format makes an encoding of a value of the type; what it refuses is stated in xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic].
 
 *The format decides.*
 Which inputs are encodings, and of which values, is the format's to say: for a malformed input, for an input that ends early, for an empty input, and for an input with elements that the type does not know.
@@ -56,13 +53,13 @@ Which inputs are encodings, and of which values, is the format's to say: for a m
 * The wire *MUST NOT* add a default or a lenient reading of its own.
 * A wire that accepts less than a public format allows *MUST* state that narrower format as its own.
 
-*What the format does not say.*
+*Type identity.*
 A format's bytes need not say which type they encode, and an encoding identifier never does.
 
 * The wire *MUST* state what agrees the type of a payload between a sender and a receiver, and what the wire checks of it (xref:wires.adoc#req-ssr-wire-readme[A wire's README says what its format is and what it cannot detect]).
 * The wire *MUST NOT* present a decode that succeeds as proof that the sender meant that type.
 
-*Resources are declared apart.*
+*Heap use and ownership.*
 A format and its identifier say nothing about heap use or about ownership.
 The wire declares those apart (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 --
@@ -81,11 +78,11 @@ Verification:: test, review
 
 *Rationale.*
 A receiver can decode a sender's bytes only if both mean the same format.
-A wire that wrote a variant of its own, or read more leniently than its format, would agree with itself and with nothing else.
+A wire that wrote a variant of its own, or read more leniently than its format, would agree only with itself.
 
 _The format decides._
 What a decoder must refuse is stated by another item (xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]).
-This item adds the other half: the wire names the format, at a version, so that a test can state each expected result from the format and so that a second implementation can be checked against the same text.
+The wire names the format, at a version, so that a test can state each expected result from the format and so that a second implementation can be checked against the same text.
 
 _Type identity._
 Many formats do not carry the name of the type that they encode, and a payload encoding identifier names a format, never a type.
@@ -100,30 +97,29 @@ The wire cannot always prevent that, so it says what does agree the type, and it
 *Sizing.*
 A serialized wire *MUST* state the largest encoding that it can write for its type, or that it has none.
 
-* A size that it reports for a value as exact is the number of bytes that encoding that value writes.
+* A size that it reports for a value as exact *MUST* be the number of bytes that encoding that value writes.
 * A wire with no largest encoding runs only on a route that declares a payload bound.
-* A value whose encoding does not fit the route's bound, or the storage that the wire was given, is refused before anything is sent.
-Nothing is cut short.
+* A value whose encoding does not fit the route's bound, or the storage that the wire was given, *MUST* be refused before anything is sent.
 
 *Encoding.*
 Encoding *MUST* write the value once, in order, through the payload writer that the element gives it, into the storage that carries the frame (xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]).
 
-* The wire does not build the encoding in storage of its own and copy it out.
-* A value that the format cannot represent is an error, and nothing is sent.
-* Encoding leaves the value as it was, so a refused send can be tried again with the same value.
+* The wire *MUST NOT* build the encoding in storage of its own and copy it out.
+* A value that the format cannot represent *MUST* be an error, with nothing sent.
+* Encoding *MUST* leave the value as it was, so a refused send can be tried again with the same value.
 
 *Decoding.*
 Decoding *MUST* replace the value in the slot that the element gives it.
 
-* The result depends on the input alone, and not on what the slot held before.
-* What the slot held before ends exactly once, as its route's class says (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors]).
-* A decode that fails leaves a valid value in the slot and nothing half-owned.
+* The result *MUST* depend on the input alone, and not on what the slot held before.
+* What the slot held before *MUST* end exactly once, as its route's class says (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors]).
+* A decode that fails *MUST* leave a valid value in the slot and nothing half-owned.
 
 *An owned value.*
 A decoded value owns everything that it holds.
 It *MUST NOT* borrow from the input, from the frame or from the wire, so it stays valid after the frame is returned.
 
-*Owning is not an encoding, and not heap use.*
+*Owning heap memory.*
 Whether a decoded value owns heap memory is a property of its type and of the wire.
 
 * The wire states its heap class for each direction, with its policy where it allocates (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
@@ -132,7 +128,7 @@ Whether a decoded value owns heap memory is a property of its type and of the wi
 * A declaration establishes no stronger guarantee.
 
 *Errors.*
-Each refusal is a returned error of fixed size, and none is a panic (xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]; xref:../seooc-up-rust/errors.adoc#req-ssr-error-fixed-size[Errors are fixed-size diagnoses]).
+Each refusal *MUST* be a returned error of fixed size (xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]; xref:../seooc-up-rust/errors.adoc#req-ssr-error-fixed-size[Errors are fixed-size diagnoses]).
 --
 
 [horizontal]
@@ -170,15 +166,15 @@ A frame goes back to its transport as soon as decoding is done, and its storage 
 A decoded value that still pointed into it would read another message.
 So a decoded value owns what it holds.
 
-_Not an encoding, and not the heap._
+_Owning heap memory._
 One format can be decoded into a value that owns heap memory, or into one that holds everything in storage of fixed capacity.
 So the format does not say whether a route allocates.
 The wire says it, for each direction, and a deployment that needs more than ordinary ownership requires it by name (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-resource-guarantees[A resource guarantee the item relies on is required by name]).
 
 [[owning]]
-== Owning, apart from an encoding and apart from heap use
+== Encoding, owning and heap use
 
-Three questions about a payload are separate, and each has its own answer.
+Three questions about a payload have separate answers.
 
 [cols="3,4,3",options="header"]
 |===
@@ -199,7 +195,6 @@ Three questions about a payload are separate, and each has its own answer.
 
 No answer follows from another.
 
-* An identifier does not say that a value is owned or that it uses the heap.
 * An owned value need not use the heap, and a route that uses none is not thereby native.
 * A value that owns heap memory is ordinary on a route that declares allocation.
 Setup does not refuse it for that, and no stronger guarantee is asked of it unless the route requires one by name.
@@ -233,7 +228,6 @@ Setup does not refuse it for that, and no stronger guarantee is asked of it unle
 == A serialized payload, step by step
 
 Each row names the rule that governs a step, and who acts.
-The items govern, and this table adds no duty.
 
 [cols="2,5,4,2",options="header"]
 |===
@@ -424,9 +418,7 @@ The rules are xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap cla
 [[protobuf]]
 == One profile: Protobuf
 
-Protobuf is one serialized format among others.
-This section says what the rules above ask of a wire for it.
-It adds no duty and defines no rule, and each statement about the format is the format's own (https://protobuf.dev/programming-guides/encoding/[the Protobuf encoding]).
+Each statement about the format is the format's own (https://protobuf.dev/programming-guides/encoding/[the Protobuf encoding]).
 
 [cols="2,5,3",options="header"]
 |===
@@ -466,7 +458,7 @@ It adds no duty and defines no rule, and each statement about the format is the 
 
 | Type identity
 | The bytes do not carry the name of their message type. A payload of one message type can decode as another without an error
-| <<req-ssr-wire-serialized-format,A serialized wire reads and writes one stated format>>, "What the format does not say"
+| <<req-ssr-wire-serialized-format,A serialized wire reads and writes one stated format>>, "Type identity"
 
 | On a transport
 | A Protobuf wire runs on a lending binding and on a handoff binding alike. On LoLa and on iceoryx2 it encodes into a loan

@@ -6,7 +6,7 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 Conventions and tags: xref:../README.adoc[the safety area's README].
 Scope and element boundary: xref:README.adoc[the SEooC's README].
 
-The exact addresses that an ASIL Streamer route names are a forwarding rule, filed with the Streamer: xref:../up-l2/streamer.adoc#req-ssr-config-exact-addresses[ASIL Streamer routes name exact source addresses] in xref:../up-l2/streamer.adoc[the Streamer's page].
+The rule on the exact addresses that an ASIL Streamer route names is stated in xref:../up-l2/streamer.adoc#req-ssr-config-exact-addresses[ASIL Streamer routes name exact source addresses] in xref:../up-l2/streamer.adoc[the Streamer's page].
 
 [[req-ssr-config-validated]]
 == Deployment data is validated in full
@@ -41,7 +41,7 @@ Publishing the ranges lets the integrator produce the deployment data within the
 
 [.specitem,oft-sid="req~ssr-config-one-path~1",oft-title="Direct construction and deployment data are one path",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-Building the element directly in code and building it from deployment data *MUST* give the same types and pass the same checks, because validation happens in the element's setup and not only in a loader.
+Building the element directly in code and building it from deployment data *MUST* give the same types and pass the same checks, because validation happens in the element's setup.
 --
 
 [horizontal]

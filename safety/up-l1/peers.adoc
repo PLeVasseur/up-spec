@@ -4,14 +4,14 @@
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
+This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These items say how the element treats the peers of a transport.
-They are allocated to the element, and one of them also to each binding that carries native frames between processes: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+They are allocated to the element, and one of them also to each binding that carries native frames between processes (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 
 * Where they concern what a peer sends or writes, the faults that they hold against are stated in xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer].
-A peer's death and restart, and a peer of another ABI, are stated in the items themselves.
+A peer's death and restart, and a peer of another ABI, are stated in these items.
 * RPC calls and message identity are in xref:../up-l2/interaction.adoc[the communication layer's part].
 
 [[req-ssr-peer-failure-normal]]
@@ -19,7 +19,7 @@ A peer's death and restart, and a peer of another ABI, are stated in the items t
 
 [.specitem,oft-sid="req~ssr-peer-failure-normal~3",oft-title="Peer failure is normal input",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-*What a peer's failure must not cause.*
+*Effects in surviving processes.*
 A peer process that dies at any instruction, or restarts, *MUST NOT* cause any of the following in element code in any process that stays up:
 
 * a panic;
@@ -27,18 +27,17 @@ A peer process that dies at any instruction, or restarts, *MUST NOT* cause any o
 * an unbounded wait;
 * a heap release on a native route, on a route whose heap class is none or in work they share.
 
-*The one exception to the unbounded wait.*
+*The exception.*
 The one exception to the unbounded wait is the release of what the failure ends.
 It waits for no peer, and what it releases stays charged until it completes.
 
 * Where it is pending cleanup, a retained owner's deferred return included, it is isolated as xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states.
 So no survivor's operation, arrival, deadline or expiry accounting, health report or other owner's return waits for it.
 * On a serialized or owned route whose declared heap class admits allocation, and which does not require non-waiting release (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]), an owned value's release runs under the route's declared policy on a path of that route, after the failure's outcome has been recorded (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors]).
-* An owned value's destruction never runs in a native operation, in the work one causes or in work that a native route shares.
 
 *What survivors see.*
 Those processes *MUST* see the failure only as silence, counted deadline misses, call errors, or a reported peer loss or restart.
-Each is due without waiting for that release, and each is recorded before the release of what it ended starts.
+Each *MUST* be due without waiting for that release, and each *MUST* be recorded before the release of what it ended starts.
 
 *Routes that declare allocation.*
 On a serialized or owned route whose declared heap class admits allocation, a call or frame that such an outcome ends releases what it owns exactly once as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[Decoded values and their destructors] states.
@@ -63,15 +62,14 @@ So each process has to protect itself from their failures rather than rely on th
 A peer dying or restarting is therefore normal input to a transport, and a frame from an earlier incarnation of a peer is refused as stale (<<req-ssr-peer-stale-rejected,Stale peers are rejected>>).
 
 _Heap use after a failure._
-A peer's failure can end a call that holds a decoded owned response, and that value must still be destroyed, once.
-So the failure's own handling acquires no heap anywhere, and releases none on native and heap-free routes.
+A peer's failure can end a call that holds a decoded owned response, and that value still has to be destroyed, once.
 The release of what the failure ends is confined to the route's declared class (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode]).
 
 _Where that release runs._
 An ordinary owning route uses no release service and requires none (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]), and an owned value's release there can wait behind an allocator's lock like any other.
 So on a route that requires non-waiting release, an owned value's release that can wait is kept pending and apart.
 On a route that does not, it runs under the route's declared policy, after the failure's outcome is recorded and never in native or shared work.
-A retained owner's deferred return is pending cleanup on every route, whatever the route requires.
+A retained owner's deferred return is pending cleanup on every route.
 
 [[req-ssr-native-abi-agreed]]
 == A native representation never crosses an ABI
@@ -86,18 +84,18 @@ The element *MUST* state an ABI fingerprint of its target:
 * the size and alignment of each scalar its stable payloads admit, `+u128+` and `+i128+` included.
 
 *Refusal at setup.*
-At setup, a route whose wire carries a native representation is refused when a peer's fingerprint differs.
-The refusal names both ABIs and the copying route as the fix.
+At setup, a route whose wire carries a native representation *MUST* be refused when a peer's fingerprint differs.
+The refusal *MUST* name both ABIs and the copying route as the fix.
 
 *Recording.*
 Every peer of a route that admits a native wire records its fingerprint when it creates its side.
-A native peer refuses one that records none, by name.
+A native peer *MUST* refuse one that records none, by name.
 
 *Scope.*
 A serialized wire is not affected.
 
 *Bindings.*
-Each binding that carries native frames between processes exchanges the fingerprint at setup.
+Each binding that carries native frames between processes *MUST* exchange the fingerprint at setup.
 --
 
 [horizontal]
@@ -123,7 +121,7 @@ An explicit ABI agreement prevents interpreting one target layout as another.
 A frame from an earlier incarnation of a peer *MUST* be recognized by its full incarnation and refused as stale, never treated as current, and counted.
 
 *Identity and incarnation.*
-A peer's identity is the one that its binding gives it, stable across its restarts (xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise]), and the incarnation the element records for it only rises.
+A peer's identity is the one that its binding gives it, stable across its restarts (xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise]), and the incarnation the element records for it *MUST* only rise.
 
 *One exclusive step.*
 The element *MUST* compare a frame's full peer identity and incarnation with the recorded ones, and record a newer incarnation, as one exclusive step of its configuration's mechanism, so that no concurrent classification, restart, loss or restart report can:
@@ -132,15 +130,12 @@ The element *MUST* compare a frame's full peer identity and incarnation with the
 * move the recorded incarnation back; or
 * tie one peer's frames to another peer's entry.
 
-*No limit on concurrent classification.*
-Classification places no limit on how many frames of one peer are classified at once.
-A frame is refused only as stale, as undeclared (<<req-ssr-peer-admission,Undeclared peers cannot lock out declared ones>>), or because the table that its declaration sized is genuinely full.
+*Concurrent classification.*
+Classification *MUST NOT* place a limit on how many frames of one peer are classified at once.
+A frame *MUST NOT* be refused except as stale, as undeclared (<<req-ssr-peer-admission,Undeclared peers cannot lock out declared ones>>), or because the table that its declaration sized is genuinely full.
 
 *Restart reports.*
-On a binding's restart report, the element fails the calls tied to older incarnations of that peer, and counts the report.
-
-*No admission from a stale incarnation.*
-No frame is admitted as current from a stale incarnation.
+On a binding's restart report, the element *MUST* fail the calls tied to older incarnations of that peer, and count the report.
 --
 
 [horizontal]
@@ -161,13 +156,12 @@ Verification:: test, fault-injection, review
 *Rationale.*
 Without this rule, a restarted peer could inherit frames or calls from its predecessor, and contention could turn a stale incarnation into a current one.
 
-_An outcome, not a mechanism._
-The requirement states the outcome that every mechanism keeps, and names no representation.
-A limit that one representation would bring, such as a refusal under contention or a cap on how many frames of one peer are classified at once, is not a limit of the element: a mechanism that has one does not meet this item.
+_Mechanisms._
+A mechanism whose representation brings a limit, such as a refusal under contention or a cap on how many frames of one peer are classified at once, does not meet this item.
 A mechanism that keeps each peer's full identity and incarnation in one exclusive record has neither limit.
 
 Full width removes a wrap window.
-It does not by itself establish the exclusion argument, which the review of each mechanism supplies (xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-width[No target needs an atomic width it lacks]).
+The exclusion argument still needs the review of each mechanism (xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-width[No target needs an atomic width it lacks]).
 
 [[req-ssr-peer-admission]]
 == Undeclared peers cannot lock out declared ones
@@ -176,9 +170,9 @@ It does not by itself establish the exclusion argument, which the review of each
 --
 On a route with a declared list of peers, a frame from an undeclared source *MUST* be refused and counted before it takes a peer-table entry.
 
-* The table is sized from the declaration, and a declaration that the table or the binding cannot hold is refused at setup.
-* A lost peer's entry is returned.
-* Returning it never makes a later peer's frames be refused as stale, whatever frames of the lost peer are in flight at that moment.
+* The table *MUST* be sized from the declaration, and a declaration that the table or the binding cannot hold *MUST* be refused at setup.
+* A lost peer's entry *MUST* be returned.
+* Returning it *MUST NOT* make a later peer's frames be refused as stale, whatever frames of the lost peer are in flight at that moment.
 --
 
 [horizontal]

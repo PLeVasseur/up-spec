@@ -4,21 +4,16 @@
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom it binds: xref:README.adoc[safety at uP-L1].
+This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 The contract of the LoLa binding, and the words _loan_ and _sample_: xref:lola.adoc[LoLa].
 
 This page states how the LoLa binding places one uProtocol frame in one LoLa sample.
-The sample holds an envelope: a fixed header, a routing hint, the selected wire's metadata, padding and the payload, in that order.
-The page states the envelope completely, so that an implementation that has only this page can write and read it.
 
-This page holds the six requirements of the envelope, allocated to the LoLa binding: each item's statement and "Allocated to" line say whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+== Whom the items bind
 
-== Whom this page binds
-
-* The six requirements bind the LoLa binding of the up-rust SEooC, as the writer and as the reader of the envelope.
+* The six requirements bind the LoLa binding of the up-rust SEooC, as the writer and as the reader of the envelope (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 * Each item of the binding contract (xref:bindings.adoc[allocated to each binding]) and of the LoLa page that binds the LoLa binding holds beside them.
-* What the metadata holds, and how it is checked, is the selected wire's and the element's; this page states where the metadata stands and what the binding reads from it.
-* No item of this page names a panic path: the LoLa binding's account of its panic paths is xref:lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path].
+* The LoLa binding's account of its panic paths: xref:lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path].
 
 [[req-ssr-binding-lola-envelope-layout]]
 == On LoLa, a frame is one envelope in one sample, in a fixed order
@@ -49,7 +44,7 @@ Each field is an unsigned integer, least significant byte first:
 *Where each part stands.*
 The source hint starts at byte 24 and the sink hint at its end, and the metadata starts at the end of the sink hint.
 The payload starts at the offset that the header gives, and the payload's length is the header's payload length.
-A writer *MUST* write each length and the offset as the parts actually stand.
+A writer *MUST* write each length and the offset as the parts stand.
 
 *The version.*
 This page states version 2.
@@ -97,8 +92,8 @@ The binding *MUST* refuse a received sample:
 
 *Before any of it is used.*
 The binding *MUST* check every length and the offset with arithmetic that cannot overflow, before it forms any range from them.
-No part of a refused sample reaches a wire or an application.
-A refusal is returned or counted as the element's rules on refused frames say (xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]), and it never panics (xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input]).
+Any part of a refused sample *MUST NOT* reach a wire or an application.
+A refusal *MUST* be returned or counted as the element's rules on refused frames say (xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]), and it never panics (xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input]).
 --
 
 [horizontal]
@@ -117,7 +112,7 @@ A peer writes the whole sample, header included (xref:../README.adoc#req-ssr-pee
 
 [.specitem,oft-sid="req~ssr-binding-lola-envelope-presence~1",oft-title="On LoLa, an absent payload and a present empty payload stay apart",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
-*Presence is the metadata's.*
+*Presence.*
 Whether a frame has a payload is what its metadata says: a frame with a payload encoding has a payload, and a frame without one has none.
 The payload length gives only the length.
 
@@ -154,7 +149,7 @@ The sink hint is empty exactly when the frame has no sink.
 *What a hint is for.*
 The binding *MAY* use a hint only to choose the physical queue or listener that a sample goes to, and to keep a sample that matches no current receive for a later one.
 
-*What a hint is not.*
+*Identity and delivery.*
 A hint is no identity.
 The binding *MUST NOT* deliver a frame, admit it to a route or count it as a route's own because of its hint.
 A frame reaches a receive only once its metadata has been decoded and the receive's source and sink filters have been matched against the metadata (<<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>>).
@@ -168,7 +163,7 @@ Allocated to:: the LoLa binding
 Verification:: test, fault-injection
 * *test*
 ** A sample whose hint names the receiving route while its metadata names another source: not delivered to that route.
-** A sample whose hint names another route while its metadata matches the receive: delivered by the metadata, or kept for a later receive, and never lost uncounted.
+** A sample whose hint names another route while its metadata matches the receive: delivered by the metadata, or kept for a later receive, and counted if it is lost.
 * *fault-injection*: hints that are not URI text, and hints that name a source the route does not declare, sent by a faulty peer: refused or kept as above, with no delivery on the hint alone.
 
 *Rationale.*
@@ -213,7 +208,7 @@ The binding *MUST* fix the metadata and the payload's offset when it creates a l
 What it gives a sender to write *MUST* be the payload's extent alone, and that extent *MUST NOT* move or change size while the loan is held.
 
 *Receive.*
-A view of a received payload *MUST* cover exactly the payload's extent: never the header, a hint, the metadata, the padding or the bytes after the payload.
+A view of a received payload *MUST* cover exactly the payload's extent.
 A view *MUST NOT* outlive the sample that holds it, and releasing the sample ends every view of it (xref:lola.adoc#req-ssr-binding-lola-sample-lifetime[On LoLa, no subscription ends while one of its samples is held]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]).
 --
 

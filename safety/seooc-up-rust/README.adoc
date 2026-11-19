@@ -11,7 +11,7 @@ xref:../../contract-generations.adoc[Which requirements an implementation follow
 
 This directory holds what is specific to the element: its scope and boundary, its claims, its modes, memory, build and platform rules, and the index of its assumptions of use.
 The items that concern a protocol layer are filed with that layer, in xref:../up-l1/README.adoc[the transport layer's part] and xref:../up-l2/README.adoc[the communication layer's part].
-They are items of this element and of the parts that work with it all the same, and <<files>> lists them.
+They are items of this element and of the parts that work with it, and <<files>> lists them.
 
 == The element
 
@@ -34,9 +34,6 @@ a|
 a|
 * The traits a binding implements: binding setup, lending runtime, handoff runtime, frame, lent transmit storage.
 * The SDK services a binding calls: the runtime port.
-
-The contract is in the element.
-Each binding's implementation of it is not.
 | `up-rust-core`
 
 | E3. Startup memory
@@ -106,8 +103,7 @@ Allocated to:: the element
 Verification:: review (each statement and allocation that names the element, element code or one of the parts E1 to E7, read against this item)
 
 *Rationale.*
-A statement or an allocation that names the element, element code or one of its parts is read against this item.
-The initialization-mode code is part of the element: its faults show before traffic starts, but a wrong admission decision becomes a runtime fault, so the transition is safety-relevant.
+Faults of initialization-mode code show before traffic starts, but a wrong admission decision becomes a runtime fault, so the transition is safety-relevant.
 
 [[req-ssr-element-configurations]]
 === The ASIL path and supported configurations
@@ -132,7 +128,7 @@ Verification:: review (each statement and allocation that names the ASIL path, a
 
 *Rationale.*
 The rules on storage, dependencies and qualification hold where a configuration claims the element's assurance, and ordinary use keeps the element's functional contract without them.
-A package states once what a supported configuration offers, so that an application team selects one instead of arguing its platform again.
+A package states once what a supported configuration offers, so that every application team that selects one relies on that statement for its platform.
 
 == Outside the element
 
@@ -154,7 +150,8 @@ Nothing here claims that it exists yet.
 === Middleware internals
 
 iceoryx2, Zenoh, vSomeIP, DDS, MQTT, LoLa.
-Allocation inside middleware needs a declared permit and a named waiver, and each binding's README says what its middleware cannot guarantee.
+Allocation inside middleware: its permit, xref:../up-l1/bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode]; its waiver, xref:waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
+Each binding's README says what its middleware cannot guarantee.
 
 === QM convenience crates
 
@@ -179,18 +176,18 @@ The optional `alloc`, `std` and application layers are separate crates.
 
 * *The classic `UStreamer`*, its dynamic routes and its cross-family adapters.
 * *Wires and bindings from elsewhere* with `unsafe` code of their own.
-Their integrator qualifies that code.
+Their integrator qualifies that code (xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]).
 * *A custom platform backend that an integrator supplies*, an explicit extension held to the platform's rules by xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules].
 * *The application's own logic and the item's safety function.*
 The element carries data.
 What the data means, and how the item, in ISO 26262's sense, reacts to a failure, are the integrator's.
-* *The OS, hardware, supervisor, clock source and deployment data, and the choice of routes that need end-to-end protection*: these are assumptions of use.
+* *The OS, hardware, supervisor, clock source and deployment data, and the choice of routes that need end-to-end protection*, which the assumptions of use cover.
 
 == What the element relies on but does not contain
 
 * *Bindings and wires*: what each is, and whether it is part of the element, xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract] and xref:../up-l1/wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
 Their code runs inside the element's calls, but each is developed and verified on its own, against the contract suites in `test-util`.
-Each item that binds them names them in its statement and its "Allocated to" line, wherever it is filed (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]); what the binding contract and the wire contract are is stated in the same two items.
+Each item that binds them names them in its statement and its "Allocated to" line, wherever it is filed (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts] restricts an integrator to those that pass.
 The end-to-end protection wire is a wire too, but it is shipped as the element's safety mechanism, so it is part E6, with its own items.
 * *Derive macros* (`up-rust-macros`: `ZeroSlot`, `StablePayload`, `StablePayloadInit`) are tools.
@@ -209,7 +206,7 @@ Every supported profile offers it, with no timing or safety package.
 * *A finite timing bound*: xref:qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened].
 * *A safety-assurance scope*: xref:qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened].
 
-=== The properties are not a ladder
+=== Independent properties
 
 * No OS family, architecture, compiler or middleware confers a timing bound or an ASIL, and a dependency's certificate does not qualify this element.
 * A timing bound or an assurance scope that a route explicitly requires is admitted under its configuration or refused at setup by name.
@@ -259,7 +256,7 @@ QNX 7.1 and 8.x are future work, source only, each its own profile.
 
 === Whom the assumptions of use bind
 
-Whom the assumptions of use bind, and that they replace no requirement: xref:assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+Stated in xref:assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 
 A safety manual states the integration contract.
 It is not a safety case, an assessment or a certificate.
@@ -399,7 +396,7 @@ A test names what it verifies with OFT's own coverage tag, and the method after 
 | xref:heap.adoc[Heap] | 5 | `SafetyUpRustCore`
 | xref:errors.adoc[Refusal, errors and reporting] | 5 | `SafetyUpRustCore`
 | xref:bounded-work.adoc[Bounded work and waiting] | 3 | `SafetyUpRustCore`
-| xref:release.adoc[No release path] | 3 | `SafetyUpRustCore`
+| xref:release.adoc[Release and drop] | 3 | `SafetyUpRustCore`
 | xref:startup-memory.adoc[Startup memory] | 3 | `SafetyUpRustCore`
 | xref:qos.adoc[QoS, TTL and deadlines] | 7 | `SafetyUpRustCore`
 | xref:waivers.adoc[Waivers] | 3 | `SafetyUpRustCore`

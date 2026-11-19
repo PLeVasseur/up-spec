@@ -12,26 +12,25 @@ It holds three things:
 * how shared memory is lent or copied between integrity levels;
 * what a deployment provides for its transports.
 
-== Whom this part binds
+== Whom the items bind
 
-Where an item is filed says which layer it concerns.
-It does not say that every transport implementation must meet it (xref:../README.adoc#filing[filing an item does not widen it]).
+Where an item is filed says which layer it concerns (xref:../README.adoc#filing[filing and scope]).
 
-* *Written for one element.*
+* *One element.*
 The items here were written for the up-rust SEooC (xref:../seooc-up-rust/README.adoc[its README]) and for the bindings and wires that work with it.
 They are not protocol requirements of uP-L1, and none of them names a transport implementation of another SDK, or an SDK of another language.
-* *Bound by statement and allocation.*
+* *Requirements.*
 Each requirement binds the parts that its statement and its "Allocated to" line name (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]): such as every binding or those among them that it names, every wire, every serialized wire apart from the end-to-end protection wire, each wire of the fixed-layout XCDR2 profile, one binding alone (<<one-binding>>), or the element itself.
 Its tags say which repositories cover it (xref:../README.adoc#tags[the tags]).
 * *Assumptions of use.*
 The five assumptions of use filed here are that element's: three about every transport, and two about one binding and its middleware, iceoryx2.
-Whom they bind, and that they replace no requirement: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
-* *The protocol chapter stays in force for what it covers*: xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
+Whom they bind: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+* *The protocol chapter.*
+The protocol chapter stays in force for what it covers (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
 
 == Words used in this part
 
-These words are used as the items use them.
-The items give them their meaning, and this list only points to it.
+These words have the meaning that the items give them.
 
 * A *binding*, the *binding contract*, a binding's *middleware* and *binding code*: xref:bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract].
 * A *wire*, the *wire contract*, the *native wire* and a *serialized wire*: xref:wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
@@ -67,7 +66,7 @@ Wires are filed with this layer, beside the bindings that carry what they write.
 [[one-binding]]
 == What is specific to one binding
 
-The duties of every binding name no middleware (xref:bindings.adoc[allocated to each binding]), and neither do the assumptions about every transport (xref:deployment.adoc[what a deployment provides for its transports]).
+The duties of every binding (xref:bindings.adoc[allocated to each binding]) and the assumptions about every transport (xref:deployment.adoc[what a deployment provides for its transports]) name no middleware.
 What only one binding must meet, and what only a deployment on it provides, is stated with that binding, in items that are allocated to it alone.
 
 [cols="2,3,5",options="header"]
@@ -78,9 +77,9 @@ What only one binding must meet, and what only a deployment on it provides, is s
 | LoLa | Twelve requirements (tag `SafetyLola`) and no assumption of use: six in xref:lola.adoc[the LoLa page], and six in xref:lola-envelope.adoc[the LoLa physical envelope] | Both kinds of route, its counts and its storage, the boundary to LoLa's C++ code, the life of a subscription and of what LoLa is given, and LoLa's own assumptions of use are stated there, with what the general rules ask on LoLa. The LoLa binding is bound as well by each item of the binding contract whose statement and "Allocated to" line name it, and a deployment on it by the assumptions about every transport. Its account of its panic paths, under which it has no accepted panic path, is in xref:lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path]. No item of this area names a permit or an accepted limit for it, and its permits, limits and known anomalies are those that its qualification record states (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it])
 |===
 
-* *No item of its own is not an exemption.*
+* *Bindings without a page.*
 A binding without a page of its own is bound, in full, by each item of the binding contract that binds it (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
-* *Evidence stays with its binding.*
+* *Evidence.*
 A test that runs on one binding over its real middleware is evidence for that binding, and none for another binding.
 * *Another middleware.*
 A binding on another middleware is a binding as xref:bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract] states, and it is bound the same way.
@@ -116,10 +115,10 @@ The item governs, and this table adds no duty.
 | A waiver for each permit a binding ships | The deployment's owner | xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument] in xref:../seooc-up-rust/assumptions-of-use.adoc[the element's assumptions of use]
 |===
 
-== What stays with the element
+== Items filed with the element
 
-Some items concern a transport or a wire and are still filed with the element, because they are rules of the element's own modes, memory and reports.
-Each item binds the parts that its statement and its "Allocated to" line name, and some of these name a binding or a wire beside the element (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
+Some items that concern a transport or a wire are filed with the element, because they are rules of the element's own modes, memory and reports.
+In their statements and "Allocated to" lines, some of these name a binding or a wire beside the element (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names]).
 A binding or wire author reads them in xref:../seooc-up-rust/README.adoc[the element's part]:
 
 * the heap class that every wire, binding and route declares, and the stronger resource guarantees a route may require (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name]);

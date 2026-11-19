@@ -23,7 +23,7 @@ Before placed storage becomes reachable as an object, placement *MUST* have esta
 
 A refused placement *MUST* expose no object.
 
-*What this covers.*
+*Storage covered.*
 That covers slots, startup slots, queues, peer and call tables, waker storage, route state and the Streamer's route table.
 
 *Startup memory from a heap.*
@@ -57,7 +57,7 @@ Static or caller-provided memory is the element's chosen policy for configuratio
 It is not a prohibition on obtaining startup regions from a heap in ordinary use.
 There `+up-rust-std+` provides them automatically, and `+up-rust-alloc+` lets an application supply its own allocation provider, as on a fixed-memory board.
 
-Exclusivity is a property of live ownership, not of numeric addresses: a region may occupy addresses that an earlier, ended owner used.
+Exclusivity is a property of live ownership, so a region may occupy addresses that an earlier, ended owner used.
 
 [[req-ssr-memory-sealed]]
 == Startup memory is sealed
@@ -69,10 +69,10 @@ A startup memory *MUST* be sealed when the last live setup that uses it enters r
 Once it is sealed:
 
 * no further placement from it succeeds;
-* a refused placement asks no region source for memory;
-* a setup built on it is refused.
+* a refused placement *MUST NOT* ask a region source for memory;
+* a setup built on it *MUST* be refused.
 
-`+enter_runtime_all+` reports any setup that is still alive on that memory and has not entered runtime mode.
+`+enter_runtime_all+` *MUST* report any setup that is still alive on that memory and has not entered runtime mode.
 
 A failed `+enter_runtime_all+` seals the memory as well, so setup cannot be retried on it in the process (xref:assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
 --
@@ -93,7 +93,7 @@ A startup memory that several setups share places nothing once initialization en
 --
 *The computation.*
 The element *MUST* provide a computation that gives, from a deployment's data alone and before the process starts, the startup memory that deployment needs.
-The result includes the storage for:
+The result *MUST* include the storage for:
 
 * the registrations of pending asynchronous operations;
 * every backlog of retained owners, deferred releases and deferred destructions that its routes admit.
@@ -104,7 +104,7 @@ Placement at startup *MUST NOT* need more than the computation gives.
 From the worst-case semantic load that the integrator declares for each route (xref:assumptions-of-use.adoc#aou-seooc-capacity-sizing[Capacities are sized for the worst case]), the element *MUST* compute the slots, queue depth, held messages and call tables that it needs.
 The other capacities that this load sets are the registration storage, backlogs and startup memory that the computation gives, and the peer table that xref:../up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones] sizes.
 
-*Each figure says what it measures.*
+*What each figure measures.*
 Each figure that the element computes or reports *MUST* state what it measures, and *MUST NOT* be presented as another.
 The measures are:
 
@@ -133,16 +133,16 @@ ISO 26262:: 6-7.4.13 (part-clause numbers only)
 
 *Rationale.*
 An integrator who places startup memory in a static region or a linker section has to size it before the process starts, and a request that does not fit is refused only at startup.
-A size that could be worked out only in principle does not help the integrator, so the element provides the computation itself.
+So the element provides the computation.
 Each route's reserved storage is reported under xref:errors.adoc#req-ssr-error-route-report[Each route reports what it got].
 
 _What each figure measures._
-The startup memory alone is not the whole footprint.
+The startup memory is only part of the footprint.
 A report that counted only live objects would understate two things:
 
 * the backing that refused setups, growth and lost races leave claimed;
 * the storage that asynchronous registrations and deferred work need.
 
-So each figure says what it measures, and a figure that the configuration cannot bound is reported as not established.
+So a figure that the configuration cannot bound is reported as not established.
 
 Sizes that depend on a scheduler's tasks and timers, an allocator's overhead or a thread's stack are the supported configuration's package to state (xref:README.adoc#claims[the SEooC's claims]).
