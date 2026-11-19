@@ -141,7 +141,7 @@ Text for people is produced only from initialization errors, where formatting is
 [[req-ssr-error-no-silent-loss]]
 == No silent loss, and each loss counted once
 
-[.specitem,oft-sid="req~ssr-error-no-silent-loss~3",oft-title="No silent loss, and each loss counted once",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-error-no-silent-loss~4",oft-title="No silent loss, and each loss counted once",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Every loss is returned or counted.*
 Every frame the element refuses, drops, evicts or expires in runtime mode *MUST* be either returned to its caller as an error, or counted exactly once in its route's fixed counters, under a counter that names the cause.
@@ -149,9 +149,9 @@ Every frame the element refuses, drops, evicts or expires in runtime mode *MUST*
 * A retry is not a drop.
 * The counters can be read in runtime mode without heap.
 
-*Losses the binding cannot observe.*
-A loss entirely inside middleware that the binding cannot observe is not a counted event.
-That route's report *MUST* explicitly disclose the unobservable-loss limitation.
+*Losses the element cannot see.*
+A loss that the element cannot see, such as a drop-oldest eviction inside the middleware, is not a counted event.
+Its route's report *MUST* explicitly disclose the unobservable-loss limitation.
 
 Observable overflow discards *MUST* be counted as specified by xref:qos.adoc#req-ssr-qos-overflow[Overflow acts as declared].
 This exception does not excuse missing observable counts.
@@ -174,14 +174,14 @@ An E2E client counts a response with no E2E header in a route counter of its own
 --
 
 [horizontal]
-ID:: `+req~ssr-error-no-silent-loss~3+`
+ID:: `+req~ssr-error-no-silent-loss~4+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, heap-window
 * *test*
 ** One counter per cause.
 ** Each observable loss counted once or returned as specified, under contention and under `+Wait+` too.
-** Unobservable middleware losses disclosed rather than represented as complete counts.
+** Losses the element cannot see disclosed rather than represented as complete counts.
 * *heap-window*: counters read inside the window.
 ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 

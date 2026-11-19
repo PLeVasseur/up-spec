@@ -145,7 +145,7 @@ Keeping the platform layer as the only part of the element that talks to an oper
 [[req-ssr-atomic-width]]
 == No target needs an atomic width it lacks
 
-[.specitem,oft-sid="req~ssr-atomic-width~2",oft-title="No target needs an atomic width it lacks",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-atomic-width~3",oft-title="No target needs an atomic width it lacks",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *The obligation.*
 On every supported target the element *MUST* keep the following without needing an atomic width that the target lacks:
@@ -155,6 +155,9 @@ On every supported target the element *MUST* keep the following without needing 
 * ownership;
 * genuine `+Full+` behaviour;
 * its terminal-safe finite-lifetime policy.
+
+*Selection.*
+The element *MUST* tell by `+target_has_atomic+`, never by a list of targets, whether a target has 32-bit atomics with compare-and-swap (xref:assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]).
 
 *Platform-specific mechanisms.*
 A target's backend *MAY* use a reviewed platform-specific mechanism behind one common SDK contract: wider atomics where the target provides them, or a private exclusion where it does not.
@@ -177,7 +180,7 @@ A private interrupt mask is not a lock shared with another process, and it does 
 --
 
 [horizontal]
-ID:: `+req~ssr-atomic-width~2+`
+ID:: `+req~ssr-atomic-width~3+`
 ASIL:: B
 Allocated to:: the element; each platform backend, for its mechanism
 Verification:: gate, test, review
@@ -187,7 +190,9 @@ Verification:: gate, test, review
 * *test*
 ** The suite under Miri, both models, for a little-endian and for a big-endian 32-bit target without 64-bit atomics.
 ** Each backend's mechanism on the targets its configuration names.
-* *review*: each mechanism's source-level safety argument, against every participant that can reach its storage.
+* *review*
+** Each mechanism's source-level safety argument, against every participant that can reach its storage.
+** The source where the element tells whether a target has 32-bit atomics with compare-and-swap: `+target_has_atomic+`, and no list of targets.
 
 *Rationale.*
 An earlier requirement made every protocol word a 32-bit atomic, in one implementation on every target.
@@ -200,6 +205,8 @@ A target mechanism is acceptable when it keeps them, states its contexts and is 
 
 Host execution does not show how a masked interrupt behaves on an MCU.
 So each mechanism is verified on the targets its configuration names.
+
+A list of targets can leave out a target that has 32-bit compare-and-swap, or name one that lacks it.
 
 [[req-ssr-atomic-windows]]
 == Every narrowed value states its window

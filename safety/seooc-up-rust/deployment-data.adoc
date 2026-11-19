@@ -11,9 +11,11 @@ The exact addresses that an ASIL Streamer route names are a forwarding rule, fil
 [[req-ssr-config-validated]]
 == Deployment data is validated in full
 
-[.specitem,oft-sid="req~ssr-config-validated~1",oft-title="Deployment data is validated in full",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-config-validated~2",oft-title="Deployment data is validated in full",oft-needs="impl,utest,uman",oft-tags="SafetyUpRustCore"]
 --
 Deployment data applied at startup *MUST* be validated completely during initialization: every value against its admissible range, and every dependency between values.
+
+The element *MUST* publish the admissible ranges of its deployment data.
 
 Anything invalid, unknown, missing where required or inconsistent *MUST* be refused with an error naming the field.
 
@@ -21,16 +23,18 @@ A value *MUST NOT* be coerced, silently defaulted or skipped.
 --
 
 [horizontal]
-ID:: `+req~ssr-config-validated~1+`
+ID:: `+req~ssr-config-validated~2+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test (a negative configuration suite, run on both construction paths)
+Verification:: test (a negative configuration suite, run on both construction paths), review (the published ranges, against the ranges that validation uses)
 ISO 26262:: 6-C.4.6 (part-clause numbers only)
 
 *Rationale.*
 A value that is coerced, defaulted or skipped without an error runs the deployment on a configuration nobody wrote, and the integrator learns of it only from its effects.
 
 Refusing during initialization, by field, keeps every such mistake out of runtime mode, where setup can no longer change anything (xref:runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
+
+Publishing the ranges lets the integrator produce the deployment data within them (xref:assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]), instead of finding a value out of range only when setup refuses it.
 
 [[req-ssr-config-one-path]]
 == Direct construction and deployment data are one path

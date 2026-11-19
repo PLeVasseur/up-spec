@@ -181,7 +181,7 @@ A refused carrier leg, for one, reports the route, the binding and the reason.
 [[req-ssr-mode-entry-clock]]
 == The wall clock is read before runtime mode
 
-[.specitem,oft-sid="req~ssr-mode-entry-clock~2",oft-title="The wall clock is read before runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-mode-entry-clock~3",oft-title="The wall clock is read before runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 A transport *MUST* enter runtime mode only after both of these:
 
@@ -191,13 +191,14 @@ A transport *MUST* enter runtime mode only after both of these:
 A provider known to fall short of that contract, such as one that supplies uptime or a fixed value as wall time, *MUST* fail the check.
 
 If the clock cannot be read, or the provider fails its check, the transition *MUST* fail with an error that says so.
+Where the target has no synchronized wall clock and its time provider supplies none, the transition *MUST* fail with an error that says so.
 --
 
 [horizontal]
-ID:: `+req~ssr-mode-entry-clock~2+`
+ID:: `+req~ssr-mode-entry-clock~3+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test (an unreadable clock; a provider that supplies uptime as wall time; a provider that passes its check)
+Verification:: test (an unreadable clock; a provider that supplies uptime as wall time; a provider that passes its check; a target with no synchronized wall clock whose time provider supplies none)
 
 *Rationale.*
 Message IDs carry a timestamp (xref:../../basics/uuid.adoc[UUID]), and a message's expiry is judged against its creation time plus its TTL (`+dsn~up-attributes-ttl-timeout~1+`).
@@ -208,6 +209,8 @@ Reading the clock once before the transition makes a clock that cannot be read f
 A board without a synchronized wall clock is a real configuration.
 Quietly using uptime there would make every TTL decision wrong while appearing to work.
 So the provider's contract is checked where it can be, and a known substitution is refused.
+Such a board supplies a synchronized wall clock through its time provider (xref:assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]).
+Where its provider supplies none, every TTL decision would rest on a wall clock that nothing keeps in step with the peers' time bases, so the transition fails.
 
 Simulated time and test seeds establish only the behaviour of a test harness.
 
@@ -236,18 +239,20 @@ Setup refuses, for example:
 [[req-ssr-mode-one-way]]
 == There is no way back
 
-[.specitem,oft-sid="req~ssr-mode-one-way~1",oft-title="There is no way back",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-mode-one-way~2",oft-title="There is no way back",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 An operation *MUST NOT* take a transport, a handle or the Streamer from runtime mode back to initialization mode.
 
 Runtime mode *MUST* end only when the process ends.
+
+The element *MUST NOT* provide any recovery inside the process.
 --
 
 [horizontal]
-ID:: `+req~ssr-mode-one-way~1+`
+ID:: `+req~ssr-mode-one-way~2+`
 ASIL:: B
 Allocated to:: the element
-Verification:: compile-fail (the setup value is consumed), review (no such operation exists)
+Verification:: compile-fail (the setup value is consumed), review (no such operation exists, and no recovery inside the process)
 ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
@@ -259,6 +264,9 @@ A comparable system makes the change of phase one-way too:
 * an RTIC application's `+idle+` task, which runs after `+init+`, never returns (https://rtic.rs/2/book/en/by-example/app_idle.html[the RTIC book]).
 
 So a transport that started cannot be taken back out of runtime mode, and a refusal means the process exits and is restarted.
+
+Recovery inside the process could replace neither its startup memory, which is never given back in the process (xref:startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed]), nor its internal synchronization state.
+So a process recovers by a restart of the whole process or partition, which a supervisor outside it makes (xref:assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
 
 [[req-ssr-mode-init-failure]]
 == Initialization failure
@@ -381,19 +389,20 @@ Every refusal stays an error, element code stays free of panics, everything setu
 [[req-ssr-mode-restart]]
 == A restart is an initialization
 
-[.specitem,oft-sid="req~ssr-mode-restart~1",oft-title="A restart is an initialization",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-mode-restart~2",oft-title="A restart is an initialization",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 * A restarted process *MUST* run the same initialization path as a first start.
 * Each binding *MUST* recover or remove what a dead predecessor left before it prepares any route.
+* In a restart, the element and each binding *MUST NOT* revoke storage that a peer that stayed up still retains.
 * The successor *MUST* reach runtime mode with stale predecessor state present.
 * Peers that stayed up *MUST NOT* need anything from it.
 --
 
 [horizontal]
-ID:: `+req~ssr-mode-restart~1+`
+ID:: `+req~ssr-mode-restart~2+`
 ASIL:: B
-Allocated to:: the element; each binding, for what a dead predecessor left
-Verification:: fault-injection (a kill and restart at every startup step and during traffic)
+Allocated to:: the element; each binding, for what a dead predecessor left and for the storage that a peer that stayed up still retains
+Verification:: fault-injection (a kill and restart at every startup step and during traffic; a restart while a peer that stayed up still retains storage, with that storage not revoked)
 ISO 26262:: 6-Table 15 (part-clause numbers only)
 
 *Rationale.*
@@ -401,6 +410,9 @@ A process can die at any instruction (xref:../up-l1/peers.adoc#req-ssr-peer-fail
 
 Recovering through the one initialization path keeps a single tested way to start, instead of a second path that runs only after a failure.
 A binding that cannot recover its predecessor refuses setup.
+
+A peer that stayed up sees another process's death and restart only as silence, counted deadline misses, call errors, or a reported peer loss or restart (xref:../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
+So the restart, which a supervisor outside the process makes (xref:assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]), revokes no storage that such a peer still retains.
 
 Other systems recover the same way:
 

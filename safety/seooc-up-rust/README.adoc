@@ -331,11 +331,11 @@ A test that passes on another path is not evidence.
 
 === How a test names what it verifies
 
-A test names what it verifies with OFT's own coverage tag, and the method after it on the same line, for example `+// [utest->req~ssr-qos-ttl~4] method: test+`.
+A test names what it verifies with OFT's own coverage tag, and the method after it on the same line, for example `+// [utest->req~ssr-qos-ttl~5] method: test+`.
 
 * OFT reads the bracket.
 * The method is for the check that each listed method has its evidence, which OFT does not do.
-* Code that meets an item carries `+// [impl->req~ssr-qos-ttl~4]+`.
+* Code that meets an item carries `+// [impl->req~ssr-qos-ttl~5]+`.
 
 [[files]]
 == Files

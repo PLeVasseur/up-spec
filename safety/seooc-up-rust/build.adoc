@@ -9,7 +9,7 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 [[req-ssr-build-panic-abort]]
 == The ASIL build aborts on panic and checks overflow
 
-[.specitem,oft-sid="req~ssr-build-panic-abort~3",oft-title="The ASIL build aborts on panic and checks overflow",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
+[.specitem,oft-sid="req~ssr-build-panic-abort~4",oft-title="The ASIL build aborts on panic and checks overflow",oft-needs="impl,utest,uman",oft-tags="SafetyUpRustCore,SafetyStreamer"]
 --
 *Profile settings.*
 The ASIL release profile *MUST* set `+panic = "abort"+` and `+overflow-checks = true+`.
@@ -17,6 +17,10 @@ The ASIL release profile *MUST* set `+panic = "abort"+` and `+overflow-checks = 
 *The binary refuses an unwinding build.*
 A build of the ASIL Streamer binary *MUST* refuse to compile unless `+cfg(panic = "abort")+` holds.
 The refusal sits in that binary, which has `+test = false+` and no integration tests in its package, so that no test build compiles it: Cargo builds tests, and every dependency of a test, with unwinding.
+
+*An application's own binary.*
+The element *MUST* provide its ASIL build check for an application's own binary.
+Placed there, it *MUST* give that binary the check that the ASIL Streamer binary has.
 
 *Every other build still compiles.*
 Every other build of the workspace *MUST* still compile, `+cargo build+`, `+cargo clippy --all-targets+` and `+cargo doc+` among them.
@@ -27,14 +31,15 @@ So the development profile *MUST* set `+panic = "abort"+` as well, or the binary
 --
 
 [horizontal]
-ID:: `+req~ssr-build-panic-abort~3+`
+ID:: `+req~ssr-build-panic-abort~4+`
 ASIL:: B
-Allocated to:: the Streamer binary
+Allocated to:: the Streamer binary; the element, for its ASIL build check for an application's own binary
 Verification:: gate
 * A build of the binary with unwinding fails to compile.
 * The release profile's settings.
 * `+cargo test+` on the workspace still compiles.
 * `+cargo build+`, `+cargo clippy --all-targets+` and `+cargo doc+` on the workspace still compile.
+* An application's own binary that carries the element's ASIL build check fails to compile with unwinding, and compiles with `+panic = "abort"+`.
 
 *Rationale.*
 With `+panic = "abort"+`, a panic ends the process at once instead of unwinding through code that may hold half-changed state.
@@ -326,32 +331,70 @@ Judging the claimed graph and each route's declared class refuses what the claim
 
 Native guarantees cannot be relaxed by a route label or by a serialized route's permission, and a previously accepted middleware deviation keeps exactly its stated scope.
 
+[[req-ssr-strict-rules]]
+== The rules that strict mode checks
+
+[.specitem,oft-sid="req~ssr-strict-rules~1",oft-title="The rules that strict mode checks",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+--
+*Refusals in the Enforce state.*
+In its Enforce state, strict mode *MUST* refuse at setup:
+
+* a transport or route at C or D, unless `+above_capability+` names the integrator's measures (xref:assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element]);
+* C or D data whose only protection is an end-to-end mechanism of ASIL B capability, unless `+decomposition+` names the argument (xref:assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element]);
+* an ASIL route over a transport that the integrator classifies as a black channel, with no protection named (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
+* an ASIL RPC route that selects the E2E wire and whose clients are not declared increasing from a counter (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
+* an integrator platform that names no contract-test evidence (xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]);
+* a setup still alive and not entered when `+enter_runtime_all+` returns (xref:assumptions-of-use.adoc#aou-seooc-build-order[Applications build every transport and role before the last transition]);
+* a binding or wire that is not on the integrator's qualified list (xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]).
+
+*Checks on every configuration.*
+In the Enforce state, with or without `+--cfg up_rust_strict+`, strict mode *MUST* apply the target, dependency, ownership, known-failure and deviation checks to every configuration (xref:assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]).
+Its known-failure and deviation checks are those of <<req-ssr-strict-ack-revision,An acknowledgement names a deviation by ID and revision>>.
+
+*An ASIL process built with unwinding.*
+Strict mode *MUST* refuse at setup an ASIL process built with unwinding (xref:assumptions-of-use.adoc#aou-seooc-build-configuration[The ASIL binary is built from its claimed graph, with the ASIL profile]).
+--
+
+[horizontal]
+ID:: `+req~ssr-strict-rules~1+`
+ASIL:: B
+Allocated to:: the element's strict mode
+Verification:: test
+* Each refusal in the Enforce state, with a negative control per rule: the same configuration admitted with `+above_capability+` or `+decomposition+` named, with a protection named, with its clients declared increasing from a counter, with contract-test evidence named, with every setup entered, or with the binding or wire on the qualified list.
+* Each of the five checks, in the Enforce state with and without `+--cfg up_rust_strict+`, on a configuration that it refuses and on one that it admits.
+* An ASIL process built with unwinding, refused at setup, and neither a QM process built with unwinding nor an ASIL process built with `+panic = "abort"+` refused for it.
+
+*Rationale.*
+Each rule checks a declaration or a condition on which an assumption of use rests, so that the Enforce state refuses a configuration that lacks it instead of relying on it.
+Meeting the assumption stays the integrator's duty, as the assumption states.
+
 [[req-ssr-strict-ack-revision]]
 == An acknowledgement names a deviation by ID and revision
 
-[.specitem,oft-sid="req~ssr-strict-ack-revision~1",oft-title="An acknowledgement names a deviation by ID and revision",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-strict-ack-revision~2",oft-title="An acknowledgement names a deviation by ID and revision",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 A strict-mode acknowledgement *MUST* name one deviation by its ID and its revision, never by its type, with a reference, an approver and a date.
 
 When a deviation's revision rises, an acknowledgement of its earlier revision no longer holds.
 So its finding refuses again in the Enforce state until it is acknowledged anew.
 
-A known failure is refused whatever is acknowledged.
+In the Enforce state, strict mode *MUST* refuse each route that a known failure affects, whatever is acknowledged.
 --
 
 [horizontal]
-ID:: `+req~ssr-strict-ack-revision~1+`
+ID:: `+req~ssr-strict-ack-revision~2+`
 ASIL:: B
 Allocated to:: the element's strict mode
-Verification:: test (an acknowledgement of an earlier revision refuses again; one that names an unknown ID is refused; a known failure refuses whatever is acknowledged)
+Verification:: test (an acknowledgement of an earlier revision refuses again; one that names an unknown ID is refused; in the Enforce state, each route that a known failure affects refused whatever is acknowledged, and a route that it does not affect not refused for it)
 
 *Rationale.*
 Acknowledging an earlier deviation cannot establish acceptance of a later change to its scope or consequences.
+A known failure is not an accepted limit, so no acknowledgement admits a route that it affects (xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]).
 
 [[req-ssr-strict-report]]
 == Strict mode reports on every run
 
-[.specitem,oft-sid="req~ssr-strict-report~2",oft-title="Strict mode reports on every run",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-strict-report~3",oft-title="Strict mode reports on every run",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 Whenever strict mode is in its Report or Enforce state, setup *MUST* produce a compliance report.
 The report holds:
@@ -364,13 +407,54 @@ The report holds:
 * the assumptions of use that apply to the features configured;
 * each cited item's revision and status, so that a run before the requirements are signed off says that its rules rest on draft items.
 
+*Routes.*
+The report also holds:
+
+* for each route, its TTL, against the reaction budget the integrator declares for it (xref:assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]);
+* the end-to-end protection named for each route (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
+* for each E2E route, its senders, data IDs, `+resync_frames+`, start declarations with their duty, and thread duties (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
+* for each route, the counters the application reads and what each means, the E2E figures included (xref:assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]);
+* every route's capacities (xref:assumptions-of-use.adoc#aou-seooc-capacity-sizing[Capacities are sized for the worst case]);
+* each route's declared peers and the shared-memory permissions its binding requests (xref:../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious]);
+* each shared route, with what one faulty peer can starve there (xref:assumptions-of-use.adoc#aou-seooc-peer-rates[Peer rates on shared routes are the integrator's]);
+* which ASIL routes an operator can disable (xref:../up-l2/streamer.adoc#aou-seooc-operator-access[Only authorized operators reach the Streamer's operator interface]);
+* every route that a Streamer monitor trips and that only a Streamer restart clears (xref:../up-l2/streamer.adoc#aou-seooc-monitor-thresholds[Monitor thresholds allow for peers' restarts]).
+
+*The deployment.*
+The report also holds:
+
+* the transports that share each process (xref:assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated]);
+* the restart path that the integrator declares, a supervisor or, on an MCU, a partition restart (xref:assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]);
+* the time-sync source, where one is declared (xref:assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]);
+* the startup memory that each setup computes (xref:assumptions-of-use.adoc#aou-seooc-capacity-sizing[Capacities are sized for the worst case]);
+* what was declared in the deployment data, and what was checked (xref:assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]);
+* each binding's limits, deviations and known failures, as its qualification record states them (xref:../up-l1/bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]; xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]).
+
+*Duties.*
+The report also holds:
+
+* both duties for data above ASIL B, the integrator's measures and the argument for a decomposition (xref:assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element]);
+* the coherence duty on multi-core parts, and the stack-sizing duty (xref:assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]);
+* overflow checks, as a checklist item (xref:assumptions-of-use.adoc#aou-seooc-build-configuration[The ASIL binary is built from its claimed graph, with the ASIL profile]);
+* for an integrator platform, the entropy duty and the platform contract test (xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]).
+
+*Warnings.*
+The report also holds:
+
+* a warning of every QM transport in an ASIL process, with the coexistence duty that follows (xref:assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated]);
+* where no restart path is declared, a warning that none is declared (xref:assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]);
+* a warning when the wall clock at setup reads earlier than the element's release date, a sign that it is not yet synchronised (xref:assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]);
+* a warning of each transport that the integrator has not classified, as a black channel or not (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
+* a warning of each ASIL route with several declared senders and no declared per-peer rate (xref:assumptions-of-use.adoc#aou-seooc-peer-rates[Peer rates on shared routes are the integrator's]);
+* a warning of each ASIL receive route that admits undeclared peers (xref:../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport, and peers are faulty, never malicious]).
+
 In the Enforce state every finding is still reported, so one run shows everything to fix.
 
 The report *MUST* say that passing its checks is neither a safety qualification nor an assessment.
 --
 
 [horizontal]
-ID:: `+req~ssr-strict-report~2+`
+ID:: `+req~ssr-strict-report~3+`
 ASIL:: B
 Allocated to:: the element's strict mode
 Verification:: test, review
@@ -380,6 +464,8 @@ Verification:: test, review
 ** A monitored route with and without an established J.
 ** A route's requested and admitted claims.
 ** An ASIL-labelled configuration with no assurance package, reported Draft and unassessed and not refused.
+** Each entry of the lists on routes, on the deployment and on duties, on a configuration that has what it lists, and an entry with a condition, such as a declared time-sync source or an integrator platform, with and without that condition.
+** Each warning, on a configuration that draws it and on one that does not.
 * *review*: the report's fields against this item.
 
 *Rationale.*

@@ -9,7 +9,7 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 [[req-ssr-bound-work]]
 == Work per call is bounded by setup data
 
-[.specitem,oft-sid="req~ssr-bound-work~2",oft-title="Work per call is bounded by setup data",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-bound-work~3",oft-title="Work per call is bounded by setup data",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *The bound.*
 Each runtime operation *MUST* examine at most a number of frames, slots and loop iterations fixed by setup data: route depth, slot count and table capacity.
@@ -23,13 +23,16 @@ However much a peer sends, it cannot make one call run longer than that bound.
 
 *Lock-free retries.*
 Lock-free retry loops depend only on other threads' progress, never on a peer's data.
+
+*A producer that stalls.*
+Whatever a configuration's representation, the element *MUST* deliver a frame queued behind a producer that stalls before linking its own frame, when that producer resumes.
 --
 
 [horizontal]
-ID:: `+req~ssr-bound-work~2+`
+ID:: `+req~ssr-bound-work~3+`
 ASIL:: B
 Allocated to:: the element
-Verification:: fault-injection (a flood on every receive kind, through the documented read and drain calls alone), review (every loop on the runtime path and in the documented usage)
+Verification:: fault-injection (a flood on every receive kind, through the documented read and drain calls alone), test (a producer stalled before linking its own frame, and each frame queued behind it delivered when that producer resumes), review (every loop on the runtime path and in the documented usage)
 ISO 26262:: 6-Annex D.2.2, 6-7.4.13 (part-clause numbers only)
 
 *Rationale.*
@@ -43,6 +46,10 @@ It is not a bound on time:
 * A worst-case execution time while running is not a scheduled response time.
 
 Those are timing claims of a supported configuration (<<req-ssr-bound-wait,Every wait is bounded>>).
+
+_A producer that stalls._
+The bound limits the work a call does, not how long a producer stalls, so it does not limit when the frames queued behind that producer are delivered.
+Where the item relies on such a frame within a time, bounding the stall is the integrator's (xref:assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 
 [[req-ssr-bound-wait]]
 == Every wait is bounded

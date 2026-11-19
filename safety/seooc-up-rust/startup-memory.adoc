@@ -89,7 +89,7 @@ A shared startup allocator must stop serving new requests once initialization en
 [[req-ssr-memory-computable]]
 == Startup storage is computable before start
 
-[.specitem,oft-sid="req~ssr-memory-computable~3",oft-title="Startup storage is computable before start",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-memory-computable~4",oft-title="Startup storage is computable before start",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *The computation.*
 The element *MUST* provide a computation that gives, from a deployment's data alone and before the process starts, the startup memory that deployment needs.
@@ -99,6 +99,10 @@ The result includes the storage for:
 * every backlog of retained owners, deferred releases and deferred destructions that its routes admit.
 
 Placement at startup *MUST NOT* need more than the computation gives.
+
+*The capacities.*
+From the worst-case semantic load that the integrator declares for each route (xref:assumptions-of-use.adoc#aou-seooc-capacity-sizing[Capacities are sized for the worst case]), the element *MUST* compute the slots, queue depth, held messages and call tables that it needs.
+The other capacities that this load sets are the registration storage, backlogs and startup memory that the computation gives, and the peer table that xref:../up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones] sizes.
 
 *Each figure says what it measures.*
 Each figure that the element computes or reports *MUST* state what it measures, and *MUST NOT* be presented as another.
@@ -116,12 +120,13 @@ Where a figure depends on allocator overhead, scheduler storage, concurrency or 
 --
 
 [horizontal]
-ID:: `+req~ssr-memory-computable~3+`
+ID:: `+req~ssr-memory-computable~4+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, review
 * *test*
 ** The computation against what placement used, for each route kind and for whole deployments, including registration and deferred backlogs.
+** The capacities computed from a declared worst-case load against what carrying that load uses, for each route kind and for whole deployments.
 ** Repeated refused setups, growth histories and lost races that leave backing claimed, against what the report states.
 * *review*: each reported figure's stated measure.
 ISO 26262:: 6-7.4.13 (part-clause numbers only)

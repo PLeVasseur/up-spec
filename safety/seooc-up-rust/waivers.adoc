@@ -60,7 +60,7 @@ So a waiver cannot carry native work into allocation, and a serialized route's p
 [[req-ssr-waiver-record]]
 == Waivers are recorded and can be found
 
-[.specitem,oft-sid="req~ssr-waiver-record~1",oft-title="Waivers are recorded and can be found",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-waiver-record~2",oft-title="Waivers are recorded and can be found",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 Each waiver *MUST*:
 
@@ -70,14 +70,16 @@ Each waiver *MUST*:
 * be readable in runtime mode without heap;
 * name an approver other than its author.
 
+In strict mode's Enforce state, the element *MUST* refuse a waiver that does not name its interference argument's kind and a reference (xref:assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]).
+
 Deployment data can select a waiver compiled into the program by its id, but *MUST NOT* be able to create one.
 --
 
 [horizontal]
-ID:: `+req~ssr-waiver-record~1+`
+ID:: `+req~ssr-waiver-record~2+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test (the runtime lists the waiver; a record that names its author as approver is refused), review (findable)
+Verification:: test (the runtime lists the waiver; a record that names its author as approver is refused; in strict mode's Enforce state, a waiver that does not name its interference argument's kind and a reference is refused), review (findable)
 ISO 26262:: 9-7 (part-clause numbers only)
 
 *Rationale.*
@@ -89,3 +91,6 @@ The split follows MISRA Compliance:2020, which keeps a deviation permit, the acc
 Keeping waivers compiled in and selected by id lets deployment data choose among approved waivers, but never write a new one.
 
 An approver other than the author gives each waiver a second person's check.
+
+A waiver that names its interference argument's kind and a reference leads a reviewer to the argument that interference from its allocation is excluded.
+The element can check that the argument is named, but not that it holds.

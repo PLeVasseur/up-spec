@@ -325,6 +325,24 @@ _What becomes of a refused frame._
 This item says when a leg refuses a frame.
 What becomes of a frame that is not forwarded, and what an RPC client is told, are stated by <<req-ssr-streamer-dispatch-obligations,Undeliverable messages are counted, never sent as dead letters>> and <<req-ssr-streamer-rpc-error-response,An RPC request that cannot be dispatched is answered, best effort>>, which this item leaves as they are.
 
+[[req-ssr-streamer-build-order]]
+== The Streamer builds every transport and role before `+enter_runtime_all+`
+
+[.specitem,oft-sid="req~ssr-streamer-build-order~1",oft-title="The Streamer builds every transport and role before `enter_runtime_all`",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
+--
+The Streamer *MUST* build every transport and every role it will use before it calls `+enter_runtime_all+`.
+--
+
+[horizontal]
+ID:: `+req~ssr-streamer-build-order~1+`
+ASIL:: B
+Allocated to:: the Streamer
+Verification:: test (every transport and every role the Streamer will use is built before it calls `+enter_runtime_all+`), review (the Streamer's startup path builds no transport or role after that call)
+
+*Rationale.*
+Once `+enter_runtime_all+` has returned, the startup memory is sealed, and a setup built on it is refused (xref:../seooc-up-rust/startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
+An application's own order is stated in xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-build-order[Applications build every transport and role before the last transition].
+
 [[req-ssr-streamer-startup-report]]
 == The startup report says what will run
 
@@ -475,20 +493,21 @@ With its cause counted, each change shows in the reports as an operator's disabl
 [[req-ssr-streamer-operator-control]]
 == Operator changes go through a declared interface
 
-[.specitem,oft-sid="req~ssr-streamer-operator-control~1",oft-title="Operator changes go through a declared interface",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
+[.specitem,oft-sid="req~ssr-streamer-operator-control~2",oft-title="Operator changes go through a declared interface",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
 --
 An operator *MUST NOT* be able to disable or re-enable a route in runtime mode other than through an interface declared at setup.
 
 * The interface *MUST* name the routes it may change.
+* In strict mode, the Streamer's own checks *MUST* refuse an operator interface that names an ASIL route unless `+operator_may_disable+` acknowledges it (<<aou-seooc-operator-access,Only authorized operators reach the Streamer's operator interface>>).
 * The interface *MUST* use fixed-size records and no heap.
 * Every change made through it *MUST* be counted, and shown in the route's report and in the mode report.
 --
 
 [horizontal]
-ID:: `+req~ssr-streamer-operator-control~1+`
+ID:: `+req~ssr-streamer-operator-control~2+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: test, heap-window
+Verification:: test (changes only through the interface declared at setup, which names the routes that it may change, each change counted and shown in the route's report and the mode report; in strict mode, an operator interface that names an ASIL route refused, and not refused for that reason where `+operator_may_disable+` acknowledges it), heap-window
 
 *Rationale.*
 Disabling an ASIL route removes its function.
@@ -501,11 +520,14 @@ A route outside the declared interface stays disabled until the Streamer restart
 [[req-ssr-streamer-monitors]]
 == Worker and transport monitors trip routes
 
-[.specitem,oft-sid="req~ssr-streamer-monitors~4",oft-title="Worker and transport monitors trip routes",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
+[.specitem,oft-sid="req~ssr-streamer-monitors~5",oft-title="Worker and transport monitors trip routes",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
 --
 *What is monitored.*
 The Streamer *MUST* monitor each worker and each transport leg.
 Each monitor's trip condition *MUST* be stated in its specification, with its thresholds from deployment data.
+
+*Thresholds and restart times.*
+In strict mode's Enforce state, the Streamer *MUST* refuse at setup a monitor threshold below the declared restart time of a peer on that monitor's routes, unless `+outage_on_restart+` names the accepted outage (<<aou-seooc-monitor-thresholds,Monitor thresholds allow for peers' restarts>>).
 
 *Completion, not activity.*
 A monitor *MUST* observe the completion of the work it supervises.
@@ -537,7 +559,7 @@ Without such a claim, the monitors still operate, and the Streamer's report *MUS
 --
 
 [horizontal]
-ID:: `+req~ssr-streamer-monitors~4+`
+ID:: `+req~ssr-streamer-monitors~5+`
 ASIL:: B
 Allocated to:: the Streamer
 Verification:: fault-injection, test
@@ -549,6 +571,7 @@ Verification:: fault-injection, test
 ** A tripped route that the operator interface does not name stays disabled.
 ** A trip keeps its routes' storage.
 ** The report without a reaction claim.
+** In strict mode's Enforce state, a threshold below the declared restart time of a peer on its monitor's routes: refused by setup, and not refused for that reason where `+outage_on_restart+` names the accepted outage.
 ISO 26262:: 6-7.4.12 (part-clause numbers only)
 
 *Rationale.*
@@ -685,13 +708,13 @@ That wire is deferred and not part of this delivery, and every other clause bind
 [[aou-seooc-operator-access]]
 == Only authorized operators reach the Streamer's operator interface
 
-[.specitem,oft-sid="aou~seooc-operator-access~2",oft-title="Only authorized operators reach the Streamer's operator interface",oft-needs="uman",oft-tags="SafetyManual"]
+[.specitem,oft-sid="aou~seooc-operator-access~3",oft-title="Only authorized operators reach the Streamer's operator interface",oft-needs="uman",oft-tags="SafetyManual"]
 --
 The integrator *SHALL* restrict the Streamer's operator interface (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>) to the parties allowed to disable or re-enable routes.
 
 It *SHALL* treat an operator's disable of an ASIL route as a loss of that route's function, which the item *SHALL* tolerate.
 
-In strict mode, the Streamer's own checks refuse an operator interface that names an ASIL route unless `+operator_may_disable+` acknowledges it, and the report lists which ASIL routes an operator can disable.
+What the Streamer's own checks refuse in strict mode, of an operator interface that names an ASIL route without `+operator_may_disable+`, is stated in <<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>; what strict mode's report lists of the ASIL routes that an operator can disable, in xref:../seooc-up-rust/build.adoc#req-ssr-strict-report[Strict mode reports on every run].
 --
 
 *Violation:*
@@ -701,7 +724,7 @@ In strict mode, the Streamer's own checks refuse an operator interface that name
 * Who made a change is *undetectable* by the element.
 
 [horizontal]
-ID:: `+aou~seooc-operator-access~2+`
+ID:: `+aou~seooc-operator-access~3+`
 ASIL:: B
 
 *Rationale.*
@@ -714,13 +737,15 @@ So who may make one is the integrator's to control.
 [[aou-seooc-monitor-thresholds]]
 == Monitor thresholds allow for peers' restarts
 
-[.specitem,oft-sid="aou~seooc-monitor-thresholds~2",oft-title="Monitor thresholds allow for peers' restarts",oft-needs="uman",oft-tags="SafetyManual"]
+[.specitem,oft-sid="aou~seooc-monitor-thresholds~3",oft-title="Monitor thresholds allow for peers' restarts",oft-needs="uman",oft-tags="SafetyManual"]
 --
 The integrator *SHALL* set each Streamer monitor's thresholds, in deployment data, above the worst-case restart time of the peers on the routes that monitor trips, or accept that a peer's normal restart trips such a route.
 
-A tripped route stays disabled until an operator re-enables it, and a route that the operator interface does not name can then be re-enabled only by restarting the Streamer.
+What a trip does, and how long it holds, is stated in <<req-ssr-streamer-monitors,Worker and transport monitors trip routes>> and <<req-ssr-streamer-route-gate,Each route has a heap-free gate>>.
 
-In strict mode, the deployment data *SHALL* also declare each peer's worst-case restart time: in the Enforce state, setup refuses a monitor threshold below the declared restart time of a peer on that monitor's routes, unless `+outage_on_restart+` names the accepted outage, and strict mode's report lists every monitored route that only a Streamer restart clears.
+In strict mode, the deployment data *SHALL* also declare each peer's worst-case restart time.
+In strict mode, where a monitor's threshold is below the declared restart time of a peer on that monitor's routes, `+outage_on_restart+` names the outage that the integrator accepts.
+What the Enforce state refuses with those restart times, and what strict mode's report lists of the routes that only a Streamer restart clears, is stated in <<req-ssr-streamer-monitors,Worker and transport monitors trip routes>> and xref:../seooc-up-rust/build.adoc#req-ssr-strict-report[Strict mode reports on every run].
 --
 
 *Violation:*
@@ -732,13 +757,13 @@ In strict mode, the deployment data *SHALL* also declare each peer's worst-case 
 * Whether that outage is acceptable for the item is *undetectable* by the element.
 
 [horizontal]
-ID:: `+aou~seooc-monitor-thresholds~2+`
+ID:: `+aou~seooc-monitor-thresholds~3+`
 ASIL:: B
 
 *Rationale.*
-A peer recovers from a fault by restarting, since the element has no recovery inside a process (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
+A peer recovers from a fault by restarting, since the element has no recovery inside a process (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-one-way[There is no way back]; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
 A monitor's trip holds until an operator re-enables the route (<<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>).
 So a threshold below a peer's worst-case restart turns that peer's normal restart into an outage of the route, and only the item's own analysis can say whether that outage is acceptable.
 
 Declared restart times make the duty checkable.
-Setup can compare every threshold with them, and refuse a short one unless its outage is accepted by name, before any route carries traffic.
+Setup can compare every threshold with them, and refuse a short one unless its outage is accepted by name, before any route carries traffic (<<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>).

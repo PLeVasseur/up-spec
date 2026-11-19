@@ -16,11 +16,14 @@ They are allocated to the element (tag `SafetyUpRustCore`).
 [[req-ssr-peer-rpc-ends]]
 == RPC calls always end
 
-[.specitem,oft-sid="req~ssr-peer-rpc-ends~2",oft-title="RPC calls always end",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-peer-rpc-ends~3",oft-title="RPC calls always end",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Every call has a deadline.*
 Every RPC call *MUST* have a deadline, so a call whose server has vanished or never answers completes with an error by its TTL.
 A server can answer a request only within the request's TTL, counted from when the request was created.
+
+*A failure the element can report.*
+Where the element can report a call's failure, the element *MUST* set the call's outcome as soon as the element's answer arrives (<<req-ssr-peer-rpc-no-server,A call with no server fails at once>>; <<req-ssr-peer-rpc-undecodable-answered,An undecodable request is answered>>; xref:streamer.adoc#req-ssr-streamer-rpc-error-response[An RPC request that cannot be dispatched is answered, best effort]).
 
 *Completion ends the call's tenure.*
 A call's completion, by a response, by its TTL, by its cancellation or by a peer's failure, ends its tenure, so no later response completes it.
@@ -35,16 +38,20 @@ The call's slot then returns to the table once it holds nothing whose release is
 --
 
 [horizontal]
-ID:: `+req~ssr-peer-rpc-ends~2+`
+ID:: `+req~ssr-peer-rpc-ends~3+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, fault-injection
-* *test*: a call ended by its TTL, by its cancellation and by a peer's failure while what it owned is pending release.
+* *test*
+** A call ended by its TTL, by its cancellation and by a peer's failure while what it owned is pending release.
 Its outcome is reported at once, its storage is charged and not reused, and its slot is returned only once nothing it holds is pending.
+** A call whose request its server answers `+InvalidArgument+`, and one whose request the Streamer answers with an error response.
+Each call's outcome is set as soon as the answer arrives, without waiting out its TTL.
 * *fault-injection*: a server killed during a call.
 
 *Rationale.*
 A vanished server cannot release its client resources, so the client needs its own expiration path and a reusable call slot.
+Waiting out the TTL of a call whose failure is already known would only delay the error.
 
 _The TTL is a logical deadline_ (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every wait is bounded]).
 

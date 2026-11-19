@@ -9,23 +9,37 @@ Scope and element boundary: xref:README.adoc[the SEooC's README].
 [[req-ssr-qos-declared]]
 == QoS is declared per route at setup
 
-[.specitem,oft-sid="req~ssr-qos-declared~1",oft-title="QoS is declared per route at setup",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-qos-declared~2",oft-title="QoS is declared per route at setup",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 Every route's QoS (reliability, overflow, depth, history, deadline, and whether priority is required) *MUST* be declared during initialization in transport-agnostic terms, or take the one documented default.
 
 Priority and TTL stay per message.
+
+*A route without a deadline.*
+An explicit `+event_only()+` declaration permits a route without a deadline.
+In default mode, the element *MUST NOT* refuse a route for lacking a deadline.
+In strict mode's Enforce state, the element *MUST* refuse at setup an ASIL receive route that declares neither a deadline nor `+event_only()+`, and a receive route on the E2E wire, at every integrity level, that declares neither (xref:assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]; xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 --
 
 [horizontal]
-ID:: `+req~ssr-qos-declared~1+`
+ID:: `+req~ssr-qos-declared~2+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test, compile-fail (QoS set after runtime)
+Verification:: test, compile-fail
+* *test*
+** Each route's QoS declared at setup, or the one documented default.
+** A route that declares neither a deadline nor `+event_only()+`, admitted with strict mode off.
+** In the Enforce state, an ASIL receive route and a QM receive route on the E2E wire that declare neither, refused, and the same routes admitted with a deadline or with `+event_only()+`.
+* *compile-fail*: QoS set after runtime.
+
+*Rationale.*
+A route that declares `+event_only()+` forgoes deadline-based silence and delay detection by choice (xref:assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+The declaration lets the Enforce state tell that choice from a missing deadline.
 
 [[req-ssr-qos-no-downgrade]]
 == QoS is honored or refused, never weakened
 
-[.specitem,oft-sid="req~ssr-qos-no-downgrade~2",oft-title="QoS is honored or refused, never weakened",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-qos-no-downgrade~3",oft-title="QoS is honored or refused, never weakened",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Functional QoS.*
 Each route's QoS *MUST* be checked at setup against its binding's declared capability, before any resource is reserved.
@@ -39,6 +53,9 @@ A finite timing bound and a safety-assurance scope are claims separate from a ro
 Otherwise setup *MUST* refuse the route, naming the route, the claim and the missing condition.
 * Neither claim is inferred from an OS family, an architecture or a compiler.
 * The absence of an optional timing bound or assurance scope *MUST NOT* refuse a route that requires only functional QoS.
+* Where a configuration offers no finite bound for an endpoint, the element *MUST* still operate and report functionally.
+A route that explicitly requires that bound is refused, as the first entry states.
+* In strict mode's Enforce state, the element *MUST* refuse at setup a route whose detection bound exceeds the reaction budget declared for it (<<req-ssr-qos-deadline,Deadlines are monitored>>; xref:assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 
 *Reporting.*
 Each route's report *MUST* state separately:
@@ -51,7 +68,7 @@ A report *MUST NOT* present a passed setup check as a safety qualification.
 --
 
 [horizontal]
-ID:: `+req~ssr-qos-no-downgrade~2+`
+ID:: `+req~ssr-qos-no-downgrade~3+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test
@@ -60,6 +77,8 @@ Verification:: test
 * The native lanes.
 * A route that requires a timing bound or an assurance scope its configuration does not establish is refused by name.
 * The same route without that requirement is admitted on a configuration that has no timing or assurance package.
+* On a configuration that offers no finite bound for an endpoint, a route that does not require that bound operates and reports functionally.
+* In the Enforce state, a route whose detection bound exceeds its declared reaction budget is refused, and one whose bound equals the budget is not.
 
 *Rationale.*
 Silently substituting a supported policy would leave the application relying on a guarantee the route does not provide.
@@ -128,7 +147,7 @@ Without that, a serialized route that admits owning values could not destroy an 
 [[req-ssr-qos-deadline]]
 == Deadlines are monitored
 
-[.specitem,oft-sid="req~ssr-qos-deadline~4",oft-title="Deadlines are monitored",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-qos-deadline~5",oft-title="Deadlines are monitored",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *What is counted.*
 A route that declares a deadline *MUST* count one miss for every gap between arrivals that is longer than its threshold.
@@ -171,6 +190,9 @@ For the one-word tick representation that range is:
 
 The transport's `+wait+` services its routes between inner waits of at most 2^28^ ticks of the shortest-scaled route on the transport.
 
+*Strict mode.*
+In strict mode's Enforce state, the element *MUST* refuse at setup a declared servicing period longer than its transport's bound.
+
 *When the count is current.*
 The count is current whenever the route's counters are read after the transport's receive, wait or service operations.
 So it does not depend on the application polling that route.
@@ -187,12 +209,13 @@ An application's later read of the report adds its own delay, outside J, and pla
 *Related rules.*
 
 * The deadlines setup refuses are stated in <<req-ssr-qos-invalid-refused,Meaningless QoS is refused at setup>>.
+* What setup does with a route that declares no deadline is stated in <<req-ssr-qos-declared,QoS is declared per route at setup>>.
 * On an ASIL deployment the binding turns its middleware's own event deadlines off.
 The element's deadline monitor is the receiver's mechanism.
 --
 
 [horizontal]
-ID:: `+req~ssr-qos-deadline~4+`
+ID:: `+req~ssr-qos-deadline~5+`
 ASIL:: B
 Allocated to:: the element; each binding, for its middleware's own event deadlines on an ASIL deployment
 Verification:: test, miri, fault-injection
@@ -211,6 +234,7 @@ Verification:: test, miri, fault-injection
 ** For the one-word tick representation, a silence across the tick wrap and past the refresh, through a hook.
 ** The inner loop of `+wait+`.
 ** The report's bound with and without an established J.
+** In the Enforce state, a declared servicing period at its transport's bound and one just longer.
 * *miri*: an arrival racing a refresh.
 * *fault-injection*: the publisher killed.
 
@@ -239,7 +263,7 @@ So the element states the detection bound only where a supported configuration e
 [[req-ssr-qos-ttl]]
 == Expired messages are not processed
 
-[.specitem,oft-sid="req~ssr-qos-ttl~4",oft-title="Expired messages are not processed",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-qos-ttl~5",oft-title="Expired messages are not processed",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Expired frames.*
 A frame whose TTL has expired *MUST NOT* be delivered to the application or forwarded by a carrier, and *MUST* be counted as expired.
@@ -251,7 +275,8 @@ Measured from that time:
 * a frame *MUST NOT* be refused before its TTL has passed;
 * a frame *MUST* always be refused once its TTL, rounded up to a whole millisecond, plus one more millisecond has passed.
 
-An ID made while the sender's wall clock could not be read records the last good time, so its frame can be refused before its TTL has passed in real time.
+An ID made while the sender's wall clock could not be read records the last good time, so its frame can be refused before its TTL has passed in real time, by up to the time the clock was unreadable.
+For a generator that keeps the last good time only to 64 ms, such a frame can be refused by up to 64 ms more (xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]).
 
 *An unreadable clock.*
 If the wall clock cannot be read at the check, the frame *MUST* be refused and counted, never processed with an unknown expiry.
@@ -262,7 +287,7 @@ So an expired frame is never decoded and changes no wire state.
 --
 
 [horizontal]
-ID:: `+req~ssr-qos-ttl~4+`
+ID:: `+req~ssr-qos-ttl~5+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test
@@ -270,6 +295,7 @@ Verification:: test
 * At the bound, for sub-millisecond and whole-millisecond TTLs.
 * With the clock unavailable.
 * An expired frame refused when it reaches its route, never decoded, with no end-to-end state changed.
+* A frame whose ID was made while the sender's wall clock could not be read, at the bound of its early refusal, also from a generator that keeps the last good time only to 64 ms.
 
 *Rationale.*
 The check also reads the current time in whole milliseconds, so it can see up to one millisecond less than has passed.

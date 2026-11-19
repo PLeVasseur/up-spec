@@ -90,13 +90,15 @@ It is a refusal by name because every refusal at setup names its cause, the rout
 [[aou-seooc-integrity-levels]]
 == Each transport's integrity level is assigned correctly
 
-[.specitem,oft-sid="aou~seooc-integrity-levels~6",oft-title="Each transport's integrity level is assigned correctly",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-integrity-levels~7",oft-title="Each transport's integrity level is assigned correctly",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
-The integrator *SHALL* give each transport one integrity level in the deployment data: QM, A, B, C or D, in that order. Every route on that transport carries the level (xref:integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]). Each process declares the level it was built to, and is developed to at least that level.
+The integrator *SHALL* give each transport one integrity level in the deployment data: QM, A, B, C or D, in that order.
+What the element does with that level, on every route of the transport and at setup, is stated in xref:integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level].
+Each process declares the level it was built to, and is developed to at least that level.
 
 * *One transport's restrictions.* What one binding adds to the assignment is stated with that binding.
 * *Above ASIL B.* The duties for a level or for data above ASIL B are xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element].
-* *A level is a label.* A declared level is a label checked at setup: it neither raises the element's capability nor qualifies the process that declares it.
+* *A level is a label.* A declared level is a label: it neither raises the element's capability nor qualifies the process that declares it.
 --
 
 *Violation:*
@@ -108,7 +110,7 @@ The integrator *SHALL* give each transport one integrity level in the deployment
 * A process that declares a level it was not built to is *undetectable*.
 
 [horizontal]
-ID:: `+aou~seooc-integrity-levels~6+`
+ID:: `+aou~seooc-integrity-levels~7+`
 ASIL:: B
 ISO 26262:: 6-7.4.8, 9-6 (part-clause numbers only)
 
@@ -126,20 +128,30 @@ They bind only where data above ASIL B crosses the element, or where the element
 [[aou-seooc-qualified-bindings-and-wires]]
 == Bindings and wires pass their contracts
 
-[.specitem,oft-sid="aou~seooc-qualified-bindings-and-wires~7",oft-title="Bindings and wires pass their contracts",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-qualified-bindings-and-wires~8",oft-title="Bindings and wires pass their contracts",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
 The integrator *SHALL* use on the ASIL path only bindings and wires that pass the contract suites (the binding contract suite, the QoS contract suite and the wire contract suite) on the integrator's own target, at the exact versions and configuration whose evidence its supported configuration records, and *SHALL NOT* take evidence of one state, compiled, linked, exercised, source-reviewed, composition-verified or qualified, for another.
 
 * *32-bit targets.* On a 32-bit target, those are only the bindings and wires whose contracts pass on that target.
-* *Pull bindings and deadlines.* A pull binding used for a route with a deadline reports an arrival through the runtime port only with evidence that a frame entered the route's queue, or that the queue's overflow policy discarded one, and within the arrival-report latency it declares in its QoS support. It never reports one on a wake hint alone. It reports each failure to read its own queue through the runtime port's receive-failure report. Its deadline checks of the QoS contract suite pass, on a subscriber and on a carrier ingress.
-* *Response routes.* A push binding delivers one response route from one thread at a time, which the contract checks. A pull binding needs nothing: the element serializes the pulls of a response route itself.
+* *Pull bindings and deadlines.* A pull binding used for a route with a deadline reports an arrival through the runtime port only with evidence that a frame entered the route's queue, or that the queue's overflow policy discarded one, and within the arrival-report latency it declares in its QoS support.
+It never reports one on a wake hint alone.
+It reports each failure to read its own queue through the runtime port's receive-failure report.
+Its deadline checks of the QoS contract suite pass, on a subscriber and on a carrier ingress.
+The element's side of these reports is stated in xref:../seooc-up-rust/qos.adoc#req-ssr-qos-deadline[Deadlines are monitored] and xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once].
+* *Response routes.* A push binding delivers one response route from one thread at a time, which the contract checks.
+A pull binding needs nothing (xref:../up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
 * *Cores without coherent atomics.* A route between cores whose atomics are not coherent with each other (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]) uses a transport whose qualification covers that.
 
-The integrator accepts the limits and known anomalies that each binding's README states (xref:bindings.adoc#req-ssr-binding-readme[The README says what the middleware cannot guarantee]). Where an assumption of one binding lists them, it lists apart that binding's known failures, which are not accepted limits.
+The integrator accepts the limits and known anomalies that each binding's qualification record states (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures, and its README points at it]).
+Where an assumption of one binding lists them, it lists apart that binding's known failures, which are not accepted limits.
 
-A wire or binding from elsewhere with `+unsafe+` code of its own, such as a wire over a C codec, is a separate element, and the integrator qualifies its `+unsafe+` (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]). The bindings this project ships keep their own inventories under the same gate (xref:bindings.adoc#req-ssr-binding-unsafe-inventory[A binding this project ships inventories its own `+unsafe+`]).
+A wire or binding from elsewhere with `+unsafe+` code of its own, such as a wire over a C codec, is a separate element, and the integrator qualifies its `+unsafe+` (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]).
+The inventory that a binding this project ships keeps is stated in xref:bindings.adoc#req-ssr-binding-unsafe-inventory[A binding this project ships inventories its own `+unsafe+`].
 
-In strict mode, the Enforce state refuses a binding or wire that is not on the integrator's qualified list, an ASIL process that reaches a deviation not acknowledged at its current revision, and any known failure, whatever is acknowledged. The report lists each binding's README limits, deviations and known failures.
+In strict mode, every binding and wire that the integrator uses is on its qualified list.
+In strict mode, the Enforce state refuses an ASIL process that reaches a deviation not acknowledged at its current revision (xref:../seooc-up-rust/build.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]).
+The refusal of each route that a known failure affects is stated in xref:../seooc-up-rust/build.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision].
+What strict mode otherwise refuses for bindings and wires, and what its report lists of each binding's limits, deviations and known failures, is stated in xref:../seooc-up-rust/build.adoc#req-ssr-strict-rules[The rules that strict mode checks] and xref:../seooc-up-rust/build.adoc#req-ssr-strict-report[Strict mode reports on every run].
 --
 
 *Violation:*
@@ -150,7 +162,7 @@ In strict mode, the Enforce state refuses a binding or wire that is not on the i
 * In strict mode, a binding or wire off the qualified list, an unacknowledged deviation, and any known failure are *refused at setup* in the Enforce state.
 
 [horizontal]
-ID:: `+aou~seooc-qualified-bindings-and-wires~7+`
+ID:: `+aou~seooc-qualified-bindings-and-wires~8+`
 ASIL:: B
 
 *Rationale.*
