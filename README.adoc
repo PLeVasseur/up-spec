@@ -50,6 +50,12 @@ If you're a developer who would like to use uProtocol in your application or ser
 
 If you would like to contribute to uProtocol to develop a new language library or transport implementation, please checkout the xref:CONTRIBUTING.adoc[CONTRIBUTING.adoc].
 
+== Conformance records
+
+The link:conformance/README.md[conformance catalogue] presents versioned
+implementation and evidence observations against an exact specification revision.
+These non-normative records neither add nor waive requirements.
+
 == Tracing Requirements
 
 NOTE: Implementers of the uProtocol specification are encouraged to use link:https://github.com/itsallcode/openfasttrace[OpenFastTrace] (OFT) for making sure that they actually cover all requirements from the specification that are relevant for the implemented component.
