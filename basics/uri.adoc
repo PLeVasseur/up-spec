@@ -24,16 +24,20 @@ SPDX-License-Identifier: Apache-2.0
 NOTE: uProtocol uses https://datatracker.ietf.org/doc/html/rfc3986[Uniform Resource Identifiers] (URI) to uniquely identify (and/or address) resources such as devices,
 software components, topics, methods, etc on a computer network.
 
-https://datatracker.ietf.org/doc/html/rfc3986[RFC3986] defines the structure of a URI as follows:
+https://datatracker.ietf.org/doc/html/rfc3986#section-3[RFC3986, Section 3] defines the structure of a URI as follows:
 
-.URI
-image::rfc3986.png[RFC3986 URI]
+.Illustration of the generic URI syntax of RFC3986, Section 3
+image::uri-syntax.svg["Syntax diagram of a URI: a scheme and a colon; optionally two slashes, then optionally user information and an at sign, a host, and optionally a colon and a port; a path; optionally a question mark and a query; optionally a number sign and a fragment", align="center"]
 
 Using this terminology, a uProtocol URI (UUri) can be structured like this:
 
-.UUri Specification
+.How the properties of a UUri map to the parts of a URI
 [#uuri-specification]
-image::uri.drawio.svg["uProtocol Uri Specification", align="center"]
+====
+image::uri.drawio.svg["A UUri as a URI: the scheme up, the authority_name as the authority, and the ue_type_id, ue_instance_id, ue_version_major and resource_id as the four segments of the path", align="center"]
+
+The rules of this mapping are stated in <<uri-definition>>.
+====
 
 [NOTE]
 ====
@@ -48,7 +52,7 @@ In the remainder of this document, the term _UUri_ is used to refer to an instan
 [#data-model-definition]
 == Data Model
 
-The diagram below shows a UUri and its properties using UML2 notation.
+The class diagram below shows a UUri and its properties.
 
 .UUri Data Model
 [#uuri-data-model]
@@ -137,7 +141,7 @@ It is often helpful to represent UUris in a textual format, for example when ser
 
 The URIs mapped from UUris use the syntax defined in https://datatracker.ietf.org/doc/html/rfc3986#appendix-A[RFC3986, Appendix A] with a few modifications:
 
-NOTE: The ABNF fragments below only contain the rules that differ from the original definitions in RFC3986.
+NOTE: The ABNF fragments below, written in the notation of https://www.rfc-editor.org/rfc/rfc5234[RFC5234], only contain the rules that differ from the original definitions in RFC3986.
 
 [.specitem,oft-sid="dsn~uri-scheme~1",oft-needs="impl,utest"]
 --
@@ -214,7 +218,7 @@ The examples below can be used as test vectors for implementing client libraries
 
 [.specitem,oft-sid="req~uri-serialization~1",oft-needs="impl,utest"]
 --
-Each link:../languages.adoc[uProtocol Language Library] *MUST* provide means to serialize UUris to the <<_mapping_to_uri, URI format>> and vice versa. A concrete implementation should follow common practices for the particular programming language.
+Each link:../languages.adoc[uProtocol Language Library] *MUST* provide means to serialize UUris to the <<uri-definition, URI format>> and vice versa. A concrete implementation should follow common practices for the particular programming language.
 --
 
 .UUri serialization in Java and Rust libraries

@@ -25,7 +25,7 @@ NOTE: uProtocol entities communicate with each other by means of exchanging `UMe
 [#data-model-definition]
 == Data Model
 
-NOTE: A UMessage consists of xref:uattributes.adoc[UAttributes] holding the message's meta data and (optional) payload as shown in the class diagram below (using UML2 notation).
+NOTE: A UMessage consists of xref:uattributes.adoc[UAttributes] holding the message's meta data and (optional) payload as shown in the class diagram below.
 
 What makes a payload present is stated with the `payloadEncodingId` attribute in
 xref:uattributes.adoc#common-attributes[Common Message Attributes].

@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview
 
-NOTE: https://zenoh.io[Eclipse Zenoh&trade;] (/zeno/) is a protocol for publishing, subscribing and querying that brings moving data, stored data and computation together. It joins classic publish/subscribe with geographically distributed storage, queries and computations, and it stays far more efficient in time and in space than every mainstream stack.
+NOTE: https://zenoh.io[Eclipse Zenoh&trade;] (/zeno/) is a protocol for publishing, subscribing and querying that brings moving data, stored data and computation together. It joins classic publish/subscribe with geographically distributed storage, queries and computations.
 
 This document defines how uProtocol messages can be exchanged by means of Zenoh _Resources_.
 
@@ -39,16 +39,17 @@ NOTE: A uProtocol message consists of _UAttributes_ and optional payload. The fo
 
 [.specitem,oft-sid="dsn~up-transport-zenoh-attributes-mapping~1",oft-covers="req~utransport-send-preserve-data~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-The value of a Zenoh Resource that is used to convey a uProtocol message *MUST* contain _attachments_ as defined in <<uAttributes Mapping to Zenoh Attachments>>.
+The value of a Zenoh Resource that is used to convey a uProtocol message *MUST* contain _attachments_ as defined in <<zenoh-uattributes-mapping,uAttributes Mapping to Zenoh Attachments>>.
 --
 
+[#zenoh-uattributes-mapping]
 .uAttributes Mapping to Zenoh Attachments
 [%autowidth]
 |===
 | order | value
 
 | 1
-a| *MUST* be set to a single byte representing the UProtocol major version (`0x01` at the time of writing)
+a| *MUST* be set to a single byte representing the UProtocol major version (`0x01` for major version 1)
 
 | 2
 a| *MUST* be set to the bytes representing the link:../up-core-api/uprotocol/v1/uattributes.proto[protobuf encoding of the UAttributes object]
@@ -68,7 +69,7 @@ All types of uProtocol messages *MUST* be transferred using Zenoh's pub/sub API 
 
 [.specitem,oft-sid="dsn~up-transport-zenoh-message-priority-mapping~1",oft-covers="req~utransport-send-qos-mapping~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-The uProtocol service classes *MUST* be mapped to Zenoh message priority levels as follows:
+The uProtocol service classes *MUST* be mapped to Zenoh message priority levels as follows (source: Zenoh Protocol Specification, version 1.0.0, Validation Refresh edition as published at https://spec.zenoh.io/spec/1.0.0/ on 2026-11-18, section Quality of Service, Priority):
 
 [cols="1,1"]
 |===
@@ -94,8 +95,6 @@ A Zenoh message that is used to convey a uProtocol message *MUST* contain in its
 == Zenoh Key Structure
 
 NOTE: Message producers publish messages to the Zenoh network using _keys_. Other clients can indicate their interest in particular keys or patterns in order to receive the messages that are being published using matching keys.
-
-The Zenoh _key expression_ that is used to transfer a uProtocol message is derived from the message's `source` and `sink` attributes.
 
 [.specitem,oft-sid="dsn~up-transport-zenoh-key-expr~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --

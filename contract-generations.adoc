@@ -12,11 +12,15 @@ For some behaviours the repository holds two rules: one in a protocol chapter, a
 
 | The protocol chapters
 | The chapters xref:basics/README.adoc[`basics/`], xref:up-l1/README.adoc[`up-l1/`], xref:up-l2/README.adoc[`up-l2/`] and xref:up-l3/README.adoc[`up-l3/`], with the items they tag for tracing: `LanguageLibrary`, `TransportLayerImpl` and the other tags that xref:README.adoc[the repository's README] lists
-| Every language library, transport library and dispatcher that implements uProtocol
+| The implementations that each chapter's rules cover, as the chapter states; how a chapter's rule and an item of the safety area meet: xref:safety/README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]
 
 | The items of the safety area
 | The items filed under xref:safety/README.adoc[`safety/`], which carry the `Safety…` tags
-| Each part that a requirement names, and for an assumption of use the integrator who claims the up-rust SEooC's safety-assurance scope (<<claims>>)
+| xref:safety/README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]
+
+| The owned-frame SDK contract
+| The items filed under xref:sdk/owned-frame/README.adoc[`sdk/owned-frame/`], which carry the `OwnedFrame…` tags
+| xref:sdk/owned-frame/README.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it]
 |===
 
 [NOTE]
@@ -24,7 +28,7 @@ For some behaviours the repository holds two rules: one in a protocol chapter, a
 * *One implementation family.*
 The items of the safety area are written for the up-rust SEooC and for the parts that work with it.
 * *Kinds of claim.*
-They are filed under `safety/`, and they make claims of more than one kind (<<claims>>).
+They are filed under `safety/`, and a claim that rests on them can be of more than one kind (<<claims>>).
 * *Relation to the chapters.*
 Most items add to the protocol chapters.
 Some state a chapter's rule again with more precision, and some differ from a chapter's rule on purpose.
@@ -33,8 +37,8 @@ Some state a chapter's rule again with more precision, and some differ from a ch
 [[claims]]
 == Responsibility and kind of claim
 
-A rule answers two questions.
-The answer to one question cannot be derived from the answer to the other, or from the directory that a rule is filed in.
+NOTE: A rule answers two questions, and neither answer follows from the other or from the directory that the rule is filed in.
+Whom a rule of a protocol chapter binds is stated by that chapter, and whom an item of the safety area or of the owned-frame SDK area binds is stated by the items below.
 
 [cols="2,5",options="header"]
 |===
@@ -43,16 +47,17 @@ The answer to one question cannot be derived from the answer to the other, or fr
 | Whose responsibility?
 | The common protocol; a contract between parts, such as a wire, a binding or an interaction; the own contract of one SDK or one library; or a duty of whoever integrates and deploys.
 
-| What kind of claim?
-| Ordinary functional behaviour; an additional resource, fault or timing condition; or safety assurance, with its evidence and its assumptions of use.
+| What kind of claim can rest on it?
+| Ordinary functional behaviour; native resource behaviour; a finite timing bound; or a safety-assurance scope, with its evidence and its assumptions of use (xref:safety/README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "What a claim covers").
 |===
 
 NOTE: So an item under `safety/` can state ordinary functional behaviour of the up-rust SEooC.
 
 These items state when an item binds, whatever its kind of claim:
 
-* *A software requirement*: xref:safety/README.adoc#req-ssr-requirements-bind[A requirement binds the parts that it names].
+* *A software requirement*: xref:safety/README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
 * *An assumption of use*: xref:safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+* *A requirement of the owned-frame SDK contract*: xref:sdk/owned-frame/README.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
 
 The up-rust SEooC's own account of its claims is xref:safety/seooc-up-rust/README.adoc#claims[the SEooC's claims].
 
@@ -60,3 +65,5 @@ The up-rust SEooC's own account of its claims is xref:safety/seooc-up-rust/READM
 == Which contract an implementation follows
 
 xref:safety/README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
+
+For the ordinary SDK contract of owned-frame routes: xref:sdk/owned-frame/README.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].

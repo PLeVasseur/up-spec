@@ -3,7 +3,7 @@
 :sectnums:
 :source-highlighter: highlight.js
 :discovery-proto-ref: xref:../../../up-core-api/uprotocol/core/udiscovery/v3/udiscovery.proto[udiscovery.proto]
-:up-l2-ref: xref:up-l2/README.adoc[uProtocol Communication Layer (uP-L2) API]
+:up-l2-ref: xref:../../../up-l2/README.adoc[uProtocol Communication Layer (uP-L2) API]
 
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
@@ -46,7 +46,7 @@ NOTE: The client facing APIs of uDiscovery provide the means for uEntities to di
 
 [.specitem,oft-sid="dsn~discovery-client-apis~1",oft-needs="impl"]
 --
-Each link:../languages.adoc[uProtocol Language Library] *MUST* implement the client-side APIs of {discovery-proto-ref} using the {up-l2-ref} RpcClient. 
+Each link:../../../languages.adoc[uProtocol Language Library] *MUST* implement the client-side APIs of {discovery-proto-ref} using the {up-l2-ref} RpcClient. 
 --
 
 === FindServices()
@@ -82,10 +82,10 @@ Below are example string URIs that could be passed to the API.
 |===
 | URI | `recursive` | Description
 
-| `up:/FFFF1234/FF/0` | false | Find local instances & versions of service 1234.
-| `up://*/FFFF1234/FF/0` | false | Find instances & versions of service 1234 that are known to the local uDiscovery service instance.
-| `up://*/FFFF0004/FF/0` | true | Find instances & versions of service 4 that are known to the local uDiscovery service instance or any of its parent nodes.
-| `up://*/11234/2/0` | false | Find the authority_name for version 2 & instance 1 of service 1234.
+| `up:/1234/FFFF/FF/0` | false | Find local instances & versions of service 1234.
+| `up://*/1234/FFFF/FF/0` | false | Find instances & versions of service 1234 that are known to the local uDiscovery service instance.
+| `up://*/4/FFFF/FF/0` | true | Find instances & versions of service 4 that are known to the local uDiscovery service instance or any of its parent nodes.
+| `up://*/1234/1/2/0` | false | Find the authority_name for version 2 & instance 1 of service 1234.
 
 |===
 ====
@@ -121,9 +121,9 @@ Below are example use cases for the API when passed certain URIs (shown in strin
 |===
 | URI | Description
 
-| `up:/1234/2/8000` | Return the `UServiceTopic` for topic 8000 of service 1234 version 2.
+| `up:/1234/1/2/8000` | Return the `UServiceTopic` for topic 8000 of instance 1 of service 1234 version 2.
 
-| `up:/1234/2/FFFF` | Return repeated list of `UServiceTopic` for all tpoics from service 1234 version 2.
+| `up:/1234/1/2/FFFF` | Return repeated list of `UServiceTopic` for all topics from instance 1 of service 1234 version 2.
 
 |===
 ====

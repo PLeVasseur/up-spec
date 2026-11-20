@@ -47,7 +47,7 @@ The remainder of this document defines the use cases, interfaces, state machines
 
 ---
 
-The uSubscription service API is defined using UML2 notation.
+The class diagram below is an illustrative summary of the uSubscription service API that the following sections define.
 
 .uSubscription API
 [#usubscription-api]
@@ -69,7 +69,7 @@ class SubscriptionStatus {
     <<enumeration>>
     UNSUBSCRIBED
     SUBSCRIBE_PENDING
-    UNSUBSCRIBED
+    SUBSCRIBED
     UNSUBSCRIBE_PENDING
 }
 
@@ -152,7 +152,6 @@ subscribe(topic: UUri, expiration: Instant[0..1], samplePeriod: UInt32[0..1]) : 
 NOTE: Clients use this operation to subscribe to a topic. 
 
 * Returns the current status of the requested subscription. 
-* Calling this endpoint also registers the subscribing client to receive subscription change notifications when the subscription status changes.
 
 [.specitem,oft-sid="req~usubscription-subscribe-method_id~1",oft-needs="dsn,impl,utest",oft-tags="uSubscription"]
 The uSubscription `Subscribe()` operation *MUST* use the method ID `1`.
@@ -200,7 +199,7 @@ The uSubscription `Subscribe()` operation *MUST* implement the following respons
 | {uuri_ref}
 | Subscribed topic, as passed to SubscriptionRequest
 
-| xref:SubscriptionStatus[SubscriptionStatus]
+| xref:subscription-status[SubscriptionStatus]
 | Current status of the subscription.
 |===
 
@@ -310,7 +309,6 @@ unsubscribe(topic: UUri)
 NOTE: Clients use this operation to unsubscribe from a topic. 
 
 * Unsubscribing from a topic always succeeds from the client's point of view.
-* Calling this endpoint also unregisters the client from receiving any future change notifications regarding the subscription.
 
 [.specitem,oft-sid="req~usubscription-unsubscribe-method_id~1",oft-needs="dsn,impl,utest",oft-tags="uSubscription"]
 The uSubscription `Unsubscribe()` operation *MUST* use the method ID `2`.
@@ -389,8 +387,7 @@ deactivate T
 fetchSubscriptions(topicFilter: UUri[0..1], subscriberFilter: UUri[0..1]) : Subscription[*]
 ----
 
-Clients use this operation to get details about subscriptions that are currently tracked by uSubscription service.
-Clients can provide {uuri_ref}s to filter subscriptions by topic and/or subscriber. Filter UURIs may contain wildcards. 
+NOTE: Clients use this operation to get details about subscriptions that are currently tracked by uSubscription service.
 
 [.specitem,oft-sid="req~usubscription-fetch-subscriptions-method_id~1",oft-needs="dsn,impl,utest",oft-tags="uSubscription"]
 The uSubscription `FetchSubscriptions()` operation *MUST* use the method ID `3`.
@@ -783,7 +780,7 @@ When a client invokes the uSubscription service's `Reset()` operation, uSubscrip
 3. send `Subscription` messages to each client subscribed to a topic or that has registered for notifications about a topic, with xref:subscription-status[SubscriptionStatus] `UNSUBSCRIBED`
 
 [.specitem,oft-sid="req~usubscription-reset-only-usubscription~1",oft-needs="impl,utest",oft-tags="uSubscription"]
-When receiving a `Reset()` call from a source that is not another uSubscription services (i.e. from source URIs where uEntity type does not equal `0x0`), uSubscription service *MUST* return a failure status message with {ucode_link} `PermissionDenied`.
+When receiving a `Reset()` call from a source that is not another uSubscription services (i.e. from source URIs where uEntity type does not equal `0x0`), uSubscription service *MUST* return a failure status message with {ucode_proto_ref} `PermissionDenied`.
 
 ---
 
@@ -916,7 +913,7 @@ NOTE: Subscription is an information object containing all available information
 | Subscriber URI of the subscription relationship.
 
 | `status`
-| xref:SubscriptionStatus[SubscriptionStatus]
+| xref:subscription-status[SubscriptionStatus]
 | yes
 | Current status of the subscription.
 
@@ -1026,7 +1023,7 @@ end %% rect
 
 .Message flow for a remote publisher and a local subscriber
 ====
-This is an illustration of how remote subscriptions are set up in deployment scenarios where the message publisher is located in a local __Authority A__ transport network segment, whereas the publisher resides on a remote transport network (dubbed __Authority B__).
+This is an illustration of how remote subscriptions are set up in deployment scenarios where the message subscriber is located in a local __Authority A__ transport network segment, whereas the publisher resides on a remote transport network (dubbed __Authority B__).
 
 [mermaid]
 ifdef::env-github[[source,mermaid]]

@@ -49,7 +49,7 @@ NOTE: A uProtocol message consists of _UAttributes_ and optional payload. The fo
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-attributes-mapping~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-The value of a iceoryx2 Service that is used to convey a uProtocol message *MUST* have a https://docs.rs/iceoryx2/0.6.1/iceoryx2/service/builder/publish_subscribe/struct.Builder.html#method.user_header[user header] as defined in <<uAttributes Mapping to iceoryx2 user header>>.
+The value of an iceoryx2 Service that is used to convey a uProtocol message *MUST* have a https://docs.rs/iceoryx2/0.6.1/iceoryx2/service/builder/publish_subscribe/struct.Builder.html#method.user_header[user header] as defined in <<uAttributes Mapping to iceoryx2 user header>>.
 --
 
 ==== uAttributes Mapping to iceoryx2 user header
@@ -74,18 +74,12 @@ struct UProtocolHeader {
 | field | value
 
 | `uprotocol_major_version`
-a| *MUST* be set to a single byte representing the uProtocol major version (`0x01` at the time of writing)
+a| *MUST* be set to a single byte representing the uProtocol major version (`0x01` for major version 1)
 
 | `uattributes_serialized`
 a| *MUST* be set to the bytes representing the protobuf encoding of the UAttributes object as defined by the link:../up-core-api/uprotocol/v1/uattributes.proto[UAttributes Protocol Buffers definition]
 
 |===
-
-_Known limitations_: Using a `FixedSizeVec` in the header containing a serialization of the entire `UAttributes` is wasteful and unnecessarily makes every message larger than it really need be most of the time. The approach chosen here was chosen primarily for expediency and simplicity of implementation. It should be possible to optimize this significantly. Some low-hanging fruit: use custom structs for entirety of `UAttributes` in User Header, make use of `Option<T>` to cut down on size when e.g. not using `token` or `traceparent`.
-
-==== Message Priority
-
-Currently not a clear path to map from uProtocol message priority to iceoryx2 QoS (Quality of Service). Skip for current revision.
 
 === Payload Mapping
 
@@ -114,9 +108,7 @@ That encapsulates the following additional properties in Rust:
 
 == iceoryx2 Service Name Structure
 
-NOTE: Message producers publish messages to the iceory2 inter-process communication using _ServiceNames_. Other clients can then use the same _ServiceName_ to receive the messages that are being published.
-
-The iceoryx2 _ServiceName_ that is used to transfer a uProtocol message is derived from the message's `source` and `sink` attributes.
+NOTE: Message producers publish messages to the iceoryx2 inter-process communication using _ServiceNames_. Other clients can then use the same _ServiceName_ to receive the messages that are being published.
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-service-name~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
@@ -132,7 +124,7 @@ The ServiceName for sending an _RPC Request_ UMessage **MUST** consist of the fo
 
 `up/[sink.authority]/[sink.ue_type_id]/[sink.ue_instance_id]/[sink.ue_version]/[sink.resource]`
 
-Please refer to <<UUri Encoding Rules>> for details regarding the encoding of the `source` and `sink` UUris into the key expression's segments.
+Please refer to <<UUri Encoding Rules>> for details regarding the encoding of the `source` and `sink` UUris into the ServiceName's segments.
 
 --
 
@@ -272,5 +264,5 @@ NOTE: The examples below assume that the local entity's authority name is `devic
 Note that subscribing to all Request messages pointed to this uEntity for a given invokable method
 means that we **MUST** determine the source in order to send Response messages.
 
-The source UUri **MUST** be determined by deserializing the `uatributes_serialized` in the UProtocolHeader
+The source UUri **MUST** be determined by deserializing the `uattributes_serialized` in the UProtocolHeader
 and then creating the appropriate fully-qualified ServiceName.

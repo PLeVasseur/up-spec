@@ -26,7 +26,7 @@ NOTE: UAttributes contain meta data describing a particular message's purpose, c
 [#data-model-definition]
 == Data Model
 
-The diagram below shows the UAttributes class and its properties using UML2 notation.
+The class diagram below shows the UAttributes class and its properties.
 
 NOTE: The UCode, UUri and UUID classes are defined in detail in xref:error_model.adoc[Error Model Specification], xref:uri.adoc[UUri Specification] and xref:uuid.adoc[UUID Specification] respectively.
 
@@ -164,12 +164,13 @@ A consumer *MUST NOT* consider a message expired if it has a TTL value of `0`.
 |none
 
 a|
-A tracing identifier to use for correlating messages across the system, intended to be compatible with https://github.com/cloudevents/spec/blob/main/cloudevents/extensions/distributed-tracing.md[CloudEvents distributed tracing extension].
+A tracing identifier to use for correlating messages across the system, intended to be compatible with https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/extensions/distributed-tracing.md[CloudEvents distributed tracing extension].
 
 [.specitem,oft-sid="dsn~up-attributes-traceparent~1",oft-needs="impl,utest",oft-tags="LanguageLibrary"]
 --
 The traceparent *MUST* either be empty or contain a value as defined by https://w3c.github.io/trace-context/#traceparent-header[W3C Trace Context Level 3].
 --
+Source:: W3C Trace Context Level 3, Editor's Draft of 29 June 2026, https://github.com/w3c/trace-context/blob/acab820be9db7b3433668baa5cdd43f57f4c4be0/spec/20-http_request_header_format.md#traceparent-header[section 3.2, Traceparent Header] (w3c/trace-context commit `acab820be9db7b3433668baa5cdd43f57f4c4be0`).
 
 
 |`payloadEncodingId`

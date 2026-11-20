@@ -31,7 +31,9 @@ For more information, please refer to https://mqtt.org/
 This document defines how MQTT 5 PUBLISH packets can be used to transfer uProtocol messages (UMessages) between uEntities for the following use cases:
 
 1. *uEntity-2-uEntity*: Communication between uEntities within the same vehicle by means of an _in-vehicle_ MQTT broker.
-2. *Device-2-Device* (D2D): Communication between uEntities in vehicles and a (cloud) back end system by means of an _off-vehicle_ MQTT broker, e.g. running in the back end. MQTT brokers running on cloud infrastructure often have limitations regarding the number of topics that can be subscribed and the number of segments those topics may contain. The mapping for this use case therefore uses a coarser grained topic structure than the one for in-vehicle only communication.
+2. *Device-2-Device* (D2D): Communication between uEntities in vehicles and a (cloud) back end system by means of an _off-vehicle_ MQTT broker, e.g. running in the back end. The mapping for this use case uses a coarser grained topic structure than the one for in-vehicle only communication.
+
+NOTE: MQTT itself limits the number of levels in a Topic Name or Topic Filter only through the maximum length of a UTF-8 Encoded String, 65,535 bytes (source: MQTT Version 5.0, edition of 7 March 2019, sections 1.5.4 UTF-8 Encoded String and 4.7.3 Topic semantic and usage). A limit that a particular broker imposes is a matter of that broker's deployment, not of this mapping.
 
 == UMessage Mapping
 
@@ -42,11 +44,12 @@ NOTE: A uProtocol message consists of _UAttributes_ and optional payload. The fo
 [.specitem,oft-sid="dsn~up-transport-mqtt5-attributes-mapping~3",oft-covers="req~utransport-send-preserve-data~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
 An MQTT 5 PUBLISH packet that is used to convey a uProtocol message *MUST*
-contain properties as defined in <<uAttributes Mapping to MQTT 5 PUBLISH Properties>> (source: MQTT Version 5.0, edition of 7 March 2019, section 3.3.2.3 PUBLISH Properties).
+contain properties as defined in <<mqtt5-uattributes-mapping,uAttributes Mapping to MQTT 5 PUBLISH Properties>> (source: MQTT Version 5.0, edition of 7 March 2019, section 3.3.2.3 PUBLISH Properties).
 Unless a mapping row defines presence explicitly, a property *MUST* be present
 if and only if the corresponding UMessage attribute has a non-empty value.
 --
 
+[#mqtt5-uattributes-mapping]
 .uAttributes Mapping to MQTT 5 PUBLISH Properties
 [cols="1,2,5"]
 |===
@@ -58,21 +61,21 @@ if and only if the corresponding UMessage attribute has a non-empty value.
 | User Property [key: _uP_]
 a| The uProtocol version being used
 
-* *MUST* be set to the (major) version of the uProtocol specification that the message mapping adheres to. At the time of writing, the version is `1`.
+* *MUST* be set to the (major) version of the uProtocol specification that the message mapping adheres to (`1` for major version 1).
 * Message consumers *MAY* use this property to determine that the (PUBLISH) packet contains a uProtocol message.
 
 | _id_
 | User Property [key: _1_]
 a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
-* *MUST* be set to the https://www.rfc-editor.org/rfc/rfc4122.html#section-3[hyphenated string representation] of the UUID.
+* *MUST* be set to the lower-case https://www.rfc-editor.org/rfc/rfc9562#section-4[hyphenated string representation] of the UUID (source: RFC 9562, section 4 UUID Format).
 
 | _type_
 | User Property [key: _2_]
 a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the value of the _uprotocol.ce_name_ option defined for the
-link:../up-core-api/uprotocol/uattributes.proto[UMessageType enum].
+link:../up-core-api/uprotocol/v1/uattributes.proto[UMessageType enum].
 
 | _source_
 | User Property [key: _3_]
@@ -91,7 +94,7 @@ a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)
 a| The message's priority class as defined in xref:../basics/upriority.adoc[Message Priority]
 
 * *MUST* be set to the value of the _uprotocol.ce_name_ option defined for the
-link:../up-core-api/uprotocol/uattributes.proto[UPriority enum].
+link:../up-core-api/uprotocol/v1/uattributes.proto[UPriority enum].
 
 | _ttl_
 | User Property [key: _6_] +
@@ -100,9 +103,10 @@ _Message Expiry Interval_
 a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 If _ttl_ is `0`, the message has no expiration. The _Message Expiry Interval_
-and TTL User Property *MUST NOT* be set in this case. An omitted message expiry
-interval does not impose an MQTT expiration, whereas a zero interval is not
-an unlimited lifetime.
+and TTL User Property *MUST NOT* be set in this case. MQTT applies no expiry to
+a message whose _Message Expiry Interval_ is absent, whereas an interval of `0`
+is a lifetime of zero seconds, not an unlimited lifetime
+(source: MQTT Version 5.0, edition of 7 March 2019, section 3.3.2.3.3 Message Expiry Interval).
 
 If _ttl_ is greater than `0`, the _Message Expiry Interval_ property *MUST* be set to
 
@@ -133,7 +137,7 @@ a| The service consumer's permission level as defined in xref:../basics/permissi
 | User Property [key: _8_]
 a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
-* *MUST* be set to the link:../up-core-api/uprotocol/v1/ustatus.proto[UCode enum] integer value's decimal string representation.
+* *MUST* be set to the link:../up-core-api/uprotocol/v1/ucode.proto[UCode enum] integer value's decimal string representation.
 
 | _reqId_
 | _Correlation Data_
@@ -186,8 +190,6 @@ An MQTT 5 PUBLISH packet that is used to convey a uProtocol message *MUST* conta
 == MQTT Topic Structure
 
 NOTE: Message producers publish messages to _topics_ maintained by an MQTT broker. Other clients can then subscribe to such topics in order to receive the messages that are being published to these topics.
-
-The topic name of an MQTT 5 PUBLISH packet that is used to transfer a uProtocol message is derived from the message's `source` and `sink` attributes.
 
 === uEntity-2-uEntity Communication
 
@@ -409,7 +411,7 @@ a| The segment *MUST* contain the (UTF8) string representation of the
 
 [.specitem,oft-sid="req~up-transport-mqtt5-session-config~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-Each transport implementing this specification *MUST* provide means to configure the values of the https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901048[Session Expiry Interval] and https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901039[Clean Start] properties of the MQTT CONNECT packet being used when establishing a connection to a broker.
+Each transport implementing this specification *MUST* provide means to configure the value of the https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901048[Session Expiry Interval] property and the value of the https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901039[Clean Start] flag of the MQTT CONNECT packet being used when establishing a connection to a broker (source: MQTT Version 5.0, edition of 7 March 2019, section 3.1.2.4 Clean Start and section 3.1.2.11.2 Session Expiry Interval).
 --
 
 [.specitem,oft-sid="req~up-transport-mqtt5-reconnection~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
@@ -417,7 +419,7 @@ Each transport implementing this specification *MUST* provide means to configure
 Each transport implementing this specification *MUST*
 
 * re-establish a lost connection to an MQTT broker using an exponential backoff strategy.
-* re-subscribe to all previously subscribed topics, if the broker indicates that https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901078[no session is present] after successful reconnection.
+* re-subscribe to all previously subscribed topics, if the broker indicates that https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901078[no session is present] after successful reconnection (source: MQTT Version 5.0, edition of 7 March 2019, section 3.2.2.1.1 Session Present).
 --
 
 .Backoff values for reconnecting to a broker

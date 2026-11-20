@@ -28,11 +28,10 @@ SPDX-License-Identifier: Apache-2.0
 ====
 Scalable service-Oriented MiddlewarE over IP *(SOME/IP)* is a communication protocol used in the automotive industry for exchanging data between electronic control units (ECUs) in a vehicle.
 
-SOME/IP provides a framework for efficient and reliable communication between ECUs over IP networks. It is designed to support real-time and high-bandwidth communication requirements in automotive systems. The protocol allows ECUs to discover and communicate with each other, exchange messages, and provide services in a distributed system.
+SOME/IP provides a framework for communication between ECUs over IP networks. The protocol allows ECUs to discover and communicate with each other, exchange messages, and provide services in a distributed system.
 
 SOME/IP is based on the Internet Protocol (IP) and uses UDP or TCP as the transport layer. It supports various communication patterns, including unicast, multicast, and broadcast. The protocol defines a set of message formats and procedures for encoding and decoding data, handling service discovery, and managing communication sessions.
 By using SOME/IP, automotive ECUs can communicate with each other to exchange information related to vehicle functions, such as sensor data, control commands, diagnostics, and software updates. It enables the integration and interoperability of different ECUs from various automotive suppliers within a vehicle's network architecture.
-Overall, SOME/IP plays a crucial role in facilitating efficient and standardized communication between ECUs in modern automotive systems.
 ====
 
 The following specification will elaborate on how uProtocol shall be mapped to SOME/IP protocol so that mechatronics applications and services can be connected to non-mechatronics and cloud based applications and services.
@@ -43,7 +42,7 @@ xref:README.adoc[Transport & Session Layer (uP-L1)] specifies how xref:../basics
 
 Mapping of uTransport APIs to SOME/IP specific library *APIs* shall not be covered in this document given there are multiple open source libraries available for SOME/IP.
 
-Although some limitations of *vsomeip* library are mentioned bellow as *NOTES*.
+Although some limitations of *vsomeip* library are mentioned below as *NOTES*.
 
 === UUris
 
@@ -65,13 +64,13 @@ NOTE: *vsomeip* hides IP endpoint information and uses `ServiceID`/`InstanceID` 
 | Identifier of the service placed in the upper 16 bits of the *SOME/IP Header* `MessageID`.
 
 | ue_instance_id | InstanceID
-| No direct mapping to SMOE/IP message header. `InstanceID` is used in *SOME/IP-SD Service Entry Type* for service discovery and events.
+| No direct mapping to SOME/IP message header. `InstanceID` is used in *SOME/IP-SD Service Entry Type* for service discovery and events.
 
 | ue_version_major | Interface Version
 |
 * `Interface Version` field of *SOME/IP Header*.
 * Maps to `Major Version` for the `ServiceID`.
-* If set, it *SHOULD* be passed to underlying SOME/IP library to override it's default _Service Major Version_
+* If set, it *SHOULD* be passed to underlying SOME/IP library to override its default _Service Major Version_
 
 | resource_id | MethodID/EventID |
 * Identifier of the method/event placed in the lower 16 bits of the *SOME/IP Header* `MessageID`.
@@ -139,7 +138,7 @@ NOTE: xref:../basics/uuid.adoc[uProtocol UUID] specifications create a unique id
 
 The *UUid* is used for correlate between request and response as well. SOME/IP instead defines the `RequestID` as 16 bit `ClientID` + 16 bit `SessionID` (that is incremented).
 
-* When messages are converted *SOME/IP* to/from *uProtocol*, care must be taken to ensure that the SOME/IP Response `RequestID` and uProtocol `UUID` are properly mapped, especially when corelating a request to a response.
+* When messages are converted *SOME/IP* to/from *uProtocol*, care must be taken to ensure that the SOME/IP Response `RequestID` and uProtocol `UUID` are properly mapped, especially when correlating a request to a response.
 
 * Generated SOME/IP Events *MUST* set the 16 bit `ClientID` to 0
 * Generated SOME/IP Responses *MUST* auto-populate the `RequestID` cached from the request message, into the response message and then flush the entry in the cache.
@@ -148,7 +147,7 @@ Further details of the usage of IDs for the various message types is described <
 
 ==== Message Type
 
-<<umessagetype-mapping>> table below maps of uProtocol messages to SOME/IP message types.
+<<umessagetype-mapping>> table below maps uProtocol messages to SOME/IP message types.
 
 .UMessageType Mapping
 [[umessagetype-mapping]]
@@ -208,7 +207,7 @@ NOTE: *UAttributes* Specification explains that `source` attributes defines the 
 | sink.resource_id 
 | source.ue_type_id
 | xref:#note-2[^(2)^],xref:#note-3[^(3)^]
-| sink.ue_major_version
+| sink.ue_version_major
 |
 
 | Publish
@@ -217,7 +216,7 @@ NOTE: *UAttributes* Specification explains that `source` attributes defines the 
 | source.resource_id
 | sink.ue_type_id=0
 | xref:#note-2[^(2)^]
-| source.ue_major_version
+| source.ue_version_major
 |
 
 | RpcRequest
@@ -226,7 +225,7 @@ NOTE: *UAttributes* Specification explains that `source` attributes defines the 
 | sink.resource_id
 | source.ue_type_id
 | xref:#note-2[^(2)^],xref:#note-3[^(3)^]
-| sink.ue_major_version
+| sink.ue_version_major
 | OK
 
 .2+.^| RpcResponse
@@ -235,14 +234,14 @@ NOTE: *UAttributes* Specification explains that `source` attributes defines the 
 | sink.resource_id
 | source.ue_type_id
 | xref:#note-2[^(2)^],xref:#note-3[^(3)^]
-| sink.ue_major_version
+| sink.ue_version_major
 | OK
 .^| ERROR (0x81)
 | sink.ue_type_id
 | sink.resource_id
 | source.ue_type_id
 | xref:#note-2[^(2)^],xref:#note-3[^(3)^]
-| sink.ue_major_version
+| sink.ue_version_major
 |  <<commstatus-error-mapping,commstatus>>
 |===
 
@@ -297,7 +296,7 @@ and unsubscribe flows.
 
 ==== Common Fields
 
-<<common-field-mappings>> table below illustrates the common *SOME/IP-SD* EventGroup Entry fields that are present in for all *SOME/IP-SD* Eventgroup entry types (`SubscribeEventgroup`, `SubscribeEventGroupAck`, `SubscribeEventgroupNack`, `StopSubscribeEventGroup`).
+<<common-field-mappings>> table below illustrates the common *SOME/IP-SD* EventGroup Entry fields that are present in all *SOME/IP-SD* Eventgroup entry types (`SubscribeEventgroup`, `SubscribeEventGroupAck`, `SubscribeEventgroupNack`, `StopSubscribeEventGroup`).
 
 These fields are then mapped to uProtocol `UUri` attributes used in uProtocol `UMessage` for performing subscription operations.
 
@@ -321,7 +320,7 @@ This may require specific ECU Firmware.
 
 |===
 
-NOTE: `UUri.authority_name` *MAY* be translated to/from IPv4 (and/or IPv6) Endpoint Option of the *SOME/IP-SD* message, although in `vsomeip` this is not available in the API (e.g. each discovered Endpoint maps to `ServiceID`/`InstanceID`/`Major Version`/`Minor Version`).
+NOTE: `UUri.authority_name` *MAY* be translated to/from IPv4 (and/or IPv6) Endpoint Option of the *SOME/IP-SD* message.
 
 <<eventgroup-entry-mapping>> table below illustrates the mapping of *SOME/IP-SD* Eventgroup Entry types to *uSubscription* messages for the subscribe and unsubscribe flows.
 
@@ -334,9 +333,6 @@ h| Eventgroup Entry Type h| uSubscription Message h| Additional Details
 | `SubscribeEventGroup` | `SubscriptionRequest` | The message is used to subscribe to a topic.
 
 * If `SubscribeAttributes.expire` is not set, `TTL` *MAY* be set to `0xFFFFFF` to indicate that the subscription should remain for the duration of the ignition cycle
-
-NOTE: `vsomeip` has static TTL configuration (for Service Discovery), that applies for all subscriptions. +
-It can't be changed per subscription.
 
 | `SubscribeEventGroupAck` | `SubscriptionResponse` | The message is used to acknowledge a successful subscription request.
 
@@ -351,11 +347,7 @@ It can't be changed per subscription.
 | `StopSubscribeEventGroup` | `UnsubscribeRequest` | The message is used to unsubscribe from a topic.
 
 * `TTL` *SHALL* be set to 0 to indicate that the subscription has terminated.
-NOTE: handled by underlying SOME/IP library.
+
+NOTE: This is handled by the underlying SOME/IP library.
 
 |===
-
-
-=== uDiscovery Translation
-
-*TODO:* _Pending uDiscovery v3 redesign_

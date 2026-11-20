@@ -28,7 +28,7 @@ The purpose of this layer of uProtocol is to define a common API for sending and
 This specification defines the transport layer's abstract API which is mapped to supported programming languages by means of uProtocol's xref:../languages.adoc[language specific libraries]. The API is _implemented_ for particular transport protocols and programming languages by _uProtocol Transport Libraries_.
 ====
 
-The Transport Layer API is defined using UML2 notation.
+The Transport Layer API is defined by the following class diagram, written in Mermaid class diagram notation.
 
 [mermaid]
 ifdef::env-github[[source,mermaid]]
@@ -72,7 +72,7 @@ Each language library *MUST* declare the UListener interface using corresponding
 [#on-receive]
 === OnReceive
 
-A <<UTransport>> implementation invokes this method for each newly arrived message that matches the criteria specified during <<register-listener,registration of the listener>>.
+NOTE: A <<UTransport>> implementation passes a message to a registered listener through this method. When it does so is stated in the requirements under <<register-listener>>.
 
 [source]
 ----
@@ -167,7 +167,7 @@ An implementation *MAY* also handle all messages equally, regardless of priority
 
 [.specitem,oft-sid="dsn~utransport-send-handed-over~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-* A UTransport implementation *MUST* complete <<send>> successfully only once the given message has been handed over to the underlying communication protocol's message delivery mechanism.
+* A UTransport implementation *MUST* complete <<send>> successfully only after the given message has been handed over to the underlying communication protocol's message delivery mechanism.
 --
 
 .What a successful send means over MQTT and over HTTP
@@ -181,7 +181,7 @@ Based on that, a client using this method should not assume that the given messa
 
 On the other hand, unsuccessful completion of this method does not necessarily mean that the given message has not been sent at all. For example, an MQTT based implementation might lose its connection to the MQTT broker _after_ it has sent its MQTT `PUBLISH` packet but _before_ it has received the broker's `PUBACK`. In such a case, clients should use the returned error to determine, if another attempt to send the message is feasible or not. For example, if the initial attempt to send the message has failed with a `UCode.InvalidArgument`, then trying to send the same unaltered message again will most likely yield the same result. However, if the initial attempt failed with a `UCode.Unavailable`, then resending the message using some back-off mechanism will likely succeed eventually.
 
-The above strategy for retrying failed attempts to send a message results in https://www.cloudcomputingpatterns.org/at_least_once_delivery/[at-least-once delivery]. Recipient(s) of these messages should therefore be https://www.cloudcomputingpatterns.org/idempotent_processor/[Idempotent Processors].
+A client that retries failed attempts in this way can hand the same message over more than once, so that a recipient can receive it more than once. Recipient(s) of these messages should therefore be https://www.cloudcomputingpatterns.org/idempotent_processor/[Idempotent Processors]. Retrying does not by itself establish https://www.cloudcomputingpatterns.org/at_least_once_delivery/[at-least-once delivery] to a recipient: a successful `send` confirms only the handover that the requirements above state.
 ====
 
 .Sending a Message
@@ -198,7 +198,7 @@ C->>T : send(UMessage)
 activate T
 opt error while sending
 Note right of T: message may or may<br>not have been sent
-T--)C : error : Ustatus
+T--)C : error : UStatus
 end
 deactivate T
 ----
@@ -242,7 +242,7 @@ NOTE: This method implements the _pull_ <<delivery-method, delivery method>> on 
 
 [.specitem,oft-sid="dsn~utransport-receive-error-notfound~2",oft-needs="impl,utest",oft-tags="TransportLayerImplPull"]
 --
-* A UTransport implementation that supports the _pull_ delivery method *MUST* fail invocations of <<receive>> with a `UCode.NotFound`, if there are no matching messages available. This is also the case if the a package data unit cannot be deserialized into a valid xref:../basics/umessage.adoc[uProtocol message]. Transport implementations *SHOULD* use the validation functionality provided by language libraries for this purpose, if available.
+* A UTransport implementation that supports the _pull_ delivery method *MUST* fail invocations of <<receive>> with a `UCode.NotFound`, if there are no matching messages available. This is also the case if a package data unit cannot be deserialized into a valid xref:../basics/umessage.adoc[uProtocol message]. Transport implementations *SHOULD* use the validation functionality provided by language libraries for this purpose, if available.
 --
 
 [.specitem,oft-sid="dsn~utransport-receive-filter-match~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPull"]
@@ -410,18 +410,6 @@ deactivate T
 ----
 ====
 
-Sometimes it's necessary to distinguish the message types which should be listened to.
-
-[%autowidth]
-|===
-| Message Type | Possible resource ID combinations `{source resource_id, sink resource_id}`
-
-| Publish      | {[8000-FFFE], None}
-| Notification | {[8000-FFFE], 0}, {FFFF, 0}, {FFFF, FFFF}
-| Request      | {0, [1-7FFF]}, {FFFF, FFFF}
-| Response     | {[1-7FFF], 0}, (FFFF, 0), {FFFF, FFFF}
-|===
-
 [#unregister-listener]
 === UnregisterListener
 
@@ -432,7 +420,7 @@ NOTE: Clients use this method to unregister a previously registered listener.
 unregisterListener(sourceFilter: UUri, sinkFilter: UUri [0..1], listener: UListener)
 ----
 
-.RegisterListener Parameters
+.unregisterListener Parameters
 [width="100%",cols="1,1,5"]
 |===
 |Parameter | Type | Description
@@ -566,11 +554,11 @@ uProtocol distinguishes between the following message delivery methods:
 |===
 |Method |Definition
 
-|https://peterdaugaardrasmussen.com/2021/02/26/polling-vs-pushing-data/[*Push*]
+|*Push*
 |Data is pushed by the sender to the receiver.
 
 
-|https://peterdaugaardrasmussen.com/2021/02/26/polling-vs-pushing-data/[*Pull/Poll*]
+|*Pull/Poll*
 |Data is pulled in by the receiver. The receiver does so periodically, at set intervals, because it is usually unaware of when new data will become available.
 
 |===
@@ -585,10 +573,12 @@ uProtocol distinguishes between the following message delivery methods:
 
 NOTE: Communication protocols like MQTT or HTTP define a specific Protocol Data Unit (PDU) for conveying control information and user data. A uProtocol Transport Library implements the Transport Layer API defined above on top of such a communication protocol.
 
+[#communication-protocol-binding]
 A _communication protocol binding_ defines how the uProtocol Transport Layer API maps to the communication protocol's message exchange pattern(s) and how uProtocol messages are mapped to the protocol's PDU. Many communication protocols distinguish between a message's metadata and the (raw) payload. This is often reflected by the structure of the protocol's PDU. For example, HTTP supports _header_ fields and a _body_ which can be used to convey a uProtocol message's attributes and payload respectively.
 
-uProtocol currently defines bindings to the following communication protocols:
+uProtocol defines bindings to the following communication protocols:
 
 * xref:zenoh.adoc[*Eclipse Zenoh*]
 * xref:mqtt_5.adoc[*MQTT 5*]
 * xref:someip.adoc[*SOME/IP*]
+* xref:iceoryx2.adoc[*Eclipse iceoryx2*]

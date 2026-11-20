@@ -1,5 +1,5 @@
 = Digital Twin (uTwin)
-%toc%
+:toc:
 :sectnums:
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
@@ -95,9 +95,11 @@ If a cloud application MyApp subscribes to the tire pressure of a given vehicle 
 * uTwin of each device received all events flowing through the device, therefore creating a local dig twin accessible by all apps local to this device
 * Only events that must be transferred due to existing subscribers are transmitted, and therefore stored in a remote device (therefore minimizing communication overhead related to utwin management)
 
-.uTwin Sequence Diagram
 [#utwin-sequence-diagram]
+.uTwin Sequence Diagram
+====
 image::utwin.png[uTwin Sequence Diagram]
+====
 
 [NOTE]
 ====

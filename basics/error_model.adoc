@@ -28,12 +28,12 @@ In order to do so, a client uEntity (service consumer) sends an xref:uattributes
 In general, an RPC can succeed or fail from the service consumer's point of view.
 ====
 
-uProtocol follows Google's https://cloud.google.com/apis/design/errors[protocol-agnostic API error model]. The following sections describe how this model is applied to uProtocol service definitions and implementations.
+uProtocol's error model has a set of error codes and a status type. The codes are the `UCode` values: link:../up-core-api/uprotocol/v1/ucode.proto[ucode.proto] declares them, each with a comment on its meaning. The status type is `UStatus` (<<ustatus-data-model>>), which carries one code, an optional message and any number of details. The following sections describe how this model is applied to uProtocol service definitions and implementations.
 
 [#data-model-definition]
 == Data Model
 
-NOTE: A UStatus contains detail information about an error that has occurred while a service provider has processed an RPC Request message. The diagram below shows the UStatus class and its properties using UML2 notation.
+NOTE: A UStatus contains detail information about an error that has occurred while a service provider has processed an RPC Request message. The class diagram below shows the UStatus class and its properties.
 
 .UStatus Data Model
 [#ustatus-data-model]
