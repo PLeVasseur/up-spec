@@ -1,0 +1,72 @@
+= uP-L1 Peers and Fault Model
+:toc: preamble
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
+
+[NOTE]
+====
+This page holds transport-layer peer fault-model requirements of the up-rust SEooC requirement family (`+req~ssr-*+`, `ASIL:: B`, `Safety*` tags).
+Filing on this page does not broaden any requirement to all uP-L1 implementations: whom each item binds, and how the repository's requirement families meet, is stated in xref:../contract-generations.adoc[Which requirements an implementation follows] (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
+
+Additional safety-view fault-model navigation is indexed in xref:../safety/fault-models.adoc[Safety fault models and hypotheses].
+The remaining transport-peer items currently in xref:../safety/up-l1/peers.adoc[Peers of a transport] join this page in a later relocation commit.
+====
+
+[[req-ssr-peer-fault-model]]
+== The requirements hold against a faulty peer
+
+[.specitem,oft-sid="req~ssr-peer-fault-model~2",oft-title="The requirements hold against a faulty peer",oft-needs="impl,utest,uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
+--
+*The faulty-peer model.*
+Every peer is treated as faulty, never malicious.
+
+* A peer may send any content, at any time and in any volume, and may choose any source URI.
+* A peer may stop sending, stall, exit, be killed or restart at any time.
+* A faulty peer includes one that writes values its own middleware never writes, into shared memory it can write.
+* A peer below a reader's level may write its own shared memory at any moment, and the route that its reader then takes is stated in xref:../safety/up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader].
+
+*The duty.*
+Each part that a requirement of the up-rust SEooC requirement family binds *MUST* meet each duty that the requirement gives it against everything that this model allows of a peer: each input, each write into shared memory, and each stop, stall, exit, kill and restart.
+
+*The model's scope.*
+The peers of the up-rust SEooC, on every transport.
+The model applies within the access restriction that the integrator provides: only the processes deployed to use a transport's resources reach them (xref:../safety/up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]).
+What lies outside that scope is outside this item's duty, which releases no part from a requirement as its own statement reads.
+
+*The boundary between safety and security.*
+Only deliberate exploitation, such as engineering a peer-ID hash collision, is out of scope, as security.
+That exclusion is the model's boundary between safety and security: it does not say that a peer that exploits deliberately is harmless, or that the requirements hold against it.
+
+*Rules left in force.*
+The model bounds only the safety argument.
+It leaves in force the protocol's security requirements, such as those of xref:README.adoc[uP-L1] against address spoofing and unauthorized access.
+It also does not make a lower-assurance process harmless because it runs apart: the rules for lending and copying cover what such a process can write into shared memory.
+
+*The safety manual.*
+Each such part *MUST* state the model, its scope and the boundary between safety and security in the safety manual that is released with it.
+--
+
+[horizontal]
+ID:: `+req~ssr-peer-fault-model~2+`
+ASIL:: B
+Allocated to:: each part that a requirement of the up-rust SEooC requirement family binds
+Verification:: fault-injection, review
+* *fault-injection*
+** Malformed and truncated frames, and frames with any bytes in their header, their envelope and their payload.
+** Arbitrary byte strings, decoded by each wire.
+** A flood on every receive kind, and one peer that fills a route's depth, its slots or its peer table.
+** Frames at any time, frames that carry an earlier incarnation of their peer included.
+** Frames from undeclared sources, and from any source URI.
+** A peer process that stalls, exits, is killed or restarts during traffic.
+** A peer process that writes values its own middleware never writes, into shared memory that it can write.
+** A peer process below the reader's level that writes its shared memory while it is read.
+* *review*
+** For each part, that the verification of each requirement that binds it covers the faults of this item that bear on that requirement.
+** For each part, that the safety manual released with it states the model, its scope and the boundary between safety and security.
+ISO 26262:: 6-Annex D.2.2, 6-Annex D.2.3, 6-Annex D.2.4 (part-clause numbers only)
+
+*Rationale.*
+Peers run in other processes, often over middleware this project does not control.
+A requirement that held only for well-formed input would leave a process open to every peer that fails.
+
+The element, the bindings, the wires and the Streamer handle the same frames and the same shared memory, so a fault that one of them does not withstand reaches the others.

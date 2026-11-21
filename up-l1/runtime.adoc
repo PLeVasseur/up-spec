@@ -5,11 +5,11 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 
 [NOTE]
 ====
-This page holds transport-layer runtime requirements of the up-rust SEooC requirement family (`+req~ssr-*+`): mode transition, setup checks, initialization failure, restart, startup bounds, bounded work and waiting, runtime retention, lease drops, pending cleanup and decoded-value destruction.
+This page holds transport-layer runtime requirements of the up-rust SEooC requirement family (`+req~ssr-*+`): mode transition, setup checks, initialization failure, restart, startup bounds, bounded work and waiting, runtime retention, lease drops, pending cleanup, decoded-value destruction, synchronous or polled traffic, and route QoS declarations and overflow.
 Whom each item binds, and how the three requirement families meet, is stated in xref:../contract-generations.adoc[Which requirements an implementation follows] (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]); classic-route exclusion from runtime mode is stated in xref:../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode].
 
 Shared two-mode types, startup storage, heap classes and stronger resource guarantees are stated in xref:../basics/resources.adoc[shared resource lifecycle and storage] (including xref:../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types], xref:../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode] and xref:../basics/resources.adoc#req-ssr-mode-no-traffic-before-runtime[Traffic is impossible before runtime mode]).
-Related transport QoS, TTL and deadline rules (xref:../safety/seooc-up-rust/qos.adoc[QoS, TTL and deadlines]) and the synchronous-or-polled traffic rule (xref:../safety/seooc-up-rust/crate-isolation.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled]) join this page in the next relocation commit.
+Binding-facing loss counting, route reporting, arrival-deadline monitoring, TTL expiry checks and middleware waivers are stated in xref:bindings.adoc[uP-L1 binding observation, deadlines, TTL and waivers].
 ====
 
 == Transport mode transition, checks, failure, restart and bounds
@@ -76,11 +76,11 @@ The entry conditions are these, each a requirement of its own:
 * no declaration admitted whose traffic would be refused for a reason setup already knows (<<req-ssr-mode-entry-no-latent-refusal,Nothing is refused at runtime for a reason setup already knew>>);
 * every heap class declared and admissible for its route, and every decoded type admitted as its route's class admits (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; <<req-ssr-heap-slot-types,A decoded value is destroyed once, as its route's class admits>>);
 * lazy state forced, in the element and in each binding (xref:../basics/resources.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]; xref:../safety/up-l1/bindings.adoc#req-ssr-binding-lazy-forced[Lazy state is forced, and threads are idle, before running]);
-* a waiver for every permit, complete and approved by someone other than its author (xref:../safety/seooc-up-rust/waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]; xref:../safety/seooc-up-rust/waivers.adoc#req-ssr-waiver-record[Waivers are recorded and can be found]);
-* QoS that can be honored, means something, and agrees between declarations, and every timing or assurance claim that a route requires admitted under its configuration (xref:../safety/seooc-up-rust/qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]; xref:../safety/seooc-up-rust/qos.adoc#req-ssr-qos-invalid-refused[Meaningless QoS is refused at setup]; xref:../safety/seooc-up-rust/qos.adoc#req-ssr-qos-consistent-declarations[Two declarations of one route agree]);
+* a waiver for every permit, complete and approved by someone other than its author (xref:bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]; xref:../safety/assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found]);
+* QoS that can be honored, means something, and agrees between declarations, and every timing or assurance claim that a route requires admitted under its configuration (<<req-ssr-qos-no-downgrade,QoS is honored or refused, never weakened>>; <<req-ssr-qos-invalid-refused,Meaningless QoS is refused at setup>>; <<req-ssr-qos-consistent-declarations,Two declarations of one route agree>>);
 * integrity levels declared, and every crossing they imply admissible (xref:../safety/up-l1/integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]);
 * all runtime storage placed under the startup-memory policy of the configuration, static or caller-provided on the ASIL path (xref:../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]);
-* in strict mode's Enforce state, the Locked state included, no forbidden finding and no denied finding (xref:../safety/seooc-up-rust/build.adoc#req-ssr-strict-states[Strict mode has four states]).
+* in strict mode's Enforce state, the Locked state included, no forbidden finding and no denied finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]).
 --
 
 [horizontal]
@@ -135,7 +135,7 @@ A refused carrier leg, for one, reports the route, the leg, the setting and the 
 The element *MUST* let a transport enter runtime mode only after both of these:
 
 * the wall clock of the platform's time provider has been read successfully;
-* the provider has passed the setup check of its package's stated contract (xref:../safety/seooc-up-rust/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules]).
+* the provider has passed the setup check of its package's stated contract (xref:../basics/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules]).
 
 In the setup check, the element *MUST* fail a provider known to fall short of that contract, such as one that supplies uptime or a fixed value as wall time.
 
@@ -157,9 +157,9 @@ Reading the clock once before the transition makes a clock that cannot be read f
 
 A board without a synchronized wall clock is a real configuration.
 Quietly using uptime there would make every TTL decision wrong while appearing to work.
-Such a board supplies a synchronized wall clock through its time provider (xref:../safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]).
+Such a board supplies a synchronized wall clock through its time provider (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]).
 Where its provider supplies none, every TTL decision would rest on a wall clock that nothing keeps in step with the peers' time bases, so the transition fails.
-A wall clock that reads but is wrong still passes the setup check, and only the integrator's own measures cover it (xref:../safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]).
+A wall clock that reads but is wrong still passes the setup check, and only the integrator's own measures cover it (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]).
 
 [[req-ssr-mode-entry-no-latent-refusal]]
 === Nothing is refused at runtime for a reason setup already knew
@@ -168,7 +168,7 @@ A wall clock that reads but is wrong still passes the setup check, and only the 
 --
 The element *MUST* refuse at setup, naming the route and the setter, each declaration for which what setup already knows shows that the element would refuse, in runtime mode, traffic that the declaration admits: all of that traffic or any part of it.
 
-A refusal that depends on what a frame or a call itself carries, or on when it arrives, is not known at setup, and stays a refusal in runtime mode (xref:../safety/seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]).
+A refusal that depends on what a frame or a call itself carries, or on when it arrives, is not known at setup, and stays a refusal in runtime mode (xref:../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]).
 
 *A wire with no largest encoding.*
 Where a route's wire declares no largest encoding, the element *MUST* refuse the route at setup unless the route declares a payload bound (xref:../safety/up-l1/serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns]).
@@ -213,7 +213,7 @@ The element *MUST* treat that later initialization as a first one: it starts fro
 Startup memory that is sealed admits no new setup, so a later initialization needs startup memory that is not sealed (xref:../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
 
 *Recovery from outside.*
-A fault of a transport in runtime mode is recovered by a restart of the whole process or partition, which a supervisor outside it makes (xref:../safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]), and the restarted process initializes as <<req-ssr-mode-restart,A restart is an initialization>> states.
+A fault of a transport in runtime mode is recovered by a restart of the whole process or partition, which a supervisor outside it makes (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]), and the restarted process initializes as <<req-ssr-mode-restart,A restart is an initialization>> states.
 --
 
 [horizontal]
@@ -251,7 +251,7 @@ Otherwise the element's setup *MUST* refuse the source or the provider by name b
 It is reported as that item states, whether or not a route uses the source or the provider, and a route that requires, itself or through a claim, a guarantee which that outcome leaves not established is refused by name, as xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused] states.
 
 Such a report records that declared policy.
-It establishes no guarantee, no timing bound and no assurance scope (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../safety/seooc-up-rust/qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]).
+It establishes no guarantee, no timing bound and no assurance scope (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; <<req-ssr-qos-no-downgrade,QoS is honored or refused, never weakened>>).
 
 *One stated disposition.*
 On a refusal, the element's setup *MUST* leave each resource and each initialized value that it acquired with one stated disposition:
@@ -313,7 +313,7 @@ Verification:: test, review, fault-injection
 ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
-In a build that aborts on panic (xref:../safety/seooc-up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]), a setup mistake that panicked would end the process, and its restart would run straight into the same panic.
+In a build that aborts on panic (xref:../safety/elements/up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]), a setup mistake that panicked would end the process, and its restart would run straight into the same panic.
 An error that names its cause, its route and the setter to change tells the integrator what to fix instead.
 
 Leaving nothing that stops a successor from initializing lets the successor start cleanly, since it recovers what a dead predecessor left before it prepares a route (<<req-ssr-mode-restart,A restart is an initialization>>).
@@ -451,7 +451,7 @@ A wait without a bound would leave a process stuck in initialization with nothin
 A bound that expires ends setup with an error naming what was missing.
 
 The bound is logical, as every wait of the element's own is (<<req-ssr-bound-wait,Every bounded wait has a logical deadline>>).
-Setup fails with that error once it runs after the bound has passed, and a process that the OS does not run at all is the supervisor's to bound (xref:../safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
+Setup fails with that error once it runs after the bound has passed, and a process that the OS does not run at all is the supervisor's to bound (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
 
 A destruction that setup performs on a refusal runs within setup, on the refusing path (<<req-ssr-mode-init-failure,Initialization failure>>).
 Setup hands nothing to a release service to dispose of a refusal (<<req-ssr-mode-init-failure,Initialization failure>>), so pending cleanup (<<req-ssr-release-lease-drop,A lease gives back its slot and nothing else>>) does not reach it.
@@ -509,7 +509,7 @@ So a repeat is tied to the progress that caused it, and a failure alone is no ev
 
 _A producer that stalls._
 The bound leaves open how long a producer stalls, and so when the frames queued behind that producer are delivered.
-Where the item relies on such a frame within a time, bounding the stall is the integrator's (xref:../safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+Where the item relies on such a frame within a time, bounding the stall is the integrator's (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 
 [[req-ssr-bound-wait]]
 === Every bounded wait has a logical deadline
@@ -577,7 +577,7 @@ The element *MUST* state, in the contract of each operation that takes a deadlin
 
 * A wait's timeout and a setup bound are compared with the platform's monotonic clock.
 The acceptance event is the observation of the awaited state.
-* An RPC call's TTL is compared in wall time from the request's creation (xref:../safety/seooc-up-rust/qos.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
+* An RPC call's TTL is compared in wall time from the request's creation (xref:bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
 The acceptance event is the element's completion of the call with a response that its wire check accepted (xref:../safety/up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
 
 For every logical deadline in the element, a wait's timeout, an RPC call's TTL and a setup bound alike, the deadline decides the outcome.
@@ -1022,7 +1022,7 @@ An ordinary decoded message owns strings, sequences and nested messages, and end
 Refusing such a type for want of a proof about its destruction would refuse ordinary serialized communication (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 
 The value's destruction is part of that route's resource policy; it is not a release of the reservation that holds it.
-Every transition that ends a value uses this one rule, so the refusal, overflow and peer-failure items need no release of their own (xref:../safety/seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; xref:../safety/seooc-up-rust/qos.adoc#req-ssr-qos-overflow[Overflow acts as declared]; xref:../safety/up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
+Every transition that ends a value uses this one rule, so the refusal, overflow and peer-failure items need no release of their own (xref:../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; <<req-ssr-qos-overflow,Overflow acts as declared>>; xref:../safety/up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
 
 _Waiting._
 Waiting and panicking are different properties, and neither follows from ownership.
@@ -1047,3 +1047,265 @@ So the element keeps memory safe against all of it on every route, holds nothing
 
 Rust does not promise that a destructor runs (<<req-ssr-mode-no-shutdown,No shutdown in runtime mode>>).
 So a forgotten value is leaked with its slot and never reclaimed behind a live reference.
+
+== Synchronous or polled traffic
+
+[[req-ssr-crate-sync-path]]
+=== Traffic is synchronous or polled
+
+[.specitem,oft-sid="req~ssr-crate-sync-path~2",oft-title="Traffic is synchronous or polled",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+--
+The element *MUST* offer every traffic operation of its runtime path in synchronous or polled form, and *MUST* use none of `+core::future+`, `+core::task+` or `+core::pin+` on that path.
+
+Each asynchronous layer *MUST* sit above the runtime path, in a crate of its own.
+The element *MUST NOT* take an asynchronous layer into the safety crate, and *MUST NOT* depend on one.
+--
+
+[horizontal]
+ID:: `+req~ssr-crate-sync-path~2+`
+ASIL:: B
+Allocated to:: the element; each asynchronous layer, for its place above the runtime path, in a crate of its own
+Verification:: gate (a token scan for `+async+`, `+.await+`, `+Future+`, `+Pin+`, `+Poll+`, `+Waker+` and `+Context+`, and for grouped `+use core::{…}+` paths, with a negative control for each), review (each asynchronous layer's crate, which sits above the runtime path and is no dependency of the element)
+
+*Rationale.*
+Offering traffic in synchronous or polled form, with no futures, tasks or pinning, keeps it independent of any executor and of library modules that a given qualification scope may not cover.
+
+Which compiler releases, targets, library modules and options a qualification covers is stated by its supplier for an exact release.
+
+== Route QoS declarations and overflow
+
+[[req-ssr-qos-declared]]
+=== QoS is declared per route at setup
+
+[.specitem,oft-sid="req~ssr-qos-declared~3",oft-title="QoS is declared per route at setup",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+--
+*The declaration.*
+The element *MUST* take every route's QoS (reliability, overflow, depth, history, deadline, and whether priority is required) from a declaration made during initialization in transport-agnostic terms, or give the route the one documented default.
+
+Priority and TTL stay per message.
+
+*What each setting belongs to.*
+
+* Reliability, overflow and history belong to the route: on one transport, every declaration of one route agrees on them (<<req-ssr-qos-consistent-declarations,Two declarations of one route agree>>).
+* Depth is the capacity of the declaring endpoint's queue: the number of frames that it holds before the overflow policy applies.
+* A deadline is the declaring receive endpoint's monitoring of arrivals (xref:bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored]).
+* Whether priority is required is a demand on the capability of the route's binding.
+
+*A deadline or `+event_only()+`.*
+A declaration gives a deadline, declares `+event_only()+`, or does neither.
+The clauses of this paragraph hold for every route but a detector route of the E2E wire.
+
+* An explicit `+event_only()+` declaration permits a route without a deadline, in every state of strict mode.
+* The element *MUST* refuse at setup, in every state of strict mode, a declaration that gives a deadline together with `+event_only()+`, naming the route and the setting.
+* In strict mode's Off and Report states, the element *MUST NOT* refuse a route solely because it declares neither.
+* In strict mode's Enforce and Locked states, the element *MUST* refuse at setup, as a forbidden finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]), an ASIL receive route that declares neither (xref:../safety/up-l1/integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]; xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+In the Report state, the element *MUST* report such a route as that finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run]).
+
+*A detector route of the E2E wire.*
+A detector route of the E2E wire is a receive route that selects the E2E wire and on which that wire judges each declared sender's counters: a topic's or a notification's receive route, and an RPC server's request route (xref:../safety/seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-detects[The E2E wire detects each fault]).
+
+* The element *MUST* refuse at setup, in every state of strict mode and at every integrity level, a detector route of the E2E wire that declares `+event_only()+` or no deadline, naming the route and the setting (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+* The element *MUST* refuse such a route that gives a deadline together with `+event_only()+`, as it refuses any other.
+* The route's deadline is the timeout of its end-to-end detection.
+The element monitors it as xref:bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] states; that the E2E wire keeps no timeout of its own is stated in xref:../safety/seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-detects[The E2E wire detects each fault].
+* An RPC client's response route is no detector route: the E2E wire keeps no receiving slot for it (xref:../safety/seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-receiver-state[E2E receiving state is one fixed slot per declared data ID]), and each call ends by its TTL (xref:../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-ends[RPC calls always end]).
+The clauses on a deadline or `+event_only()+` apply to it.
+* In strict mode's Enforce and Locked states, the element *MUST* refuse at setup, as a forbidden finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]), at every integrity level, an RPC client's response route that selects the E2E wire and declares neither, naming the route and the setting.
+In the Report state, the element *MUST* report such a route as that finding.
+* This paragraph asks no deadline of a route that only sends.
+--
+
+[horizontal]
+ID:: `+req~ssr-qos-declared~3+`
+ASIL:: B
+Allocated to:: the element
+Verification:: test, compile-fail
+* *test*
+** Each route's QoS declared at setup, or the one documented default.
+** A route with `+event_only()+` and no deadline, other than a detector route of the E2E wire, admitted in each state of strict mode.
+** A declaration that gives a deadline together with `+event_only()+`, refused in each state of strict mode, naming the route and the setting.
+** A route that declares neither, other than a detector route of the E2E wire and an RPC client's response route that selects that wire: admitted in the Off and Report states, the ASIL receive route reported as a forbidden finding in the Report state; in the Enforce and Locked states, an ASIL receive route refused, and a QM receive route and an ASIL route that only sends admitted.
+The same ASIL receive route, with a deadline, admitted in the Enforce and Locked states.
+** A detector route of the E2E wire, of each of the three kinds, at an ASIL level and at QM, in each state of strict mode: refused with `+event_only()+`, with neither, and with a deadline together with `+event_only()+`, each refusal naming the route and the setting; admitted with a deadline.
+** An RPC client's response route and a route that only sends, each selecting the E2E wire, admitted with `+event_only()+` and no deadline in each state of strict mode.
+The response route that declares neither, at QM and at an ASIL level: admitted in the Off and Report states, reported as a forbidden finding in the Report state, and refused in the Enforce and Locked states, naming the route and the setting.
+* *compile-fail*: QoS set after runtime.
+
+*Rationale.*
+A route that declares `+event_only()+` forgoes deadline-based silence and delay detection by choice (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+The declaration lets the Enforce and Locked states tell that choice from a missing deadline.
+
+A declaration that gives both a deadline and `+event_only()+` makes no choice, so setup refuses it.
+
+A counter reveals a lost frame only when a later frame arrives.
+So the loss of a sender's last frames, and its silence, show only as a missed deadline, which is why a detector route cannot forgo one.
+A client's response is judged against its call, and the call ends by its TTL, so a response route needs no deadline to show a silent server.
+As on every receive route on the E2E wire, the Enforce and Locked states still ask it for an explicit choice.
+
+Depth, a deadline and a required priority are each one endpoint's, so declarations of one route may differ in them.
+
+[[req-ssr-qos-no-downgrade]]
+=== QoS is honored or refused, never weakened
+
+[.specitem,oft-sid="req~ssr-qos-no-downgrade~5",oft-title="QoS is honored or refused, never weakened",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+--
+*Functional QoS.*
+The element *MUST* check each route's QoS at setup against the declared capability of the route's binding, before any resource is reserved.
+If it cannot be honored, the element *MUST* refuse setup, naming the route and the setting.
+The element *MUST NOT* let a QoS setting be weakened silently, at setup or in runtime mode.
+
+*Timing and assurance.*
+A finite timing bound and a safety-assurance scope are claims separate from a route's functional QoS.
+A finite timing bound is a stated endpoint reached within a bound, under a supported configuration whose execution model, workload envelope and evidence establish it.
+A safety-assurance scope is the element's contribution to the safety requirements of an item, in ISO 26262's sense, at a stated ASIL and context, with its requirements, analyses, verification, qualification and assessment.
+
+* Where a route explicitly requires either claim, the element *MUST* admit that claim only under the declared conditions of a supported configuration whose evidence establishes it.
+Otherwise the element *MUST* refuse the route at setup, naming the route, the claim and the missing condition.
+* The element *MUST NOT* let either claim be inferred from an OS family, an architecture or a compiler.
+* An integrity level, an ASIL label or a strict-mode state is no request for either claim.
+* Apart from the refusal that the last entry states for strict mode's Enforce and Locked states, the element *MUST NOT* refuse a route that requires only functional QoS for want of an optional timing bound or assurance scope.
+* Where a configuration offers no finite bound for an endpoint, the element *MUST* still operate and report functionally on routes admitted under this item.
+The first and last entries state which routes setup refuses.
+* In strict mode's Enforce and Locked states, the element *MUST* refuse at setup, as a forbidden finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]), a route that declares a deadline and a reaction budget where its detection bound exceeds that budget or no finite detection bound is established for it (xref:bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored]; xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+In the Report state, the element *MUST* report such a route as that finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run]) and *MUST NOT* refuse it for that finding.
+A declared reaction budget is by itself no requirement of a finite timing bound in the sense of the first entry.
+
+*Reporting.*
+The element *MUST* state separately in each route's report:
+
+* its admitted functional QoS;
+* any admitted finite timing bound, with the configuration it rests on;
+* any admitted assurance scope.
+
+In a report, the element *MUST NOT* present a passed setup check as a safety qualification.
+--
+
+[horizontal]
+ID:: `+req~ssr-qos-no-downgrade~5+`
+ASIL:: B
+Allocated to:: the element
+Verification:: test, review
+* *test*
+** The QoS contract suite, on the test doubles and on a binding.
+** A route whose QoS its binding cannot honor, refused at setup before any resource is reserved for it, naming the route and the setting.
+** A route that requires a timing bound or an assurance scope its configuration does not establish is refused by name.
+** The same route without that requirement and with no declared reaction budget is admitted on a configuration that has no timing or assurance package.
+** A route at an ASIL integrity level that requires neither claim and declares no reaction budget is not refused for want of a timing bound or an assurance scope, in any strict-mode state, on a configuration that has no timing or assurance package.
+** On a configuration that offers no finite bound for an endpoint, an admitted route that does not require that bound operates and reports functionally.
+** In the Enforce and Locked states, a route whose detection bound exceeds its declared reaction budget is refused, and one whose bound equals the budget is not.
+** In the Enforce and Locked states, a route that declares a deadline and a reaction budget, on a configuration that establishes no finite detection bound, refused; the same route without a declared budget, and a route with `+event_only()+` and a declared budget, admitted.
+** In the Off and Report states, a route whose detection bound exceeds its declared reaction budget, and a route that declares a deadline and a reaction budget for which no finite detection bound is established, each admitted, and each reported as a forbidden finding in the Report state.
+** Each route's report, stating apart its admitted functional QoS, any admitted finite timing bound with the configuration it rests on, and any admitted assurance scope, and presenting no passed setup check as a safety qualification.
+* *review*: no path on which a finite timing bound or a safety-assurance scope is inferred from an OS family, an architecture or a compiler; and each statement that uses a finite timing bound or a safety-assurance scope, read with the clause "Timing and assurance".
+
+*Rationale.*
+Silently substituting a supported policy would leave the application relying on a guarantee the route does not provide.
+
+Functional communication, a finite timing bound and a safety-assurance scope are independent properties (xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], clause "What a claim covers").
+Ordinary use needs only the first.
+Refusing it for want of the others would make a safety package a prerequisite for non-safety use.
+Granting a required stronger claim without its evidence would be a silent downgrade of that claim.
+
+[[req-ssr-qos-overflow]]
+=== Overflow acts as declared
+
+[.specitem,oft-sid="req~ssr-qos-overflow~3",oft-title="Overflow acts as declared",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+--
+*The policy.*
+In runtime mode the element *MUST* ensure that a full route applies exactly its declared overflow policy (drop the oldest, drop the newest, or wait within a bound).
+The element *MUST* count every discard observable to it or to the route's binding, exactly once under its cause.
+
+*No heap for the policy itself.*
+The element *MUST* ensure that choosing and applying the policy, waiting and counting acquire and release no heap memory.
+
+*Native and heap-free routes.*
+On a native route, and on any route whose heap class is none, the element *MUST* ensure that a discard releases nothing.
+
+*Routes that declare allocation.*
+On a serialized route whose declared heap class admits allocation, the policy ends ownership of one of these:
+
+* an evicted oldest value;
+* a refused newest frame;
+* a waiting sender's frame whose bound ran out.
+
+That ownership is released exactly once as <<req-ssr-heap-slot-types,A decoded value is destroyed once, as its route's class admits>> and xref:../safety/up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
+The element *MUST* ensure that this release is the only heap use an overflow causes, and that it releases no route, table or other runtime resource.
+
+*Discards the binding cannot observe.*
+If a discard occurs entirely inside middleware and the binding cannot observe it, the element *MUST* explicitly disclose that limitation in the route's report and make no claim there to count it (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+--
+
+[horizontal]
+ID:: `+req~ssr-qos-overflow~3+`
+ASIL:: B
+Allocated to:: the element
+Verification:: test, heap-window
+* *test*
+** The QoS contract suite, observing what an application receives from the documented read call alone, with no drain loop first.
+** Observable discards counted once under their cause.
+** A route whose binding has discards that it cannot observe: the route's report discloses the limitation and claims no complete count.
+** On a serialized route that admits owning values, one release per evicted, refused or timed-out frame.
+* *heap-window*
+** Every overflow policy inside the window.
+** On a serialized route, only the declared release of the ownership a discard ends.
+
+*Rationale.*
+Counting observable discards gives the application a local congestion signal.
+
+Counter fields can be present for events that a binding cannot observe.
+
+_Heap use on overflow._
+Only the release of the ownership that the policy ends, under the route's declared class, may touch the heap.
+Destroying an evicted value on a serialized route that admits owning values can touch the heap.
+
+[[req-ssr-qos-invalid-refused]]
+=== Meaningless QoS is refused at setup
+
+[.specitem,oft-sid="req~ssr-qos-invalid-refused~2",oft-title="Meaningless QoS is refused at setup",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+--
+Six QoS declarations cannot be honored as written, and the element *MUST* refuse each at setup, naming the route and the setting:
+
+* a zero deadline;
+* a deadline under 1,024 ns;
+* a deadline on a pull route whose binding cannot report arrivals (xref:../safety/up-l1/bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is]);
+* a deadline shorter than the route's binding's declared arrival latency;
+* a wait policy with a zero timeout;
+* history on an RPC route.
+--
+
+[horizontal]
+ID:: `+req~ssr-qos-invalid-refused~2+`
+ASIL:: B
+Allocated to:: the element
+Verification:: test (each of the six refusals)
+
+*Rationale.*
+Diagnosing a declaration outside the monitor or binding capability before activation keeps it from becoming a different policy at runtime.
+
+A deadline on a pull route whose binding cannot report arrivals is refused whatever timing claim the route makes, because the monitor counts from the arrivals that the binding reports.
+
+[[req-ssr-qos-consistent-declarations]]
+=== Two declarations of one route agree
+
+[.specitem,oft-sid="req~ssr-qos-consistent-declarations~2",oft-title="Two declarations of one route agree",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+--
+On one transport, the element *MUST* refuse at setup two declarations of the same route that differ in reliability, overflow or history, naming the route and the setting.
+
+The element *MUST NOT* refuse two declarations of the same route because they differ in depth, in deadline or in whether priority is required.
+Each of those settings is one endpoint's, and the element checks each declaration's own against the capability of the route's binding (<<req-ssr-qos-declared,QoS is declared per route at setup>>; <<req-ssr-qos-no-downgrade,QoS is honored or refused, never weakened>>).
+--
+
+[horizontal]
+ID:: `+req~ssr-qos-consistent-declarations~2+`
+ASIL:: B
+Allocated to:: the element
+Verification:: test
+* On one transport, two declarations of one route that differ in reliability, in overflow and in history, each refused, naming the route and the setting.
+* Two declarations of one route that agree on those three settings and differ in depth, in deadline and in whether priority is required, alone and together: admitted, each endpoint keeping its own.
+* One of them with a setting beyond the capability of the route's binding: refused for that setting, and not as a conflict.
+
+*Rationale.*
+Two declarations of one route that differ in reliability, overflow or history cannot both be honored, and choosing one would silently weaken the other (<<req-ssr-qos-no-downgrade,QoS is honored or refused, never weakened>>).
+So setup refuses, and the refusal names the setting in conflict.
+
+Depth, a deadline and a required priority are each one endpoint's, so two declarations can both be honored where they differ in them.

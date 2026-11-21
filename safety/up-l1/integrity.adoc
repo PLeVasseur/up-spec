@@ -5,7 +5,7 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
-Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
+Scope and element boundary: xref:../elements/up-rust/README.adoc[the up-rust SEooC's README].
 
 These items say how the element lends or copies shared memory between integrity levels.
 Each item's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
@@ -14,7 +14,7 @@ Each item's statement says whom it binds (xref:../../contract-generations.adoc#r
 * A lending binding's statement of which way its ports write shared state is xref:bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state], on the same page.
 * The integrator's part, assigning each transport's level, is xref:deployment.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly] in xref:deployment.adoc[what a deployment provides].
 * The integrator's duties for access, for two-way shared state and for a zero-copy writer are xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], on the same page.
-* The integrator's duties for data above ASIL B, and for the element inside a process or partition that holds software at ASIL C or D, are xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element] in xref:../seooc-up-rust/assumptions-of-use.adoc[the element's assumptions of use].
+* The integrator's duties for data above ASIL B, and for the element inside a process or partition that holds software at ASIL C or D, are xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element] in xref:../elements/up-rust/assumptions-of-use.adoc[the element's assumptions of use].
 * What a level is, its values, their order and its default: <<req-ssr-integrity-declared,Each transport declares one integrity level>>; what a level is not: xref:../README.adoc#concepts[Shared concepts and fault models].
 
 [[req-ssr-integrity-declared]]
@@ -40,7 +40,7 @@ A transport or a route at A, B, C or D is an ASIL transport or an ASIL route, an
 The same holds for each kind of route: an ASIL receive route, for one, is a receive route at A, B, C or D.
 Each of these words names a declared level, and a declared level establishes no assurance claim.
 A process at a declared level of A, B, C or D, or of QM, is one whose own declared level is that level (xref:deployment.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly]).
-A process's declared level is independent of whether it is an ASIL process: an ASIL process, application, binary, image and build are words of the ASIL path, which an integrator's claim decides (xref:../seooc-up-rust/README.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]).
+A process's declared level is independent of whether it is an ASIL process: an ASIL process, application, binary, image and build are words of the ASIL path, which an integrator's claim decides (xref:../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]).
 
 *A reader's and a writer's level.*
 On a route, the reader's level is the level of the reader's transport.
@@ -116,7 +116,7 @@ On a receive route that crosses upward, or whose writer's level is unknown, the 
 * read the shared bytes as racing bytes, never assuming that they stay unchanged while it reads, and only through reads that are valid on a read-only mapping.
 
 The element *MUST* make the acquisition and the copy through a source-access mechanism that is valid, on the element's target and on the mapping that the binding provides, while a faulty writer races it, and *MUST* refuse the route at setup where no such mechanism can be established.
-A mechanism that holds only while the writer keeps a lock or another protocol is no such mechanism, because a faulty writer need not keep it (xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
+A mechanism that holds only while the writer keeps a lock or another protocol is no such mechanism, because a faulty writer need not keep it (xref:../../up-l1/peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
 
 *Refusals at setup.*
 
@@ -125,14 +125,14 @@ A mechanism that holds only while the writer keeps a lock or another protocol is
 * The element *MUST* ensure that, on a binding whose ports write shared state both ways, a port whose level differs from the service's recorded level, higher or lower, is refused at setup, on every port kind and on the paired event service.
 
 *Reporting and heap.*
-What the element states in each route's report of the form that the route got, a read of the shared storage or the copy route's copy, is specified in xref:../seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got].
+What the element states in each route's report of the form that the route got, a read of the shared storage or the copy route's copy, is specified in xref:../../up-l1/bindings.adoc#req-ssr-error-route-report[Each route reports what it got].
 The element *MUST* make each view, the acquisition and the copy, their validation and that report without acquiring or releasing heap memory, in its own work and in the work that it invokes for them, the decoding that validates a serialized payload included.
 A route's declared allocation does not reach these operations (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path], "What a declaration does not reach").
 The element *MUST* refuse at setup a route that needs the copy route where the route's wire declares a heap class that admits allocation for decoding, naming the route and that class.
 
 *What the copy protects.*
 A copy, or a check over it, protects the payload only.
-It repairs no corrupt middleware offset, length, free list or ownership record: those need containment of their own against a faulty peer (xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
+It repairs no corrupt middleware offset, length, free list or ownership record: those need containment of their own against a faulty peer (xref:../../up-l1/peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
 A level, an agreed layout, a type that accepts every bit pattern, a copy and a refusal at setup do not establish that containment, or that one process is isolated from another.
 --
 
@@ -152,7 +152,7 @@ Verification:: fault-injection, test, miri, heap-window, review
 ** A serialized route with every condition of the clause "Decoding from shared memory" established: decoded from the frame; the same route crossing upward, with a valid copy route: decoded from the validated copy; the same route without established tenure or synchronization: not decoded in shared memory.
 ** A frame on the copy route that fails its validation: no value of it is shown to a reader.
 ** A route that needs the copy route, on a wire that declares allocation for decoding: refused at setup, naming the route and the class.
-** On a receive route of a lending binding, the form that the route got, a read of the shared storage or the copy route's copy, as its report shows it (xref:../seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got]).
+** On a receive route of a lending binding, the form that the route got, a read of the shared storage or the copy route's copy, as its report shows it (xref:../../up-l1/bindings.adoc#req-ssr-error-route-report[Each route reports what it got]).
 * *miri*, under Stacked Borrows, under Tree Borrows and with strict provenance: the copy route's mechanism against a racing writer thread, where Miri can model the mechanism; and, as negative controls, a plain-read copy and an atomic read racing a plain write, each of which Miri reports as a data race.
 A mechanism over memory that another process maps is shown by the review and the fault-injection cases instead.
 * *heap-window*: a view, the copy route's acquisition, copy and validation, the decoding of a serialized payload included, and the report of a route's form.
@@ -224,7 +224,7 @@ A check made once cannot hold while a faulty writer can still change the bytes.
 
 With no invalid bit patterns, a later bad write can only leave a wrong value.
 A checked getter reports a value outside its field's range.
-A wrong value inside that range is for whatever end-to-end protection the system supplies to detect, on the routes for which the integrator requires it (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+A wrong value inside that range is for whatever end-to-end protection the system supplies to detect, on the routes for which the integrator requires it (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 That protection is the system's, and it need not be the route's wire.
 
 The writer-at-or-above rule and the view's synchronization exclude a write that races a read through an ordinary Rust reference (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>).

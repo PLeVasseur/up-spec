@@ -4,10 +4,10 @@
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
-Scope and element boundary: xref:README.adoc[the SEooC's README].
+Scope and element boundary: xref:../elements/up-rust/README.adoc[the SEooC's README].
 
 Whom an item binds: xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
-Using the wire is the integrator's choice (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+Using the wire is the integrator's choice (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 [[req-ssr-e2e-not-required]]
 == The element requires end-to-end protection on no route, outside strict mode's black-channel rule
@@ -19,7 +19,7 @@ The element *MUST NOT* refuse a route because it has no end-to-end protection, a
 The element *MUST NOT* require that a route's protection be the E2E wire.
 
 *A black channel.*
-In strict mode's Enforce and Locked states, an ASIL route over a transport that the integrator classifies as a black channel is refused where it names no protection (xref:build.adoc#req-ssr-strict-rules[The rules that strict mode checks]).
+In strict mode's Enforce and Locked states, an ASIL route over a transport that the integrator classifies as a black channel is refused where it names no protection (xref:../elements/up-rust/strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]).
 Naming the integrator's own protection meets that rule, and so does selecting the E2E wire for the route.
 
 *A route that selects the E2E wire.*
@@ -35,7 +35,7 @@ Allocated to:: the element
 Verification:: test (in strict mode's Off and Report states, a route at an ASIL integrity level with no end-to-end protection, admitted at setup; in the Enforce and Locked states, an ASIL route with no end-to-end protection over a transport that the integrator does not classify as a black channel, an ASIL route over a black-channel transport whose declaration names the integrator's own protection, and an ASIL route over a black-channel transport that selects the E2E wire, each admitted)
 
 *Rationale.*
-Which routes need end-to-end protection is the integrator's decision for the item, in ISO 26262's sense (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+Which routes need end-to-end protection is the integrator's decision for the item, in ISO 26262's sense (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 Requiring it in the element would make protection a condition even of routes that need none.
 
 [[req-ssr-e2e-wraps-any-wire]]
@@ -188,7 +188,7 @@ A response is judged by <<req-ssr-e2e-rpc-echo,An E2E response answers exactly i
 
 *No timeout of its own.*
 The E2E wire *MUST NOT* keep a timeout of its own: it judges only the frames that it is given.
-How the element requires a detector route's deadline at setup, and monitors it as the timeout of end-to-end detection, is stated in xref:qos.adoc#req-ssr-qos-declared[QoS is declared per route at setup] and xref:qos.adoc#req-ssr-qos-deadline[Deadlines are monitored].
+How the element requires a detector route's deadline at setup, and monitors it as the timeout of end-to-end detection, is stated in xref:../../up-l1/runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup] and xref:../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored].
 --
 
 [horizontal]
@@ -234,7 +234,7 @@ Where it applies, the E2E wire, as the receiver, *MUST* refuse every request who
 * Such a request *MUST NOT* start or extend a resynchronization run, become the reference, or move the newest adopted incarnation backwards.
 * A request that fails the framing or integrity checks is refused as corrupt first, as <<req-ssr-e2e-detects,The E2E wire detects each fault>> states.
 * How such a refusal is counted and answered is stated in <<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>> and <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>.
-* The refusal is runtime behavior that a setting fixed during initialization selects (xref:build.adoc#req-ssr-strict-init-only[Strict mode checks in initialization only]), and the clients' increasing starts are the integrator's declaration (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+* The refusal is runtime behavior that a setting fixed during initialization selects (xref:../elements/up-rust/strict-mode.adoc#req-ssr-strict-init-only[Strict mode checks in initialization only]), and the clients' increasing starts are the integrator's declaration (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 *The run rule.*
 Where the strict older-incarnation refusal applies, the run rule applies subject to it; everywhere else the run rule applies without it.
@@ -255,7 +255,7 @@ While a sender's declaration is true:
 * any other sender's restart *MUST* cost exactly `+resync_frames+` refused frames on a route that keeps order. They are counted from the last frame of the old incarnation to arrive, provided the new incarnation sends more than `+resync_frames+` frames;
 * a live declared sender *MUST NOT* be refused for good because of the order in which its frames arrive.
 Displaced incarnations are exceptions: the retired incarnation of a sender declared increasing is always refused, and where the strict older-incarnation refusal applies every incarnation older than the newest adopted is always refused.
-An undetected corruption of a frame's header is no arrival order, and this duty does not cover what follows one (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+An undetected corruption of a frame's header is no arrival order, and this duty does not cover what follows one (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 *`+resync_frames+`.*
 `+resync_frames+` is an unsigned 8-bit value from 1 to 255, set in deployment data.
@@ -317,7 +317,7 @@ It is delivered again at once with an incarnation newer than the corrupted one.
 With an older one, it is delivered again once a run of that incarnation is adopted, where the strict older-incarnation refusal does not apply; where that refusal applies, the requests of that incarnation stay refused until the receiver restarts.
 * *Where the strict older-incarnation refusal does not apply.*
 An incarnation older than the retired one can complete a run and become the reference.
-Its late requests within their TTL can then execute, and a re-adoption can permit replay within the window (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+Its late requests within their TTL can then execute, and a re-adoption can permit replay within the window (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 ====
 
 [[req-ssr-e2e-replay-window]]
@@ -404,7 +404,7 @@ The E2E wire *MUST* name the cause of each such refusal: corrupt, undeclared dat
 A copy that another server answers is refused as an undeclared data ID when the client declares one server for the method.
 
 *Several declared servers.*
-Where a client declares several servers for one method, an answer from another declared server to a misaddressed copy meets every condition, so the E2E wire accepts it: its check cannot tell that answer from the call's own (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+Where a client declares several servers for one method, an answer from another declared server to a misaddressed copy meets every condition, so the E2E wire accepts it: its check cannot tell that answer from the call's own (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 The element's own checks of a response still apply (xref:../up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
 
 *A response with no E2E header.*
@@ -489,7 +489,7 @@ The E2E wire *MUST* keep its sending state in the E2E value: one counter and one
 * The counter *MUST* be 48 bits, and *MUST NOT* wrap: an encode at 2^48^ *MUST* be refused, by name.
 * The counter *MUST* be kept in two 32-bit halves behind a try-lock.
 * An encode that finds another encode of the same value in progress *MUST* be refused, by name, before the counter moves, so the receiver sees no lost frame.
-* The lock sees a second sending thread only when two encodes overlap; the one-sender assumption of use still binds the integrator (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+* The lock sees a second sending thread only when two encodes overlap; the one-sender assumption of use still binds the integrator (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 * The counter *MUST* advance by one per encode, so an encode or send that fails, or a send refused and then retried, shows at the receiver as one lost frame.
 
 *The incarnation.*
@@ -523,7 +523,7 @@ Verification:: compile-fail, test, heap-window
 *Rationale.*
 Sharing one sequence between independent senders would manufacture apparent loss and reordering.
 Refusing overlapping encodes preserves the counter state.
-The element's builders hand out the E2E values, so the element answers for giving each to one role, and an integrator's own wire keeps the same rule under its assumption of use (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+The element's builders hand out the E2E values, so the element answers for giving each to one role, and an integrator's own wire keeps the same rule under its assumption of use (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 [[req-ssr-e2e-receiver-state]]
 == E2E receiving state is one fixed slot per declared data ID
@@ -605,7 +605,7 @@ For such a frame, these rules replace that item's refusal, result and count for 
 * The element *MUST* release a refused frame at once.
 * What a refused response does to its call is stated in xref:../up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
 * Which refused requests are answered is stated in <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>; whether a request with no E2E header is answered, in xref:../up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
-* Which check counts a response, a request or a frame on a topic's or a notification's receive route with no E2E header that a check of its TTL also refuses is stated in xref:qos.adoc#req-ssr-qos-ttl[Expired messages are not processed].
+* Which check counts a response, a request or a frame on a topic's or a notification's receive route with no E2E header that a check of its TTL also refuses is stated in xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed].
 --
 
 [horizontal]
@@ -620,7 +620,7 @@ Verification:: test, heap-window
 ** On each of a topic's and a notification's receive routes that selects the E2E wire, a frame with no payload to an operation that requires a value, one with no payload to an operation whose declared contract permits a message with no payload, one whose payload names an encoding that no wire of the route declares, one whose payload names the inner wire's encoding, and one whose payload names the encoding of another wire of the route, also one of length zero, none refused by an earlier check: each given to no wire, not delivered, refused, and counted once as `+unprotected+` in its own counter, not in the E2E counter and under no other cause, with no `+missing_payload+` result and no absence reported.
 ** On those routes, a present-empty payload bearing the E2E wire's encoding identifier and admitted by the preceding checks reaches that wire and is refused by its header check, counted in the E2E counter and not as `+unprotected+`.
 ** The same unprotected frames refused by an earlier TTL check: only that check's count, with no wire called and no `+unprotected+` count.
-** A frame that reached the route's queue and is then refused as `+unprotected+` remains an arrival for the deadline monitor, as xref:qos.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines it.
+** A frame that reached the route's queue and is then refused as `+unprotected+` remains an arrival for the deadline monitor, as xref:../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines it.
 ** A refused request's frame released at once.
 
 *Rationale.*
@@ -775,7 +775,7 @@ So an explicit unknown preserves the observation limit without stopping traffic 
 
 Completeness and saturation are different limits.
 
-NOTE: Which figures an application reads to react within the fault tolerant time interval of the item, in ISO 26262's sense, is the integrator's to arrange (xref:assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]).
+NOTE: Which figures an application reads to react within the fault tolerant time interval of the item, in ISO 26262's sense, is the integrator's to arrange (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]).
 
 [[req-ssr-e2e-survives-hops]]
 == Protection survives every allowed hop

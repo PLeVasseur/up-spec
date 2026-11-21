@@ -18,7 +18,7 @@ For some behaviours the repository holds rules from more than one contract famil
 
 | The up-rust SEooC requirement family
 | Every requirement with identifier `+req~ssr-*+` and every assumption of use with identifier `+aou~seooc-*+`, carrying `Safety*` tags, wherever in this repository it is filed (entry navigation: xref:safety/README.adoc[`safety/`])
-| <<req-ssr-requirements-bind,A requirement binds the actors to which it gives a duty>>; xref:safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]
+| <<req-ssr-requirements-bind,A requirement binds the actors to which it gives a duty>>; xref:safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]
 
 | The owned-frame SDK contract
 | Every requirement with identifier `+req~sdk-owned-frame-*+`, carrying `OwnedFrame*` tags, wherever in this repository it is filed (entry pages: xref:basics/ownership.adoc[`basics/ownership.adoc`], xref:basics/resources.adoc[`basics/resources.adoc`], xref:sdk/owned-frame/application.adoc[`sdk/owned-frame/application.adoc`])
@@ -30,7 +30,7 @@ For some behaviours the repository holds rules from more than one contract famil
 * *One implementation family.*
 The items of the up-rust SEooC requirement family (`+req~ssr-*+` and `+aou~seooc-*+`) are written for the up-rust SEooC and for the parts that work with it.
 * *Kinds of claim.*
-Claims resting on the up-rust SEooC requirement family can be of more than one kind (<<claims>>).
+Claims resting on the up-rust SEooC requirement family can be of more than one kind (xref:safety/elements/up-rust/README.adoc#claims[claims]).
 * *Relation to the classic protocol-chapter rules.*
 Most items add to the classic protocol-chapter rules.
 Some state a classic rule again with more precision, and some differ from a classic rule on purpose.
@@ -58,10 +58,10 @@ NOTE: So an item of the up-rust SEooC requirement family (`+req~ssr-*+`) can sta
 These items state when an item binds, whatever its kind of claim:
 
 * *A software requirement of the up-rust SEooC family*: <<req-ssr-requirements-bind,A requirement binds the actors to which it gives a duty>>.
-* *An assumption of use*: xref:safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+* *An assumption of use*: xref:safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 * *A requirement of the owned-frame SDK contract*: <<req-sdk-owned-frame-contract,The owned-frame SDK contract binds the parts that declare it>>.
 
-The up-rust SEooC's own account of its claims is xref:safety/seooc-up-rust/README.adoc#claims[the SEooC's claims].
+The up-rust SEooC's own account of its claims is xref:safety/elements/up-rust/README.adoc#claims[the SEooC's claims].
 
 [[selection]]
 == Binding, claims, replacement and reading of the up-rust SEooC family
@@ -99,7 +99,7 @@ Where the line and the statement differ, the statement determines whom the requi
 None of these changes whom a requirement binds, or how far: the page or the directory that holds it; its tags; a trace filter or a tracing run; the repository that implements or covers it, and who owns that repository; a status that a record keeps of its adoption, its implementation or its qualification.
 
 *Assumptions of use.*
-Whom an assumption of use binds is stated by xref:safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+Whom an assumption of use binds is stated by xref:safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 --
 
 [horizontal]
@@ -155,18 +155,18 @@ The supplier of each such part *MUST* release the part's declaration, and each c
 The supplier *MUST* keep a record of where the part implements each item of the up-rust SEooC requirement family that binds it, and of who made each entry of that record.
 For an SDK, this duty of its supplier replaces the earlier convention of the up-rust SEooC requirement family that an SDK which implements an item keeps its own record of where it does so.
 The record is kept with the part, outside the specification, and it is no statement of the up-rust SEooC requirement family.
-What the supplier shows as the evidence of a claim is stated in xref:safety/seooc-up-rust/README.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for].
+What the supplier shows as the evidence of a claim is stated in xref:safety/assurance.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for].
 
 *Deployment claims.*
-A deployment declaration names the deployment's profile (xref:safety/seooc-up-rust/README.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]), the revision of the specification, and each part that the deployment composes, with that part's declaration.
+A deployment declaration names the deployment's profile (xref:safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]), the revision of the specification, and each part that the deployment composes, with that part's declaration.
 A deployment conformance claim is a claim that a deployment meets the assumptions of use.
 Both belong to the integrator, and both are separate from every component conformance claim.
-When the integrator makes them, and what a deployment conformance claim names, are stated in xref:safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+When the integrator makes them, and what a deployment conformance claim names, are stated in xref:safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 A component conformance claim is no claim about a deployment, and a deployment conformance claim adds nothing to what a part's own claims state of that part.
 
 *What a claim covers.*
 A claim covers what it names.
-Ordinary functional behaviour, native resource behaviour (xref:up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]), a finite timing bound and a safety-assurance scope (xref:safety/seooc-up-rust/qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]) are four separate subjects of a claim.
+Ordinary functional behaviour, native resource behaviour (xref:up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]), a finite timing bound and a safety-assurance scope (xref:up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]) are four separate subjects of a claim.
 A claim to one of them, and the evidence for it, is neither a claim to another nor evidence for it.
 
 *What establishes no claim.*
@@ -229,7 +229,7 @@ The statements of the items of the up-rust SEooC requirement family, and nothing
 The `ID` row, the ASIL, the "Allocated to" line, the "Verification" line, the ISO 26262 references, the "Violation" text of an assumption of use and the rationale are not part of the statement.
 Neither they nor a note, an example, a figure, a table, an index or a summary outside an item's block add, change or lift a duty.
 Where one of them differs from a statement, the statement governs.
-A "Verification" line describes evidence for its statement (xref:safety/seooc-up-rust/README.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for]): it adds no duty, and it is no condition of one.
+A "Verification" line describes evidence for its statement (xref:safety/assurance.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for]): it adds no duty, and it is no condition of one.
 A duty holds as its statement says, whether or not a part meets it yet, whether or not anyone has shown how to meet it, and whether or not evidence for it exists.
 An ISO 26262 reference names a clause that an item relates to, and nothing more.
 
@@ -291,9 +291,9 @@ A route is native or serialized, and lent or handed off, as xref:safety/up-l1/pa
 *Parts.*
 An SDK is a xref:languages.adoc[language library] that offers owned-frame routes to applications.
 Its core is the part that holds its synchronous or polled traffic operations, its two modes and its setup checks.
-Where an SDK's core is the element (xref:safety/seooc-up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]), the items of the up-rust SEooC requirement family state what that core does, and an item of the owned-frame SDK contract adds a duty for that core only where its statement gives the SDK one for its core.
+Where an SDK's core is the element (xref:safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]), the items of the up-rust SEooC requirement family state what that core does, and an item of the owned-frame SDK contract adds a duty for that core only where its statement gives the SDK one for its core.
 A layer above the core is a part of the SDK, outside its core, that an application can leave out and that offers it operations on owned-frame routes or takes memory for them on its behalf, such as the application-role layer, the asynchronous layer or a layer that obtains startup memory from the host's heap.
-Where the core is the element, a layer above the core is an optional layer, as xref:safety/seooc-up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code] names one.
+Where the core is the element, a layer above the core is an optional layer, as xref:safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code] names one.
 The classic APIs are no layer above the core, and neither is a memory provider, a scheduler integration or an adapter.
 A memory provider, a scheduler integration and an adapter are parts that the SDK ships or that another party supplies.
 
@@ -380,7 +380,7 @@ After its statement, an item has an `ID` row, an "Allocated to" line and a "Veri
 The "Allocated to" line mirrors the statement: it names each actor to which the statement gives a duty, with the qualifier that limits that actor's share.
 Where the two differ, the statement governs (<<req-ssr-item-reading,How an item is read>>).
 * *Verification.*
-A "Verification" line names methods of xref:safety/seooc-up-rust/README.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for], with the meaning that item gives them, and details them with cases.
+A "Verification" line names methods of xref:safety/assurance.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for], with the meaning that item gives them, and details them with cases.
 It adds no duty.
 * *Coverage needs.*
 `impl,utest` marks behaviour in code, `uman` what a part states in what is released with it, and `impl,utest,uman` both.
@@ -464,7 +464,7 @@ ISO 26262:: 6-7.4.8 (part-clause numbers only)
 
 *Rationale.*
 A classic route is declared and admitted by no two-mode setup, so nothing checks it or places its storage before traffic, and its contract states no heap class.
-A waiver covers allocation inside a binding's middleware only (xref:safety/seooc-up-rust/waivers.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
+A waiver covers allocation inside a binding's middleware only (xref:up-l1/bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
 So no waiver can admit a classic route.
 
 A two-mode type is not a classic route, whichever crate re-exports it.

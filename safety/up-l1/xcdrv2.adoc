@@ -245,7 +245,7 @@ Verification:: test, fault-injection, review
 ** An input with every byte of padding changed, in the body and after it, and an input with each other bit of the options set: each decoded to the same value.
 ** An encoding with each count of trailing padding, from zero to three: decoded.
 ** A floating-point field holding a negative zero and a NaN with a payload: decoded with the same bit patterns.
-* *fault-injection*: truncated and malformed frames on a route, each refused as the rules for every wire say (xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]), and returned as an error or counted as the element's rule on refused frames says (xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+* *fault-injection*: truncated and malformed frames on a route, each refused as the rules for every wire say (xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]), and returned as an error or counted as the element's rule on refused frames says (xref:../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 * *review*: at source level, that the first five checks come before every read of a field, and that their arithmetic cannot overflow.
 
 *Rationale.*
@@ -347,7 +347,7 @@ _Declared._
 The bytes show a length and nothing of a type.
 A reader that took any shorter or longer body for a version of its type would read whatever arrived with a fitting length.
 So a receiving end reads the types that its route declares, and no others.
-An encoding of a longer admitted type that is cut back, with its headers rewritten, to the body length of a shorter admitted type is an encoding of that shorter type, and no reader can tell; end-to-end protection catches such a change where a route needs it (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+An encoding of a longer admitted type that is cut back, with its headers rewritten, to the body length of a shorter admitted type is an encoding of that shorter type, and no reader can tell; end-to-end protection catches such a change where a route needs it (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 _Mandatory fields._
 The encoding puts no mark on a field, so a reader cannot see in the bytes that a field which it does not know must be understood.
@@ -417,7 +417,7 @@ Verification:: test, review
 *Rationale.*
 A decode that succeeds shows that the bytes fit a type that the reader admits, and nothing about what the sender meant.
 The delimiter header adds a length and no name, and types with other fields share lengths.
-So what agrees the type is declared outside the bytes, and a wire that claimed more would mislead whoever decides which routes need end-to-end protection (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+So what agrees the type is declared outside the bytes, and a wire that claimed more would mislead whoever decides which routes need end-to-end protection (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 _The identifier._
 An identifier of the private-use range has no meaning of its own, so two deployments can give one number to two formats.

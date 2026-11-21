@@ -1,0 +1,166 @@
+= uP-L2 Execution and Asynchronous Seam
+:toc: preamble
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
+
+[NOTE]
+====
+This page holds execution and asynchronous-seam requirements of the up-rust SEooC requirement family (`+req~ssr-*+`, `ASIL:: B`, `Safety*` tags).
+Filing on this page does not broaden any requirement to all uP-L2 implementations: whom each item binds, and how the repository's requirement families meet, is stated in xref:../contract-generations.adoc[Which requirements an implementation follows] (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
+
+The synchronous-or-polled runtime path rule is stated in xref:../up-l1/runtime.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled].
+The ordinary owned-frame SDK asynchronous and scheduler-integration items currently in xref:../sdk/owned-frame/application.adoc[Owned-frame SDK application roles and execution] join this page in a later relocation commit.
+====
+
+[[req-ssr-async-seam]]
+== The asynchronous interface has a written, executor-independent contract
+
+[.specitem,oft-sid="req~ssr-async-seam~4",oft-title="The asynchronous interface has a written, executor-independent contract",oft-needs="impl,utest,uman",oft-tags="SafetyUpRustCore"]
+--
+*A written contract.*
+The element *MUST* state, with the element, a written contract for an asynchronous interface to its runtime operations and for its seam, through which an asynchronous layer learns when a route or a call can make progress.
+The contract holds whichever scheduler runs the layer.
+
+For each operation, the element *MUST* name in the contract:
+
+* its submission event;
+* its acceptance event and the clock of its deadline;
+* the contexts that may call it;
+* what it requires of a scheduler.
+
+*Who keeps the seven properties.*
+The element *MUST* keep the seven properties below in its seam, in its own work in a step and in an abandonment, in its deadline accounting, expiry and deferred release, and in its refusals at setup.
+Each asynchronous layer that implements the interface *MUST* keep them in its implementation: its steps, registrations, notifications, completions and handles.
+
+*1. Progress.*
+
+* A progress step (what one is: xref:../sdk/owned-frame/application.adoc#req-sdk-owned-frame-operation-kinds[Each message operation is a nonblocking attempt, a bounded wait or asynchronous, and none hides a wait], "Three kinds") returns a completion or a pending result.
+* It does not wait for a peer, for middleware, in a blocking operating-system call or in an overflow wait, and its work is bounded as xref:../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data] states.
+Where the configuration's package states that a wait can occur in its scheduler's registration, wake-up or timer work that a step causes, that wait is the scheduler's and not a wait of the step.
+* On a serialized route whose declared heap class admits allocation, a step can wait inside the declared allocation domain only as xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] states.
+Each non-waiting guarantee limits only its own operation in a step (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]):
+** An acquisition in a step does not wait on a route that requires non-waiting acquisition.
+On a route that does not, it can wait as the route's declared policy states.
+** A release in a step that could wait leaves the step as pending cleanup on a route that requires non-waiting release.
+On a route that does not, it can wait in the step as the route's declared policy states.
+* A step that returns pending has arranged a notification of the event it waits for, with no window in which that event can be missed, and it does not poll in a loop or notify itself instead.
+* An operation that needs a blocking wait is offered synchronously, not as an asynchronous step.
+
+*2. Concurrent waiters.*
+
+* Every pending operation that the admitted capacity of its route or call table allows keeps its own notification path.
+Registering, replacing its own registration, completing or abandoning one operation never removes or overwrites another's.
+* Registration storage is part of the admitted capacity (xref:../basics/resources.adoc#req-ssr-memory-computable[Startup storage is computable before start]).
+* A notification is a hint, never an arrival (xref:../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored]), and the operation rechecks its state after every notification.
+
+*3. Abandonment and commit.*
+
+* Abandoning an operation before its submission event leaves nothing submitted.
+* Abandoning it afterwards never recalls submitted traffic or undoes anything at a peer.
+* Each owner the operation held is returned or released exactly once under its route's rules (xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]), or stays charged until that can complete.
+* Abandonment follows the rule of a drop: the element's own work in it neither waits nor panics.
+On a route that requires non-waiting release, a release that may wait leaves the abandoning step as pending cleanup.
+On a route that does not, what the operation owned is released under the route's declared policy on the abandoning path.
+* A completion offered after the operation was abandoned, or for an earlier tenure of its slot, completes nothing (xref:../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-correlation[A response reaches only its own call]).
+
+*4. Lifetime.*
+
+* An operation abandoned without its cleanup running, because safe code forgot it, leaves no notification or callback able to reach storage that is no longer valid.
+It keeps its capacity charged, and its slot is not reused while it is still owned.
+* Dropping an asynchronous handle to an activated role stops no service and releases no runtime resource (xref:../languages/rust.adoc#req-ssr-release-inert-drop[Dropping a runtime handle does nothing]).
+
+*5. Deadlines.*
+
+* A scheduler's timer only causes another progress step.
+It never extends, shortens or replaces an operation's deadline, its clock or its acceptance event (xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
+* A result committed at its acceptance event before the deadline stands however late it is observed.
+* A completion whose acceptance event falls after the deadline is refused even when a timer or a timeout wrapper reports the operation ready.
+
+*6. Ownership and resources.*
+
+* A transmit loan, on a native or a serialized route, is submitted or given back before its operation returns pending, so no pending operation holds one.
+* A native receive borrow stays tied to its retained owner while suspended.
+* Abandoning an operation revokes no other borrower and never copies or serializes its payload.
+* On a native path the contract covers the registration, replacement, notification, abandonment, completion and timer work that an operation causes.
+That work keeps xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path] and xref:../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths] only in a configuration whose package establishes that for its scheduler.
+Elsewhere a native asynchronous operation is not offered, or the element refuses it at setup by name; it is never replaced by a serialized one.
+
+*7. Service.*
+
+* The element's deadline accounting, expiry and deferred release do not depend on whether an application polls its asynchronous operations.
+* Using the asynchronous interface adds no service duty to the application.
+* Pending cleanup never runs on, holds or occupies a scheduler context or other execution resource that progress steps, notifications or deadline and expiry accounting need, or that the return of another owner needs whose release does not itself need the dependency that the cleanup waits for (xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else], "Isolation").
+* Where a configuration's scheduler cannot keep pending cleanup off such a resource, the element refuses at setup, by name, an asynchronous composition that needs it (xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
+A composition needs pending cleanup where its route requires non-waiting release over a dependency that can wait, or where its binding defers a retained owner's return (xref:../safety/up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+* A release that runs inline is not pending cleanup.
+On a route that does not require non-waiting release, a release runs on a path of that route as xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] states, such as the step or the abandoning path that ends its value, and can wait there under the route's declared policy.
+No composition is refused because that release can wait, or because its configuration has no release service.
+
+*Schedulers and timing bounds.*
+The element *MUST NOT* make the contract require a particular scheduler, the standard library or an allocator.
+Asynchronous use needs no finite timing bound.
+The layer's place above the runtime path is stated in xref:../up-l1/runtime.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled], and its admission to a claimed graph in xref:../safety/elements/up-rust/build.adoc#req-ssr-crate-core-only-binary[The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it].
+
+*Documentation of the contract.*
+The element *MUST* document the contract as part of its API.
+--
+
+[horizontal]
+ID:: `+req~ssr-async-seam~4+`
+ASIL:: B
+Allocated to:: the element, for the written contract and its documentation, for its seam, for its own work in a step and in an abandonment, for its deadline accounting, expiry and deferred release, and for its refusals at setup; each asynchronous layer that implements the interface, for its implementation
+Verification:: test, miri, review
+* *test*: the contract's controls against core and under each supported scheduler.
+** Readiness before, during and after registration.
+** Spurious and coalesced notifications.
+** Several waiters on one route and on one call table, with an older waiter abandoned after a newer registration.
+** Abandonment before and after submission and during completion.
+** A completion offered late or for an earlier tenure.
+** A forgotten operation.
+** A timer that fires before, at and after the deadline, and a timeout wrapper that reports ready past the deadline.
+** A release held pending behind its dependency while progress steps, notifications, expiry and the returns of other owners that do not need that dependency continue.
+** On a route that does not require non-waiting release, an abandoned operation's owned value released on the abandoning path under the declared policy.
+** On a route that requires only non-waiting acquisition, a step that ends an owned value, with its declared release waiting in the step and the route not refused for it.
+** On a route that requires only non-waiting release, a step whose declared acquisition waits, with a release that could wait left as pending cleanup.
+** In a configuration whose package states that a wait can occur in its scheduler's registration, wake-up or timer work, a progress step whose only wait is that stated wait.
+** Under a scheduler that cannot isolate pending cleanup, a route that requires non-waiting release over a dependency that can wait refused by name, and the same route without that requirement admitted with its inline release reported.
+** Native paths inside heap windows.
+** A transmit loan, on a native route and on a serialized route, submitted or given back before its operation returns pending.
+** A native receive borrow tied to its retained owner while its operation is suspended.
+** In a configuration whose package does not establish the heap and panic rules for its scheduler's work on a native path, a native asynchronous operation not offered or refused at setup by name, and never replaced by a serialized one.
+** A dropped asynchronous handle to an activated role, with no service stopped and no runtime resource released.
+* *miri*: the seam's registration storage.
+* *review*: the contract against the code, and each scheduler's causal resource behaviour, its waits included, against its package.
+
+*Rationale.*
+An asynchronous layer can miss a notification, overwrite another operation's, keep storage alive incorrectly or accept a late result unless registration, progress, abandonment, lifetime and deadline responsibilities are explicit.
+
+_An observable contract._
+Because the contract is stated in observable terms, any scheduler can drive an executor-independent layer that keeps it.
+Naming a hidden function or a wake-storage type of one scheduler integration would tie the requirement to that integration's shape.
+
+_Waits in a step and in an abandonment._
+Pending cleanup is used only on a route that requires non-waiting release (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]), and for a return that a binding defers, on whatever route.
+Requiring it everywhere would need a release service for every owned value an operation could hold.
+
+_Timeouts._
+A generic timeout wrapper may report an operation ready after its own deadline has passed.
+So the element's acceptance rule decides lateness, whatever the wrapper reports.
+
+_Schedulers and native claims._
+A scheduler's wake-up mechanism can allocate, panic or run other code.
+So a native resource claim for an asynchronous path rests on the interface and on the package that supplies the scheduler.
+
+_Scheduler work._
+A host scheduler can take a lock when it registers or wakes a task, and no step can avoid that wait.
+Where the package that supplies the scheduler states that wait, the wait is known and is not hidden in the step.
+
+_Pending cleanup._
+A release that waits on a scheduler's own worker would stop every task that worker drives.
+So pending cleanup is kept off the contexts that progress needs.
+
+_Inline release._
+On a route that does not require non-waiting release, a release can wait only where the route's declared policy states it, and the route's report shows that wait.
+That wait delays the step that ends the value, and where the item relies on non-waiting release, the integrator requires it in the route's declaration (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-resource-guarantees[A resource guarantee the item relies on is required by name]).
+
+NOTE: The ordinary obligations of an asynchronous layer and of a scheduler integration, outside this item, are stated in xref:../sdk/owned-frame/application.adoc#req-sdk-owned-frame-operation-kinds[Each message operation is a nonblocking attempt, a bounded wait or asynchronous, and none hides a wait], xref:../sdk/owned-frame/application.adoc#req-sdk-owned-frame-async-layer[Asynchronous operations come from one layer that needs no host library and no allocator] and xref:../sdk/owned-frame/application.adoc#req-sdk-owned-frame-scheduler-integration[A scheduler integration supplies wake-ups, timers and contexts through public interfaces].

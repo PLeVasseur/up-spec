@@ -23,7 +23,7 @@ Where an SDK's core is not the element, a word that an item of the up-rust SEooC
 
 * An *SDK*, its *core*, a *layer above the core* and an *owned-frame route*: xref:../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
 * A *part* and its *supplier*: xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
-* The *element*: xref:../safety/seooc-up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code].
+* The *element*: xref:../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code].
 * A *binding* and its *middleware*: xref:../safety/up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract].
 * A *wire*: xref:../safety/up-l1/wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
 * A *route*: xref:../safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name].
@@ -117,7 +117,7 @@ Traffic before the transition would run before every route is admitted and its s
 [.specitem,oft-sid="req~ssr-memory-static~3",oft-title="ASIL-path storage is static or caller-provided",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyStreamer"]
 --
 *Where storage comes from.*
-On the ASIL path (xref:../safety/seooc-up-rust/README.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]), the element *MUST* place all storage that its runtime path uses during initialization, from static or caller-provided memory, and *MUST* check the size, alignment and arithmetic of each placement when it makes it.
+On the ASIL path (xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]), the element *MUST* place all storage that its runtime path uses during initialization, from static or caller-provided memory, and *MUST* check the size, alignment and arithmetic of each placement when it makes it.
 
 *Checks before an object is reachable.*
 Before placed storage becomes reachable as an object, the element *MUST* have established that it:
@@ -136,7 +136,7 @@ The element answers for no storage of an application's own.
 *Regions.*
 The element *MUST* take a region only through an interface whose contract hands it the region exclusively and for the life of the process, and *MUST* check each region before it places from it.
 The element then owns the region: it places from it as from any other, and it *MUST NOT* release any of it in runtime mode.
-That a static or caller-provided region is exclusive and stays valid for the life of the process is the integrator's to ensure (xref:../safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-startup-storage[Startup storage that the integrator provides is exclusive and lives as long as the process]).
+That a static or caller-provided region is exclusive and stays valid for the life of the process is the integrator's to ensure (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-startup-storage[Startup storage that the integrator provides is exclusive and lives as long as the process]).
 
 *Startup memory from a heap.*
 The element *MUST* accept startup memory obtained from a heap only outside the ASIL path: from the memory source that an optional layer provides over the standard library's allocator, or from an allocation provider that the configuration declares (<<req-sdk-owned-frame-provider-selection,The selected memory provider is the only one used, and selecting it claims nothing>> states what each is).
@@ -156,7 +156,7 @@ Verification:: test, gate, review
 ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
 *Rationale.*
-The safety crate is `+no_std+` with no `+alloc+` (xref:../safety/seooc-up-rust/crate-isolation.adoc#req-ssr-crate-isolated[The safety crate cannot be tainted]).
+The safety crate is `+no_std+` with no `+alloc+` (xref:../languages/rust.adoc#req-ssr-crate-isolated[The safety crate cannot be tainted]).
 So its storage can come only from a static region or from bytes the caller provides.
 
 Exclusivity is a property of live ownership, so a region may occupy addresses that an earlier, ended owner used.
@@ -206,7 +206,7 @@ The element *MUST* include in the result the storage for:
 The element's placement at startup *MUST NOT* need more than the computation gives.
 
 *The capacities.*
-From the worst-case semantic load that the integrator declares for each route (xref:../safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-capacity-sizing[Capacities are sized for the worst case]), the element *MUST* compute the slots, queue depth, held messages and call tables that it needs.
+From the worst-case semantic load that the integrator declares for each route (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-capacity-sizing[Capacities are sized for the worst case]), the element *MUST* compute the slots, queue depth, held messages and call tables that it needs.
 The other capacities that this load sets are the registration storage, backlogs and startup memory that the computation gives, and the peer table that xref:../safety/up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones] sizes.
 
 *What each figure measures.*
@@ -219,7 +219,7 @@ The measures are:
 * transient setup memory or stack.
 
 A count of live objects is neither the retained backing nor the physical footprint.
-A capacity that the element computes is not the QoS depth that a route declares (xref:../safety/seooc-up-rust/qos.adoc#req-ssr-qos-declared[QoS is declared per route at setup]), and neither is a guarantee of what a binding's middleware has available.
+A capacity that the element computes is not the QoS depth that a route declares (xref:../up-l1/runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup]), and neither is a guarantee of what a binding's middleware has available.
 
 *Figures that are not established.*
 Where a figure depends on anything that the configuration does not bound, such as allocator overhead, scheduler storage, a thread's stack, concurrency or growth history, the element *MUST* report it as not established instead of stating a bound.
@@ -240,7 +240,7 @@ ISO 26262:: 6-7.4.13 (part-clause numbers only)
 *Rationale.*
 An integrator who places startup memory in a static region or a linker section has to size it before the process starts, and a request that does not fit is refused only at startup.
 So the element provides the computation.
-Each route's reserved storage is reported under xref:../safety/seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got].
+Each route's reserved storage is reported under xref:../up-l1/bindings.adoc#req-ssr-error-route-report[Each route reports what it got].
 
 _What each figure measures._
 The startup memory is only part of the footprint.
@@ -249,7 +249,7 @@ A report that counted only live objects would understate two things:
 * the backing that refused setups, growth and lost races leave claimed;
 * the storage that asynchronous registrations and deferred work need.
 
-Sizes that depend on a scheduler's tasks and timers, an allocator's overhead or a thread's stack depend on the supported configuration, whose package states its sizing (xref:../safety/seooc-up-rust/README.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]).
+Sizes that depend on a scheduler's tasks and timers, an allocator's overhead or a thread's stack depend on the supported configuration, whose package states its sizing (xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]).
 
 == Heap classes, lazy state and stronger guarantees
 
@@ -351,7 +351,7 @@ The element *MUST* refuse at the transition, naming the route and the reason:
 * a serialized route whose wire, binding or allocation provider declares allocation that the route does not declare;
 * a route for which a wire, its binding, an allocation provider or the route's own declaration states no class, or for which a wire, a binding or an allocation provider states no resource and failure policy where this item requires one.
 
-The element applies xref:../safety/seooc-up-rust/waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] to the runtime transition of a transport with a route whose binding declares allocation inside its middleware under a named permit, a native route included; the waiver's scope is stated in xref:../safety/seooc-up-rust/waivers.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
+The element applies xref:../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] to the runtime transition of a transport with a route whose binding declares allocation inside its middleware under a named permit, a native route included; the waiver's scope is stated in xref:../up-l1/bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
 
 A route that requires a stronger guarantee that is not established for it is refused as <<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>> states.
 
@@ -445,10 +445,10 @@ A decoded type is admitted as xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types
 *What holds whatever a route requires.*
 Nothing selects or waives the following:
 
-* memory safety and the ownership rules: one destruction of each initialized value, no reuse of storage while it is owned, and no reclamation behind a forgotten owner (xref:../safety/seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour]; xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]);
-* the functional semantics that a route offers: true arrival, identity, TTL and logical deadlines, the declared overflow policy, and truthful errors, capacity and charges (xref:../safety/seooc-up-rust/qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]; xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]; xref:../safety/seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]);
+* memory safety and the ownership rules: one destruction of each initialized value, no reuse of storage while it is owned, and no reclamation behind a forgotten owner (xref:../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour]; xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]);
+* the functional semantics that a route offers: true arrival, identity, TTL and logical deadlines, the declared overflow policy, and truthful errors, capacity and charges (xref:../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]; xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]; xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]);
 * the native rule, for every native operation, the work it causes and the work a native route shares (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]);
-* the duties of element code itself: no panic, bounded work, and waits of its own that take a logical deadline (xref:../safety/seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data]; xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]);
+* the duties of element code itself: no panic, bounded work, and waits of its own that take a logical deadline (xref:error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data]; xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]);
 * a truthful declaration of the heap class and its policy (<<req-ssr-heap-declared,The heap class is declared, with no default>>).
 
 A fault against one of these is a defect on every route.
@@ -472,7 +472,7 @@ Each guarantee limits only the operations that its own definition names.
 Non-waiting acquisition limits acquisitions and no release, and non-waiting release limits the calls, transitions and drops that end a value and no acquisition.
 Two apply together only where the route requires both, by naming both or through a claim whose package states that it depends on both.
 
-A finite timing bound and a safety-assurance scope are the claims of xref:../safety/seooc-up-rust/qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened], required and admitted as that item states.
+A finite timing bound and a safety-assurance scope are the claims of xref:../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened], required and admitted as that item states.
 
 *When a guarantee is required.*
 A route requires one of these guarantees only where:
@@ -572,8 +572,8 @@ Stronger properties of that cleanup are different in kind.
 Whether a destruction can panic, whether a release can wait and whether exhaustion is recoverable depend on the exact type, wire, binding, provider and build.
 So they can be shown only for a named composition.
 
-* Demanding that evidence of every owning route would make a safety package a prerequisite for ordinary use (xref:../safety/seooc-up-rust/README.adoc#claims[the SEooC's claims]).
-* Granting a guarantee without it would be a silent downgrade of the guarantee (xref:../safety/seooc-up-rust/qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]).
+* Demanding that evidence of every owning route would make a safety package a prerequisite for ordinary use (xref:../safety/elements/up-rust/README.adoc#claims[the SEooC's claims]).
+* Granting a guarantee without it would be a silent downgrade of the guarantee (xref:../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]).
 
 So a guarantee is required by name, and is then admitted or refused.
 
@@ -631,7 +631,7 @@ Where the selected provider refuses a request, the SDK *MUST NOT* send the reque
 Where the core is the element, a route's allocation is outside this clause: <<req-ssr-heap-declared,The heap class is declared, with no default>> states how it stays in its domain.
 
 *Without a provider.*
-How the element stays usable without a memory-provider layer, on static or caller-provided memory: xref:../safety/seooc-up-rust/crate-isolation.adoc#req-ssr-crate-core-only-binary[The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it]; <<req-ssr-memory-static,ASIL-path storage is static or caller-provided>>.
+How the element stays usable without a memory-provider layer, on static or caller-provided memory: xref:../safety/elements/up-rust/build.adoc#req-ssr-crate-core-only-binary[The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it]; <<req-ssr-memory-static,ASIL-path storage is static or caller-provided>>.
 
 *No claim.*
 Selecting a memory provider admits no allocation on a route and establishes no guarantee.
@@ -791,7 +791,7 @@ A provider called from a context that it does not support can break any of this,
 [.specitem,oft-sid="req~sdk-owned-frame-provider-failure~1",oft-title="A provider's refusal reaches the caller with its cause, and leaves held memory valid",oft-needs="impl,utest,uman",oft-tags="OwnedFrameSdk,OwnedFrameProvider"]
 --
 *The core.*
-Where the SDK's core is the element, what its setup does with a provider's refusal is stated in xref:../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure], and what a route does with one in runtime mode in xref:../safety/seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap].
+Where the SDK's core is the element, what its setup does with a provider's refusal is stated in xref:../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure], and what a route does with one in runtime mode in xref:error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap].
 Where the SDK's core is not the element, the core *MUST* meet, for each of its operations that takes memory from a memory provider, each duty that this item gives a layer above the core.
 
 *A layer above the core.*

@@ -1,0 +1,89 @@
+= Safety Fault Models and Hypotheses
+:toc: preamble
+
+[NOTE]
+====
+This page is a non-normative safety-view navigation index of the fault models, violation classes and fault-containment obligations of the up-rust SEooC requirement family (`+req~ssr-*+` and `+aou~seooc-*+`).
+It adds, changes and lifts no duty: the linked items govern (xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]; xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
+====
+
+== Faulty-peer model
+
+The faulty-peer model, its transport scope and its boundary between safety and security are stated in:
+
+* xref:../up-l1/peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]
+
+== Violation classes and undetectable faults
+
+How a violated assumption of use shows up to an observer, and the integrator's duty to cover every undetectable violation and contract limit, are stated in:
+
+* xref:assurance.adoc#req-ssr-violation-classes[How a violated assumption of use shows up]
+* xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-violation-classes[The integrator covers each violation that its observer cannot detect]
+
+== Integrator isolation, access and reaction boundaries
+
+* xref:up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]
+* xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated]
+* xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]
+* xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element]
+* xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-peer-rates[Peer rates on shared routes are the integrator's]
+* xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]
+* xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]
+* xref:up-l1/iceoryx2.adoc#aou-seooc-iceoryx2-level-separation[On iceoryx2, each integrity level has its own processes, domain and OS user] and xref:up-l1/iceoryx2.adoc#aou-seooc-iceoryx2-limits[A deployment on iceoryx2 accepts that binding's limits, and no known failure as one]
+* xref:up-l1/lola.adoc#aou-seooc-lola-assumptions-kept[A deployment on LoLa keeps the assumptions of LoLa that the binding names for the integrator]
+
+== Integrity levels and shared-memory boundaries
+
+* xref:up-l1/integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level], xref:up-l1/deployment.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly], and xref:up-l1/bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level]
+* xref:up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], xref:up-l1/integrity.adoc#req-ssr-integrity-any-bits[In-place types accept every bit pattern], xref:up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission] and xref:up-l1/integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused]
+* xref:up-l1/native-wire.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout] and xref:up-l1/native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]
+
+== End-to-end protection and black-channel fault detection
+
+* xref:seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-detects[The E2E wire detects each fault]
+* xref:seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-replay-window[A sliding window judges a reference's counters]
+* xref:seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-resync[A restart resynchronizes, stale frames are refused, and no arrival order locks a sender out]
+* xref:seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once]
+
+== Software fault containment across parts
+
+* *Transport peers:*
+  xref:up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input];
+  xref:up-l1/peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI];
+  xref:up-l1/peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected];
+  xref:up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones].
+* *Element runtime, refusal, restart and memory safety:*
+  xref:../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data];
+  xref:../up-l1/runtime.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode];
+  xref:../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back];
+  xref:../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization];
+  xref:../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths];
+  xref:../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour];
+  xref:../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety].
+* *Binding observation, deadlines, TTL and middleware boundaries:*
+  xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once];
+  xref:../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored];
+  xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed];
+  xref:up-l1/bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input];
+  xref:up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do];
+  xref:up-l1/bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits];
+  xref:up-l1/bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held];
+  xref:up-l1/bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state];
+  xref:up-l1/bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization];
+  xref:up-l1/bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures].
+* *Middleware-specific bindings:*
+  xref:up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-panic-paths[iceoryx2's allowed panic paths are named, bounded and disclosed];
+  xref:up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-static-segments[On iceoryx2, every publisher has a static data segment];
+  xref:up-l1/iceoryx2-frame.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used];
+  xref:up-l1/iceoryx2-frame.adoc#req-ssr-binding-iceoryx2-frame-metadata[On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check];
+  xref:up-l1/lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path];
+  xref:up-l1/lola-envelope.adoc#req-ssr-binding-lola-envelope-checks[On LoLa, a sample that is not a well-formed envelope is refused before any of it is used];
+  xref:up-l1/lola-envelope.adoc#req-ssr-binding-lola-envelope-routing-hint[On LoLa, the routing hint is untrusted, and the metadata decides];
+  xref:up-l1/lola-envelope.adoc#req-ssr-binding-lola-envelope-metadata[On LoLa, the metadata is the selected wire's, and is checked before delivery].
+* *Wires:*
+  xref:up-l1/wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic].
+* *The Streamer:*
+  xref:up-l2/streamer.adoc#req-ssr-config-exact-addresses[ASIL Streamer routes name exact source addresses];
+  xref:up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route];
+  xref:up-l2/streamer.adoc#req-ssr-streamer-no-panic[The Streamer does not panic in runtime mode];
+  xref:up-l2/streamer.adoc#req-ssr-streamer-memory-safety[The Streamer's own code cannot cause undefined behaviour, and its `+unsafe+` is inventoried].

@@ -1,0 +1,41 @@
+= uP-L1 Wires
+:toc: preamble
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
+
+[NOTE]
+====
+This page holds common transport-wire boundary requirements of the up-rust SEooC requirement family (`+req~ssr-*+`, `ASIL:: B`, `Safety*` tags).
+Filing on this page does not broaden any requirement to all uP-L1 implementations: whom each item binds, and how the repository's requirement families meet, is stated in xref:../../contract-generations.adoc[Which requirements an implementation follows] (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
+
+Related `+unsafe+` inventory governance and Rust soundness rules are stated in xref:../../safety/assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified] and xref:../../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour].
+The remaining wire-contract items currently in xref:../../safety/up-l1/wires.adoc[Allocated to each wire] join these wire chapters in a later relocation commit.
+====
+
+[[req-ssr-unsafe-wire-untrusted]]
+== No wire can break the element's memory safety
+
+[.specitem,oft-sid="req~ssr-unsafe-wire-untrusted~2",oft-title="No wire can break the element's memory safety",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyGateUpRust"]
+--
+The element *MUST NOT* let its memory safety depend on a wire's code being right.
+
+Where memory safety depends on a byte count, a length or a claim, the element *MUST NOT* take it from wire code on trust:
+
+* it *MUST* check the writer after encoding and refuse one that was replaced;
+* it *MUST* refuse a frame for which the wire reports more bytes than it wrote, and *MUST NOT* send or read a byte that the wire did not write;
+* it *MUST* give decoding only a valid mutable reference to an initialized value.
+--
+
+[horizontal]
+ID:: `+req~ssr-unsafe-wire-untrusted~2+`
+ASIL:: B
+Allocated to:: the element
+Verification:: test (a replaced writer is refused; a wire that reports more bytes than it wrote has its frame refused, with no byte beyond those that it wrote sent or read), miri
+
+*Rationale.*
+A wire can be written in safe code alone, against a safe interface.
+So its code can be wrong without any `+unsafe+`, and the element cannot rely on what it reports.
+
+Encoding goes through a checked writer that keeps the count of the bytes written itself.
+So a safe wire cannot claim more initialized bytes than it wrote.
+A frame sent at a length above that count would carry bytes that nothing wrote, so the element refuses it.

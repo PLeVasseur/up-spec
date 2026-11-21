@@ -86,7 +86,7 @@ The element *MUST NOT* send the address of a value, of a buffer or of a shared-m
 The element *MUST* treat a type as native only where one of these made it so:
 
 * the derive, which *MUST* refuse at build time a type that breaks this item;
-* an `+unsafe+` declaration that states these obligations and sits in a reviewed inventory (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified]).
+* an `+unsafe+` declaration that states these obligations and sits in a reviewed inventory (xref:../assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified]).
 
 *Size.*
 The encoded size of a native type is the type's size in memory, and its alignment is the type's alignment.
@@ -135,7 +135,7 @@ Another language can lay out such a type, or read it, differently, so they stay 
 Padding can hold any bytes, so nothing reads a meaning into it.
 
 _The two ways._
-A wire is written in safe code, and the element's memory safety does not depend on it (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]).
+A wire is written in safe code, and the element's memory safety does not depend on it (xref:../../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]).
 The derive checks a type, and a reviewer checks an inventoried `+unsafe+` declaration.
 A wire's description of a type is neither a derive nor a reviewed declaration, so it makes no type native.
 
@@ -163,7 +163,7 @@ A binary outside that domain is reached through a serialized wire (xref:serializ
 
 *Agreed by the deployment.*
 A _native agreement_ is the deployment data that names, for each native route, the route's type with its layout identity, the ABI for which it states that layout, and the payload encoding identifier that the frames of the route carry.
-The integrator supplies it, and chooses that identifier as the registry's rules for originating one allow (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]; xref:wires.adoc#encoding-identifier[the encoding identifier is the registry's]).
+The integrator supplies it, and chooses that identifier as the registry's rules for originating one allow (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]; xref:wires.adoc#encoding-identifier[the encoding identifier is the registry's]).
 
 * The element *MUST* prepare a native route only for a type that the agreement names for that route, with its layout identity.
 * The element *MUST* make each check of this item itself: what an agreement declares stands in for no check of a layout or of an identity.
@@ -257,7 +257,7 @@ On a native route the element *MUST* have the sender initialize the value once, 
 * nothing is read from a loan before it is written, and a loan is sent only once the whole value has been written into it;
 * sending consumes the loan, and ends the sender's access to the storage (xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]);
 * a loan whose lease is dropped unsent is given back, exactly once (xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]);
-* no pending operation holds a loan (xref:../seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]).
+* no pending operation holds a loan (xref:../../up-l2/execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]).
 
 *Receiving.*
 The element *MUST* give a receiver a checked, typed view of the storage in which the frame arrived, wherever xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] allows a view and <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>> is established, and *MUST* ensure that:
@@ -288,8 +288,8 @@ On every path of a native route, success, refusal, cancellation, a peer's failur
 
 * xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path];
 * xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path];
-* xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap];
-* xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths];
+* xref:../../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap];
+* xref:../../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths];
 * xref:../../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data];
 * xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline];
 * xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input].
@@ -344,7 +344,7 @@ Each row names the rules that govern a step.
 | <<req-ssr-native-type,A native payload type holds its whole value in one fixed layout>>; xref:integrity.adoc#req-ssr-integrity-any-bits[In-place types accept every bit pattern]
 
 | The deployment agrees its native types
-| <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]
+| <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]
 
 | The route is prepared
 | <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Refusal at the transition"; xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "Native routes"; xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; xref:payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]
@@ -353,7 +353,7 @@ Each row names the rules that govern a step.
 | xref:integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]; xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]; xref:bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level]; xref:bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state]
 
 | A value is sent
-| <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>; xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]
+| <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>; xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../../up-l2/execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]
 
 | A frame arrives
 | xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]; <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]
@@ -365,10 +365,10 @@ Each row names the rules that govern a step.
 | xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]
 
 | On every path
-| xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:../../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data]; xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]; xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]
+| xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; xref:../../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; xref:../../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:../../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data]; xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]; xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]
 
 | The route is reported
-| xref:../seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got]; xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]
+| xref:../../up-l1/bindings.adoc#req-ssr-error-route-report[Each route reports what it got]; xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]
 |===
 
 [[failures]]
@@ -404,7 +404,7 @@ Each row names the rules that govern a step.
 
 | No loan is free
 | Runtime
-| xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]
+| xref:../../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]
 
 | A frame whose writer's layout identity is not established to be the reader's, a layout of the same size and the same alignment included
 | Admission
@@ -420,7 +420,7 @@ Each row names the rules that govern a step.
 
 | A faulty peer that writes wrong contents with the right shape
 | Not detected by the wire
-| xref:integrity.adoc#req-ssr-integrity-any-bits[In-place types accept every bit pattern]; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]
+| xref:integrity.adoc#req-ssr-integrity-any-bits[In-place types accept every bit pattern]; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]
 |===
 
 NOTE: A write that races a view is excluded by the conditions under which a view is allowed (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "When a view is allowed") and by what the integrator provides (xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], "Zero-copy routes"), and the element does not detect a violation of that assumption.
@@ -445,7 +445,7 @@ The table says what establishes each one.
 | xref:peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]
 
 | Lent storage is exclusive, disjoint, stable, and of the declared size and alignment, for as long as it is held
-| xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]
+| xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]
 
 | The bytes of a frame are a value of the type
 | xref:integrity.adoc#req-ssr-integrity-any-bits[In-place types accept every bit pattern]; xref:integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]; xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]

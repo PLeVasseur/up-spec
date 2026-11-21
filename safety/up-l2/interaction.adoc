@@ -5,7 +5,7 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom its items bind: xref:README.adoc[safety at uP-L2].
-Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
+Scope and element boundary: xref:../elements/up-rust/README.adoc[the up-rust SEooC's README].
 
 These items say what the element guarantees for an RPC call and for the identity of a message.
 Whom an item binds: xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
@@ -13,7 +13,7 @@ Whom an item binds: xref:../../contract-generations.adoc#req-ssr-requirements-bi
 * How the element treats the peers of a transport is in xref:../up-l1/peers.adoc[the transport layer's part].
 * The end-to-end protection wire, which some clauses here name for a route that selects it (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-not-required[The element requires end-to-end protection on no route, outside strict mode's black-channel rule]), is specified in xref:../seooc-up-rust/e2e-wire.adoc[`e2e-wire.adoc`].
 * The last section is an assumption of use, on message IDs that never repeat across restarts.
-Whom it binds: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+Whom it binds: xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 
 [[req-ssr-peer-rpc-ends]]
 == RPC calls always end
@@ -22,7 +22,7 @@ Whom it binds: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptio
 --
 *The deadline.*
 The element *MUST* give every RPC call a deadline: the TTL of its request, counted from when the request was created.
-An RPC request's TTL is greater than 0 (xref:../../basics/uattributes.adoc[UAttributes], `+dsn~up-attributes-request-ttl~1+`), and what the element does with a request whose TTL is 0 is stated in xref:../seooc-up-rust/qos.adoc#req-ssr-qos-ttl[Expired messages are not processed] and, for its answer at a server, in <<req-ssr-peer-rpc-undecodable-answered,An undecodable request is answered>>.
+An RPC request's TTL is greater than 0 (xref:../../basics/uattributes.adoc[UAttributes], `+dsn~up-attributes-request-ttl~1+`), and what the element does with a request whose TTL is 0 is stated in xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] and, for its answer at a server, in <<req-ssr-peer-rpc-undecodable-answered,An undecodable request is answered>>.
 So a call whose server has vanished or never answers completes with an error by its TTL.
 A response completes the call only where the element accepts it before that TTL has passed (xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
 
@@ -119,7 +119,7 @@ ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 A reused slot can carry a later call.
 Tying the response's full request identity to the slot's current tenure as the slot is claimed prevents a delayed response from completing that later call.
 
-The width at which a representation keeps the request ID and the peer tied to the call is stated in xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window].
+The width at which a representation keeps the request ID and the peer tied to the call is stated in xref:../../basics/platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window].
 
 [[req-ssr-rpc-check-at-arrival]]
 == A response completes its call only once its wire accepts it
@@ -130,7 +130,7 @@ The width at which a representation keeps the request ID and the peer tied to th
 When a response arrives, the element *MUST* first tie it to the call's current tenure as <<req-ssr-peer-rpc-correlation,A response reaches only its own call>> requires, which also states what becomes of a response that does not match.
 
 *Then, the TTL and the admission.*
-After the tie to the call succeeds, the element *MUST* check the response's TTL as xref:../seooc-up-rust/qos.adoc#req-ssr-qos-ttl[Expired messages are not processed] states, and then apply xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding] before it gives the response to a wire.
+After the tie to the call succeeds, the element *MUST* check the response's TTL as xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states, and then apply xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding] before it gives the response to a wire.
 A response that one of these checks refuses is a refused response: no later check is made for it, and no wire reads it.
 
 *Then, the wire check.*
@@ -205,14 +205,14 @@ What the refused copy owns is released as xref:../../up-l1/runtime.adoc#req-ssr-
 *The answer.*
 Where the element's RPC server role receives a request whose header the element can parse, the element *MUST* answer the request once, as a response to its reply address, with commstatus `+InvalidArgument+`, producing the answer without heap, where the check of "The order of the checks" that refuses the request refuses it for one of these causes:
 
-* a TTL of 0, on a route that does not select the E2E wire (xref:../seooc-up-rust/qos.adoc#req-ssr-qos-ttl[Expired messages are not processed], which states the refusal of such a request and its count);
+* a TTL of 0, on a route that does not select the E2E wire (xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed], which states the refusal of such a request and its count);
 * an encoding identifier that no wire of the route declares, or a missing payload where the request's operation requires a value, on a route that does not select the E2E wire (xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]);
 * a payload that the fourth check cannot decode, for a reason other than an end-to-end check.
 
 *The order of the checks.*
 When a request whose header the element can parse reaches the route of its RPC server role, the element *MUST* make these checks of it in this order, and *MUST NOT* make a later one of them for a request that an earlier one refuses:
 
-. its TTL: a TTL of 0, its expiry, and a clock that cannot be read (xref:../seooc-up-rust/qos.adoc#req-ssr-qos-ttl[Expired messages are not processed], which also states that a request that it refuses gets no check of its payload and no other count);
+. its TTL: a TTL of 0, its expiry, and a clock that cannot be read (xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed], which also states that a request that it refuses gets no check of its payload and no other count);
 . its payload, before any wire: on a route that does not select the E2E wire, its encoding and its presence (xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]); on a route that selects it, whether it carries an E2E header (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once]);
 . on a route that selects the E2E wire, that wire's check (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory]);
 . the decode of its payload, where it has one, with, on a native route, the check of its agreed layout (xref:../up-l1/native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]).
@@ -224,7 +224,7 @@ The element *MUST NOT* make one of those after an earlier one has refused the re
 A request that one of them refuses gets none of these checks and no answer under this item, and its refusal is returned or counted once as the item of that check states.
 
 *The one count.*
-The element *MUST* count each request that one of these checks refuses exactly once on its route, under the cause that the refusing check names, also where a typed operation returns that refusal's result to its caller: a refusal by the first check as xref:../seooc-up-rust/qos.adoc#req-ssr-qos-ttl[Expired messages are not processed] states, a request with no E2E header as xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once] states, and a refusal by the E2E wire as xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory] states.
+The element *MUST* count each request that one of these checks refuses exactly once on its route, under the cause that the refusing check names, also where a typed operation returns that refusal's result to its caller: a refusal by the first check as xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states, a request with no E2E header as xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once] states, and a refusal by the E2E wire as xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory] states.
 Each received copy of a request is a request of its own here, and an answer to a request is no second count of it.
 
 *No second answer.*
@@ -236,16 +236,16 @@ The element *MUST* send the answer as any response on that route is sent, under 
 *Requests that get no answer.*
 
 * A request whose header cannot be parsed has no reply address: the element *MUST NOT* answer it.
-Its refusal is as xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths] states for a malformed frame.
+Its refusal is as xref:../../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths] states for a malformed frame.
 Where the element refuses it, the element *MUST* count it exactly once on its route, also where a typed operation returns that refusal's result to its caller.
 Where the request's binding refuses it in a check of its own, its refusal is returned or counted once as that binding's item states.
 * The element *MUST NOT* answer a request that the first check refuses for its expiry or because the clock cannot be read, on any route.
 * On a route that selects the E2E wire, the element *MUST NOT* answer a request that it refuses before the E2E wire reads it, by the first or the second check: among them a request whose TTL is 0, one with no payload, and one whose payload is of an encoding other than the E2E wire's.
 The E2E wire has not read such a request, so the request has no tag for an answer to echo (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call]).
-* The element *MUST* count once an `+InvalidArgument+` answer of this item that it cannot send, as an event of its own and not as a second count of its request; where the route's overflow policy discards the answer, that count is the discard's (xref:../seooc-up-rust/qos.adoc#req-ssr-qos-overflow[Overflow acts as declared]).
+* The element *MUST* count once an `+InvalidArgument+` answer of this item that it cannot send, as an event of its own and not as a second count of its request; where the route's overflow policy discards the answer, that count is the discard's (xref:../../up-l1/runtime.adoc#req-ssr-qos-overflow[Overflow acts as declared]).
 * In each of these cases the client's call gets no answer to that request.
 A call whose request's TTL is greater than 0 then ends as <<req-ssr-peer-rpc-ends,RPC calls always end>> states: at its TTL, where it is still pending then.
-A request whose TTL is 0 is invalid, and the element refuses it at a client before it is sent (xref:../seooc-up-rust/qos.adoc#req-ssr-qos-ttl[Expired messages are not processed]); for a peer that sends one, this item states no completion of its call.
+A request whose TTL is 0 is invalid, and the element refuses it at a client before it is sent (xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]); for a peer that sends one, this item states no completion of its call.
 
 *End-to-end refusals.*
 Which answer the element gives a request that the E2E wire refuses is stated in xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory]: none to a request that the wire finds corrupt, whatever data ID it names; `+InvalidArgument+` to one that is not corrupt and whose data ID was not declared; and the wire's refusal answer, final or advisory, to every other.
@@ -292,7 +292,7 @@ Each is given to no wire, counted once as `+unprotected+` and under no other cau
 A known decoding failure can be reported immediately.
 
 _The order of the checks._
-The TTL check reads only the header, so an invalid or expired request is refused before its payload is looked at (xref:../seooc-up-rust/qos.adoc#req-ssr-qos-ttl[Expired messages are not processed]); the payload is admitted before any wire reads it, and the E2E wire runs before the decode.
+The TTL check reads only the header, so an invalid or expired request is refused before its payload is looked at (xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]); the payload is admitted before any wire reads it, and the E2E wire runs before the decode.
 So the one check that refuses a request names the cause of its one count, and decides its answer.
 
 _End-to-end refusals._
@@ -346,7 +346,7 @@ Waiting out the TTL of a request that no server received only delays an error th
 --
 *Format and source.*
 Every message ID the element generates *MUST* be a UUIDv7, as up-spec's rules require.
-Its 74 bits beyond the millisecond *MUST* come from one generator per route, seeded once from initialization-only entropy (xref:../seooc-up-rust/platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source]).
+Its 74 bits beyond the millisecond *MUST* come from one generator per route, seeded once from initialization-only entropy (xref:../../basics/platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source]).
 
 *The stated residual.*
 Two IDs of one source can therefore collide by chance.
@@ -358,7 +358,7 @@ The element *MUST* state that residual, with its derivation: the probability tha
 * across the source process's restarts, including while the wall clock cannot be read and the last good time is reused.
 
 *No repetition across restarts.*
-The element *MUST NOT* rest a statement that its message IDs never repeat across restarts on the entropy alone, as xref:../seooc-up-rust/platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source] states for every value.
+The element *MUST NOT* rest a statement that its message IDs never repeat across restarts on the entropy alone, as xref:../../basics/platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source] states for every value.
 Where a supported configuration offers message IDs that never repeat across restarts, the element *MUST* provide them through a checked persistent construction, and *MUST* state that construction's conditions in the configuration's package.
 Who relies on such IDs, and how, is stated in <<aou-seooc-ids-never-repeat,Message IDs that never repeat across restarts come from a configuration that provides them>>.
 
@@ -412,7 +412,7 @@ A wider sequence moves them.
 
 Random seeding gives a quantified collision probability, not a guarantee that two starts differ.
 
-A generator that keeps a 64-bit counter and the full last good time has a period of 2^64^ IDs of one route (xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window]).
+A generator that keeps a 64-bit counter and the full last good time has a period of 2^64^ IDs of one route (xref:../../basics/platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window]).
 
 [[aou-seooc-ids-never-repeat]]
 == Message IDs that never repeat across restarts come from a configuration that provides them
@@ -421,13 +421,13 @@ A generator that keeps a 64-bit counter and the full last good time has a period
 --
 Where the item, in ISO 26262's sense, relies on message IDs that never repeat across restarts, the integrator *SHALL* select a supported configuration that offers them (<<req-ssr-ids-unique,Message IDs are unique>>) and *SHALL* meet the conditions that its package states for their persistent construction.
 
-The integrator *SHALL NOT* rest that reliance on initialization entropy alone (xref:../seooc-up-rust/platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source]).
+The integrator *SHALL NOT* rest that reliance on initialization entropy alone (xref:../../basics/platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source]).
 --
 
 *Violation:*
 
 * A reliance on entropy alone is *undetectable* by the element: IDs of different starts then collide with the probability that the element's stated residual gives.
-* A persistent source whose read fails, or that the element's setup check finds short of its stated contract, is *refused at setup* (xref:../seooc-up-rust/platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source]).
+* A persistent source whose read fails, or that the element's setup check finds short of its stated contract, is *refused at setup* (xref:../../basics/platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source]).
 * No requirement has the element verify every condition that a package states for the persistent construction: this is a limit of the contract, and the integrator cannot rely on the element to detect a condition outside the checks that the items above require.
 
 [horizontal]

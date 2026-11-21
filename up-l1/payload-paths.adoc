@@ -27,13 +27,13 @@ In runtime mode, no part acquires or releases heap memory on a path that a nativ
 * element code *MUST NOT* acquire or release heap memory on it;
 * each wire that the native route uses declares a heap class of none in each direction that the route uses, and answers for that claim in all its work there, as xref:../safety/up-l1/wires.adoc#req-ssr-wire-heap-claim-tested[A heap-free claim is true, and encoding is repeatable] states;
 * each binding's code keeps the same rule, as xref:../safety/up-l1/bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] states;
-* the element applies the native-route refusal of xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], and, for allocation inside a binding's middleware under a named permit, the transition check of xref:../safety/seooc-up-rust/waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
+* the element applies the native-route refusal of xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], and, for allocation inside a binding's middleware under a named permit, the transition check of xref:bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
 
 What an allocation provider is, is stated in xref:../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing].
 The rule follows the cause, whichever part's code does the work: it reaches the work that the operation causes on another thread or at a later time as well.
 
 *Named middleware allocation.*
-Allocation inside a binding's middleware is an exception to this item's general native-path prohibition only for the operations and bound of a named permit that a matching named waiver admits, within the scope of xref:../safety/seooc-up-rust/waivers.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
+Allocation inside a binding's middleware is an exception to this item's general native-path prohibition only for the operations and bound of a named permit that a matching named waiver admits, within the scope of xref:bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
 This exception does not apply to a native lease drop, frame return or other native release operation, retirement and deferred release included (xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../safety/up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 It replaces no other requirement on an operation.
 What the binding declares and what a permit establishes are stated in xref:../safety/up-l1/bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path], under "Middleware".
@@ -65,7 +65,7 @@ The element and each wire *MUST* keep the native rule in work that a native rout
 A route is native or serialized, as its wire decides (xref:../safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]).
 On a serialized route whose declared class admits allocation, the element *MUST* confine heap use to two kinds:
 
-* an acquisition at an allocation point that the class names, made only after the operation's refusals that can come first (xref:../safety/seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]);
+* an acquisition at an allocation point that the class names, made only after the operation's refusals that can come first (xref:../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]);
 * the release, exactly once, of what such an acquisition produced, when the ownership it created ends, by whichever transition ends it (xref:runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
 
 The element *MUST NOT* acquire or release anything in deciding, reporting or counting any outcome.
@@ -78,7 +78,7 @@ It admits the route's ordinary ownership, and it establishes nothing more:
 * It excuses no lazy first-use initialization (xref:../basics/resources.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]).
 * It does not reach a native operation, the work one causes or the work a native route shares.
 * It does not reach an operation that its own item requires to use no heap on every route, such as the generation of a message ID (xref:../safety/up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]) or the acquisition, copy and validation of an integrity copy route (xref:../safety/up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
-* It relaxes no duty of element code, which keeps xref:../safety/seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data] and xref:runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] on every route.
+* It relaxes no duty of element code, which keeps xref:../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data] and xref:runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] on every route.
 * What it establishes of the stronger guarantees, and what a route's report shows of them, is stated in xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
 
 *When the rules apply.*
@@ -108,7 +108,7 @@ The rule follows what a native operation causes, because heap use in a wire's wo
 
 Ending an owned value is the only release a serialized route makes.
 Every transition that can end one uses that one rule: a release, a refusal, an overflow, a cancellation, an expiry or a peer's failure.
-So no transition needs heap of its own (xref:../safety/seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; xref:../safety/seooc-up-rust/qos.adoc#req-ssr-qos-overflow[Overflow acts as declared]; xref:../safety/up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
+So no transition needs heap of its own (xref:../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; xref:runtime.adoc#req-ssr-qos-overflow[Overflow acts as declared]; xref:../safety/up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
 
 An allocator working inside a pre-obtained region still allocates and frees, so the backing region's origin does not make it admissible on a native path.
 
@@ -149,7 +149,7 @@ The crossing makes only the copies and allocations that the adapter states.
 It changes neither the form, the heap class nor a guarantee of the owned-frame route (xref:../safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]; xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 * _Errors._
 The caller gets, for each outcome, a result that states that outcome.
-A refusal stays a refusal with its cause, and a loss or a partial delivery is not reported as delivery (xref:../safety/seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+A refusal stays a refusal with its cause, and a loss or a partial delivery is not reported as delivery (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 
 *Or refused.*
 An adapter *MUST* refuse each of these crossings, with a result that names the adapter's refusal and its reason:

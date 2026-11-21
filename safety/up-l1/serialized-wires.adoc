@@ -135,7 +135,7 @@ Whether a decoded value owns heap memory is a property of its type and of the wi
 What the wire declares of it for each direction, what a route that declares allocation admits, and what a declared class of none requires of the wire are stated in xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused] and xref:wires.adoc#req-ssr-wire-heap-claim-tested[A heap-free claim is true, and encoding is repeatable].
 
 *Errors.*
-Each refusal *MUST* be a returned error of fixed size (xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]; xref:../seooc-up-rust/errors.adoc#req-ssr-error-fixed-size[Errors are fixed-size diagnoses]).
+Each refusal *MUST* be a returned error of fixed size (xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]; xref:../../basics/error_model.adoc#req-ssr-error-fixed-size[Errors are fixed-size diagnoses]).
 
 *The end-to-end protection wire.*
 This item does not bind the end-to-end protection wire.
@@ -167,7 +167,7 @@ The element cannot see inside a wire, so the duty is the wire's.
 _Sizing._
 The element reserves storage before a wire encodes.
 A size reported as exact that was wrong would leave bytes of an earlier frame in the payload, or cut the encoding short.
-The element checks the writer afterwards and trusts no byte count (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]), and the wire still owes an honest size, so that a refusal can come before anything is written.
+The element checks the writer afterwards and trusts no byte count (xref:../../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]), and the wire still owes an honest size, so that a refusal can come before anything is written.
 A wire with no largest encoding gives the element no size to reserve, so its route declares a bound.
 Without one, nothing sizes the route's storage, and setup refuses the route rather than admit one that fails only in operation (xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-no-latent-refusal[Nothing is refused at runtime for a reason setup already knew]).
 
@@ -179,7 +179,7 @@ So a decoded value borrows nothing from the frame.
 _Owning heap memory._
 One format can be decoded into a value that owns heap memory, or into one that holds everything in storage of fixed capacity.
 So the format does not say whether a route allocates.
-The wire says it, for each direction, and a deployment that needs more than ordinary ownership requires it by name (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-resource-guarantees[A resource guarantee the item relies on is required by name]).
+The wire says it, for each direction, and a deployment that needs more than ordinary ownership requires it by name (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-resource-guarantees[A resource guarantee the item relies on is required by name]).
 
 [[owning]]
 == Encoding, owning and heap use
@@ -256,7 +256,7 @@ Each row names the rules that govern a step.
 | xref:payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]; xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Refusal at the transition"; xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>, "Sizing"
 
 | A value is sent
-| <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>; xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]; xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]
+| <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>; xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:../../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]; xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]
 
 | A frame is carried
 | xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]
@@ -274,13 +274,13 @@ Each row names the rules that govern a step.
 | xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]
 
 | The route is reported
-| xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Reporting"; xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], "Reporting"; xref:../seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got]
+| xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Reporting"; xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], "Reporting"; xref:../../up-l1/bindings.adoc#req-ssr-error-route-report[Each route reports what it got]
 |===
 
 [[guarantees]]
 == Allocation, and each stronger guarantee
 
-The rules are xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], xref:wires.adoc#req-ssr-wire-heap-claim-tested[A heap-free claim is true, and encoding is repeatable] and, for the integrator, xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-resource-guarantees[A resource guarantee the item relies on is required by name].
+The rules are xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], xref:wires.adoc#req-ssr-wire-heap-claim-tested[A heap-free claim is true, and encoding is repeatable] and, for the integrator, xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-resource-guarantees[A resource guarantee the item relies on is required by name].
 
 [[apart]]
 === Kept apart from native routes
@@ -299,7 +299,7 @@ The rules are xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap cl
 
 | A value whose encoding does not fit the route's bound or the storage given
 | Before sending
-| <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>; xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]
+| <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>; xref:../../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]
 
 | A value that the format cannot represent
 | Encoding
@@ -307,7 +307,7 @@ The rules are xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap cl
 
 | A wire that reports more bytes than it wrote, or replaces the writer
 | After encoding
-| xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]
+| xref:../../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]
 
 | A frame whose payload encoding identifier is not the wire's
 | Before decoding
@@ -335,7 +335,7 @@ The rules are xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap cl
 
 | An input that was changed and is still an encoding of some value
 | Not detected by a wire
-| xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]
+| xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]
 
 | Bytes of another type that the format decodes without an error
 | Not detected by a format that does not name its type

@@ -17,7 +17,7 @@ It holds three things:
 NOTE: Where an item is filed says which layer it concerns (xref:../README.adoc#filing[filing and scope]).
 
 * *One element.*
-The items here were written for the up-rust SEooC (xref:../seooc-up-rust/README.adoc[its README]) and for the bindings and wires that work with it.
+The items here were written for the up-rust SEooC (xref:../elements/up-rust/README.adoc[its README]) and for the bindings and wires that work with it.
 They are not protocol requirements of uP-L1, and none of them names a transport implementation of another SDK, or an SDK of another language.
 * *Requirements.*
 Each requirement's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]): such as every binding or those among them that it names, every wire, every serialized wire apart from the end-to-end protection wire, each wire of the XCDR2 little-endian appendable profile, one named binding (<<one-binding>>), or the element itself.
@@ -26,7 +26,7 @@ NOTE: Its tags say which repositories cover it (xref:../README.adoc#tags[the tag
 
 * *Assumptions of use.*
 The assumptions of use filed here are that element's: those about every transport (xref:deployment.adoc[what a deployment provides for its transports]), and those about one binding and its middleware (<<one-binding>>).
-Whom they bind: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+Whom they bind: xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 * *The protocol chapter.*
 The protocol chapter, xref:../../up-l1/README.adoc[the Transport & Session Layer (uP-L1)] with its transport pages, stays in force for what it covers until an adopted replacement takes effect for it (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
 
@@ -90,15 +90,15 @@ What the evidence of one binding shows for another is stated in xref:deployment.
 NOTE: Some items that concern a transport or a wire are filed with the element, because they are rules of the element's own modes, memory and reports.
 In their statements, some of these name a binding or a wire beside the element (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 
-A binding or wire author reads them in xref:../seooc-up-rust/README.adoc[the element's part]:
+A binding or wire author reads them in xref:../elements/up-rust/README.adoc[the element's part]:
 
 * the heap class and the stronger resource guarantees (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]);
-* waivers for middleware allocation (xref:../seooc-up-rust/waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]);
-* QoS, TTL and deadlines of a route (xref:../seooc-up-rust/qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]; xref:../seooc-up-rust/qos.adoc#req-ssr-qos-deadline[Deadlines are monitored]; xref:../seooc-up-rust/qos.adoc#req-ssr-qos-ttl[Expired messages are not processed]);
-* losses and their counts (xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]);
+* waivers for middleware allocation (xref:../../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]);
+* QoS, TTL and deadlines of a route (xref:../../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]; xref:../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored]; xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]);
+* losses and their counts (xref:../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]);
 * the modes, startup and restart (xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]; xref:../../up-l1/runtime.adoc#req-ssr-mode-bounded-startup[Setup never waits without a bound]; xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]);
 * release, the release service and pending cleanup (xref:../../up-l1/runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]);
-* memory safety against any wire and any binding written in safe code (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]; xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]), and the inventory of `+unsafe+` (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]);
+* memory safety against any wire and any binding written in safe code (xref:../../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]; xref:../../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]), and the inventory of `+unsafe+` (xref:../assurance.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]);
 * the end-to-end protection wire.
 It is a wire, but it is the element's own safety mechanism and reaches RPC calls and Streamer hops too, so its items stay together in xref:../seooc-up-rust/e2e-wire.adoc[`e2e-wire.adoc`].
 

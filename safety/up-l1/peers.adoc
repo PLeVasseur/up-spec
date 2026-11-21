@@ -5,12 +5,12 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
-Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
+Scope and element boundary: xref:../elements/up-rust/README.adoc[the up-rust SEooC's README].
 
 These items say how the element treats the peers of a transport.
 Each item's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 
-* The faults that these items hold against, in what a peer sends or writes, are stated in xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer].
+* The faults that these items hold against, in what a peer sends or writes, are stated in xref:../../up-l1/peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer].
 * A peer's death and restart are stated in <<req-ssr-peer-failure-normal,Peer failure is normal input>> and <<req-ssr-peer-stale-rejected,Stale peers are rejected>>, and a peer of another ABI in <<req-ssr-native-abi-agreed,A native representation never crosses an ABI>>.
 * RPC calls and message identity are in xref:../up-l2/interaction.adoc[the communication layer's part].
 
@@ -27,7 +27,7 @@ In each process that stays up, the element *MUST NOT* let a peer process that di
 * an unbounded wait;
 * a heap release on a native route, on a route whose heap class is none or in work they share.
 
-That holds whatever the peer sent or wrote before it failed (xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
+That holds whatever the peer sent or wrote before it failed (xref:../../up-l1/peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
 
 *The exception.*
 The one exception to the unbounded wait is the release of what the failure ends.
@@ -52,7 +52,7 @@ On every route, the element *MUST NOT* let a peer's failure, or the cleanup that
 
 *Other parts.*
 What a binding owes when a peer fails is stated in xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input], xref:bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits] and xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise].
-What the integrator provides is stated in xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated] and xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports].
+What the integrator provides is stated in xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated] and xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports].
 --
 
 [horizontal]
@@ -128,7 +128,7 @@ For the element and for each such binding, this revision replaces two sentences 
 *Peers that do not use the element.*
 This item gives a duty to the element and to a binding in each process that uses them, and to no other peer.
 For a peer that uses neither, this revision retires the recording of a fingerprint and the refusal of a peer that records none, which revision 1 gave every peer and a native peer.
-Such a peer's participation is the deployment's condition: the peers of a route are the deployment's to declare (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]), and the element still refuses a frame whose writer's ABI or layout is not established, as xref:native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout] states.
+Such a peer's participation is the deployment's condition: the peers of a route are the deployment's to declare (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]), and the element still refuses a frame whose writer's ABI or layout is not established, as xref:native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout] states.
 
 *Scope.*
 A serialized route needs no fingerprint, and this item does not affect it.
@@ -203,7 +203,7 @@ A mechanism whose representation brings a limit, such as a refusal under content
 A mechanism that keeps each peer's full identity and incarnation in one exclusive record has neither limit.
 
 Full width removes a wrap window.
-The exclusion argument still needs the review of each mechanism (xref:../seooc-up-rust/platform.adoc#req-ssr-atomic-width[No target needs an atomic width it lacks]).
+The exclusion argument still needs the review of each mechanism (xref:../../basics/platform.adoc#req-ssr-atomic-width[No target needs an atomic width it lacks]).
 
 [[req-ssr-peer-admission]]
 == Undeclared peers cannot lock out declared ones

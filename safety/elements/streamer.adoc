@@ -1,0 +1,43 @@
+= Streamer Safety Element
+:toc: preamble
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
+
+[NOTE]
+====
+The Streamer and the Streamer binary are separate parts outside the `up-rust` element (xref:up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]; xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
+Conventions and tags: xref:../README.adoc[Safety and assurance view].
+
+The Streamer's bounded-runtime scope, memory-safety rules and assumptions of use currently in xref:../up-l2/streamer.adoc[Streamer] join this page and `up-l2/streamer.adoc` in a later relocation commit.
+Shared build and handle-drop obligations allocated to the Streamer alongside the element are stated in xref:up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow], xref:up-rust/build.adoc#req-ssr-build-specified-functions-only[The ASIL build contains only specified functions] and xref:../../languages/rust.adoc#req-ssr-release-inert-drop[Dropping a runtime handle does nothing].
+====
+
+[[req-ssr-crate-streamer-isolated]]
+== The ASIL Streamer is its own untaintable crate
+
+[.specitem,oft-sid="req~ssr-crate-streamer-isolated~4",oft-title="The ASIL Streamer is its own untaintable crate",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
+--
+The Streamer *MUST* keep the ASIL Streamer's route table, admission, validation and forwarding loop in a crate of their own, which:
+
+* is `+no_std+`;
+* uses no `+alloc+`;
+* declares no Cargo features;
+* depends on no crate other than the safety crate;
+* uses no 64-bit atomic type.
+
+The Streamer *MUST* keep that crate so that no feature, dependency or build setting outside it can bring classic routes, `+std+`-only paths or heap use into it.
+
+The Streamer *MUST* have its `+std+` loader only parse deployment data, and *MUST* validate that data in this crate.
+What that validation covers is stated in xref:../up-l2/streamer.adoc#req-ssr-streamer-config-validated[The Streamer validates its deployment data in full].
+
+So bindings and wires are linked by the binary that uses the crate, not by the crate.
+--
+
+[horizontal]
+ID:: `+req~ssr-crate-streamer-isolated~4+`
+ASIL:: B
+Allocated to:: the Streamer
+Verification:: gate (the gates of the safety crate applied to this crate: its manifest, a build on a sysroot with neither `+alloc+` nor `+std+`, its resolved dependency closure, which holds only the safety crate, and its own panic-link fixture, which gives evidence for xref:../up-l2/streamer.adoc#req-ssr-streamer-no-panic[The Streamer does not panic in runtime mode]; a build for a bare-metal 32-bit target without 64-bit atomics), review (the `+std+` loader, which only parses deployment data, with all validation of it in this crate)
+
+*Rationale.*
+Separating the data plane keeps a convenience dependency, or a feature that another package of the build enables on a dependency that they share, from bringing heap use into it (source: the Cargo Book, Rust 1.98.1, chapter https://doc.rust-lang.org/1.98.1/cargo/reference/features.html[Features], sections Feature unification and Feature resolver version 2).

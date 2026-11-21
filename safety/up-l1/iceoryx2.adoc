@@ -16,10 +16,10 @@ It holds what is specific to one binding and its middleware, iceoryx2:
 * two assumptions of use for the integrator of a deployment that uses iceoryx2;
 * the rules of every binding, of the element and of every deployment to read for iceoryx2 (<<index>>).
 
-Each requirement's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]), and each assumption binds the integrator (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
+Each requirement's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]), and each assumption binds the integrator (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
 The assumptions about every transport hold for a deployment that uses iceoryx2 as well: xref:deployment.adoc[what a deployment provides for its transports].
 
-NOTE: Each "Violation" text uses the three classes of xref:../seooc-up-rust/assumptions-of-use.adoc#violation-classes[how a violation shows up], or states a limit of the contract in place of a class.
+NOTE: Each "Violation" text uses the three classes of xref:../elements/up-rust/assumptions-of-use.adoc#violation-classes[how a violation shows up], or states a limit of the contract in place of a class.
 
 [[req-ssr-binding-iceoryx2-profile]]
 == The iceoryx2 binding follows one profile, stated for one release of iceoryx2
@@ -128,7 +128,7 @@ Allocated to:: the iceoryx2 binding
 Verification:: test (the event IDs read from the event service's static config; a route whose lifecycle events share its data ID refused at setup; a data ID at the service's `+event_id_max_value+` admitted, and one above it refused at setup)
 
 *Rationale.*
-The event IDs, and the largest one that the service carries, belong to the event service's static config, not to the deployment data that xref:../seooc-up-rust/deployment-data.adoc#req-ssr-config-validated[Deployment data is validated in full] checks (source: the code of iceoryx2, release 0.9.3, https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/service/static_config/event.rs#L51-L65[`+iceoryx2/src/service/static_config/event.rs+`, lines 51 to 65] and https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/service/static_config/event.rs#L114-L138[lines 114 to 138], where the event service's static config holds its lifecycle event IDs and its largest event ID; https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/service/builder/event.rs#L593-L681[`+iceoryx2/src/service/builder/event.rs+`, lines 593 to 681], where an opener of an existing event service gets that service's own values).
+The event IDs, and the largest one that the service carries, belong to the event service's static config, not to the deployment data that xref:../../basics/configurations.adoc#req-ssr-config-validated[Deployment data is validated in full] checks (source: the code of iceoryx2, release 0.9.3, https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/service/static_config/event.rs#L51-L65[`+iceoryx2/src/service/static_config/event.rs+`, lines 51 to 65] and https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/service/static_config/event.rs#L114-L138[lines 114 to 138], where the event service's static config holds its lifecycle event IDs and its largest event ID; https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/service/builder/event.rs#L593-L681[`+iceoryx2/src/service/builder/event.rs+`, lines 593 to 681], where an opener of an existing event service gets that service's own values).
 So the binding reads them there and checks each route against them at setup.
 
 [[req-ssr-binding-iceoryx2-panic-paths]]
@@ -292,7 +292,7 @@ That is why the retained budget has to fit twice.
 [.specitem,oft-sid="req~ssr-binding-iceoryx2-arrival-reports~2",oft-title="iceoryx2's arrivals are reported from its receive thread, and a failed notification is counted",oft-needs="impl,utest",oft-tags="SafetyIceoryx2"]
 --
 *Arrivals.*
-An arrival, and a binding's arrival latency, are what xref:../seooc-up-rust/qos.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines under "Terms".
+An arrival, and a binding's arrival latency, are what xref:../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines under "Terms".
 This item specializes xref:bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is] for the iceoryx2 binding, and that item holds beside it.
 For every arrival on a receive route, the iceoryx2 binding *MUST* report an arrival to the element within its declared arrival latency, also while a data connection of the route has failed.
 One report *MAY* stand for every arrival since the report before it.
@@ -315,7 +315,7 @@ A notification whose frame did not reach the queue, such as one of a publisher w
 Neither observation limits the duty of the clause "Arrivals": an arrival that neither shows is still owed its report.
 
 *Where the binding cannot make these reports.*
-What the binding declares of its arrival reports, and of a route whose arrivals it cannot report within a declared latency, is stated in xref:bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is], "The declared latency", and what setup does with a deadline on such a route, in xref:../seooc-up-rust/qos.adoc#req-ssr-qos-invalid-refused[Meaningless QoS is refused at setup].
+What the binding declares of its arrival reports, and of a route whose arrivals it cannot report within a declared latency, is stated in xref:bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is], "The declared latency", and what setup does with a deadline on such a route, in xref:../../up-l1/runtime.adoc#req-ssr-qos-invalid-refused[Meaningless QoS is refused at setup].
 
 *A failed notification call.*
 This clause applies where, after a send on a route, the sending side of the binding notifies the route's listeners with a notification call.
@@ -346,7 +346,7 @@ Verification:: test, fault-injection, review
 
 *Rationale.*
 What every binding owes for its arrival reports, and why, is stated in xref:bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is]; when, and on which evidence, the iceoryx2 binding reports an arrival is its own to state.
-The duty covers every arrival, and not only those that one observation shows, for the reason that xref:../seooc-up-rust/qos.adoc#req-ssr-qos-deadline[Deadlines are monitored] gives under "What is counted".
+The duty covers every arrival, and not only those that one observation shows, for the reason that xref:../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] gives under "What is counted".
 A notification says that a send was made, not that its frame is in this route's queue, so it is evidence of an arrival only together with a frame that the queue newly holds; a sample that was already there shows nothing new.
 
 _A failed notification call._
@@ -364,7 +364,7 @@ The iceoryx2 binding *MUST* install, at setup, a degradation handler of its own 
 Where iceoryx2 offers a degradation callback for a kind of port, the binding *MUST* attach its handler to it; for a kind of port on which iceoryx2 offers none, the binding *MUST* learn by another means that it declares of each connection that cannot be set up, and *MUST* deliver that failure to its handler.
 
 *A receive route whose data connection could not be set up.*
-The binding *MUST* report to the element, as a receive failure, each data connection that a receive route's subscriber could not set up, whether or not iceoryx2 returns an error for it; this specializes xref:bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is], "Failed reads", which holds beside it, and the element counts the report as xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states under "Pull bindings".
+The binding *MUST* report to the element, as a receive failure, each data connection that a receive route's subscriber could not set up, whether or not iceoryx2 returns an error for it; this specializes xref:bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is], "Failed reads", which holds beside it, and the element counts the report as xref:../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states under "Pull bindings".
 That report replaces no arrival report: <<req-ssr-binding-iceoryx2-arrival-reports,iceoryx2's arrivals are reported from its receive thread, and a failed notification is counted>> holds while the connection is missing, and a notification of the publisher whose connection is missing is no evidence of an arrival.
 
 *A send route whose data connection could not be set up.*
@@ -420,7 +420,7 @@ The iceoryx2 binding is a binding whose ports write shared state both ways, so x
 * A port whose level differs from its service's recorded level is *refused at setup* (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 * A peer at another level that the deployment lets onto a service can crash or corrupt its peers' memory: *undetectable* by the element (xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]).
 * No requirement has the element or the binding check a domain or an OS user.
-The integrator validates the separation itself, as it validates every assumption (xref:../seooc-up-rust/assumptions-of-use.adoc[the element's assumptions of use]), and relies on no automatic check.
+The integrator validates the separation itself, as it validates every assumption (xref:../elements/up-rust/assumptions-of-use.adoc[the element's assumptions of use]), and relies on no automatic check.
 
 [horizontal]
 ID:: `+aou~seooc-iceoryx2-level-separation~1+`
@@ -443,18 +443,18 @@ The integrator *SHALL NOT* use the iceoryx2 binding on a 32-bit target: the bind
 On each service that the iceoryx2 binding uses for a route, the integrator *SHALL* deploy only programs that create every publisher with a static data segment, and *SHALL* declare that in the service's deployment data (<<req-ssr-binding-iceoryx2-static-segments,On iceoryx2, every publisher has a static data segment>>).
 
 *The permit.*
-The permit that the iceoryx2 binding declares for allocation inside iceoryx2 on a peer's join or restart (xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path], "Middleware") needs the waiver, and the heap for its bound, that xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument] states.
+The permit that the iceoryx2 binding declares for allocation inside iceoryx2 on a peer's join or restart (xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path], "Middleware") needs the waiver, and the heap for its bound, that xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument] states.
 
 *Limits and deviations.*
 The integrator accepts the limits and the deviations of the iceoryx2 binding, and takes no known failure of it for either, as xref:deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts] states for every binding under "Limits, deviations and known failures".
 The binding's one accepted panic path is a deviation only as <<req-ssr-binding-iceoryx2-panic-paths,iceoryx2's allowed panic paths are named, bounded and disclosed>> states it.
 
 *What setup refuses, and what a route reports.*
-The service depths are part of the deployment data that xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected] covers.
+The service depths are part of the deployment data that xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected] covers.
 What the binding refuses at setup for a service's depth, for the expired-connection buffer and for a route's data ID is stated in <<req-ssr-binding-depth-from-deployment,iceoryx2's service depth comes from deployment data>>, <<req-ssr-binding-iceoryx2-expired-buffer,On iceoryx2, a receive route's retained budget fits twice in the expired-connection buffer>> and <<req-ssr-binding-iceoryx2-event-ids,iceoryx2's event IDs come from the event service's static config>>.
 What the binding reports of a route's arrivals, and what it counts of a failed notification call, is stated in <<req-ssr-binding-iceoryx2-arrival-reports,iceoryx2's arrivals are reported from its receive thread, and a failed notification is counted>>.
-What a route reports while one of its data connections has failed is stated, for the receive side, in xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once], "Pull bindings", and for the sending side in <<req-ssr-binding-iceoryx2-degradation-handler,On iceoryx2, each port has a degradation handler>>, which states what the binding reports on both sides.
-What the application does with a route's reports is stated in xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports].
+What a route reports while one of its data connections has failed is stated, for the receive side, in xref:../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once], "Pull bindings", and for the sending side in <<req-ssr-binding-iceoryx2-degradation-handler,On iceoryx2, each port has a degradation handler>>, which states what the binding reports on both sides.
+What the application does with a route's reports is stated in xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports].
 
 *No known failure taken for a limit or a deviation.*
 The known failures of the iceoryx2 binding, listed apart from its limits and its deviations, are:
@@ -464,7 +464,7 @@ The known failures of the iceoryx2 binding, listed apart from its limits and its
 * each further one that the binding's qualification record states (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]).
 
 *Strict mode.*
-What strict mode refuses for a known failure, route by route, is stated in xref:../seooc-up-rust/build.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision].
+What strict mode refuses for a known failure, route by route, is stated in xref:../elements/up-rust/strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision].
 --
 
 *Violation:*
@@ -474,8 +474,8 @@ What strict mode refuses for a known failure, route by route, is stated in xref:
 * A program on such a service that adds a publisher with a data segment that is not static after the route's setup is *undetectable* by the element and the binding; one present at setup is *refused at setup*.
 * A route on a service whose deployment data does not declare that every program on the service creates its publishers with a static data segment is *refused at setup* by the iceoryx2 binding, naming the service (<<req-ssr-binding-iceoryx2-static-segments,On iceoryx2, every publisher has a static data segment>>).
 * A deviation accepted here is not a waiver.
-* A heap too small for the bound of the binding's permit for allocation on a peer change can end the process during such a change, which is *undetectable* until then (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]).
-* In strict mode's Enforce state, and in its Locked state, each route that a known failure affects is *refused at setup* (xref:../seooc-up-rust/build.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]).
+* A heap too small for the bound of the binding's permit for allocation on a peer change can end the process during such a change, which is *undetectable* until then (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]).
+* In strict mode's Enforce state, and in its Locked state, each route that a known failure affects is *refused at setup* (xref:../elements/up-rust/strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]).
 
 [horizontal]
 ID:: `+aou~seooc-iceoryx2-limits~4+`
@@ -499,9 +499,9 @@ This section links those to read for iceoryx2.
 | <<aou-seooc-iceoryx2-level-separation,On iceoryx2, each integrity level has its own processes, domain and OS user>>
 | <<aou-seooc-iceoryx2-limits,A deployment on iceoryx2 accepts that binding's limits, and no known failure as one>>
 | xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], "Two-way shared state"
-| xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]
-| xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]
-| xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's], "Priority inversion through middleware locks"
+| xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]
+| xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]
+| xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's], "Priority inversion through middleware locks"
 |===
 
 === Rules that the binding or the element keeps
@@ -523,8 +523,8 @@ This section links those to read for iceoryx2.
 | xref:bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization]
 | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Refusals at setup"
 | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "The copy route"
-| xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once], "Pull bindings"
-| xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports], "What the element reports"
+| xref:../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once], "Pull bindings"
+| xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports], "What the element reports"
 |===
 
 === Where iceoryx2 is only the test bed or the example

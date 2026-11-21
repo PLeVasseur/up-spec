@@ -5,7 +5,7 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 
 Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
-The element whose contract these duties belong to: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
+The element whose contract these duties belong to: xref:../elements/up-rust/README.adoc[the up-rust SEooC's README].
 
 These requirements give duties to every binding, or to every binding of one kind; requirements filed elsewhere in this area give a binding duties too (xref:README.adoc[safety at uP-L1]).
 Each item's statement says whom it binds: every binding or some of them, and the element where an item's statement gives it a duty (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
@@ -26,7 +26,7 @@ What only one binding must meet is stated with that binding, in requirements tha
 [.specitem,oft-sid="req~ssr-binding-scope~2",oft-title="What a binding is, and the binding contract",oft-needs="uman",oft-tags="SafetyBinding"]
 --
 *What a binding is.*
-A binding is a uP-L1 transport implementation that adapts the element to one middleware and is written against the element's lending or handoff runtime contract, part E2 of the element (xref:../seooc-up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
+A binding is a uP-L1 transport implementation that adapts the element to one middleware and is written against the element's lending or handoff runtime contract, part E2 of the element (xref:../elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
 
 *The binding contract.*
 The binding contract of a binding is that runtime contract together with every duty that the statement of a requirement of this area gives that binding (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]), wherever the requirement is filed:
@@ -127,7 +127,7 @@ A serialized route may allocate where it declares it and setup admits it.
 That permission cannot reach native work or metadata a native route shares.
 
 Allocation inside middleware is outside the binding's own code.
-So it is declared as a permit, admitted only by a waiver (xref:../seooc-up-rust/waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]), and reported apart from the binding's own.
+So it is declared as a permit, admitted only by a waiver (xref:../../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]), and reported apart from the binding's own.
 
 [[req-ssr-binding-lazy-forced]]
 == Lazy state is forced, and threads are idle, before running
@@ -353,15 +353,15 @@ A figure that is read as more than it measures admits a route that the binding c
 --
 *Scope.*
 The duties of this item on the declared latency, on arrival reports and on failed reads bind a binding on each receive route that it serves by pull (<<req-ssr-binding-scope,What a binding is, and the binding contract>>).
-What the element records on a route that a binding serves by push, and that route's arrival latency, are stated in xref:../seooc-up-rust/qos.adoc#req-ssr-qos-deadline[Deadlines are monitored].
+What the element records on a route that a binding serves by push, and that route's arrival latency, are stated in xref:../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored].
 
 *The declared latency.*
-For each pull route on which it can report arrivals, a binding *MUST* declare its arrival latency L, as xref:../seooc-up-rust/qos.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines it under "Terms", in its QoS capability, with its unit.
+For each pull route on which it can report arrivals, a binding *MUST* declare its arrival latency L, as xref:../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines it under "Terms", in its QoS capability, with its unit.
 The binding *MUST* keep that latency on every target and in every configuration that its qualification record claims.
 A binding that cannot report every arrival of a pull route within a declared latency *MUST* declare that it cannot report arrivals on that route.
 
 *Arrival reports.*
-An arrival is what xref:../seooc-up-rust/qos.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines under "Terms".
+An arrival is what xref:../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines under "Terms".
 On a pull route that declares a deadline, the binding *MUST* report every arrival to the element through the runtime port, each within L of the time at which its frame reached the route's queue.
 One report *MAY* stand for several arrivals, where the binding makes it within L of each of them.
 The binding *MUST NOT* report an arrival without evidence that a frame reached the route's queue: that a frame entered it, or that its overflow policy discarded one.
@@ -377,8 +377,8 @@ It *MUST NOT* report one of them as another, or infer one from another.
 What a call that notifies a peer returns shows what that call did: it shows neither that a frame arrived, was read or was consumed, nor that one was lost, and an error of the call does not show that no peer was notified.
 
 *The element's side.*
-What the element records, monitors and counts from these reports is stated in xref:../seooc-up-rust/qos.adoc#req-ssr-qos-deadline[Deadlines are monitored] and xref:../seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once].
-What setup does with a deadline on a pull route whose binding cannot report arrivals is stated in xref:../seooc-up-rust/qos.adoc#req-ssr-qos-invalid-refused[Meaningless QoS is refused at setup].
+What the element records, monitors and counts from these reports is stated in xref:../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] and xref:../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once].
+What setup does with a deadline on a pull route whose binding cannot report arrivals is stated in xref:../../up-l1/runtime.adoc#req-ssr-qos-invalid-refused[Meaningless QoS is refused at setup].
 --
 
 [horizontal]
@@ -558,7 +558,7 @@ Each binding *MUST* keep a qualification record, versioned with the binding, tha
 
 * each target and configuration for which the binding claims its binding contract;
 * every runtime guarantee that its middleware cannot make, with measured figures where they exist;
-* the permits that it declares, which only a named waiver admits (xref:../seooc-up-rust/waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]);
+* the permits that it declares, which only a named waiver admits (xref:../../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]);
 * its limits, its deviations and its known failures, each classed as this item defines them;
 * the revision of its middleware, and of every other source that an entry relies on;
 * the evidence of the runs that its entries rest on, each with the target and the configuration that it ran on, and the history of each entry.
@@ -579,7 +579,7 @@ Nothing makes a known failure a limit or a deviation: not its disclosure, not an
 
 *Whose defect.*
 For each limit, deviation and known failure, the binding *MUST* say in the record whether its cause lies in the binding's own code or in its middleware, and *MUST* name the exact source that the entry relies on: the document or file, its revision and the place in it.
-Which routes a known failure affects for strict mode is stated in xref:../seooc-up-rust/build.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision].
+Which routes a known failure affects for strict mode is stated in xref:../elements/up-rust/strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision].
 
 *Shared memory.*
 Where a binding or its middleware uses shared memory, the binding *MUST* disclose in its record that:
@@ -604,7 +604,7 @@ Verification:: review (every binding's record: the targets and configurations th
 A deployment decision needs the limits of the middleware underneath the binding, including limits that setup declarations cannot remove.
 
 The timing budgets that the record discloses as the integrator's duty are the system's allocation.
-A timing package that a supported configuration offers is the element's supplier's (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+A timing package that a supported configuration offers is the element's supplier's (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 
 The end-to-end protection that the record discloses as the integrator's duty is whatever the system supplies.
 
@@ -658,7 +658,7 @@ Each binding *MUST* have its build and release verification refuse a new, a chan
 
 *Its own inventory.*
 The inventory is the binding's own.
-It is no part of the element's inventory (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]), and the element's inventory check does not reach it.
+It is no part of the element's inventory (xref:../assurance.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]), and the element's inventory check does not reach it.
 For each binding, this item replaces the clause on bindings of revision 3 of that requirement, which had each binding that this project ships keep its own inventory under the same gate as the element's.
 --
 
@@ -670,7 +670,7 @@ Verification:: gate (the binding's inventory check over its own sources and over
 
 *Rationale.*
 A binding's `+unsafe+` code runs on the same runtime paths as the element's.
-So its obligations need a reviewed record and a check of their own, as the element's do (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]).
+So its obligations need a reviewed record and a check of their own, as the element's do (xref:../assurance.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified]).
 
 .A binding's inventory in its own repository
 ====
@@ -735,7 +735,7 @@ Where its middleware can enlarge, move or map again such storage after the bindi
 The binding *MUST* give a loan or a frame of zero bytes an address that is not null and has the route's alignment.
 
 *How the claim is made.*
-A lending binding *MUST NOT* state these properties to the element other than through the `+unsafe+` interface of the binding contract, and *MUST* keep each site that makes the claim under a reviewed row of its own inventory (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]; <<req-ssr-binding-unsafe-inventory,A binding inventories its own `+unsafe+`>>).
+A lending binding *MUST NOT* state these properties to the element other than through the `+unsafe+` interface of the binding contract, and *MUST* keep each site that makes the claim under a reviewed row of its own inventory (xref:../../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]; <<req-ssr-binding-unsafe-inventory,A binding inventories its own `+unsafe+`>>).
 A declaration, a capability value or a passed test does not establish them.
 
 *Refusal to lend.*
@@ -762,7 +762,7 @@ Verification:: test, compile-fail, miri, review
 *Rationale.*
 The element builds a writer on a loan and a typed view on a received frame.
 Both are sound only if the storage is exclusive, disjoint and stable, as the binding says.
-Safe code cannot check that, so the element takes it only through an `+unsafe+` interface with stated obligations (xref:../seooc-up-rust/memory-safety.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]).
+Safe code cannot check that, so the element takes it only through an `+unsafe+` interface with stated obligations (xref:../../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]).
 
 _A forgotten lease._
 A loan or a frame ends once, by the send, the give-back or the return.
