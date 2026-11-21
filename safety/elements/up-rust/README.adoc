@@ -28,7 +28,7 @@ The Streamer is a separate part outside the element: xref:../streamer.adoc[Strea
 [[req-ssr-element-boundary]]
 === The parts of the element, and element code
 
-[.specitem,oft-sid="req~ssr-element-boundary~2",oft-title="The parts of the element, and element code",oft-needs="uman",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-element-boundary~3",oft-title="The parts of the element, and element code",oft-needs="uman",oft-tags="SafetyUpRustCore"]
 --
 *The parts.*
 The element is the up-rust SEooC.
@@ -62,20 +62,21 @@ Its states, the severities of its findings and its rules: xref:strict-mode.adoc#
 *Element code.*
 Element code is the code of the parts that belong to the element.
 Code that runs on a runtime path but that the element does not own, such as the destructor of an owned value, an allocator's release or a dependency that they reach, is not element code.
+Admitting a selected startup-provisioning helper or a selected serialized owned-value runtime adapter on the ASIL path (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]) does not enlarge element code and does not bring that helper, adapter, allocation provider or any dependency that it reaches into parts E1 to E7.
 
 *Each part keeps its own requirements.*
 Whom a requirement binds is stated in xref:../../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
 Belonging to the element moves no duty from one part to another.
 
 *Outside the element.*
-These are parts of their own, each with its own requirements, and none is a part of the element:
+These are separately composed parts of their own outside element code, each with its own boundary, declarations, requirements, source-bound records and evidence, and none is a part of the element:
 
 * each binding, with its middleware (xref:../../../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]);
 * each wire other than the native wire and the end-to-end protection wire (xref:../../../up-l1/wires/README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]);
-* a platform backend that an integrator supplies (xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]);
+* each platform backend not shipped with the element, including a platform backend that an integrator supplies (xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]);
 * the Streamer and the Streamer binary (xref:../streamer.adoc#req-ssr-streamer-scope[What the Streamer is, and the bounded-runtime Streamer profile]);
-* each optional layer, such as an allocation-aware layer or an asynchronous layer, and the scheduler that drives an asynchronous layer;
-* each memory provider, scheduler integration and adapter (xref:../../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it]).
+* each selected startup-provisioning helper and each selected serialized owned-value runtime adapter (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]), and every other optional layer, such as an allocation-aware layer, an application-role layer or an asynchronous layer, together with the scheduler that drives an asynchronous layer;
+* each memory or allocation provider, scheduler integration and adapter (xref:../../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it]).
 
 The Streamer uses the carrier primitives of E5.
 A requirement whose statement gives a duty only to the element, to element code or to a part of the element gives the Streamer no duty.
@@ -86,22 +87,45 @@ A deployment conformance claim (xref:../../../contract-generations.adoc#req-ssr-
 Running in one process, being linked into one binary or being kept in one repository establishes no claim and merges no requirements.
 A composition that is claimed as one unit has its own explicit boundary, the revisions of its parts and of their named profiles with their dependency closure, its lifecycle, its assumptions of use and its evidence.
 
+*Composition-package releaser and role accountability.*
+Across the element and the separately composed parts that work with it, accountability is divided among five distinct roles:
+
+* *Component producers.*
+  Each component producer (supplier of a part composed with the element) *MUST* retain responsibility for its component's allocated requirements, source-bound records, proof obligations, evidence and source-level `+unsafe+` obligations for the code that it owns (xref:../../assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified]; xref:../../../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`]; xref:../streamer.adoc#req-ssr-streamer-memory-safety[The Streamer's own code cannot cause undefined behaviour, and its `unsafe` is inventoried]).
+  Tests and runs under Miri do not substitute for those source-level `+unsafe+` obligations.
+* *Releaser of a supported composition package.*
+  The releaser of a supported composition package *MUST* provide and answer for the package's compatibility statement and assembled supplier evidence, covering exact component versions, cross-component lifecycle and dependency closure, guarantees, covered execution contexts, deviations and unresolved conditions (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]).
+* *Element supplier.*
+  For each element-supported configuration package that it provides, the element's supplier is that releaser and retains release responsibility for that package.
+* *Explicit extension composer.*
+  An explicit extension composer that assembles and releases a composition package or extension beyond an element-supported package *MUST* assume composition-supplier responsibility for its extension, including its compatibility statement and assembled supplier evidence, and *MUST NOT* silently label or present that extension as element-supplier-supported.
+* *Integrator.*
+  The integrator matches its deployment against the selected package or extension and validates every applicable assumption of use for the item (xref:assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
+  A bundle of individually reviewed or evidenced parts is not proof of their combination; where no supplier offers a needed composition, that gap is recorded; an application user is not silently made a supplier, and an integrator assumes extension-supplier duties only where it deliberately creates and declares a custom extension.
+
 *The derive and test tooling.*
 The element's derive is a build input, and no part of the element at run time.
 What holds for the code that it generates, and who accounts for that code, is stated in xref:../../assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified].
 The application code around generated code is not element code.
 Test tooling, such as heap observers, contract suites and test doubles, is no part of the element.
+
+*Scoped replacement.*
+This revision replaces revision 2 of this item for the element, each component producer (supplier of a part composed with the element), the releaser of a supported composition package (including the element's supplier for each element-supported configuration package that it provides) and each explicit extension composer, preserving parts E1 to E7 and element code unchanged while explicitly classifying selected startup-provisioning helpers, serialized owned-value runtime adapters, allocation providers and non-shipped platform backends as separately composed parts outside element code and establishing component-producer, composition-package-releaser and explicit-extension-composer accountability.
 --
 
 [horizontal]
-ID:: `+req~ssr-element-boundary~2+`
+ID:: `+req~ssr-element-boundary~3+`
 ASIL:: B
-Allocated to:: the element
-Verification:: review (each statement and allocation that names the element, element code, one of the parts E1 to E7, a part outside the element or a composition of parts, read against this item)
+Allocated to:: the element, as the subject of the definitions; each component producer (supplier of a part composed with the element), for retaining responsibility for its component's allocated requirements, source-bound records, proof obligations, evidence and source-level `+unsafe+` obligations for the code that it owns; the releaser of a supported composition package (including the element's supplier for each element-supported configuration package that it provides), for providing and answering for the package's compatibility statement and assembled supplier evidence; each explicit extension composer, for assuming composition-supplier responsibility for its extension, including its compatibility statement and assembled supplier evidence, and not silently labeling or presenting that extension as element-supplier-supported
+Verification:: review
+* Each statement and allocation that names the element, element code, one of the parts E1 to E7, a part outside the element (including a selected startup-provisioning helper, serialized owned-value runtime adapter, memory or allocation provider, binding, wire, platform backend or the Streamer) or a composition of parts, read against this item, verifying that parts E1 to E7 stay unchanged and that admitting a startup-provisioning helper or serialized owned-value runtime adapter does not enlarge element code.
+* Each component producer's records: ownership of its component's allocated requirements, source-bound records, proof obligations, evidence and source-level `+unsafe+` obligations for the code that it owns, with neither tests nor Miri treated as a substitute for source-level `+unsafe+` obligations.
+* Each supported composition package and each explicit extension package: its compatibility statement and assembled supplier evidence (exact component versions, cross-component lifecycle and dependency closure, guarantees, covered execution contexts, deviations and unresolved conditions), element-supplier attribution for element-supported packages and explicit-extension-composer attribution for extensions without silently presenting an extension as element-supplier-supported, no bundle of individually reviewed parts treated as proof of their combination, recording of any gap where no supplier offers a needed composition, and no silent transfer of supplier responsibility to an application user.
 
 *Rationale.*
 Faults of initialization-mode code show before traffic starts, but a wrong admission decision becomes a runtime fault, so the transition is safety-relevant.
 Parts that are built, released and qualified apart can be combined in many ways, so a duty stays with the part to which its requirement gives it, whatever is linked or deployed beside it.
+Keeping admitted startup-provisioning helpers, serialized owned-value runtime adapters and allocation providers outside element code prevents optional helper admissions from silently enlarging the safety element's boundary, while separating component-producer, composition-package-releaser, explicit-extension-composer and integrator roles ensures that combination evidence, source-level `+unsafe+` obligations and deployment validation each have one accountable owner.
 
 == Outside the element
 
@@ -212,9 +236,9 @@ For the Streamer: xref:../../../up-l2/streamer.adoc#req-ssr-streamer-containment
 | The wire contract, and the wires' duties
 | The items whose statements give a wire a duty, in xref:../../../up-l1/wires/README.adoc[Allocated to each wire], xref:../../../up-l1/wires/serialized.adoc[Serialized wires], xref:../../../up-l1/wires/xcdrv2.adoc[XCDR2], xref:../../../up-l1/wires/e2e.adoc[The end-to-end protection wire], xref:../../../up-l1/payload-paths.adoc[Payload paths], xref:../../assurance.adoc[Assurance governance] and xref:../../../up-l1/peers.adoc[Peers and fault model]
 
-| Provided by the element's supplier
-| Versioned supported configuration packages
-| xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]; xref:../../../basics/platform.adoc[Platform contracts and atomics]; xref:assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]
+| Provided by the element's supplier or another supported composition-package releaser
+| Versioned supported configuration (composition) packages, compatibility statements and assembled supplier evidence
+| xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]; <<req-ssr-element-boundary,The parts of the element, and element code>>; xref:../../../basics/platform.adoc[Platform contracts and atomics]; xref:assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]
 
 | Required from each platform backend
 | The platform's rules: the runtime platform, with its clocks, its wait and its wake, and the initialization-only platform

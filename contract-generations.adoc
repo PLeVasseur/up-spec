@@ -124,7 +124,7 @@ NOTE: How a contributor keeps a statement and its "Allocated to" line in agreeme
 [[req-ssr-contract-transition]]
 === What a part declares and claims, and when a replacement takes effect
 
-[.specitem,oft-sid="req~ssr-contract-transition~2",oft-title="What a part declares and claims, and when a replacement takes effect",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
+[.specitem,oft-sid="req~ssr-contract-transition~3",oft-title="What a part declares and claims, and when a replacement takes effect",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
 --
 *What binds a part.*
 A requirement of the up-rust SEooC requirement family binds a part as <<req-ssr-requirements-bind,A requirement binds the actors to which it gives a duty>> states, at the revision in force for that part, whether or not the part has a declaration.
@@ -138,6 +138,7 @@ It is separate from the revision of an item, and it holds each item at one revis
 *The declaration.*
 Each part that a requirement of the up-rust SEooC requirement family binds *MUST* state, in a declaration that is released with it, which part it is, the revision of the specification that its claims rest on, and each named profile that it follows.
 A named profile is one that an item of the specification names, with each of its items by identifier or link, and the part *MUST NOT* name any other profile in its declaration.
+A supplier-defined capability name, helper name or configuration nickname is no such specification-named profile.
 The profile's own statement of its version is read at the declared revision.
 The dependency closure of an item is each item that its statement names or links, and each item that those name or link in turn; that of a named profile is that of its items.
 For the part's claims, the declared revision fixes the revision of each item and of its closure.
@@ -150,12 +151,32 @@ A claim that rests on an item rests on its dependency closure too.
 Where a claim rests on fewer than all the requirements that bind the part, the part *MUST* rest it on a named profile that it declares.
 A claim's evidence is evidence for those revisions, for that profile and for the configuration that the evidence names, and for nothing else.
 
+*Two partial-claim grammars.*
+The partial-claim grammar of the up-rust SEooC requirement family and the partial-claim grammar of the owned-frame SDK contract (<<req-sdk-owned-frame-contract,The owned-frame SDK contract binds the parts that declare it>>) stay distinct and are never merged:
+
+* under the up-rust SEooC requirement family, a partial component conformance claim rests only on a specification-named profile that the part declares under this item;
+* under the owned-frame SDK contract, a partial component conformance claim names each binding requirement of that contract that the claim leaves out (<<req-sdk-owned-frame-contract,The owned-frame SDK contract binds the parts that declare it>>, clause "Claims").
+
+A single composition or configuration document *MAY* collect declarations, claims and facts across both contract families, provided each family's grammar and scope stay explicit and separate.
+Each part that a requirement of the up-rust SEooC requirement family binds, its supplier, each releaser of a supported composition package and each explicit extension composer *MUST NOT* treat the owned-frame SDK contract as a named profile of the up-rust SEooC requirement family, *MUST NOT* use an owned-frame omitted-requirement list to authorize a partial claim under the up-rust SEooC requirement family, and *MUST NOT* let a supplier-defined capability name, helper name or configuration nickname authorize a partial claim under the up-rust SEooC requirement family.
+
 *The supplier.*
 The supplier of each such part *MUST* release the part's declaration, and each component conformance claim made for the part, with the part.
 The supplier *MUST* keep a record of where the part implements each item of the up-rust SEooC requirement family that binds it, and of who made each entry of that record.
 For an SDK, this duty of its supplier replaces the earlier convention of the up-rust SEooC requirement family that an SDK which implements an item keeps its own record of where it does so.
 The record is kept with the part, outside the specification, and it is no statement of the up-rust SEooC requirement family.
 What the supplier shows as the evidence of a claim is stated in xref:safety/assurance.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for].
+
+*Composition-package releaser accountability.*
+For a supported composition package (xref:safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]; xref:safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]):
+
+* the releaser of a supported composition package *MUST* provide and answer for the package's compatibility statement and assembled supplier evidence, covering exact component versions, cross-component lifecycle and dependency closure, guarantees, covered execution contexts, deviations and unresolved conditions;
+* for an element-supported configuration package, the element's supplier is that releaser and retains release responsibility for that package;
+* an explicit extension composer that assembles and releases a composition package or extension beyond an element-supported package *MUST* assume composition-supplier responsibility for its extension, including its compatibility statement and assembled supplier evidence, and *MUST NOT* silently label or present that extension as element-supplier-supported;
+* each component producer retains its own component's allocated requirements, source-bound records, proof obligations, evidence and source-level `+unsafe+` obligations (xref:safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]);
+* a bundle of individually reviewed or evidenced parts is not proof of their combination;
+* where no supplier offers a needed composition, that gap is recorded;
+* an application user is not silently made a supplier; the integrator matches the deployment and validates every applicable assumption of use (xref:safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]), and assumes extension-supplier duties only where it deliberately creates and declares a custom extension.
 
 *Deployment claims.*
 A deployment declaration names the deployment's profile (xref:safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]), the revision of the specification, and each part that the deployment composes, with that part's declaration.
@@ -164,10 +185,24 @@ Both belong to the integrator, and both are separate from every component confor
 When the integrator makes them, and what a deployment conformance claim names, are stated in xref:safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 A component conformance claim is no claim about a deployment, and a deployment conformance claim adds nothing to what a part's own claims state of that part.
 
+*Reusable supplier evidence and assumptions of use.*
+Reusable supplier or composition-package evidence—including component records, supported configuration packages, compatibility statements and assembled supplier evidence—assists the integrator's validation and never discharges any applicable assumption of use (xref:safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
+Each part that a requirement of the up-rust SEooC requirement family binds, its supplier, each releaser of a supported composition package and each explicit extension composer *MUST NOT* present supplier or composition-package evidence, a declaration, a setup check, a refusal or a report as discharging an assumption of use; determining applicability and validating every applicable assumption of use for the item remain with the integrator.
+
 *What a claim covers.*
 A claim covers what it names.
 Ordinary functional behaviour, native resource behaviour (xref:up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]), a finite timing bound and a safety-assurance scope (xref:up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]) are four separate subjects of a claim.
 A claim to one of them, and the evidence for it, is neither a claim to another nor evidence for it.
+
+*Claims, admission selections, assurance scopes and assessment observations.*
+Four distinct kinds of statement are never interchangeable, and none qualifies a component or a combination of components by itself:
+
+* a _formal conformance claim_: a component conformance claim (under this item or under <<req-sdk-owned-frame-contract,The owned-frame SDK contract binds the parts that declare it>>) or a deployment conformance claim (xref:safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]);
+* a _composition-package function admission selection_: an explicit selection of an admitted startup-provisioning helper, an admitted serialized owned-value runtime adapter or both under xref:safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations], which selects a declared function boundary and neither authorizes a partial conformance claim nor establishes qualification;
+* an _assurance-scope selection_: an explicit selection of a safety-assurance scope and its claim boundary, such as the ASIL path and its obligations (xref:safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]);
+* a _scoped assessment observation_: a documentary assessment record or observation for a pinned subject, target, configuration and boundary, which is neither a formal conformance claim (complete or partial under either grammar) nor proof of a qualified combination.
+
+Each part that a requirement of the up-rust SEooC requirement family binds, its supplier, each releaser of a supported composition package and each explicit extension composer *MUST NOT* present any one of these four as another, and *MUST NOT* present a composition-package function admission selection, an assurance-scope selection or a scoped assessment observation as a formal conformance claim or as qualifying a combination by itself.
 
 *What establishes no claim.*
 A report that a part produces at build time or at run time, such as a setup result, a route's report or a strict-mode report, establishes the checks that it names and nothing else.
@@ -195,22 +230,32 @@ An item and a classic protocol-chapter rule meet in one of three ways.
 * Where one implementation cannot meet both for a behaviour, a part that the item binds *MUST* say so in its declaration, naming the item at its revision.
 It *MUST NOT* claim conformance to the classic protocol-chapter rule for that behaviour, and *MUST NOT* name both rules in one claim for it.
 * Where the two texts do not settle whether one implementation can meet both, a claim of conformance to one is no claim about the other, and the part *MUST NOT* rest a claim on an answer to that question.
+
+*Scoped replacement.*
+This revision replaces revision 2 of this item for each part that a requirement of the up-rust SEooC requirement family binds, the supplier of each such part, the releaser of a supported composition package (including the element's supplier for each element-supported configuration package that it provides) and each explicit extension composer, preserving all declaration, claim, dependency-closure, replacement and classic-rule interaction rules of revision 2 while explicitly separating the two partial-claim grammars, distinguishing formal conformance claims, composition-package function admission selections, assurance-scope selections and scoped assessment observations, codifying that reusable supplier or composition-package evidence never discharges an applicable assumption of use, and establishing composition-package releaser and explicit-extension-composer accountability.
 --
 
 [horizontal]
-ID:: `+req~ssr-contract-transition~2+`
+ID:: `+req~ssr-contract-transition~3+`
 ASIL:: B
-Allocated to:: each part that a requirement of the up-rust SEooC requirement family binds; the supplier of each such part, for releasing its declaration and claims with it and for the record of where it implements each item
+Allocated to:: each part that a requirement of the up-rust SEooC requirement family binds; the supplier of each such part, for releasing its declaration and claims with it, for the record of where it implements each item, for keeping the two partial-claim grammars distinct, for not presenting supplier or composition-package evidence, declarations, checks, refusals or reports as discharging an assumption of use, and for not presenting formal conformance claims, composition-package function admission selections, assurance-scope selections and scoped assessment observations as interchangeable or as qualifying a combination by itself; the releaser of a supported composition package (including the element's supplier for each element-supported configuration package that it provides), for providing and answering for the package's compatibility statement and assembled supplier evidence, for keeping the two partial-claim grammars distinct, for not presenting supplier or composition-package evidence, declarations, checks, refusals or reports as discharging an assumption of use, and for not presenting formal conformance claims, composition-package function admission selections, assurance-scope selections and scoped assessment observations as interchangeable or as qualifying a combination by itself; each explicit extension composer, for assuming composition-supplier responsibility for its extension, including its compatibility statement and assembled supplier evidence, for not silently labeling or presenting that extension as element-supplier-supported, for keeping the two partial-claim grammars distinct, for not presenting supplier or composition-package evidence, declarations, checks, refusals or reports as discharging an assumption of use, and for not presenting formal conformance claims, composition-package function admission selections, assurance-scope selections and scoped assessment observations as interchangeable or as qualifying a combination by itself
 Verification:: review
-* Each part's declaration: it names the part, the revision of the specification and each named profile that the part follows, and no other profile.
+* Each part's declaration: it names the part, the revision of the specification and each named profile that the part follows, and no other profile, with no supplier-defined capability name, helper name or configuration nickname treated as a specification-named profile.
 * Each component conformance claim: it names the declaration and each item that it rests on, with their dependency closure, at their revisions, and it rests on a named profile where it rests on fewer than all the requirements that bind the part.
+* Each composition or configuration document, declaration and claim spanning both contract families: the two partial-claim grammars kept distinct and unmerged, with neither the owned-frame SDK contract nor an owned-frame omitted-requirement list nor a supplier-defined capability or helper name used to authorize a partial claim under the up-rust SEooC requirement family.
+* Formal conformance claims, composition-package function admission selections (startup provisioning and serialized owned-value runtime adapter), assurance-scope selections and scoped assessment observations: kept distinct, with none presented as another or as qualifying a combination by itself.
 * For each such part, its supplier's release of the declaration and of each component conformance claim with the part, and the supplier's record of where the part implements each item that binds it, with who made each entry.
+* Each supported composition package and each explicit extension package: its compatibility statement and assembled supplier evidence (exact component versions, cross-component lifecycle and dependency closure, guarantees, covered execution contexts, deviations and unresolved conditions), clear attribution to the element's supplier for element-supported packages or to the explicit extension composer for extensions without silent element-supplier labeling, no bundle of individually reviewed parts presented as proof of their combination, recording of any gap where no supplier offers a needed composition, and no silent transfer of supplier responsibility to an application user.
+* Reusable supplier or composition-package evidence, declarations, setup checks, refusals and reports: presented only as assisting integrator validation and never as discharging any applicable assumption of use.
 * Where one implementation cannot meet an item and a classic protocol-chapter rule: the part's declaration says so with the item's revision, the part claims no conformance to the classic protocol-chapter rule for that behaviour, and no claim names both rules.
 * That no claim rests on an answer that the two texts do not settle, on a report's checks beyond what the report names, or on anything that this item says establishes no claim.
 
 *Rationale.*
 A claim is read against an exact text, so it names that text and the part that it is made for.
 A part cannot speak for the deployment that composes it, and a deployment cannot add to what a part's supplier has shown, so the two kinds of claim stay apart and each has one party that answers for it.
+Keeping the specification-named partial-profile grammar of the up-rust SEooC requirement family distinct from the per-part omitted-duty grammar of the owned-frame SDK contract prevents a multi-family composition document or a supplier capability name from silently weakening either family's claim rules.
+Separating formal conformance claims, function admission selections, assurance-scope selections and scoped assessment observations ensures that selecting a helper function, declaring an assurance scope or recording an assessment observation is never mistaken for a formal conformance claim or combination qualification.
+Keeping reusable supplier evidence strictly an aid to integrator validation preserves the rule that only the integrator determines applicability and validates each assumption of use for its item, while naming composition-package releaser and explicit-extension-composer accountability ensures that combination compatibility and assembled supplier evidence belong to an identified releaser rather than falling silently onto an application user.
 A report shows the checks that ran, and what no check observes stays unshown.
 The classic protocol-chapter rules cover implementations that the items of the up-rust SEooC requirement family do not name, so only a text that names a rule, and those for whom it replaces it, can lift that rule.
 A tracing run is arranged for coverage, so what binds a part does not depend on how a run is arranged.

@@ -614,24 +614,25 @@ Cortex-M0 and Cortex-M0+ (Armv6-M) have neither exclusive accesses nor a compare
 [[aou-seooc-build-configuration]]
 == The ASIL binary is built from its claimed graph, with the ASIL profile
 
-[.specitem,oft-sid="aou~seooc-build-configuration~8",oft-title="The ASIL binary is built from its claimed graph, with the ASIL profile",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-build-configuration~9",oft-title="The ASIL binary is built from its claimed graph, with the ASIL profile",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
 *The complete image.*
-For each ASIL binary, the integrator *SHALL* declare, with the configuration, the complete content of the binary's final image and its build provenance: every crate and other component that the image contains, and every input of the build that produces it.
-The integrator *SHALL* build the final image from that declaration, and *SHALL NOT* link into the image a crate or component that the declaration does not account for.
+For each ASIL binary, the integrator *SHALL* declare, with the configuration, the complete content of the binary's final image and its build provenance: every crate and other component that the image contains, every explicitly selected ASIL-path helper function (any admitted startup-provisioning helper and any admitted serialized owned-value runtime adapter), all generated code with its exact generator and configuration, every transitive dependency, any retained state or release code reachable in the image, and every input of the build that produces it.
+The integrator *SHALL* build the final image from that declaration, and *SHALL NOT* link into the image a crate, component, helper function, generated output or transitive dependency that the declaration does not account for.
 
 *Member information.*
 For each ASIL binary, the integrator *SHALL* supply with the configuration the member information that the binary's build produces, naming each crate that the build links (xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement]).
 
 *Classification.*
-In that declaration the integrator *SHALL* classify each crate and component by what it actually brings into the image, with its features and target-selected paths, and not by its name, as one of:
+In that declaration the integrator *SHALL* classify each crate, component, selected helper function, generated output and transitive dependency by what it actually brings into the image, with its features, target-selected paths and retained state, and not by its name, as one of:
 
 * a member of the binary's claimed safety dependency graph;
 * a separately qualified component outside the claimed graph, under its own contract and qualification;
 * other code of the image, such as the application's own crates and their third-party dependencies, for which the integrator *SHALL* argue that it does not interfere with the members of the claimed graph (<<aou-seooc-process-isolation,Processes or partitions are isolated>>);
 * a build input that does not run in the image, such as a generator, whose output is classified with the artifact that consumes it; the code that the element's derive generates is held to the element's requirements, as the element's own code is, and is a member of the claimed graph (xref:../../assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified], "Generated code").
 
-Membership of the claimed graph, an integrity level and separate qualification are three separate properties: none follows from another.
+Membership of the claimed graph, an integrity level and separate qualification are separate properties: none follows from another.
+Complete-image classification, Cargo's ASIL build profile (`+panic = "abort"+` and `+overflow-checks = true+`), strict-mode states (`Off`, `Report`, `Enforce`, `Locked`), a selected safety-assurance scope and actual qualification remain distinct properties, and none follows from or substitutes for another.
 A QM label, or a place outside the claimed graph, is no argument that code does not interfere, and the element qualifies no code of the application.
 A compatibility re-export is judged by the dependencies it brings.
 
@@ -642,24 +643,34 @@ The claimed safety dependency graph holds only:
 * the element's strict-mode part, where the binary uses it (xref:README.adoc#req-ssr-element-boundary[The parts of the element, and element code]);
 * the code that the element's derive generates for the binary, with the exact derive and configuration that produced it (xref:../../assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified], "Generated code");
 * the ASIL Streamer crate, where the binary uses it (xref:../streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]);
-* the bindings, wires and platform backends that the configuration qualifies (<<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>), a custom platform backend among them only as <<aou-seooc-integrator-platform,A custom platform keeps the platform's rules>> states;
-* any optional layer that the configuration admits with that layer's own allocated requirements and evidence (xref:build.adoc#req-ssr-crate-core-only-binary[The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it]).
+* the bindings, wires, allocation providers and platform backends that the configuration qualifies (<<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>), a custom platform backend among them only as <<aou-seooc-integrator-platform,A custom platform keeps the platform's rules>> states;
+* any explicitly selected ASIL-path helper function that the configuration admits—a named startup-provisioning helper obtaining declared startup backing before the relevant transition, a named serialized owned-value runtime adapter confined strictly to implementing or serving as an explicitly identified subcomponent of an existing wire or allocation-provider role for permitted serialized message-owned values, or both as independent functional selections—with its exact selected functions, generated code, transitive dependencies, retained state and reachable release code, and its own allocated requirements and evidence (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]; xref:build.adoc#req-ssr-crate-core-only-binary[The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it]).
 
 The integrator *SHALL NOT* claim the element's safety-assurance scope for anything outside that graph.
-Code outside it, such as a compatibility facade that brings dependencies from outside the graph, an async integration or the classic Streamer, keeps its ordinary use, which claims no assurance scope.
+Code outside it—such as a compatibility facade that brings dependencies from outside the graph, an optional asynchronous or application-role layer, an executor, a generic collection library, an arbitrary application helper, a whole `+alloc+` or `+std+` crate brought merely by linkage, or the classic Streamer—keeps its ordinary use, which claims no assurance scope.
+Linking or packaging a crate or helper grants neither storage-origin permission, nor runtime allocation permission, nor safety qualification.
 
 *Toolchain.*
 The integrator *SHALL* use the exact compiler release, target, library modules and options that its configuration records for the release, with the supplier's qualification evidence for that scope where the claim needs it; the minimum supported Rust version and the availability of an API are not that evidence.
+A certified operating system, toolchain or dependency contributes only within its exact covered scope and qualifies neither selected helper functions nor the assembled image (xref:../../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
 
 *Profile.*
 The integrator *SHALL* use the ASIL profile: `+panic = "abort"+` and `+overflow-checks = true+`.
 The integrator *SHALL NOT* set the element's test-hook configuration, which the element's documentation names, in the build of an ASIL binary, and *SHALL* verify on the binary's final image that no test hook of the element is present (xref:build.adoc#req-ssr-no-test-hooks[The shipped element contains no test hook]).
 The ASIL build check that an application's own binary can carry is stated in xref:build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow].
+Building with Cargo's ASIL profile satisfies this build-profile condition alone and establishes neither strict-mode enforcement, nor complete-image classification, nor an assurance scope, nor actual qualification.
+
+*Supplier evidence and integrator validation.*
+Reusable supplier evidence—including a supported configuration package, a composition-package releaser's compatibility statement and assembled evidence, or a helper or provider contract record—assists the integrator's validation of the build graph, selected helper functions, generated code, transitive dependencies and retained state, and never discharges this assumption of use or any other applicable assumption of use.
+Under <<aou-seooc-assumptions-bind,An assumption of use binds the integrator who claims the scope, and replaces no requirement>>, the integrator *SHALL* still determine applicability and validate this assumption for the item before relying on the safety-assurance scope.
 
 *Strict states.*
 What the Locked state is, is stated in xref:strict-mode.adoc#req-ssr-strict-states[Strict mode has four states], and that only the integrator's build configuration sets the element's strict-build setting, in xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement].
-What the declared-graph check takes as its inputs and observes, and what each state reports, allows and refuses, among it a crate or route that the declared graph does not admit, is stated in xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement].
+What the declared-graph check takes as its inputs and observes, what its observation limits are, and what each state reports, allows and refuses, among it a crate, helper selection or route that the declared graph does not admit, is stated in xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement].
 What the Enforce and Locked states refuse of a process that runs an ASIL binary built with unwinding, and what the compliance report lists of the build, is stated in xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks] and xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
+
+*Scoped replacement.*
+For the integrator that claims the element's safety-assurance scope, this revision replaces revision 8 of this item for ASIL binaries and configurations on the ASIL path, requiring complete-image and claimed-graph accounting for exact selected startup-provisioning helpers and serialized owned-value runtime adapters, their generated code, transitive dependencies and retained state, distinguishing Cargo's ASIL build profile, strict-mode states, complete-image classification, selected assurance scope and actual qualification, limiting certified operating systems and dependencies to their exact covered scope, and confirming that reusable supplier or composition-package evidence assists validation without discharging any applicable assumption of use, while preserving all complete-image, member-information, toolchain, ASIL-profile (`+panic = "abort"+`, `+overflow-checks = true+`) and test-hook duties of revision 8 of this item.
 --
 
 *Violation:*
@@ -668,30 +679,31 @@ What the Enforce and Locked states refuse of a process that runs an ASIL binary 
 * An application's own binary can carry the element's ASIL build check (xref:build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]).
 Without it, a build with unwinding is *undetectable* by the element in the Off state; what the other states do with a process that runs such a binary is stated in a bullet below.
 A build without overflow checks is *undetectable* by the element whether or not the binary carries the check.
-* A crate or component that the declaration does not account for is *undetectable* by the element, except where the declared-graph check observes it; what that check observes, and what it reports and refuses in each state, which counts as *refused at setup*, is stated in xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement].
+* A crate, component, selected helper function, generated output, transitive dependency or retained state that the declaration does not account for is *undetectable* by the element, except where the declared-graph check observes an unaccounted or unadmitted crate, helper selection or route; what that check observes, and what it reports and refuses in each state, which counts as *refused at setup*, is stated in xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement].
 * A claimed graph that is not declared, or member information that the build does not supply, in a process that runs an ASIL binary, is reported in the Report state and *refused at setup* in the Enforce and Locked states (xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement]).
 * An ASIL binary built with the element's test-hook configuration set is *undetectable* by the element.
 * A process that runs an ASIL binary built with unwinding is *refused at setup* in the Enforce and Locked states, and reported as a finding in the Report state (xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]).
-* A binding or a wire of the declared graph that is not on the integrator's qualified list, and a custom platform that names no contract-test evidence, are *refused at setup* in the Enforce and Locked states, and reported as a finding in the Report state (xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]).
-No requirement has the element check what else a declared graph holds: the refusal outside the declared graph reaches only a crate or route that the declared graph does not admit (xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement]).
+* A binding, wire, allocation provider or admitted serialized owned-value runtime adapter of the declared graph that is not on the integrator's qualified list, an invalid or incomplete helper or adapter selection declaration, and a custom platform that names no contract-test evidence are *refused at setup* in the Enforce and Locked states, and reported as a finding in the Report state (xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]).
+No requirement has the element check what else a declared graph holds: the refusal outside the declared graph reaches only a crate, helper selection or route that the declared graph does not admit (xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement]).
 * No requirement has the element compare the final image with the declaration: such a comparison is verification evidence of this assumption, made outside the element.
 * In the Off state, an ASIL binary whose claimed graph is not declared, or whose member information is not supplied, is *undetectable* by the element.
-* A toolchain outside its configuration's recorded scope is *undetectable* by the element.
+* A toolchain outside its configuration's recorded scope, reliance on a certified operating system or dependency outside its exact covered scope, and reliance on reusable supplier or composition-package evidence without integrator validation for the item are *undetectable* by the element.
 
 [horizontal]
-ID:: `+aou~seooc-build-configuration~8+`
+ID:: `+aou~seooc-build-configuration~9+`
 ASIL:: B
 ISO 26262:: 1-3.22 (part-clause numbers only)
 
 *Rationale.*
-Only the members of the claimed graph are developed and qualified for the element's requirements.
+Only the members of the claimed graph—including any explicitly selected startup-provisioning helper or serialized owned-value runtime adapter, its generated code, its transitive dependencies and its retained state—are covered by the configuration's allocated requirements and evidence.
 Other code of the image is covered by no requirement of the element, and it can still interfere with the members of the graph.
 So the integrator accounts for it and argues that it does not interfere.
 A build input shapes the image without running in it, so its output is judged with the artifact that consumes it.
 The graph is declared with the configuration so that the build and the setup can be checked against it (xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement]).
 
-A toolchain qualification covers an exact release, target, library modules and options.
-A build that succeeds elsewhere, or a newly available language feature, is not covered by it.
+Cargo's ASIL build profile, strict-mode states, complete-image classification, selected assurance scope and actual qualification establish different things, so keeping them distinct prevents a build setting or setup state from standing in for image accounting or qualification.
+A toolchain qualification or a certificate for an operating system or dependency covers only its exact release, target, library modules, options and covered scope, and never qualifies helpers or the assembled image.
+Reusable supplier or composition-package evidence can establish component and build-closure facts, while only the integrator validates how they apply to the item (<<aou-seooc-assumptions-bind,An assumption of use binds the integrator who claims the scope, and replaces no requirement>>).
 
 [[aou-seooc-deployment-data]]
 == Deployment data is in range, verified and protected
@@ -1042,50 +1054,71 @@ A declared integrity level supports setup admission but cannot prove how a proce
 [[aou-seooc-qualified-bindings-and-wires]]
 == Bindings and wires pass their contracts
 
-[.specitem,oft-sid="aou~seooc-qualified-bindings-and-wires~9",oft-title="Bindings and wires pass their contracts",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-qualified-bindings-and-wires~10",oft-title="Bindings and wires pass their contracts",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
 The integrator *SHALL* use on the ASIL path only bindings and wires that pass the contract suites (the binding contract suite, the QoS contract suite and the wire contract suite) on the integrator's own target, at the exact versions and configuration whose evidence its supported configuration records.
 The integrator *SHALL NOT* take evidence of one state for another, such as compiled, linked, exercised, source-reviewed, composition-verified or qualified, each as the qualification record of the binding or wire names its states (xref:../../assurance.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for]), and *SHALL NOT* take the evidence of one binding or wire for another.
-For each combination of a wire and a binding that it uses on the ASIL path, the integrator *SHALL* use evidence of that combination, at its exact target, versions and configuration, and *SHALL NOT* take a wire's results on one binding for its results on another.
+For each combination of a wire, a binding, an allocation provider and any admitted serialized owned-value runtime adapter acting within its wire or allocation-provider role that it uses on the ASIL path, the integrator *SHALL* use assembled evidence of that combination, at its exact target, versions, configuration and covered execution contexts, and *SHALL NOT* take a wire's, provider's or adapter's results on one binding or composition for its results on another.
 
 * *Pull routes with a deadline.* For a pull route that declares a deadline, the integrator *SHALL* use only a binding whose deadline checks of the QoS contract suite pass for each use that the deployment makes of the route: on a subscriber, and on a carrier ingress.
 What such a binding reports and declares is stated in xref:../../../up-l1/bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is], and what the element records, monitors and counts in xref:../../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] and xref:../../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once].
 * *Response routes.* What a binding delivers on a response route that it serves by push is stated in xref:../../../up-l1/bindings.adoc#req-ssr-binding-response-delivery[A binding delivers one response route from one thread at a time], and the element's checks of an arriving response, on a push route and on a pull route, in xref:../../../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
 * *Cores without coherent atomics.* What the integrator uses for a route between cores whose atomics are not shown to be coherent with each other is stated in <<aou-seooc-target-environment,The target environment is verified>> ("Several cores").
 
+*Composition-package accountability and assembled evidence.*
+For each composed configuration of bindings, wires, allocation providers and admitted helpers or adapters that it uses on the ASIL path, the integrator *SHALL* validate the deployment against the composition-package releaser's compatibility statement and assembled supplier evidence: exact component versions, cross-component lifecycle and dependency closure, declared guarantees, exact covered execution contexts, deviations and unresolved conditions (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]).
+For an element-supported configuration package, the element's supplier retains release responsibility for that package; for a separate extension composition, the extension composer explicitly assumes composition-supplier responsibility for its extension, and the integrator *SHALL NOT* treat an explicit extension as element-supplier-supported or treat an unoffered combination as supported.
+A bundle of individually reviewed parts is not by itself proof of their combination.
+A certified operating system, middleware or dependency contributes only within its exact covered scope and qualifies neither helpers, adapters, bindings, wires nor the assembled image (xref:../../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
+A supplier's configuration name or package declaration is not a specification-named partial-claim profile.
+
+*Serialized owned-value runtime adapters and providers.*
+Where an ASIL-path configuration explicitly selects an admitted serialized owned-value runtime adapter confined strictly to implementing or serving as an explicitly identified subcomponent of an existing wire or allocation-provider role (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]; xref:../../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]), the integrator *SHALL* validate the adapter and its allocation provider together with every dependency that its acquisitions, resizes, destructions and releases can reach, for the exact message types, routes, directions, allocation domains, build and covered execution contexts (xref:../../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing]).
+For each route affected by an assured helper or adapter admission on the ASIL path, the integrator *SHALL* validate that the composition assurance contract and package explicitly name and establish the assured claim dependencies of recoverable exhaustion and panic-free cleanup across every covered transitive operation, setup-created values and reached dependencies included, never inferring either guarantee from an ASIL label or accepting a fallible wrapper over an allocator whose stated contract may abort (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]), and *SHALL* validate separately any requested non-waiting acquisition, non-waiting release or finite timing guarantee and the required non-native, non-shared ending path (xref:../../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
+
 *Limits, deviations and known failures.*
-The integrator *SHALL* accept for its deployment the limits that the qualification record of each binding that it uses states, and the deviations that it states, each within its scope and bounds and until it lapses (xref:../../assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]), and *SHALL NOT* take a known failure for either.
+The integrator *SHALL* accept for its deployment the limits that the qualification record of each binding that it uses states, and the deviations that each part's qualification record and the composition package state, each within its scope and bounds and until it lapses (xref:../../assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]), and *SHALL NOT* take a known failure for either.
 Where an assumption of one binding lists them, it lists that binding's known failures apart.
 
 *`+unsafe+` code outside the element.*
-A binding with `+unsafe+` code of its own, and a wire with hand-written `+unsafe+` code of its own, such as a wire over a C codec, are outside the element's `+unsafe+` inventory (xref:../../assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified]).
-The integrator *SHALL* use one on the ASIL path only where that code is qualified: by the inventory and the evidence that its own qualification record gives (xref:../../../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`]), or by a qualification that the integrator makes itself.
+A binding with `+unsafe+` code of its own, a wire with hand-written `+unsafe+` code of its own, such as a wire over a C codec, and an allocation provider, helper or runtime adapter with `+unsafe+` code of its own are outside the element's `+unsafe+` inventory (xref:../../assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified]).
+Source-level `+unsafe+` proof obligations remain with the actual code owner of each such part; tests and runs under Miri are supporting evidence and never substitute for source-level safety obligations.
+The integrator *SHALL* use one on the ASIL path only where that code is qualified: by the inventory and source-level proof evidence that its own qualification record gives (xref:../../../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`]), or by a qualification that the integrator makes itself.
 
 *The qualified list.*
-The qualified list is the integrator's list of the bindings and wires that it has qualified as the first paragraph of this assumption asks, each at the exact version and configuration whose evidence its supported configuration records.
-In the Report, Enforce and Locked states, the integrator *SHALL* have every binding and wire that it uses on its qualified list, and *SHALL* give strict mode that list and its acknowledgement of each deviation that a route of its deployment reaches, at the deviation's current revision.
-What strict mode reports in its Report state, and refuses in its Enforce state, the Locked state included, for a binding or wire off the list, for a deviation whose acknowledgement is missing or stale and for a known failure, is stated in xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks], xref:strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision] and xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
+The qualified list is the integrator's list of the bindings, wires, allocation providers and admitted serialized owned-value runtime adapters (within their wire or allocation-provider role) that it has qualified as this assumption asks, each at the exact version, configuration and covered contexts whose evidence its supported configuration or explicit extension package records.
+In the Report, Enforce and Locked states, the integrator *SHALL* have every binding, wire, allocation provider and admitted serialized owned-value runtime adapter that it uses on its qualified list, and *SHALL* give strict mode that list, the composition package's authority record and its acknowledgement of each part or composition-package deviation that a route of its deployment reaches, at the deviation's current revision.
+What strict mode reports in its Report state, and refuses in its Enforce state, the Locked state included, for a part off the list, for a composition-package authority mismatch, for a deviation whose acknowledgement is missing or stale and for a known failure, is stated in xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks], xref:strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision] and xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
+
+*Supplier evidence and integrator validation.*
+Reusable supplier and composition-package evidence assists the integrator's validation of component behavior, cross-component dependencies and covered contexts, and never discharges this assumption of use or any other applicable assumption of use.
+Under <<aou-seooc-assumptions-bind,An assumption of use binds the integrator who claims the scope, and replaces no requirement>>, the integrator *SHALL* still determine applicability and validate every applicable assumption of use for the item before relying on the safety-assurance scope.
+
+*Scoped replacement.*
+For the integrator that claims the element's safety-assurance scope, this revision replaces revision 9 of this item for bindings, wires, allocation providers, admitted serialized owned-value runtime adapters and composed configurations on the ASIL path, incorporating composition-package releaser compatibility and assembled supplier evidence, validation of admitted serialized owned-value runtime adapters within their wire or allocation-provider role (with reached dependencies, assured claim dependencies for recoverable exhaustion and panic-free cleanup, and covered execution contexts), the rule that a bundle of individually reviewed parts is not by itself proof of their combination, exact-scope limits of certified operating systems and dependencies, source-level `+unsafe+` obligations remaining with the actual code owner (with tests and Miri not substituting for them), and non-discharge of applicable assumptions of use by reusable supplier or package evidence, while preserving all contract-suite, pull-deadline, response-route, cross-core, limits/deviations/known-failures, external `+unsafe+` and qualified-list duties of revision 9 of this item.
 --
 
 *Violation:*
 
-* A wire that declares heap use on a native route, or a binding that declares middleware heap use without a waiver, is *refused at setup*.
-* That a binding or wire keeps the contract that it declares, for example that its frame destructor frees nothing on a native route, is a limit of the contract: no requirement has the element check it at runtime, apart from the checks that a requirement names, such as that of a wire's writer (xref:../../../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]).
+* A wire or allocation provider that declares heap use on a native route, a binding that declares middleware heap use without a waiver, an omitted adapter or reached dependency in a route's heap class or policy, a serialized composition with no non-native, non-shared ending path, or an assured helper route missing explicit naming or bound transitive evidence for recoverable exhaustion or panic-free cleanup is *refused at setup* (xref:../../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
+* That a binding, wire, allocation provider or admitted serialized owned-value runtime adapter keeps the contract that it declares, for example that its frame destructor frees nothing on a native route, is a limit of the contract: no requirement has the element check it at runtime, apart from the checks that a requirement names, such as that of a wire's writer (xref:../../../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]).
 * A deviation accepted here is not a waiver.
-* In strict mode's Enforce state, the Locked state included, a binding or wire off the qualified list, each route within the scope of a deviation whose acknowledgement is missing or stale, and each route that a known failure affects, whatever is acknowledged, are *refused at setup*; in the Report state they are reported, and nothing is refused for them (xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]; xref:strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]).
+* In strict mode's Enforce state, the Locked state included, a binding, wire, allocation provider or admitted serialized owned-value runtime adapter off the qualified list, a composition-package authority violation checked by strict mode, each route within the scope of a part or composition-package deviation whose acknowledgement is missing or stale, and each route that a known failure affects, whatever is acknowledged, are *refused at setup*; in the Report state they are reported, and nothing is refused for them (xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]; xref:strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]).
 * That a deviation accepted here has not lapsed is a limit of the contract: no requirement has a part check it, and strict mode judges whether an acknowledgement holds by the identifier and the revision of the deviation that it names (xref:strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]).
+* Whether individually reviewed parts combine safely without assembled composition evidence, whether a certified operating system, middleware or dependency covers the deployment's exact scope, whether source-level `+unsafe+` obligations hold for external code, and whether the integrator validated this assumption for the item rather than relying on supplier or package evidence alone are *undetectable* by the element.
 
 [horizontal]
-ID:: `+aou~seooc-qualified-bindings-and-wires~9+`
+ID:: `+aou~seooc-qualified-bindings-and-wires~10+`
 ASIL:: B
 
 *Rationale.*
-A declaration of capability needs target-specific contract evidence.
+A declaration of capability needs target-specific contract evidence, and a bundle of individually reviewed parts does not prove their cross-component combination, lifecycle or dependency closure.
 A deviation can be accepted within its exact scope and bounds, and a known failure cannot, however exactly it is bounded (xref:../../assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]).
 
-Evidence attaches to the exact pins and configuration it was produced on.
-A newer middleware release or a private variant does not inherit it, and neither does another binding.
-Evidence that code compiles does not show that it runs, and a source review does not show its timing.
+Evidence attaches to the exact pins, covered execution contexts and configuration it was produced on.
+A newer middleware release, a private variant, another binding or a certified operating system or dependency outside its exact covered scope does not inherit it.
+Evidence that code compiles does not show that it runs, a source review does not show its timing, and tests or Miri runs do not replace the code owner's source-level `+unsafe+` proof obligations.
+Reusable supplier and composition-package evidence assists integration work, while validating every applicable assumption of use for the item stays with the integrator (<<aou-seooc-assumptions-bind,An assumption of use binds the integrator who claims the scope, and replaces no requirement>>).
 
 [[aou-seooc-iceoryx2-level-separation]]
 == On iceoryx2, each integrity level has its own processes, domain and OS user
