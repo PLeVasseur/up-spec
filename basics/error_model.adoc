@@ -174,7 +174,7 @@ Beyond deciding the refusal, producing its error and counting it, the element *M
 *Serialized routes.*
 On a serialized route, some refusals are reached only after the operation acquired heap memory under its declared heap class.
 The element *MUST NOT* acquire a further resource in order to produce or report such a refusal.
-It *MUST* end the ownership already created, and what that ownership holds is released exactly once as xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] and xref:../safety/up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
+It *MUST* end the ownership already created, and what that ownership holds is released exactly once as xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] and xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
 That release is the route's declared heap use, under its own contract, and not part of producing the refusal.
 
 *Exhaustion of a declared allocation.*
@@ -226,7 +226,7 @@ Element code's arithmetic on runtime paths *MUST* be checked, saturating or wrap
 
 *Malformed frames.*
 The element *MUST* refuse a frame whose header or envelope it cannot parse, a frame that lacks them included, and *MUST* return or count that refusal as xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states.
-Where a binding parses a frame's physical envelope, the binding's own items state the refusal of a sample that does not parse (xref:../safety/up-l1/lola-envelope.adoc#req-ssr-binding-lola-envelope-checks[On LoLa, a sample that is not a well-formed envelope is refused before any of it is used]; xref:../safety/up-l1/iceoryx2-frame.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]).
+Where a binding parses a frame's physical envelope, the binding's own items state the refusal of a sample that does not parse (xref:../up-l1/lola-envelope.adoc#req-ssr-binding-lola-envelope-checks[On LoLa, a sample that is not a well-formed envelope is refused before any of it is used]; xref:../up-l1/iceoryx2-frame.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]).
 --
 
 [horizontal]

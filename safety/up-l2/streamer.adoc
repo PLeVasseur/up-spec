@@ -72,7 +72,7 @@ and the requirements of other pages that give the Streamer or the Streamer binar
 * xref:../elements/up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow];
 * xref:../elements/up-rust/build.adoc#req-ssr-build-specified-functions-only[The ASIL build contains only specified functions];
 * xref:../elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate];
-* xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop];
+* xref:../../up-l1/wires/e2e.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop];
 * xref:../../languages/rust.adoc#req-ssr-release-inert-drop[Dropping a runtime handle does nothing];
 * xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back];
 * xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode];
@@ -170,7 +170,7 @@ An exact source filter bounds route matching and lets the Streamer refuse and co
 
 It does not authenticate a sending process: a faulty process using a reserved address can pass the filter.
 Physical service selection does not establish that identity either.
-Restricting which processes reach a transport, the level that each peer process is developed to, and end-to-end protection are separate measures, each with its own assumptions and limits (xref:../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]; xref:../up-l1/deployment.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly]; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+Restricting which processes reach a transport, the level that each peer process is developed to, and end-to-end protection are separate measures, each with its own assumptions and limits (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly]; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 The element's carrier primitives ask one physical service of a lending leg (<<req-ssr-carrier-lending-service,A lending leg names one physical service>>).
 The Streamer asks more: an exact source address on every route.
@@ -333,7 +333,7 @@ A carrier is a part that forwards frames on a carrier route: the element, in wha
 The word names a role and gives no part a duty: a requirement that binds a carrier names the element, the Streamer or both, each for its own part in the forwarding.
 
 *Kinds of leg.*
-A lending leg is a leg whose transport's binding is a lending binding (xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]), and a lending ingress and a lending egress are such legs.
+A lending leg is a leg whose transport's binding is a lending binding (xref:../../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]), and a lending ingress and a lending egress are such legs.
 A byte-only egress is an egress that has no loan to copy the ingress bytes into.
 
 *A hop.*
@@ -377,7 +377,7 @@ Verification:: test (a lending leg whose source filter is one exact address, adm
 
 *Rationale.*
 A lending leg lends a reader the memory that one service's writers wrote.
-A leg that could attach to several services would have no one memory to lend and no one set of writers to check a reader against (xref:../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
+A leg that could attach to several services would have no one memory to lend and no one set of writers to check a reader against (xref:../../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 
 [[req-ssr-streamer-byte-identity]]
 == Carriage keeps the bytes
@@ -411,7 +411,7 @@ A carrier *MUST NOT* stage already-serialized input:
 
 *Metadata at egress.*
 Where the egress envelope differs from the ingress envelope, a carrier *MUST* re-encode the metadata only.
-Where the egress route selects a wire to decode frame metadata, a carrier *MUST* use that wire's stated metadata format for any metadata that it re-encodes for that egress (xref:../up-l1/wires.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
+Where the egress route selects a wire to decode frame metadata, a carrier *MUST* use that wire's stated metadata format for any metadata that it re-encodes for that egress (xref:../../up-l1/wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
 --
 
 [horizontal]
@@ -455,7 +455,7 @@ _A native representation._
 A reader borrows a native representation in place, so a frame that names one has no serialized payload and is not carried as serialized bytes.
 <<req-ssr-streamer-qos-per-leg,Both legs are checked, at setup and per frame>> says when a leg carries it.
 
-Unchanged bytes let a check made at the endpoints, such as end-to-end protection, cover every hop (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop]).
+Unchanged bytes let a check made at the endpoints, such as end-to-end protection, cover every hop (xref:../../up-l1/wires/e2e.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop]).
 A copy staged on the way would add work and a buffer for nothing.
 
 [[req-ssr-streamer-no-ingress-block]]
@@ -587,11 +587,11 @@ One count per refused frame, under the limit that it met, shows which limit stop
 
 _A native representation._
 A reader borrows a native representation in place, so carrying one is not carrying bytes.
-It is carried only where the route's setup agreed it (xref:../up-l1/peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:../up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]).
+It is carried only where the route's setup agreed it (xref:../../up-l1/peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:../../up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]).
 Carrying it as bytes, or under another name, would hand a reader memory that nothing agreed.
 An encoding identifier is no part of that agreement, and a filter that names one admits no native representation.
 That a route's wires name a representation selects a frame for carriage and proves nothing about it.
-A layout, initialized storage and ownership are established by the reader's own admission (xref:../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
+A layout, initialized storage and ownership are established by the reader's own admission (xref:../../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 A name that a frame carries establishes none of them.
 
 _The encoding identifier._
@@ -1134,7 +1134,7 @@ So the client's element completes the call with the error response only where it
 
 *Clients that use the E2E wire.*
 On a route whose client uses the E2E wire, the response carries no end-to-end protection, because the Streamer never opens a payload.
-What that client's side then does, its refusal of the response as unprotected, the count of that refusal and the end of its call, is stated in xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call], xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once] and xref:interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
+What that client's side then does, its refusal of the response as unprotected, the count of that refusal and the end of its call, is stated in xref:../../up-l1/wires/e2e.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call], xref:../../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once] and xref:interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
 
 *The dispatcher chapter.*
 For the Streamer, under the bounded-runtime Streamer profile (<<req-ssr-streamer-scope,What the Streamer is, and the bounded-runtime Streamer profile>>), this requirement replaces `+dsn~dispatcher-rpc-error-response~1+` of xref:../../up-l2/dispatchers/README.adoc[the dispatcher chapter], which stays in force for every other dispatcher, a uStreamer outside that profile included: the Streamer sends the response only under the conditions above, and counts as not sent a response that those conditions exclude.

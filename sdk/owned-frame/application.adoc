@@ -24,10 +24,10 @@ Where an SDK's core is not the element, a word that an item of the safety area d
 * The *Communication Layer APIs*: xref:../../up-l2/api.adoc[Communication Layer APIs].
 * The *element*: xref:../../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code].
 * A *transport*, *initialization* and *runtime mode*: xref:../../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types].
-* A *binding*, its *middleware* and a *test double*: xref:../../safety/up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract].
-* A *wire*, and a *native* or a *serialized* route: xref:../../safety/up-l1/wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
-* A route's *form*: xref:../../safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name].
-* A *transmit loan*: xref:../../safety/up-l1/bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], "A transmit loan".
+* A *binding*, its *middleware* and a *test double*: xref:../../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract].
+* A *wire*, and a *native* or a *serialized* route: xref:../../up-l1/wires/README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
+* A route's *form*: xref:../../up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name].
+* A *transmit loan*: xref:../../up-l1/bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], "A transmit loan".
 * *QoS*: xref:../../up-l1/runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup]; an *overflow policy*: xref:../../up-l1/runtime.adoc#req-ssr-qos-overflow[Overflow acts as declared].
 * A *heap class*, an *allocation domain* and a route's *declared policy*: xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default].
 * *Non-waiting acquisition*, *non-waiting release* and each other stronger *guarantee*: xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
@@ -57,7 +57,7 @@ The layer *MUST NOT* require, for the use of a role, a declaration of its peer r
 The topic or method and its message types, on which peers agree, are no such declaration.
 
 *One family.*
-Where the layer offers a role on native and on serialized routes, the layer *MUST* offer it as one family for both: one way to declare the role and one set of operations, apart from the differences that the route's form makes (xref:../../safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]) in how a payload is written, read, owned and allocated, and in what encoding and decoding can return.
+Where the layer offers a role on native and on serialized routes, the layer *MUST* offer it as one family for both: one way to declare the role and one set of operations, apart from the differences that the route's form makes (xref:../../up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]) in how a payload is written, read, owned and allocated, and in what encoding and decoding can return.
 The layer *MUST* state in its documentation, with the role, each such difference.
 
 *Both levels.*
@@ -172,12 +172,12 @@ A setting that an item requires to be declared has no default, because a default
 *The same route.*
 Each layer above the core *MUST* run each operation that it offers on the route that setup admitted, in the route's admitted form.
 The layer *MUST NOT* change an operation's wire, form or QoS, or who owns what the operation takes or returns.
-The layer *MUST NOT* serve an operation in a form other than the route's admitted form, such as a native operation by a serialized one, or a view by a copy (xref:../../safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]).
+The layer *MUST NOT* serve an operation in a form other than the route's admitted form, such as a native operation by a serialized one, or a view by a copy (xref:../../up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]).
 
 *Nothing added.*
 On the path of an operation that it offers, the layer *MUST NOT* add:
 
-* a copy or a staging of the payload (xref:../../safety/up-l1/payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]);
+* a copy or a staging of the payload (xref:../../up-l1/payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]);
 * in runtime mode on a native route, an allocation or a free of the layer's own, or one that it causes in a memory provider (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]);
 * in runtime mode on another route, where the core is the element, an allocation or a free of the layer's own, or one that it causes in a memory provider and that the route's heap class does not admit (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]);
 * a retry of an operation that may already have been submitted.

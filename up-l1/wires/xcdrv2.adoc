@@ -1,12 +1,17 @@
-= uP-L1 safety: The XCDR2 little-endian appendable profile
+= The XCDR2 Little-Endian Appendable Profile
 :toc: preamble
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
-The duties of every wire: xref:wires.adoc[allocated to each wire].
-The duties of every serialized wire: xref:serialized-wires.adoc[serialized wires, and the values they own].
+[NOTE]
+====
+This page holds the XCDR2 little-endian appendable serialized-format profile requirements of the up-rust SEooC requirement family (`+req~ssr-xcdr2-*+`, `ASIL:: B`, `SafetyXcdr2` tag).
+Filing on this page does not broaden any requirement to all uP-L1 implementations: whom each item binds, and how the repository's requirement families meet, is stated in xref:../../contract-generations.adoc[Which requirements an implementation follows] (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
+
+Conventions and tags: xref:../../safety/README.adoc[Safety and assurance view].
+The duties of every wire: xref:README.adoc[uP-L1 wires].
+The duties of every serialized wire: xref:serialized.adoc[serialized wires, and the values they own].
+====
 
 NOTE: This page states one serialized format.
 Its encodings are those of a standard representation: version 2 of the extended Common Data Representation (XCDR2), little-endian, as that standard encodes a structure that can grow at its end, with a delimiter header before its fields.
@@ -17,7 +22,7 @@ In the standard's words (<<dds-xtypes,DDS-XTypes 1.3>>), a type of this profile 
 
 * Each item's statement names whom it binds: here, each wire of the XCDR2 little-endian appendable profile, as <<req-ssr-xcdr2-types,The profile encodes structures of fixed-width fields, and nothing else>> defines it (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 * The duties of every wire and of every serialized wire hold beside them.
-* The rules of a native type: xref:native-wire.adoc[the native wire].
+* The rules of a native type: xref:native.adoc[the native wire].
 
 [[req-ssr-xcdr2-types]]
 == The profile encodes structures of fixed-width fields, and nothing else
@@ -26,7 +31,7 @@ In the standard's words (<<dds-xtypes,DDS-XTypes 1.3>>), a type of this profile 
 --
 *The profile and its wires.*
 The XCDR2 little-endian appendable profile is the serialized format that the six requirements of this page state.
-A wire of the profile is a serialized wire that states the profile as its format (xref:wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]; xref:serialized-wires.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format]).
+A wire of the profile is a serialized wire that states the profile as its format (xref:README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]; xref:serialized.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format]).
 
 *A structure of fields.*
 A type of this profile is a structure with a fixed list of fields, in a fixed order.
@@ -84,7 +89,7 @@ _Arrays._
 The standard representation writes an array of integers, of floating-point numbers or of booleans as its elements alone, whatever its dimensions, and in version 2 gives an array whose elements are arrays a delimiter header of its own.
 The profile admits the first and not the second, so a nested declaration has one encoding.
 The standard gives each dimension a length greater than zero, so an array of no elements is no type of the representation.
-That rule is the format's, and says nothing of a native type of size zero (xref:native-wire.adoc[the native wire]).
+That rule is the format's, and says nothing of a native type of size zero (xref:native.adoc[the native wire]).
 
 _Names and identifiers._
 An encoding carries no name and no member identifier.
@@ -177,7 +182,7 @@ A wire of the XCDR2 little-endian appendable profile *MUST* compute body lengths
 The wire *MUST* refuse, when it is built or at setup, a type whose encoded length is greater than the largest size that the wire can represent.
 
 *Stated as exact.*
-The encoded length is the size of the largest encoding, which a serialized wire states for its type (xref:serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns], "Sizing").
+The encoded length is the size of the largest encoding, which a serialized wire states for its type (xref:serialized.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns], "Sizing").
 The wire *MUST* also state it as the exact size of every encoding that it writes of the type.
 
 *At a receiving end.*
@@ -220,7 +225,7 @@ A wire of the XCDR2 little-endian appendable profile *MUST* refuse, in decoding,
 *Checked first.*
 The wire *MUST* make the first five of those checks before it reads any field, with arithmetic that cannot overflow.
 The wire *MUST NOT* report a value as decoded unless the input passed all six.
-What a refusal returns: xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]; xref:serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns], "Errors".
+What a refusal returns: xref:README.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]; xref:serialized.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns], "Errors".
 
 *Padding and options.*
 The wire *MUST* accept any value in a byte of padding, in the body and after it: an input whose padding is not zero decodes to the same value.
@@ -245,7 +250,7 @@ Verification:: test, fault-injection, review
 ** An input with every byte of padding changed, in the body and after it, and an input with each other bit of the options set: each decoded to the same value.
 ** An encoding with each count of trailing padding, from zero to three: decoded.
 ** A floating-point field holding a negative zero and a NaN with a payload: decoded with the same bit patterns.
-* *fault-injection*: truncated and malformed frames on a route, each refused as the rules for every wire say (xref:wires.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]), and returned as an error or counted as the element's rule on refused frames says (xref:../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+* *fault-injection*: truncated and malformed frames on a route, each refused as the rules for every wire say (xref:README.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]), and returned as an error or counted as the element's rule on refused frames says (xref:../bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 * *review*: at source level, that the first five checks come before every read of a field, and that their arithmetic cannot overflow.
 
 *Rationale.*
@@ -311,7 +316,7 @@ The body length chooses among the lists of fields that the declaration admits, a
 
 *A writer type with fewer fields.*
 Where an input's admitted writer type lacks fields of the reader type, the wire *MUST* decode the fields that both types have, and *MUST* give each other field of the reader type its default: the default that the reader type declares for the field, or, where it declares none, zero for an integer, positive zero for a floating-point number, false for a boolean, and, for an array, that default in each of its elements.
-Such a field never keeps what the slot held before (xref:serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns], "Decoding").
+Such a field never keeps what the slot held before (xref:serialized.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns], "Decoding").
 
 *A writer type with more fields.*
 Where an input's admitted writer type has fields beyond the reader type's, the wire *MUST* decode the reader type's fields and skip the rest of the body.
@@ -347,7 +352,7 @@ _Declared._
 The bytes show a length and nothing of a type.
 A reader that took any shorter or longer body for a version of its type would read whatever arrived with a fitting length.
 So a receiving end reads the types that its route declares, and no others.
-An encoding of a longer admitted type that is cut back, with its headers rewritten, to the body length of a shorter admitted type is an encoding of that shorter type, and no reader can tell; end-to-end protection catches such a change where a route needs it (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+An encoding of a longer admitted type that is cut back, with its headers rewritten, to the body length of a shorter admitted type is an encoding of that shorter type, and no reader can tell; end-to-end protection catches such a change where a route needs it (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 _Mandatory fields._
 The encoding puts no mark on a field, so a reader cannot see in the bytes that a field which it does not know must be understood.
@@ -382,7 +387,7 @@ The wire *MUST NOT* state that it provides any of them because it follows the pr
 Such a mechanism, where a wire provides one, is no part of the profile, and its own stated contract governs it.
 
 *Its version.*
-A wire of the profile *MUST* state the version of the profile by naming its six requirements by their identifiers, each with the revision that it ends in, for example `+req~ssr-xcdr2-types~2+` (xref:serialized-wires.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format]).
+A wire of the profile *MUST* state the version of the profile by naming its six requirements by their identifiers, each with the revision that it ends in, for example `+req~ssr-xcdr2-types~2+` (xref:serialized.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format]).
 
 *The identifier.*
 A wire of the profile *MUST* state, as the payload encoding identifier of its format, the identifier that the registry assigns to the profile where it assigns one, and otherwise an identifier of the private-use range that the deployment agreement defines as the profile at the version that the wire states (xref:../../basics/payload_encoding_registry.adoc[the payload encoding registry]).
@@ -417,7 +422,7 @@ Verification:: test, review
 *Rationale.*
 A decode that succeeds shows that the bytes fit a type that the reader admits, and nothing about what the sender meant.
 The delimiter header adds a length and no name, and types with other fields share lengths.
-So what agrees the type is declared outside the bytes, and a wire that claimed more would mislead whoever decides which routes need end-to-end protection (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+So what agrees the type is declared outside the bytes, and a wire that claimed more would mislead whoever decides which routes need end-to-end protection (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 _The identifier._
 An identifier of the private-use range has no meaning of its own, so two deployments can give one number to two formats.

@@ -5,7 +5,7 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 
 [NOTE]
 ====
-This page holds cross-cutting assurance governance items of the up-rust SEooC requirement family (`+req~ssr-*+`): violation classes for assumptions of use, verification methods and supplier evidence reporting, `+unsafe+` inventory governance and waiver records.
+This page holds cross-cutting assurance governance items of the up-rust SEooC requirement family (`+req~ssr-*+`): violation classes for assumptions of use, verification methods and supplier evidence reporting, `+unsafe+` inventory governance, waiver records and binding qualification records (limits, deviations and known failures).
 Whom each requirement binds and how claims and replacements work are stated in xref:../contract-generations.adoc[Which requirements an implementation follows] (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
 
 Conventions and tags: xref:README.adoc[Safety and assurance view].
@@ -36,7 +36,7 @@ It never says that a violation was not tested.
 *A limit of the contract.*
 A "Violation" text can state, instead of a class, a limit of the contract: that no requirement has a part check something.
 Such a text gives the violation none of the three classes, and the integrator has no detection to rely on for it.
-A limit of the contract is not a limit that a binding's qualification record states (xref:up-l1/bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]).
+A limit of the contract is not a limit that a binding's qualification record states (<<req-ssr-binding-readme,A binding's qualification record states its limits and its failures>>).
 
 *No behaviour of its own.*
 A class adds no duty.
@@ -108,7 +108,7 @@ A run that a line places under Miri uses the toolchain that Miri needs, in place
 A result directly shows the path, the platform, the target, the backend, the binding and the configuration that it ran on.
 Using it for another scope rests on an argument of its own, and no such argument replaces a run that a Verification line requires on a named platform, target, backend or configuration.
 A result on a test double is evidence for the code under test, within what the double observes.
-It is no evidence that a real part of that kind meets its requirements (xref:up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]).
+It is no evidence that a real part of that kind meets its requirements (xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]).
 
 *The evidence.*
 The supplier of each part that a requirement of the up-rust SEooC requirement family binds *MUST* show, in its evidence for the duties that the requirement gives that part, each method that the requirement's "Verification" line names, in the scope that the method has for the requirement, applied to the paths and cases of those duties that the method covers.
@@ -178,12 +178,12 @@ For each wire, this entry and the clause "Outside these inventories" replace two
 * Each wire *MUST* keep each `+unsafe+` site of its code, generated code included, under a reviewed inventory row, its own or, for generated code, the generator's, and *MUST* have its build and release verification refuse a new, a changed or a vanished site until such a row accounts for it.
 
 *Bindings.*
-A binding's `+unsafe+` code is under inventory rows that are no part of the element's inventory: those rows, with the refusal of unreviewed sites, are stated in xref:up-l1/bindings.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`].
+A binding's `+unsafe+` code is under inventory rows that are no part of the element's inventory: those rows, with the refusal of unreviewed sites, are stated in xref:../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`].
 That item replaces, for each binding, the clause on bindings of revision 3 of this item.
-The integrator's use of such a binding on the ASIL path is stated in xref:up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts].
+The integrator's use of such a binding on the ASIL path is stated in xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts].
 
 *Outside these inventories.*
-A wire that is a separate element with hand-written `+unsafe+` code of its own, such as a wire over a C codec, falls outside the element's and the generators' inventories: the integrator's use of such a wire on the ASIL path, and the qualification of its `+unsafe+`, are stated in xref:up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts].
+A wire that is a separate element with hand-written `+unsafe+` code of its own, such as a wire over a C codec, falls outside the element's and the generators' inventories: the integrator's use of such a wire on the ASIL path, and the qualification of its `+unsafe+`, are stated in xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts].
 --
 
 [horizontal]
@@ -242,11 +242,77 @@ An approver other than the author gives each waiver a second person's check.
 A waiver that names its interference argument's kind and a reference leads a reviewer to the argument that interference from its allocation is excluded.
 The element can check that the argument is named, but not that it holds.
 
+[[req-ssr-binding-readme]]
+== A binding's qualification record states its limits and its failures
+
+[.specitem,oft-sid="req~ssr-binding-readme~3",oft-title="A binding's qualification record states its limits and its failures",oft-needs="uman",oft-tags="SafetyBinding"]
+--
+*The record.*
+Each binding *MUST* keep a qualification record, versioned with the binding, that states for each revision of the binding:
+
+* each target and configuration for which the binding claims its binding contract;
+* every runtime guarantee that its middleware cannot make, with measured figures where they exist;
+* the permits that it declares, which only a named waiver admits (xref:../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]);
+* its limits, its deviations and its known failures, each classed as this item defines them;
+* the revision of its middleware, and of every other source that an entry relies on;
+* the evidence of the runs that its entries rest on, each with the target and the configuration that it ran on, and the history of each entry.
+
+The record is the authoritative statement of each of these.
+
+*Limits, deviations and known failures.*
+These definitions apply to the qualification record of each part.
+An entry has one of three classes:
+
+* a _limit_: something that the part does not serve, or serves only within a stated bound, where the requirements of the up-rust SEooC requirement family let that part declare what it serves;
+* a _deviation_, which the up-rust SEooC requirement family also calls a _known anomaly_, and once it is accepted an accepted anomaly: a departure from a requirement that binds that part, with an exact scope and exact bounds, which no requirement of the up-rust SEooC requirement family excludes from acceptance, such as a binding's accepted instance of xref:../up-l1/bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input];
+* a _known failure_: any other violation of a requirement that binds that part.
+
+For each deviation the binding *MUST* state in the record an identifier and a revision, its exact scope and bounds, the evidence that it rests on and the date on which it lapses.
+In the record, the binding *MUST* keep its known failures apart from its limits and its deviations.
+Nothing makes a known failure a limit or a deviation: not its disclosure, not an acknowledgement and not a waiver.
+
+*Whose defect.*
+For each limit, deviation and known failure, the binding *MUST* say in the record whether its cause lies in the binding's own code or in its middleware, and *MUST* name the exact source that the entry relies on: the document or file, its revision and the place in it.
+Which routes a known failure affects for strict mode is stated in xref:elements/up-rust/strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision].
+
+*Shared memory.*
+Where a binding or its middleware uses shared memory, the binding *MUST* disclose in its record that:
+
+* a write racing a zero-copy read is undefined behaviour even for a type that accepts every bit pattern;
+* the setup integrity check catches misdeployment, not a peer that lies about its level;
+* a private payload copy does not validate middleware-owned offsets, lengths or other shared state;
+* end-to-end protection, OS partitioning and timing budgets remain the integrator's duties.
+
+*The README.*
+The binding's README is a concise profile and index of the binding, and the binding *MAY* have its README link to the record.
+Where the README speaks of a matter that the record states, the record governs.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-readme~3+`
+ASIL:: B
+Allocated to:: each binding, for its record and README; each part, as the subject of the definitions of limit, deviation and known failure
+Verification:: review (every binding's record: the targets and configurations that it claims; each entry and its class; the identifier, revision, scope, bounds, evidence and lapse date of each deviation; the cause and the exact source of each limit, deviation and known failure; what its README says of the matters that the record states; and the definitions applied to entries of a binding, a wire and the element, each against the requirements that bind that part)
+
+*Rationale.*
+A deployment decision needs the limits of the middleware underneath the binding, including limits that setup declarations cannot remove.
+
+The timing budgets that the record discloses as the integrator's duty are the system's allocation.
+A timing package that a supported configuration offers is the element's supplier's (xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+
+The end-to-end protection that the record discloses as the integrator's duty is whatever the system supplies.
+
+A limit is something that the requirements let a binding declare.
+A deviation departs from a requirement within a scope and bounds that can be checked, so that an integrator can decide on it.
+A known failure is any other violation, and nothing can accept it, however exactly it is bounded.
+
+Whether a defect is the binding's or its middleware's decides who can repair it, so the record says which, with the source that shows it.
+
 [NOTE]
 ====
 Related technical obligations outside assurance governance:
 
 * *Binding middleware permits and waiver scope:* xref:../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] and xref:../up-l1/bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
-* *Rust memory-safety soundness and safe-binding boundary:* xref:../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] and xref:../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety].
+* *Rust memory-safety soundness and safe-binding boundary:* xref:../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] xref:../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety] and xref:../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`].
 * *Checked-wire memory safety:* xref:../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety].
 ====

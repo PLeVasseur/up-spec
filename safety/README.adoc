@@ -62,7 +62,7 @@ Each obligation is stated once in a single canonical item, and views, profiles a
 | Rust-specific mechanisms: crate isolation, runtime handle drop discipline, memory-safety soundness and safe-binding boundary
 |===
 
-NOTE: Remaining `up-rust` SEooC chapters still pending subsequent relocation commits are indexed at xref:seooc-up-rust/e2e-wire.adoc[the end-to-end protection wire], xref:up-l1/README.adoc[the transport-layer bindings, wires, integrity, peers, middleware and deployment pages] and xref:up-l2/README.adoc[the communication-layer RPC/message identity and Streamer pages].
+NOTE: Remaining `up-rust` SEooC chapters still pending subsequent relocation commits are indexed at xref:../up-l1/wires/e2e.adoc[the end-to-end protection wire], xref:../up-l1/README.adoc[the transport-layer bindings, wires, integrity, peers, middleware and deployment pages] and xref:up-l2/README.adoc[the communication-layer RPC/message identity and Streamer pages].
 
 [[filing]]
 === Filing and scope

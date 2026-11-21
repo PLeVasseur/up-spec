@@ -286,7 +286,7 @@ An owned-frame route is a route that an application declares on a transport that
 On such a route, the storage that carries a frame, and each value decoded from a frame, has one owner at a time (xref:basics/ownership.adoc#req-sdk-owned-frame-one-owner[Frame storage and decoded values have one owner at a time]).
 The name "owned-frame" states that ownership rule.
 It names no release generation, and it does not say that a payload is copied or serialized.
-A route is native or serialized, and lent or handed off, as xref:safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name] states, and each form keeps the guarantees that its own items state.
+A route is native or serialized, and lent or handed off, as xref:up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name] states, and each form keeps the guarantees that its own items state.
 
 *Parts.*
 An SDK is a xref:languages.adoc[language library] that offers owned-frame routes to applications.

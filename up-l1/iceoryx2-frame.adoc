@@ -1,21 +1,19 @@
-= uP-L1 safety: The iceoryx2 physical frame
+= The iceoryx2 Physical Frame (up-rust SEooC)
 :toc: preamble
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
+[NOTE]
+====
+This page states how the iceoryx2 binding places one uProtocol frame in one iceoryx2 sample under the up-rust SEooC requirement family (`+req~ssr-binding-iceoryx2-frame-*+`, `ASIL:: B`, `SafetyIceoryx2` and `SafetyUpRustCore` tags).
+Each requirement's statement says whom it binds (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
+====
 
-This page states how the iceoryx2 binding places one uProtocol frame in one iceoryx2 sample.
-The iceoryx2 binding, and the profile that the six requirements of this page belong to: xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-profile[The iceoryx2 binding follows one profile, stated for one release of iceoryx2].
-The other requirements that are specific to the iceoryx2 binding, and what a deployment on iceoryx2 provides: xref:iceoryx2.adoc[iceoryx2].
-The duties of every binding: xref:bindings.adoc[allocated to each binding].
-The format of the frame's metadata, which the route's selected wire states: xref:wires.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it].
-The protocol's iceoryx2 chapter: xref:../../up-l1/iceoryx2.adoc[the iceoryx2 transport chapter].
-The release of iceoryx2 that the requirements of this page are stated for: xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-profile[The iceoryx2 binding follows one profile, stated for one release of iceoryx2].
-
-Each requirement's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
-The iceoryx2 binding's accepted panic path, and its middleware panic paths that are known failures: xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-panic-paths[iceoryx2's allowed panic paths are named, bounded and disclosed].
+* The iceoryx2 binding, the profile that the six requirements of this page belong to, and the release of iceoryx2 that they are stated for: xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-profile[The iceoryx2 binding follows one profile, stated for one release of iceoryx2].
+* The other requirements specific to the iceoryx2 binding (including xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-panic-paths[iceoryx2's allowed panic paths are named, bounded and disclosed]) and the classic v0.6.1 protocol contract (xref:iceoryx2.adoc#classic-iceoryx2-v0-6-1[v0.6.1 section]): xref:iceoryx2.adoc[iceoryx2].
+* The duties of every binding: xref:bindings.adoc[uP-L1 transport bindings]; middleware-specific navigation: xref:README.adoc#one-binding[what is specific to one binding].
+* The format of the frame's metadata, which the route's selected wire states: xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it].
+* Safety conventions and tags: xref:../safety/README.adoc[Safety and Assurance View].
 
 == Words used on this page
 
@@ -58,8 +56,8 @@ It *MUST* write each of its fields as an unsigned integer, in the native byte or
 |===
 
 *The metadata's byte order.*
-In a frame of this profile, the numbers inside the metadata are least significant byte first, whatever the header's byte order: the metadata format that the route's selected wire states (xref:wires.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]) puts them so, and that wire decodes them (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>).
-For frames of this profile, the decoding required by xref:wires.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it] replaces the iceoryx2 binding's duty in revision 1 of this item to read the metadata's numbers in their specified byte order, whatever the header's byte order.
+In a frame of this profile, the numbers inside the metadata are least significant byte first, whatever the header's byte order: the metadata format that the route's selected wire states (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]) puts them so, and that wire decodes them (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>).
+For frames of this profile, the decoding required by xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it] replaces the iceoryx2 binding's duty in revision 1 of this item to read the metadata's numbers in their specified byte order, whatever the header's byte order.
 
 *Where each part stands.*
 The metadata starts at the byte region's first byte, and its length is the header's metadata length.
@@ -145,7 +143,7 @@ Verification:: test, fault-injection, review
 * *review*: at source level, that the first seven checks are made before any range is formed from the header, and that no byte of the byte region is read before they pass.
 
 *Rationale.*
-A peer writes the whole sample, header included (xref:../../up-l1/peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]), so every length in it is input that is checked against a bound that the binding holds before it is trusted as a bound.
+A peer writes the whole sample, header included (xref:peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]), so every length in it is input that is checked against a bound that the binding holds before it is trusted as a bound.
 The header is checked before the byte region is read, so that no range is formed from a field that has not passed.
 The byte region's length is input from the peer as well: iceoryx2 writes it into its own header of the sample at the sender's loan (source: the code of iceoryx2, release 0.9.3, https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/port/publisher.rs#L848-L854[`+iceoryx2/src/port/publisher.rs+`, lines 848 to 854], where a loan writes that header), and a receiver takes it from there (source: the code of iceoryx2, release 0.9.3, https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/port/subscriber.rs#L462-L484[`+iceoryx2/src/port/subscriber.rs+`, lines 462 to 484], where a received sample takes its length).
 The receive path uses that count as the length of a raw slice pointer without checking it against a bound, and access to the sample's payload then makes a slice reference from that pointer without a further check (source: the code of iceoryx2, release 0.9.3, https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/sample.rs#L93-L124[`+iceoryx2/src/sample.rs+`, lines 93 to 124], where a received sample's payload is accessed; https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/raw_sample.rs#L66-L71[`+iceoryx2/src/raw_sample.rs+`, lines 66 to 71], where the stored pointer becomes a reference).
@@ -157,7 +155,7 @@ So the receiving route's largest frame, which the route declares, is what bounds
 [.specitem,oft-sid="req~ssr-binding-iceoryx2-frame-presence~1",oft-title="On iceoryx2, an absent payload and a present empty payload stay apart",oft-needs="impl,utest",oft-tags="SafetyIceoryx2"]
 --
 *Presence.*
-Whether a frame has a payload is what its metadata says, in the metadata format of the route's selected wire (xref:wires.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]): a frame whose metadata has a payload encoding has a payload, and a frame without one has none.
+Whether a frame has a payload is what its metadata says, in the metadata format of the route's selected wire (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]): a frame whose metadata has a payload encoding has a payload, and a frame without one has none.
 The header's payload length gives only the length.
 
 *An absent payload.*
@@ -186,11 +184,11 @@ The header has no mark of its own for it, so the metadata, which the element wri
 [.specitem,oft-sid="req~ssr-binding-iceoryx2-frame-metadata~2",oft-title="On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check",oft-needs="impl,utest",oft-tags="SafetyIceoryx2,SafetyUpRustCore"]
 --
 *Whose bytes.*
-The metadata is the frame's metadata, which the element writes in the metadata format of the route's selected wire (xref:wires.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
+The metadata is the frame's metadata, which the element writes in the metadata format of the route's selected wire (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
 The header gives its length, and the iceoryx2 binding *MUST* carry it unchanged, from the element that writes it to the element that receives it.
 
 *What this page relies on in that format.*
-Of the fields that the selected wire states for that format (xref:wires.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it], "The format"), the items of this page rely on these:
+Of the fields that the selected wire states for that format (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it], "The format"), the items of this page rely on these:
 
 * the prefix: the element's identity check below;
 * the frame's source: the peer identity below;
@@ -209,7 +207,7 @@ It *MUST* take the frame's peer identity from that source; what makes an identit
 *The identity check.*
 The binding *MUST* hand each frame that passes its checks to the element with its metadata, and *MUST* leave every comparison of the metadata's identity to the element.
 The hand-over is not a delivery to an application, and that its metadata decodes does not make a frame the route's.
-The element *MUST* compare the wire, the payload family and the metadata layout that the metadata names with those that the route admits, and check the frame's fields and its filters, before any of the frame reaches a wire's decoding of the payload or an application (xref:native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
+The element *MUST* compare the wire, the payload family and the metadata layout that the metadata names with those that the route admits, and check the frame's fields and its filters, before any of the frame reaches a wire's decoding of the payload or an application (xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
 --
 
 [horizontal]
@@ -245,13 +243,13 @@ The binding *MUST* accept the element's record of the metadata that it wrote onl
 It *MUST* publish a loan only on the route that it was lent for, and only once that record is made.
 
 *Receive.*
-A receive route's _retained budget_ is the number of received frames that the route can hold at once, as its declaration states; on a route of the Streamer it is the retained budget of the route's declared budget (xref:../up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route]).
+A receive route's _retained budget_ is the number of received frames that the route can hold at once, as its declaration states; on a route of the Streamer it is the retained budget of the route's declared budget (xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route]).
 The binding *MUST* keep a received sample for as long as the element's lease of the frame lasts, and *MUST* charge it to the route's retained budget from before it takes the sample from iceoryx2 to after it has given the sample back.
 A view of the payload *MUST* cover exactly the payload's extent, and the binding's view of the metadata exactly the metadata's extent.
 A view *MUST NOT* outlive the sample that holds it, and giving the sample back ends every view of it (xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 
 *Release in runtime mode.*
-In runtime mode a service, a port and the node that holds them are resources of the binding, which stay attached for the life of the process (xref:../../up-l1/runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode]), so no loan, sample or view outlives the storage that it lies in.
+In runtime mode a service, a port and the node that holds them are resources of the binding, which stay attached for the life of the process (xref:runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode]), so no loan, sample or view outlives the storage that it lies in.
 --
 
 [horizontal]
@@ -302,4 +300,4 @@ Verification:: test, review
 A loan that is not sent is the binding's alone, so it can clear the token before iceoryx2 lends that storage again.
 Once a frame is handed to iceoryx2 its storage is no longer the binding's: receivers may hold it, in memory that iceoryx2 maps read-only for them (source: the code of iceoryx2, release 0.9.3, https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/port/details/data_segment.rs#L229-L274[`+iceoryx2/src/port/details/data_segment.rs+`, lines 229 to 274], where a receiver opens its view of a publisher's data segment for reading only), and iceoryx2's publisher interface tells the binding nothing when the last of them gives it back: a send reports only how many receivers it reached, and the publisher takes returned samples back internally (source: the code of iceoryx2, release 0.9.3, https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/sample_mut.rs#L306-L338[`+iceoryx2/src/sample_mut.rs+`, lines 306 to 338], where a loaned sample is sent; https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/port/publisher.rs#L578-L900[`+iceoryx2/src/port/publisher.rs+`, lines 578 to 900], the publisher's interface; https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/port/details/sender.rs#L491-L519[`+iceoryx2/src/port/details/sender.rs+`, lines 491 to 519], where returned samples are taken back).
 Writing into it could change what a receiver reads.
-So a sent frame's bytes, its token among them, stay in the service's shared memory, where a process that may open the service can read them, and xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport] is what limits who that is.
+So a sent frame's bytes, its token among them, stay in the service's shared memory, where a process that may open the service can read them, and xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport] is what limits who that is.

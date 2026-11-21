@@ -87,5 +87,5 @@ NOTE: This index is non-normative navigation; whom each item binds is stated onl
 | xref:../../languages/rust.adoc[Rust language mapping]
 
 | Remaining chapters (pending subsequent relocation commits)
-| xref:../seooc-up-rust/e2e-wire.adoc[The end-to-end protection wire]; xref:../up-l1/README.adoc[Transport-layer bindings, wires, integrity, peers, middleware and deployment]; xref:../up-l2/README.adoc[RPC/message identity and Streamer]
+| xref:../../up-l1/wires/e2e.adoc[The end-to-end protection wire]; xref:../../up-l1/README.adoc[Transport-layer bindings, wires, integrity, peers, middleware and deployment]; xref:../up-l2/README.adoc[RPC/message identity and Streamer]
 |===

@@ -1,13 +1,19 @@
-= up-rust SEooC: The end-to-end protection wire
+= The End-to-End Protection Wire
 :toc: preamble
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions and tags: xref:../README.adoc[the safety area's README].
-Scope and element boundary: xref:../elements/up-rust/README.adoc[the SEooC's README].
+[NOTE]
+====
+This page holds the behavioral requirements of the optional end-to-end protection wire (part E6 of the up-rust SEooC, and the element's hooks in part E1) within the up-rust SEooC requirement family (`+req~ssr-e2e-*+`, `ASIL:: B`, `SafetyE2eWire`, `SafetyUpRustCore` and `SafetyStreamer` tags).
+Filing on this page does not broaden any requirement to all uP-L1 implementations: whom each item binds, and how the repository's requirement families meet, is stated in xref:../../contract-generations.adoc[Which requirements an implementation follows] (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
 
-Whom an item binds: xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
-Using the wire is the integrator's choice (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+Conventions and tags: xref:../../safety/README.adoc[Safety and assurance view].
+Scope and element boundary: xref:../../safety/elements/up-rust/README.adoc[up-rust SEooC element overview].
+The duties of every wire: xref:README.adoc[uP-L1 wires].
+Rust crate isolation of the E2E wire: xref:../../languages/rust.adoc#req-ssr-e2e-crate-isolated[The E2E wire's crate cannot be tainted].
+Using the wire is the integrator's choice: xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection].
+====
 
 [[req-ssr-e2e-not-required]]
 == The element requires end-to-end protection on no route, outside strict mode's black-channel rule
@@ -19,7 +25,7 @@ The element *MUST NOT* refuse a route because it has no end-to-end protection, a
 The element *MUST NOT* require that a route's protection be the E2E wire.
 
 *A black channel.*
-In strict mode's Enforce and Locked states, an ASIL route over a transport that the integrator classifies as a black channel is refused where it names no protection (xref:../elements/up-rust/strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]).
+In strict mode's Enforce and Locked states, an ASIL route over a transport that the integrator classifies as a black channel is refused where it names no protection (xref:../../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]).
 Naming the integrator's own protection meets that rule, and so does selecting the E2E wire for the route.
 
 *A route that selects the E2E wire.*
@@ -35,7 +41,7 @@ Allocated to:: the element
 Verification:: test (in strict mode's Off and Report states, a route at an ASIL integrity level with no end-to-end protection, admitted at setup; in the Enforce and Locked states, an ASIL route with no end-to-end protection over a transport that the integrator does not classify as a black channel, an ASIL route over a black-channel transport whose declaration names the integrator's own protection, and an ASIL route over a black-channel transport that selects the E2E wire, each admitted)
 
 *Rationale.*
-Which routes need end-to-end protection is the integrator's decision for the item, in ISO 26262's sense (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+Which routes need end-to-end protection is the integrator's decision for the item, in ISO 26262's sense (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 Requiring it in the element would make protection a condition even of routes that need none.
 
 [[req-ssr-e2e-wraps-any-wire]]
@@ -47,7 +53,7 @@ The E2E wire, `+E2e<W>+`, *MUST* wrap any ordinary wire `+W+` that meets its wir
 
 *The header.*
 The E2E wire *MUST* add a header, 32 bytes on a topic and 48 on an RPC route, in the formats of <<req-ssr-e2e-header-format,The E2E header has one documented format>>.
-On this page, a topic is a route of published messages or of notifications.
+In this E2E protection contract, a topic is a route of published messages or of notifications.
 The header *MUST* carry a data ID, a counter, its sender's incarnation, the frame's length, and a CRC over every other header field and the inner payload.
 A method header also carries the fields that <<req-ssr-e2e-header-format,The E2E header has one documented format>> adds.
 
@@ -62,13 +68,13 @@ The E2E wire *MUST* leave the inner wire's encoded bytes unchanged.
 
 *Two wires, two contracts.*
 
-* The E2E wire is a sequenced wire (xref:../up-l1/wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]), and *MUST* meet the wire contract as a sequenced wire meets it.
-* The selected inner wire is an ordinary wire, and the two wires are a composition, in which each keeps its own wire contract (xref:../up-l1/wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]).
-A requirement on a wire's heap class applies to it under that requirement's own condition (xref:../up-l1/wires.adoc#req-ssr-wire-heap-claim-tested[A heap-free claim is true, and encoding is repeatable]).
+* The E2E wire is a sequenced wire (xref:README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]), and *MUST* meet the wire contract as a sequenced wire meets it.
+* The selected inner wire is an ordinary wire, and the two wires are a composition, in which each keeps its own wire contract (xref:README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]).
+A requirement on a wire's heap class applies to it under that requirement's own condition (xref:README.adoc#req-ssr-wire-heap-claim-tested[A heap-free claim is true, and encoding is repeatable]).
 * A duty that an item gives the E2E wire is no duty of the inner wire.
 
 *The rules for serialized wires.*
-The inner wire, where it is a serialized wire, stays bound by xref:../up-l1/serialized-wires.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format] and xref:../up-l1/serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns] for its own encoding.
+The inner wire, where it is a serialized wire, stays bound by xref:serialized.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format] and xref:serialized.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns] for its own encoding.
 Neither item binds the E2E wire: for the E2E wire, this item replaces revision 1 of each of them, which named each serialized wire.
 For its own format, sizing, encoding and decoding, the E2E wire *MUST* meet each duty that those two items give a serialized wire, with these two replacements:
 
@@ -126,30 +132,6 @@ Verification:: test (the known-answer vectors, encoded and decoded), review (the
 A fixed, documented header permits independent implementations to check the same protected bytes.
 Undetected header corruption remains part of the residual error analysis.
 
-[[req-ssr-e2e-crate-isolated]]
-== The E2E wire's crate cannot be tainted
-
-[.specitem,oft-sid="req~ssr-e2e-crate-isolated~2",oft-title="The E2E wire's crate cannot be tainted",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
---
-The E2E wire *MUST* live in its own crate:
-
-* `+no_std+`;
-* no `+alloc+`;
-* no Cargo features;
-* no dependency other than the crate that holds the element's runtime path;
-* no `+unsafe+` code;
-* no 64-bit atomic type.
---
-
-[horizontal]
-ID:: `+req~ssr-e2e-crate-isolated~2+`
-ASIL:: B
-Allocated to:: the E2E wire
-Verification:: gate (manifest; restricted sysroot; `+forbid(unsafe_code)+`; a build for a bare-metal 32-bit target without 64-bit atomics)
-
-*Rationale.*
-A separate wire crate keeps protection optional.
-It keeps the heap restrictions of the crate that holds the element's runtime path.
 
 [[req-ssr-e2e-detects]]
 == The E2E wire detects each fault
@@ -184,11 +166,11 @@ A response is judged by <<req-ssr-e2e-rpc-echo,An E2E response answers exactly i
 
 * A frame that passes these checks and then fails the inner wire's decode *MUST* have advanced the reference.
 * Each refusal *MUST* name what failed, without heap and without panicking.
-* Which refused requests are answered, and how, is stated in <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>> and xref:../up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
+* Which refused requests are answered, and how, is stated in <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>> and xref:../../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
 
 *No timeout of its own.*
 The E2E wire *MUST NOT* keep a timeout of its own: it judges only the frames that it is given.
-How the element requires a detector route's deadline at setup, and monitors it as the timeout of end-to-end detection, is stated in xref:../../up-l1/runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup] and xref:../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored].
+How the element requires a detector route's deadline at setup, and monitors it as the timeout of end-to-end detection, is stated in xref:../runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup] and xref:../bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored].
 --
 
 [horizontal]
@@ -234,7 +216,7 @@ Where it applies, the E2E wire, as the receiver, *MUST* refuse every request who
 * Such a request *MUST NOT* start or extend a resynchronization run, become the reference, or move the newest adopted incarnation backwards.
 * A request that fails the framing or integrity checks is refused as corrupt first, as <<req-ssr-e2e-detects,The E2E wire detects each fault>> states.
 * How such a refusal is counted and answered is stated in <<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>> and <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>.
-* The refusal is runtime behavior that a setting fixed during initialization selects (xref:../elements/up-rust/strict-mode.adoc#req-ssr-strict-init-only[Strict mode checks in initialization only]), and the clients' increasing starts are the integrator's declaration (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+* The refusal is runtime behavior that a setting fixed during initialization selects (xref:../../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-init-only[Strict mode checks in initialization only]), and the clients' increasing starts are the integrator's declaration (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 *The run rule.*
 Where the strict older-incarnation refusal applies, the run rule applies subject to it; everywhere else the run rule applies without it.
@@ -255,7 +237,7 @@ While a sender's declaration is true:
 * any other sender's restart *MUST* cost exactly `+resync_frames+` refused frames on a route that keeps order. They are counted from the last frame of the old incarnation to arrive, provided the new incarnation sends more than `+resync_frames+` frames;
 * a live declared sender *MUST NOT* be refused for good because of the order in which its frames arrive.
 Displaced incarnations are exceptions: the retired incarnation of a sender declared increasing is always refused, and where the strict older-incarnation refusal applies every incarnation older than the newest adopted is always refused.
-An undetected corruption of a frame's header is no arrival order, and this duty does not cover what follows one (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+An undetected corruption of a frame's header is no arrival order, and this duty does not cover what follows one (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 *`+resync_frames+`.*
 `+resync_frames+` is an unsigned 8-bit value from 1 to 255, set in deployment data.
@@ -317,7 +299,7 @@ It is delivered again at once with an incarnation newer than the corrupted one.
 With an older one, it is delivered again once a run of that incarnation is adopted, where the strict older-incarnation refusal does not apply; where that refusal applies, the requests of that incarnation stay refused until the receiver restarts.
 * *Where the strict older-incarnation refusal does not apply.*
 An incarnation older than the retired one can complete a run and become the reference.
-Its late requests within their TTL can then execute, and a re-adoption can permit replay within the window (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+Its late requests within their TTL can then execute, and a re-adoption can permit replay within the window (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 ====
 
 [[req-ssr-e2e-replay-window]]
@@ -404,8 +386,8 @@ The E2E wire *MUST* name the cause of each such refusal: corrupt, undeclared dat
 A copy that another server answers is refused as an undeclared data ID when the client declares one server for the method.
 
 *Several declared servers.*
-Where a client declares several servers for one method, an answer from another declared server to a misaddressed copy meets every condition, so the E2E wire accepts it: its check cannot tell that answer from the call's own (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
-The element's own checks of a response still apply (xref:../up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
+Where a client declares several servers for one method, an answer from another declared server to a misaddressed copy meets every condition, so the E2E wire accepts it: its check cannot tell that answer from the call's own (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+The element's own checks of a response still apply (xref:../../safety/up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
 
 *A response with no E2E header.*
 How the element refuses, names and counts a response with no E2E header on an RPC client's response route that selects the E2E wire is stated in <<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>>.
@@ -489,7 +471,7 @@ The E2E wire *MUST* keep its sending state in the E2E value: one counter and one
 * The counter *MUST* be 48 bits, and *MUST NOT* wrap: an encode at 2^48^ *MUST* be refused, by name.
 * The counter *MUST* be kept in two 32-bit halves behind a try-lock.
 * An encode that finds another encode of the same value in progress *MUST* be refused, by name, before the counter moves, so the receiver sees no lost frame.
-* The lock sees a second sending thread only when two encodes overlap; the one-sender assumption of use still binds the integrator (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+* The lock sees a second sending thread only when two encodes overlap; the one-sender assumption of use still binds the integrator (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 * The counter *MUST* advance by one per encode, so an encode or send that fails, or a send refused and then retried, shows at the receiver as one lost frame.
 
 *The incarnation.*
@@ -523,7 +505,7 @@ Verification:: compile-fail, test, heap-window
 *Rationale.*
 Sharing one sequence between independent senders would manufacture apparent loss and reordering.
 Refusing overlapping encodes preserves the counter state.
-The element's builders hand out the E2E values, so the element answers for giving each to one role, and an integrator's own wire keeps the same rule under its assumption of use (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+The element's builders hand out the E2E values, so the element answers for giving each to one role, and an integrator's own wire keeps the same rule under its assumption of use (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 [[req-ssr-e2e-receiver-state]]
 == E2E receiving state is one fixed slot per declared data ID
@@ -586,26 +568,26 @@ How the element keeps that count at a server, under each refusal's name, is stat
 *A response with no E2E header.*
 On an RPC client's response route that selects the E2E wire, a response that carries no payload of the E2E wire's encoding, a response with no payload included, has no E2E header.
 The element *MUST* refuse such a response before it gives it to any wire.
-The element *MUST* count it once, without heap, as `+unprotected+`, in a route counter of its own, and *MUST NOT* count it in the E2E counter or again under a cause of xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding].
+The element *MUST* count it once, without heap, as `+unprotected+`, in a route counter of its own, and *MUST NOT* count it in the E2E counter or again under a cause of xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding].
 
 *A request with no E2E header.*
 On an RPC server's request route that selects the E2E wire, a request that carries no payload of the E2E wire's encoding, a request with no payload included, has no E2E header.
 The element *MUST* refuse such a request before it gives it to any wire, also where its operation's declared contract permits a message with no payload, and *MUST NOT* deliver it to the application.
-The element *MUST* count it once, without heap, as `+unprotected+`, in a route counter of its own, and *MUST NOT* count it in the E2E counter or again under a cause of xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding].
+The element *MUST* count it once, without heap, as `+unprotected+`, in a route counter of its own, and *MUST NOT* count it in the E2E counter or again under a cause of xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding].
 For such a request, these rules replace that item's refusal, result and count for an identifier that no wire declares and for a missing payload, its rule that gives a present payload of length zero to the wire of its identifier, and its report of an absence that an operation's declared contract permits; its rules that keep a payload from a wire of another encoding, and an absent payload from becoming an empty input, still apply.
 
 *A frame on a topic or notification route with no E2E header.*
 On a topic's or a notification's receive route that selects the E2E wire, a frame that carries no payload of the E2E wire's encoding, a frame with no payload included, has no E2E header.
 Where no earlier check has refused it, the element *MUST* refuse such a frame before it gives it to any wire, also where the receiving operation's declared contract permits a message with no payload, and *MUST NOT* deliver it to the application.
-The element *MUST* count that refusal once, without heap, as `+unprotected+`, in a route counter of its own, and *MUST NOT* count it in the E2E counter or again under a cause of xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding].
+The element *MUST* count that refusal once, without heap, as `+unprotected+`, in a route counter of its own, and *MUST NOT* count it in the E2E counter or again under a cause of xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding].
 For such a frame, these rules replace that item's refusal, result and count for an identifier that no wire declares and for a missing payload, its rule that gives a present payload of length zero to the wire of its identifier, and its report of an absence that an operation's declared contract permits; its rules that keep a payload from a wire of another encoding, and an absent payload from becoming an empty input, still apply.
 
 *Calls and frames.*
 
 * The element *MUST* release a refused frame at once.
-* What a refused response does to its call is stated in xref:../up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
-* Which refused requests are answered is stated in <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>; whether a request with no E2E header is answered, in xref:../up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
-* Which check counts a response, a request or a frame on a topic's or a notification's receive route with no E2E header that a check of its TTL also refuses is stated in xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed].
+* What a refused response does to its call is stated in xref:../../safety/up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
+* Which refused requests are answered is stated in <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>; whether a request with no E2E header is answered, in xref:../../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
+* Which check counts a response, a request or a frame on a topic's or a notification's receive route with no E2E header that a check of its TTL also refuses is stated in xref:../bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed].
 --
 
 [horizontal]
@@ -620,7 +602,7 @@ Verification:: test, heap-window
 ** On each of a topic's and a notification's receive routes that selects the E2E wire, a frame with no payload to an operation that requires a value, one with no payload to an operation whose declared contract permits a message with no payload, one whose payload names an encoding that no wire of the route declares, one whose payload names the inner wire's encoding, and one whose payload names the encoding of another wire of the route, also one of length zero, none refused by an earlier check: each given to no wire, not delivered, refused, and counted once as `+unprotected+` in its own counter, not in the E2E counter and under no other cause, with no `+missing_payload+` result and no absence reported.
 ** On those routes, a present-empty payload bearing the E2E wire's encoding identifier and admitted by the preceding checks reaches that wire and is refused by its header check, counted in the E2E counter and not as `+unprotected+`.
 ** The same unprotected frames refused by an earlier TTL check: only that check's count, with no wire called and no `+unprotected+` count.
-** A frame that reached the route's queue and is then refused as `+unprotected+` remains an arrival for the deadline monitor, as xref:../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines it.
+** A frame that reached the route's queue and is then refused as `+unprotected+` remains an arrival for the deadline monitor, as xref:../bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines it.
 ** A refused request's frame released at once.
 
 *Rationale.*
@@ -657,7 +639,7 @@ For a refusal that has a kind and a class, the E2E wire *MUST* encode the refusa
 *The element answers.*
 At a server, the element *MUST* give every request that the E2E wire refuses exactly one answer, except a corrupt one, to which it *MUST* give none:
 
-* to a request whose data ID was not declared, `+InvalidArgument+`, sent as xref:../up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered] states;
+* to a request whose data ID was not declared, `+InvalidArgument+`, sent as xref:../../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered] states;
 * to every other refused request, the wire's refusal answer, in every state of strict mode.
 The element *MUST* send the class that the wire gave, and *MUST NOT* change it.
 
@@ -667,7 +649,7 @@ The element *MUST* try a refusal answer once, whatever the response route's over
 *Counting at the server.*
 At a server, the element *MUST* count each request that the E2E wire refuses, under the refusal's name: corrupt, undeclared data ID, or its kind.
 That count is the refusal's one count in the E2E counter (<<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>>), and no second count of the request.
-The count of an unsent wire refusal answer is stated under "Sending a refusal answer"; the count of an unsent `+InvalidArgument+` answer is stated in xref:../up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
+The count of an unsent wire refusal answer is stated under "Sending a refusal answer"; the count of an unsent `+InvalidArgument+` answer is stated in xref:../../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
 
 *At the client.*
 
@@ -775,7 +757,7 @@ So an explicit unknown preserves the observation limit without stopping traffic 
 
 Completeness and saturation are different limits.
 
-NOTE: Which figures an application reads to react within the fault tolerant time interval of the item, in ISO 26262's sense, is the integrator's to arrange (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]).
+NOTE: Which figures an application reads to react within the fault tolerant time interval of the item, in ISO 26262's sense, is the integrator's to arrange (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]).
 
 [[req-ssr-e2e-survives-hops]]
 == Protection survives every allowed hop
@@ -784,7 +766,7 @@ NOTE: Which figures an application reads to react within the fault tolerant time
 --
 *Carriage.*
 The Streamer *MUST* ensure that a frame protected by the E2E wire passes that wire's check at the receiving endpoint after any allowed Streamer hop, also between legs whose envelopes differ or whose bindings adapt different middleware.
-It does so by carrying the frame's payload bytes and its payload encoding identifier unchanged (xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
+It does so by carrying the frame's payload bytes and its payload encoding identifier unchanged (xref:../../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
 
 *Detection.*
 Between them, the Streamer and the E2E wire *MUST* ensure that a byte of such a frame that is corrupted between hops is detected at the receiving endpoint.
@@ -801,6 +783,6 @@ Allocated to:: the Streamer; the E2E wire, for its check at the receiving endpoi
 Verification:: test (frames carried through a test double of the Streamer's forwarding, between legs whose envelopes differ, and between legs whose bindings adapt different middleware, each passing its check at the receiving endpoint; the same through the ASIL Streamer, after each allowed hop), fault-injection (a byte corrupted between hops, detected at the receiving endpoint, the frame refused as corrupt)
 
 *Rationale.*
-A carrier forwards a frame's identifiers and payload bytes unchanged (xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
+A carrier forwards a frame's identifiers and payload bytes unchanged (xref:../../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
 So a check over those bytes at the receiving endpoint covers every hop before it.
 The Streamer holds no part of the protection, so it can neither restore it nor vouch for it, and detection is the receiving wire's.

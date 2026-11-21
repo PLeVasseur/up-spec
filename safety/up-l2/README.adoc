@@ -56,7 +56,7 @@ They are in xref:../elements/up-rust/README.adoc[the element's part]:
 * the check of a role's resource ID (xref:../../basics/configurations.adoc#req-ssr-config-resource-ranges[Resource IDs are checked at setup]);
 * the asynchronous interface's contract (xref:../../up-l2/execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]);
 * the Streamer's crate and its build (xref:../elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]; xref:../elements/up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]; xref:../elements/up-rust/build.adoc#req-ssr-build-specified-functions-only[The ASIL build contains only specified functions]);
-* the end-to-end protection wire, with the hops a protected frame survives (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop] in xref:../seooc-up-rust/e2e-wire.adoc[`e2e-wire.adoc`]);
+* the end-to-end protection wire, with the hops a protected frame survives (xref:../../up-l1/wires/e2e.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop] in xref:../../up-l1/wires/e2e.adoc[`e2e-wire.adoc`]);
 * how the application reacts to what the element reports (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]).
 
-A carrier route that crosses integrity levels upward is a transport-layer rule: xref:../up-l1/integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused] in xref:../up-l1/integrity.adoc[integrity levels].
+A carrier route that crosses integrity levels upward is a transport-layer rule: xref:../../up-l1/integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused] in xref:../../up-l1/integrity.adoc[integrity levels].

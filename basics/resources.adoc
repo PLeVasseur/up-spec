@@ -24,9 +24,9 @@ Where an SDK's core is not the element, a word that an item of the up-rust SEooC
 * An *SDK*, its *core*, a *layer above the core* and an *owned-frame route*: xref:../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
 * A *part* and its *supplier*: xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
 * The *element*: xref:../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code].
-* A *binding* and its *middleware*: xref:../safety/up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract].
-* A *wire*: xref:../safety/up-l1/wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
-* A *route*: xref:../safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name].
+* A *binding* and its *middleware*: xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract].
+* A *wire*: xref:../up-l1/wires/README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
+* A *route*: xref:../up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name].
 * A *transport*, its *initialization mode* and its *runtime mode*: <<req-ssr-mode-two-types,Two modes, as two types>>.
 * *Startup memory* and a *region*: <<req-ssr-memory-static,ASIL-path storage is static or caller-provided>>.
 * A *heap class*, an *allocation domain* and a *resource and failure policy*: <<req-ssr-heap-declared,The heap class is declared, with no default>>.
@@ -43,7 +43,7 @@ Where an SDK's core is not the element, a word that an item of the up-rust SEooC
 *What a transport is.*
 A transport is what the element builds over one binding.
 Routes and roles are declared on it in initialization mode, and the handles that carry traffic are activated from it in runtime mode.
-A lending transport is one whose binding is a lending binding, and a handoff transport one whose binding is a handoff binding (xref:../safety/up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]).
+A lending transport is one whose binding is a lending binding, and a handoff transport one whose binding is a handoff binding (xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]).
 
 *Two types.*
 The element *MUST* give each lending and each handoff transport an initialization mode and a runtime mode, each a distinct non-generic type.
@@ -69,7 +69,7 @@ Non-generic types let a forwarder such as the Streamer hold transports chosen fr
 [.specitem,oft-sid="req~ssr-mode-no-setup-at-runtime~2",oft-title="Setup is impossible in runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 Once a transport is in runtime mode, the element *MUST NOT* make it possible to declare, prepare or change a route, role, wire, QoS setting, integrity level, waiver, peer list or capacity, through the transport or through any handle activated from it.
-What is fixed with a route includes its payload form and, on a native route, the agreement of its native types (xref:../safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]; xref:../safety/up-l1/native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]).
+What is fixed with a route includes its payload form and, on a native route, the agreement of its native types (xref:../up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]; xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]).
 
 The element *MUST NOT* offer such an operation in its API, and *MUST NOT* let a use of one compile.
 --
@@ -207,7 +207,7 @@ The element's placement at startup *MUST NOT* need more than the computation giv
 
 *The capacities.*
 From the worst-case semantic load that the integrator declares for each route (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-capacity-sizing[Capacities are sized for the worst case]), the element *MUST* compute the slots, queue depth, held messages and call tables that it needs.
-The other capacities that this load sets are the registration storage, backlogs and startup memory that the computation gives, and the peer table that xref:../safety/up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones] sizes.
+The other capacities that this load sets are the registration storage, backlogs and startup memory that the computation gives, and the peer table that xref:../up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones] sizes.
 
 *What each figure measures.*
 The element *MUST* state, for each figure that it computes or reports, what the figure measures, and *MUST NOT* present it as another.
@@ -367,7 +367,7 @@ The element *MUST* show in it each route's admitted heap class, naming which of 
 * It *MUST* show the declared policy of each memory source and each allocation provider that the element's setup relied on, also where no route uses it (xref:../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]; what a memory source is, is stated in <<req-sdk-owned-frame-provider-selection,The selected memory provider is the only one used, and selecting it claims nothing>>).
 * What it shows for each stronger guarantee is stated in <<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>>.
 
-In each route's report, the element *MUST* show the declared policy of the route's binding where the binding allocates on the route, whatever the route requires (the release of a received frame's storage: xref:../safety/up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+In each route's report, the element *MUST* show the declared policy of the route's binding where the binding allocates on the route, whatever the route requires (the release of a received frame's storage: xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 --
 
 [horizontal]
@@ -439,7 +439,7 @@ The element *MUST NOT* refuse at setup such a route, or a message type, wire, bi
 * because a destructor runs when one of them ends; or
 * because a guarantee of this item, a timing bound or an assurance scope that the route does not require is not established for it.
 
-A refusal that another item states for a reason of its own is no refusal for ownership: such is the refusal of a route that needs the integrity copy route on a wire that allocates when it decodes (xref:../safety/up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
+A refusal that another item states for a reason of its own is no refusal for ownership: such is the refusal of a route that needs the integrity copy route on a wire that allocates when it decodes (xref:../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 A decoded type is admitted as xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] states.
 
 *What holds whatever a route requires.*

@@ -1,20 +1,19 @@
-= uP-L1 safety: The LoLa physical envelope
+= The LoLa Physical Envelope (up-rust SEooC)
 :toc: preamble
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
+[NOTE]
+====
+This page states how the LoLa binding places one uProtocol frame in one LoLa sample under the up-rust SEooC requirement family (`+req~ssr-binding-lola-envelope-*+`, `ASIL:: B`, `SafetyLola` and `SafetyUpRustCore` tags).
+Each requirement's statement says whom it binds (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
+====
 
-This page states how the LoLa binding places one uProtocol frame in one LoLa sample.
-The LoLa binding, and the words _loan_ and _sample_: xref:lola.adoc#req-ssr-binding-lola-terms[What LoLa, the LoLa binding, a loan and a sample are].
-The other requirements that are specific to the LoLa binding, and what a deployment on LoLa provides: xref:lola.adoc[LoLa].
-The duties of every binding: xref:bindings.adoc[allocated to each binding].
-The format of the frame's metadata, which the route's selected wire states: xref:wires.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it].
-The revision and the configuration of LoLa that the requirements of this page speak of: xref:lola.adoc#req-ssr-binding-lola-terms[What LoLa, the LoLa binding, a loan and a sample are].
-
-Each requirement's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
-The LoLa binding's panic paths: xref:lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path].
+* The LoLa binding, the words _loan_ and _sample_, and the revision and configuration of LoLa that these items speak of: xref:lola.adoc#req-ssr-binding-lola-terms[What LoLa, the LoLa binding, a loan and a sample are].
+* The other requirements specific to the LoLa binding (including xref:lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path]): xref:lola.adoc[LoLa].
+* The duties of every binding: xref:bindings.adoc[uP-L1 transport bindings]; middleware-specific navigation: xref:README.adoc#one-binding[what is specific to one binding].
+* The format of the frame's metadata, which the route's selected wire states: xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it].
+* Safety conventions and tags: xref:../safety/README.adoc[Safety and Assurance View].
 
 [[req-ssr-binding-lola-envelope-layout]]
 == On LoLa, a frame is one envelope in one sample, in a fixed order
@@ -116,7 +115,7 @@ The binding *MUST NOT* let any part of a refused sample reach the element's chec
 
 *What a refusal becomes.*
 For each sample that it refuses, the binding *MUST* either return the refusal as the error of the call that met the sample, or count it exactly once on the receiving route.
-The binding *MUST* name the cause in that error or that counter: a refused envelope (xref:../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+The binding *MUST* name the cause in that error or that counter: a refused envelope (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 The binding *MUST* return each refused sample to LoLa as it returns a frame whose lease is dropped, so that a refused sample does not stay charged to the route (xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 A refused sample is peer input, and xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input] holds for it.
 --
@@ -131,7 +130,7 @@ Verification:: test, fault-injection, review
 * *review*: at source level, that every length and the offset is checked with arithmetic that cannot overflow before any range is formed from it, and that the binding reads whether the frame has a payload only after every other check has passed.
 
 *Rationale.*
-A peer writes the whole sample, header included (xref:../../up-l1/peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]), so every field is input that has to be checked before it is trusted as a bound.
+A peer writes the whole sample, header included (xref:peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]), so every field is input that has to be checked before it is trusted as a bound.
 
 [[req-ssr-binding-lola-envelope-presence]]
 == On LoLa, an absent payload and a present empty payload stay apart
@@ -168,7 +167,7 @@ A wire is given only a payload of its own encoding (xref:payload-paths.adoc#req-
 [.specitem,oft-sid="req~ssr-binding-lola-envelope-routing-hint~2",oft-title="On LoLa, the routing hint is untrusted, and the metadata decides",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
 *What a hint holds.*
-The source hint holds the frame's source, and the sink hint the frame's sink, each as the text that the protocol maps its URI to, without the scheme and its colon, in UTF-8: the authority where the URI has one, and the four path segments (xref:../../basics/uri.adoc#uri-definition[Mapping to URI], `+dsn~uri-path-mapping~3+`).
+The source hint holds the frame's source, and the sink hint the frame's sink, each as the text that the protocol maps its URI to, without the scheme and its colon, in UTF-8: the authority where the URI has one, and the four path segments (xref:../basics/uri.adoc#uri-definition[Mapping to URI], `+dsn~uri-path-mapping~3+`).
 
 *What the binding writes.*
 The LoLa binding *MUST* write, for every frame, a source hint that is not empty, and *MUST* write an empty sink hint exactly when the frame has no sink.
@@ -190,7 +189,7 @@ The decoded metadata and the receive's source and sink filters decide what a fra
 *A hint that disagrees.*
 The binding *MUST NOT* let a hint that disagrees with the metadata change anything that the metadata decides.
 What the element does with a frame whose metadata does not match the filters of the receive that a hint brought it to is stated in <<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>>.
-The binding *MUST* keep a sample that it retains on its hint for a later receive, or, where it discards it, count its loss exactly once on the route whose queue or listener holds it, under a cause that names the discard of a retained sample, and *MUST NOT* discard such a sample uncounted (xref:../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+The binding *MUST* keep a sample that it retains on its hint for a later receive, or, where it discards it, count its loss exactly once on the route whose queue or listener holds it, under a cause that names the discard of a retained sample, and *MUST NOT* discard such a sample uncounted (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 That count records the loss of a sample that the binding retained, and does not count the frame as that route's own.
 --
 
@@ -222,7 +221,7 @@ One spelling for what the binding writes keeps two writers' hints for one source
 [.specitem,oft-sid="req~ssr-binding-lola-envelope-metadata~2",oft-title="On LoLa, the metadata is the selected wire's, and is checked before delivery",oft-needs="impl,utest",oft-tags="SafetyLola,SafetyUpRustCore"]
 --
 *Whose bytes.*
-The metadata is the metadata of the frame, in the metadata format of the wire that the route selects (xref:wires.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
+The metadata is the metadata of the frame, in the metadata format of the wire that the route selects (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
 The envelope gives its place and its length, and the LoLa binding *MUST* carry it unchanged.
 
 *What the binding reads.*
@@ -234,9 +233,9 @@ The binding *MUST* hand a frame that passes its checks to the element only toget
 The hand-over is not a delivery to an application.
 
 *Decoded and checked before delivery.*
-The element *MUST* have the selected wire decode a frame's metadata, *MUST* compare the wire, the payload family and, on a native route, the layout that the metadata names with those that the route admits, and *MUST* match the receive's source and sink filters against the metadata, before any of the frame reaches a wire's decoding of the payload or an application (xref:native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
+The element *MUST* have the selected wire decode a frame's metadata, *MUST* compare the wire, the payload family and, on a native route, the layout that the metadata names with those that the route admits, and *MUST* match the receive's source and sink filters against the metadata, before any of the frame reaches a wire's decoding of the payload or an application (xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
 The element *MUST NOT* deliver a frame to a receive whose filters the frame's metadata does not match.
-The element *MUST* refuse a frame whose metadata does not decode, whose identity is not the route's, or whose metadata matches the filters of none of the route's receives, and *MUST* return or count that refusal once, as xref:../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states.
+The element *MUST* refuse a frame whose metadata does not decode, whose identity is not the route's, or whose metadata matches the filters of none of the route's receives, and *MUST* return or count that refusal once, as xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states.
 These duties of the element replace two duties of the LoLa binding: in revision 1 of this item, that a frame whose metadata does not decode, or whose identity is not the route's, reach neither a wire's decoding of the payload nor an application; and in revision 1 of <<req-ssr-binding-lola-envelope-routing-hint,On LoLa, the routing hint is untrusted, and the metadata decides>>, that a frame reach a receive only once its metadata has been decoded and the receive's source and sink filters have been matched against it.
 --
 

@@ -36,7 +36,7 @@ A current acknowledgement of that deviation makes the finding a warning.
 * _warning_: a missing declaration or incomplete evidence, where the item that states the rule classes it so, or a deviation that a current acknowledgement names.
 A warning is reported and refuses nothing in any state.
 
-What a deviation and a known failure are is stated in xref:../../up-l1/bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures].
+What a deviation and a known failure are is stated in xref:../../assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures].
 
 *What a state refuses.*
 
@@ -115,7 +115,7 @@ The admitted configuration can still select a runtime behaviour that another ite
 
 .An initialization-selected runtime behaviour
 ====
-The strict older-incarnation refusal of xref:../../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-resync[A restart resynchronizes, stale frames are refused, and no arrival order locks a sender out] applies on an ASIL RPC request route that selects the E2E wire and is initialized with strict mode in its Enforce or Locked state.
+The strict older-incarnation refusal of xref:../../../up-l1/wires/e2e.adoc#req-ssr-e2e-resync[A restart resynchronizes, stale frames are refused, and no arrival order locks a sender out] applies on an ASIL RPC request route that selects the E2E wire and is initialized with strict mode in its Enforce or Locked state.
 That state at initialization is the fixed setting that selects it, and the refusal runs in runtime mode under the runtime no-heap and bounded-work requirements.
 E2E receive semantics can differ between configurations.
 ====
@@ -211,7 +211,7 @@ In its Enforce state, the Locked state included, the element's strict mode *MUST
 * an ASIL RPC route that selects the E2E wire and whose clients are not declared increasing from a counter (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
 * a custom platform that names no contract-test evidence (xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]);
 * a setup still alive and not entered when `+enter_runtime_all+` returns (xref:assumptions-of-use.adoc#aou-seooc-build-order[Applications build every transport and role before the last transition]);
-* a binding or wire that is not on the integrator's qualified list (xref:../../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]);
+* a binding or wire that is not on the integrator's qualified list (xref:assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]);
 * an ASIL process built with unwinding, as the clause "An ASIL process built with unwinding" states.
 
 *The Report state.*
@@ -251,8 +251,8 @@ NOTE: Refusals of the Enforce state that concern another item's own subject are 
 [.specitem,oft-sid="req~ssr-strict-ack-revision~3",oft-title="An acknowledgement names a deviation by ID and revision",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *An acknowledgement.*
-An acknowledgement is the integrator's record, given to strict mode, that it has reviewed one deviation and accepts it for its deployment (xref:../../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]).
-What a deviation and a known failure are is stated in xref:../../up-l1/bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures], and strict mode takes each as the qualification record of its part states it.
+An acknowledgement is the integrator's record, given to strict mode, that it has reviewed one deviation and accepts it for its deployment (xref:assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]).
+What a deviation and a known failure are is stated in xref:../../assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures], and strict mode takes each as the qualification record of its part states it.
 The element's strict mode *MUST* treat a record as an acknowledgement only where it names one deviation by its identifier and its revision, never by its type, with a reference, an approver and a date.
 A record in any other form acknowledges nothing.
 
@@ -300,7 +300,7 @@ Verification:: test
 
 *Rationale.*
 Acknowledging an earlier deviation cannot establish acceptance of a later change to its scope or consequences.
-A known failure is neither a limit nor a deviation, so no acknowledgement admits a route that it affects (xref:../../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]).
+A known failure is neither a limit nor a deviation, so no acknowledgement admits a route that it affects (xref:assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]).
 
 [[req-ssr-strict-report]]
 == Strict mode reports on every run
@@ -335,7 +335,7 @@ Strict mode *MUST* also include in the report:
 * for each E2E route, its senders, data IDs, `+resync_frames+`, start declarations with their duty, and thread duties (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
 * for each route, the counters the application reads and what each means, the E2E figures included (xref:assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]);
 * every route's capacities (xref:assumptions-of-use.adoc#aou-seooc-capacity-sizing[Capacities are sized for the worst case]);
-* each route's declared peers and the shared-memory permissions its binding requests (xref:../../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]);
+* each route's declared peers and the shared-memory permissions its binding requests (xref:assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]);
 * each shared route, with what one faulty peer can starve there (xref:assumptions-of-use.adoc#aou-seooc-peer-rates[Peer rates on shared routes are the integrator's]);
 * which ASIL routes an operator can disable, and that a disable stays latched until an external restart of the process or partition (xref:../../up-l2/streamer.adoc#aou-seooc-operator-access[Only authorized operators reach the Streamer's operator interface]);
 * every route that a Streamer monitor can trip, and that a trip stays latched until such a restart (xref:../../up-l2/streamer.adoc#aou-seooc-monitor-thresholds[Monitor thresholds allow for peers' restarts]).
@@ -348,7 +348,7 @@ Strict mode *MUST* also include in the report:
 * the time-sync source, where one is declared (xref:assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]);
 * the startup memory that each setup computes (xref:assumptions-of-use.adoc#aou-seooc-capacity-sizing[Capacities are sized for the worst case]);
 * what was declared in the deployment data, and what was checked (xref:assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]);
-* each binding's limits, deviations and known failures, as its qualification record states them (xref:../../up-l1/bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]; xref:../../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]).
+* each binding's limits, deviations and known failures, as its qualification record states them (xref:../../assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]; xref:assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]).
 
 *Duties.*
 Strict mode *MUST* also include in the report:
@@ -367,7 +367,7 @@ Strict mode *MUST* also include in the report:
 * a warning when the wall clock at setup reads earlier than the element's release date, the date that the element's documentation states for the release, a sign that the clock is not yet synchronised (xref:assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]);
 * a warning of each transport that the integrator has not classified, as a black channel or not (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
 * a warning of each ASIL route with several declared senders and no declared per-peer rate (xref:assumptions-of-use.adoc#aou-seooc-peer-rates[Peer rates on shared routes are the integrator's]);
-* a warning of each ASIL receive route that admits undeclared peers (xref:../../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]).
+* a warning of each ASIL receive route that admits undeclared peers (xref:assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]).
 
 *Checks after a refusal or a failure.*
 In the Report and Enforce states, strict mode *MUST NOT* let a refusal or a failed check stop the checks that can still run safely.

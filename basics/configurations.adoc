@@ -42,14 +42,14 @@ Building, linking or registering a part through a documented mechanism that is o
 The SDK *MUST NOT* admit or refuse a selected part because of its name, its origin or its packaging.
 It admits a part by what the part declares and by the setup checks that items state.
 Selecting a part waives neither the part's own contract nor any setup check that an item states.
-For a route, xref:../safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name] states this of the names of its wire, its payload encoding and its middleware.
+For a route, xref:../up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name] states this of the names of its wire, its payload encoding and its middleware.
 
 *Each part's own contract.*
 What a selected part does is stated by its own contract.
 Where the SDK's core is the element, the contracts of a binding, a wire and a platform backend are these:
 
-* a binding: xref:../safety/up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract];
-* a wire: xref:../safety/up-l1/wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract];
+* a binding: xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract];
+* a wire: xref:../up-l1/wires/README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract];
 * a platform backend of the element, or one that an integrator supplies for the element: xref:platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules], which states the duties of both and says where the integrator's own are stated.
 
 For every SDK, the contracts of the other kinds are these:
