@@ -312,7 +312,7 @@ It never covers a primitive's first-use setup.
 [[req-ssr-heap-declared]]
 === The heap class is declared, with no default
 
-[.specitem,oft-sid="req~ssr-heap-declared~4",oft-title="The heap class is declared, with no default",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyWire,SafetyBinding"]
+[.specitem,oft-sid="req~ssr-heap-declared~5",oft-title="The heap class is declared, with no default",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyWire,SafetyBinding"]
 --
 *Who declares.*
 
@@ -322,10 +322,18 @@ It never covers a primitive's first-use setup.
 * The element *MUST* require each prepared route's declaration to state the route's own class.
 
 Each wire, each binding and each allocation provider *MUST* state what it does, and *MUST* keep within what it states.
-The element *MUST* derive each prepared route's heap class from the classes that every wire direction, the route's binding and each allocation provider that the route uses state, and *MUST* check it against the class that the route's declaration states, as the refusals at the transition below state.
+The element *MUST* derive each prepared route's heap class from the classes that every wire direction, the route's binding and each allocation provider that the route uses state—including any admitted serialized owned-value runtime adapter acting within its wire or allocation-provider role—and *MUST* check it against the class that the route's declaration states, as the refusals at setup and at the transition below state.
+
+*Serialized owned-value runtime adapters.*
+An admitted serialized owned-value runtime adapter (xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]) is accounted for solely as a wire or allocation-provider participant—either implementing, or acting as an explicitly declared subcomponent of, a wire or an allocation provider—and never as a fourth allocation actor with unbounded privileges.
+It adds no permission for control state, outcome or reporting work, startup backing, native or shared work, or general application allocation.
+
+* Each wire that is implemented by, or incorporates, such an adapter *MUST* include the adapter and every dependency that its acquisitions, resizes, destructions and releases can reach in each direction's stated runtime heap class, allocation domain and resource and failure policy, and *MUST* keep the adapter's runtime heap activity within what it states and within the serialized message-owned-value scope that the route's class permits.
+* Each allocation provider that is implemented by, or incorporates, such an adapter *MUST* include the adapter and every dependency that its acquisitions, resizes, destructions and releases can reach in its stated runtime heap class, allocation domain and resource and failure policy for each route and direction that uses it, and *MUST* keep the adapter's runtime heap activity within what it states and within the serialized message-owned-value scope that the route's class permits.
+* Where a stronger guarantee is claimed or required on a route that uses such an adapter, each direction's guarantee evidence covers the adapter and all of its reached dependencies, as <<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>> states.
 
 *What a class covers.*
-A class covers every heap acquisition and release that its subject can cause on the route in runtime mode.
+A class covers every heap acquisition, resize and release that its subject—any admitted serialized owned-value runtime adapter participating in a wire or allocation provider and all of its reached dependencies included—can cause on the route in runtime mode.
 
 * For a wire's decode direction that is the whole life of a decoded value: its initialization, its replacement in a slot and its destruction.
 * A wire whose decoded value can release heap memory when it is replaced or destroyed *MUST* state allocation for that direction, even where decoding itself acquires none.
@@ -335,7 +343,7 @@ A heap class is one of:
 
 * none;
 * allocation inside middleware under a named permit;
-* on a serialized route only, allocation by its wire, its binding or its allocation provider.
+* on a serialized route only, allocation by its wire, its binding or its allocation provider (with any admitted serialized owned-value runtime adapter accounted for within its wire or allocation-provider role).
 
 A wire or a binding that states the third class *MUST* name each that allocates and the allocation domain it uses.
 Each that allocates *MUST* state the resource and failure policy it follows:
@@ -350,13 +358,14 @@ Where one of these is not known, the one that states the policy *MUST* state it 
 The element *MUST NOT* read or report an unknown as the favourable answer.
 
 *The allocator's contract.*
-Each that states a policy *MUST* state the one that its allocator's stated contract establishes on every path the route can reach: allocation, growth, shrink, destruction and deallocation, dependencies included.
+Each that states a policy *MUST* state the one that its allocator's stated contract establishes on every path the route can reach: allocation, growth, shrink, destruction and deallocation, dependencies and any participating serialized owned-value runtime adapter included.
 A fallible calling interface does not make exhaustion recoverable for an allocator whose contract may end the process.
 Each wire, each binding and each allocation provider *MUST NOT* let an allocation of its own fall back silently to another domain, and the element *MUST NOT* substitute one.
 
 *Effect of disclosure.*
 Stating a policy discloses it.
-It admits the route's ordinary ownership under that policy and establishes no stronger guarantee:
+It admits the route's ordinary ownership under that policy and establishes no stronger guarantee; preserving ordinary serialized declarations imposes no unrequested stronger guarantee by default.
+Owning resources or having a destructor is not by itself a reason to refuse a serialized route, or a message type, wire, binding or allocation provider on it, at setup: the element *MUST NOT* refuse a serialized route at setup solely because its values own resources, because a destructor runs when a value ends, or because an unrequested stronger guarantee is not established for it (<<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>>).
 
 * How setup admits a route's decoded types, and their destruction, is stated in xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits].
 * Which guarantees a route is promised, and which routes a stated policy leads the element to refuse, is stated in <<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>>.
@@ -368,12 +377,14 @@ Running it on another thread, or timing it from outside, does not make it do so.
 *No default.*
 The element *MUST NOT* supply a default for a heap class or for a policy, and each wire, each binding and each allocation provider *MUST NOT* state one by default.
 
-*Refusal at the transition.*
+*Refusal at setup and the transition.*
 The element *MUST* refuse at the transition, naming the route and the reason:
 
 * a native route whose wire or allocation provider declares allocation in a direction the route uses, or whose binding declares allocation in its own code in such a direction;
-* a serialized route whose wire, binding or allocation provider declares allocation that the route does not declare;
-* a route for which a wire, its binding, an allocation provider or the route's own declaration states no class, or for which a wire, a binding or an allocation provider states no resource and failure policy where this item requires one.
+* a serialized route whose wire, binding or allocation provider—including any admitted serialized owned-value runtime adapter acting within its wire or allocation-provider role—declares allocation that the route does not declare;
+* a route for which a wire, its binding, an allocation provider or the route's own declaration states no class, or for which a wire, a binding or an allocation provider states no resource and failure policy where this item requires one, including where an admitted serialized owned-value runtime adapter or a dependency that it reaches is omitted from its wire's or allocation provider's declaration.
+
+The element *MUST* also refuse at setup, naming the route and the reason, any serialized route or composition that offers no non-native, non-shared ending path on which to end an owned value that the route admits (xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
 
 The element applies xref:../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] to the runtime transition of a transport with a route whose binding declares allocation inside its middleware under a named permit, a native route included; the waiver's scope is stated in xref:../up-l1/bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
 
@@ -386,38 +397,43 @@ The element *MUST NOT* extend a serialized route's allocation permission to a na
 The element's startup report is what the element reports of a transport's setup at its transition.
 The element *MUST* show in it each route's admitted heap class, naming which of its wire, binding and allocation provider allocate.
 
-* It *MUST* show every wire the route uses, in each direction, with the route's binding and each allocation provider.
+* It *MUST* show every wire the route uses, in each direction, with the route's binding and each allocation provider, including any declared serialized owned-value runtime adapter participating in a wire or allocation provider.
 * It *MUST* show the declared policy of each that allocates, an unknown as unknown.
 * It *MUST* show the declared policy of each memory source and each allocation provider that the element's setup relied on, also where no route uses it (xref:../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]; what a memory source is, is stated in <<req-sdk-owned-frame-provider-selection,The selected memory provider is the only one used, and selecting it claims nothing>>).
 * What it shows for each stronger guarantee is stated in <<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>>.
 
 In each route's report, the element *MUST* show the declared policy of the route's binding where the binding allocates on the route, whatever the route requires (the release of a received frame's storage: xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+
+*Scoped replacement.*
+This revision replaces revision 4 of this item for the element, each wire, each binding and each allocation provider across all configurations, incorporating any admitted serialized owned-value runtime adapter and all of its reached dependencies into each direction's declared heap class, policy, reporting and guarantee-evidence accounting strictly within its existing wire or allocation-provider role, stating explicitly the setup refusal of a serialized route or composition with no non-native, non-shared ending path, and preserving ordinary serialized declarations, non-refusal for ownership or destructors alone, and all other duties of revision 4 of this item without imposing unrequested stronger guarantees by default.
 --
 
 [horizontal]
-ID:: `+req~ssr-heap-declared~4+`
+ID:: `+req~ssr-heap-declared~5+`
 ASIL:: B
-Allocated to:: the element; each wire, each binding and each allocation provider, for the classes and the policies that they state and for keeping within them
+Allocated to:: the element; each wire, each binding and each allocation provider, for the classes and the policies that they state—including any admitted serialized owned-value runtime adapter and reached dependencies within their wire or allocation-provider role—and for keeping within them
 Verification:: test, heap-window, review
 * *test*
 ** Refusal at the transition of a native route whose wire or allocation provider declares allocation, including allocation in work that it causes, or whose binding declares allocation in its own code, in a direction that the route uses.
 ** A native route whose binding declares only allocation inside its middleware under a named permit: not refused solely by the native-route allocation entry above. With every other admission condition met, refused without the matching waiver and admitted with it; its reported class remains allocation inside middleware under a named permit, not none.
 ** The same declared middleware allocation with a policy missing where this item requires one or with an incompatible required guarantee: still refused for that reason despite a matching waiver.
 ** Refusal at the transition of a serialized route that does not declare its wire's or its binding's allocation.
-** A route for which a class, or a resource and failure policy that this item requires, is not stated, refused at the transition by name.
-** A route's heap class derived from every wire direction, its binding and each allocation provider, and a native route over an allocation provider that states allocation refused at the transition.
-** Admission of a serialized route that declares it, with an owning decoded type and no stronger guarantee required.
+** A route for which a class, or a resource and failure policy that this item requires, is not stated, refused at the transition by name, including where an admitted serialized owned-value runtime adapter or a reached dependency is omitted from its wire's or allocation provider's declaration.
+** A route's heap class derived from every wire direction, its binding and each allocation provider—any declared serialized owned-value runtime adapter participating in a wire or allocation provider included—and a native route over an allocation provider that states allocation refused at the transition.
+** Admission of a serialized route that declares its allocation, with an owning decoded type (including one served via an admitted serialized owned-value runtime adapter within a wire or allocation-provider role) and no stronger guarantee required, with neither owning resources nor having a destructor treated by itself as a setup refusal.
+** A serialized route or composition with no non-native, non-shared ending path for an admitted owned value, refused at setup by name.
 ** A wire whose decoded value frees memory when it is destroyed, declaring none for its decode direction, failing its heap-free check.
-** The startup report's heap class per route, naming who allocates, for every wire and direction of a route with several wires.
+** The startup report's heap class per route, naming who allocates, for every wire and direction of a route with several wires and for any declared serialized owned-value runtime adapter participating in a wire or allocation provider.
 ** A declared unknown reported as unknown.
 ** A setup-only memory source's declared policy shown in the startup report where no route uses it.
 ** A route on which the binding allocates, its report showing the binding's declared policy, on a route that requires neither panic-free cleanup nor non-waiting release and on one that requires either.
 * *heap-window*
 ** A native route, and the metadata that it shares with a serialized route, with no heap use while that serialized route allocates as its permission admits.
-** A wire that declares allocation in a direction, with its allocation points against its declaration.
+** A wire or allocation provider that declares allocation in a direction—any admitted serialized owned-value runtime adapter participating in it included—with its allocation, resize and release points against its declaration and message-owned-value scope.
 * *review*
 ** No default in the declaration.
-** Each declared policy against its allocator's stated contract on every reachable path.
+** Each declared policy against its allocator's stated contract on every reachable path, including any participating serialized owned-value runtime adapter and all of its reached dependencies.
+** Each admitted serialized owned-value runtime adapter accounted for strictly within an existing wire or allocation-provider role, never as a fourth allocation actor with unbounded privileges, with all reached dependencies covered in each direction's class, policy and any claimed guarantee evidence.
 ** Each wire, binding and allocation provider keeping within the class and the policy that it states.
 ** No path on which a declared unknown is read as the favourable answer.
 ** No path on which an allocation falls back silently to another domain.
@@ -432,9 +448,10 @@ Refusing every allocating wire on every route would also refuse serialized route
 So the refusal follows the route's declared class instead.
 The refusal names the route and the wire's reason, so that whoever configured the route can correct it.
 A binding's own allocation for a serialized route is declared the same way, so an undeclared one is refused rather than hidden.
+Accounting for an admitted serialized owned-value runtime adapter strictly within its wire or allocation-provider role—together with all dependencies that its acquisitions, resizes, destructions and releases can reach—prevents a helper label from creating a fourth allocation actor with unbounded privileges while keeping ordinary serialized declarations available without unrequested stronger guarantees.
 
 A decoded value's memory is often returned when the value ends, not when it is made.
-So a class covers the value's whole life.
+So a class covers the value's whole life, and a serialized composition that offers no non-native, non-shared ending path cannot end its owned values without breaking native isolation and is refused at setup.
 A wire that decodes into a value which later frees memory uses the heap in that direction, whatever its decoding call does.
 
 A standard allocation interface can permit an allocator to end the process on exhaustion, and an interface that returns an error cannot intercept that (source: the standard library documentation, Rust 1.98.1, section Errors of `+std::alloc::GlobalAlloc::alloc+`: https://doc.rust-lang.org/1.98.1/std/alloc/trait.GlobalAlloc.html#errors[`+std::alloc::GlobalAlloc::alloc+`]; and section Errors of `+std::alloc::Allocator::allocate+`: https://doc.rust-lang.org/1.98.1/std/alloc/trait.Allocator.html#errors[`+std::alloc::Allocator::allocate+`]).
@@ -453,7 +470,7 @@ So a stated policy refuses only a route that requires the guarantee it violates.
 [[req-ssr-heap-guarantees]]
 === A stronger resource guarantee is required by name, and admitted or refused
 
-[.specitem,oft-sid="req~ssr-heap-guarantees~2",oft-title="A stronger resource guarantee is required by name, and admitted or refused",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-heap-guarantees~3",oft-title="A stronger resource guarantee is required by name, and admitted or refused",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Ordinary ownership.*
 A serialized route whose declared heap class admits allocation (<<req-ssr-heap-declared,The heap class is declared, with no default>>) carries message types whose values own resources, heap memory included.
@@ -462,6 +479,9 @@ The element *MUST NOT* refuse at setup such a route, or a message type, wire, bi
 * because its values own resources;
 * because a destructor runs when one of them ends; or
 * because a guarantee of this item, a timing bound or an assurance scope that the route does not require is not established for it.
+
+An ordinary serialized route that does not require non-waiting release *MAY* use its disclosed waiting release path under its declared policy (<<req-ssr-heap-declared,The heap class is declared, with no default>>; xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
+The explicit claim dependencies of an assured helper admission below apply only where that assured helper scope is selected, and impose no unrequested stronger guarantee on ordinary serialized routes by default.
 
 A refusal that another item states for a reason of its own is no refusal for ownership: such is the refusal of a route that needs the integrity copy route on a wire that allocates when it decodes (xref:../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 A decoded type is admitted as xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] states.
@@ -497,12 +517,21 @@ Non-waiting acquisition limits acquisitions and no release, and non-waiting rele
 Two apply together only where the route requires both, by naming both or through a claim whose package states that it depends on both.
 
 A finite timing bound and a safety-assurance scope are the claims of xref:../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened], required and admitted as that item states.
+Non-waiting acquisition, non-waiting release and a finite timing bound remain separately requested guarantees, established or refused by name.
+
+*Assured helper admission.*
+Where an ASIL-path configuration selects an assured helper admission—an assured serialized owned-value runtime adapter included (xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]):
+
+* each such assured helper *MUST NOT* panic, abort or corrupt state in its helper-authored code;
+* the supplier of the supported configuration package or explicit extension that admits that assured helper *MUST* name recoverable exhaustion and panic-free cleanup explicitly as claim dependencies in the composition assurance contract and in the package for the admitted helper scope and for each affected route—never relying on an ASIL label to imply them—and *MUST* bind evidence establishing both guarantees to every actual transitive operation of covered acquisition, resize and owned-value cleanup, setup-created values and all reached dependencies included;
+* the element *MUST* admit an affected route under that assured helper admission only where recoverable exhaustion and panic-free cleanup are named explicitly as required guarantees for that route (directly or through the package's stated claim dependencies) and established across every covered transitive operation, setup-created values and reached dependencies included, and *MUST* refuse the route at setup by name otherwise;
+* non-waiting acquisition, non-waiting release and a finite timing bound remain separately requested guarantees, established or refused by name, and neither an assured helper admission nor an ASIL label requires or establishes any of them by default.
 
 *When a guarantee is required.*
 A route requires one of these guarantees only where:
 
 * the route's declaration names it; or
-* a timing bound or an assurance scope that the route requires depends on it, as the package of that claim's configuration states.
+* a timing bound, an assurance scope or an assured helper admission that the route requires depends on it, as the composition assurance contract and the package of that claim's configuration state explicitly.
 
 A route requires none by default.
 
@@ -510,17 +539,20 @@ None of the following is a requirement: an integrity level, an ASIL label, a str
 None of them is evidence for a guarantee either, and none exempts a route from a guarantee that it requires.
 
 *When a guarantee is established.*
-A guarantee is established for a route only by evidence that a supported configuration's package, or an explicit extension with evidence of its own, binds to all of:
+A guarantee is established for a route only by evidence that the supplier of a supported configuration's package, or of an explicit extension with evidence of its own, binds to all of:
 
 * the exact message type, and each wire that the route uses, in each direction;
-* the route's binding and each allocation provider, with every dependency that their acquisitions, destructions and releases can reach;
+* the route's binding and each allocation provider—including any admitted serialized owned-value runtime adapter participating in a wire or allocation provider—with every dependency that their acquisitions, resizes, destructions and releases can reach, setup-created values included;
 * the build, and each context that can run them.
+
+Every stronger guarantee or claim covers its actual transitive operations: the supplier of the supported configuration package or explicit extension that claims a guarantee *MUST* bind its evidence to every reachable acquisition, resize, destruction, release and dependency across those paths, and the element *MUST NOT* treat a guarantee as established where any reached transitive operation lacks that evidence.
+A fallible calling interface or wrapper cannot establish recoverable exhaustion over an allocator whose stated contract permits it to abort or end the process (<<req-ssr-heap-declared,The heap class is declared, with no default>>).
 
 None of the following establishes one:
 
 * a declaration or a disclosure;
 * a record, whether by being present or by matching a type or a wire;
-* a fallible calling interface, or an implementation of an interface;
+* a fallible calling interface or wrapper—including one placed over an allocator that may abort or end the process—or an implementation of an interface;
 * the absence of an observed failure;
 * a name or a label.
 
@@ -559,29 +591,35 @@ The element *MUST* state separately, in its startup report and in each route's r
 
 The element *MUST* report a guarantee that is established and not required as established and not admitted.
 The element *MUST* report a guarantee as not established only where its evidence is absent or insufficient, and never because the route does not require it.
+
+*Scoped replacement.*
+This revision replaces revision 2 of this item for the element across all configurations, and extends its duties to each assured helper admitted on the ASIL path and to each supplier of a supported configuration package or explicit extension that admits an assured helper or binds guarantee evidence, defining the explicit recoverable-exhaustion and panic-free-cleanup claim dependencies and no-panic, no-abort and no-state-corruption duties of assured helper admissions, requiring transitive operation coverage and excluding fallible wrappers over aborting allocators from establishing recoverable exhaustion, while preserving ordinary serialized ownership—including a disclosed waiting release path when non-waiting release is not requested—separately requested non-waiting acquisition, non-waiting release and finite timing, and all admission and reporting duties of revision 2 of this item.
 --
 
 [horizontal]
-ID:: `+req~ssr-heap-guarantees~2+`
+ID:: `+req~ssr-heap-guarantees~3+`
 ASIL:: B
-Allocated to:: the element
+Allocated to:: the element; each assured helper admitted on the ASIL path (an assured serialized owned-value runtime adapter included), for not panicking, aborting or corrupting state in its helper-authored code; each supplier of a supported configuration package or explicit extension that admits an assured helper on the ASIL path or binds guarantee evidence, for naming required claim dependencies explicitly in the composition assurance contract and package and for binding evidence to every actual transitive operation covered
 Verification:: test, review
 * *test*
-** A serialized route with an owning message type, its wire, binding and provider declared, in a configuration that has no evidence for any guarantee, admitted with no guarantee required and reported with each guarantee not required, not established and not admitted.
+** A serialized route with an owning message type, its wire, binding and provider declared, in a configuration that has no evidence for any guarantee, admitted with no guarantee required, using its disclosed waiting release path where non-waiting release is not requested, and reported with each guarantee not required, not established and not admitted.
 ** For each of the four guarantees, one that is established and not required, reported as not required, established and not admitted, with its route admitted and nothing promised.
 ** For each of the four guarantees, required and established varied independently, with admitted true only where both are.
 ** The same route refused by name once it requires a guarantee that is not established, the refusal naming the route, the guarantee and what lacks it.
 ** A route that requires non-waiting acquisition over a binding whose allocation can wait, refused at setup by name, the refusal naming that binding, and the same route admitted without that requirement.
 ** A route that requires non-waiting release over a dependency that can wait, refused by name on a configuration without a release service, and the same route admitted without that requirement.
 ** A route that requires only non-waiting acquisition, admitted on a configuration with a declared release that can wait and no release service, and a route that requires only non-waiting release, admitted with a declared acquisition that can wait.
-** A requirement that follows from a required timing bound or assurance scope, admitted or refused with that claim.
-** An integrity level, a strict-mode state and the name of a wire or provider, each changing neither what a route requires nor what is established.
+** A requirement that follows from a required timing bound, assurance scope or assured helper admission, admitted or refused with that claim.
+** An affected route under an assured helper admission (an assured serialized owned-value runtime adapter included): admitted when recoverable exhaustion and panic-free cleanup are named explicitly and established across every covered acquisition, resize, cleanup, setup-created value and reached dependency; refused at setup by name where either guarantee is missing, inferred only from an ASIL label, or backed only by a fallible wrapper over an allocator whose contract permits aborting; non-waiting acquisition, non-waiting release and finite timing independently requested and admitted or refused by name.
+** An integrity level, an ASIL label, a strict-mode state and the name of a wire or provider, each changing neither what a route requires nor what is established.
 ** A record that matches a type and a wire, without its evidence, admitting no guarantee.
 ** A type without a destructor, with panic-free cleanup and non-waiting release established for the destruction of its decoded values and for nothing else, and a route that requires either still decided over its binding, providers and other wires.
 ** A route with several wires, with each guarantee decided and reported over all of them.
 ** A route that requires a guarantee, with what setup takes or creates for it held to that guarantee, and a refusal disposing of it as xref:../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure] states.
 * *review*
-** Each admitted guarantee's evidence against the exact type, wires, directions, binding, provider, dependencies, build and contexts that it names.
+** Helper-authored code of each assured helper admitted on the ASIL path, for no panic, abort or state-corruption paths.
+** Composition assurance contracts and supported configuration packages or explicit extensions admitting an assured helper: recoverable exhaustion and panic-free cleanup named explicitly for the helper scope and each affected route (never inferred from an ASIL label).
+** Each admitted guarantee's evidence against the exact type, wires, directions, binding, provider, participating serialized owned-value runtime adapter, setup-created values, resizes, transitive operations, dependencies, build and contexts that it names, with no fallible wrapper over an allocator that may abort accepted as establishing recoverable exhaustion.
 ** No path on which the element states, reports or relies on a guarantee as held for a route for which it is not established, and none on which it reports as admitted a guarantee that is not both required and established.
 ** No path on which a report drops or changes what is established because the route does not require it, or shows a guarantee as required because it is established.
 ** No path on which a fault against what holds whatever a route requires is reported as a guarantee that is not established.
@@ -593,13 +631,18 @@ Ending such a value runs its destructor and returns its memory.
 That is ordinary ownership.
 
 Stronger properties of that cleanup are different in kind.
-Whether a destruction can panic, whether a release can wait and whether exhaustion is recoverable depend on the exact type, wire, binding, provider and build.
+Whether a destruction can panic, whether a release can wait and whether exhaustion is recoverable depend on the exact type, wire, binding, provider, any participating runtime adapter and build.
 So they can be shown only for a named composition.
 
 * Demanding that evidence of every owning route would make a safety package a prerequisite for ordinary use (xref:../safety/elements/up-rust/README.adoc#claims[the SEooC's claims]).
 * Granting a guarantee without it would be a silent downgrade of the guarantee (xref:../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]).
 
 So a guarantee is required by name, and is then admitted or refused.
+
+_Assured helper admissions._
+An assured helper admission brings a declared helper function into an ASIL-path composition, where a panic, abort or state corruption in helper-authored code or in covered acquisition, resize or cleanup would violate the composition's assurance boundary.
+Binding recoverable exhaustion and panic-free cleanup as explicit claim dependencies named in the composition assurance contract and each affected route and package keeps those obligations checkable across every reached transitive operation—including setup-created values and underlying allocators—without turning them into an implicit consequence of an ASIL label or a new default for ordinary serialized routes.
+A fallible wrapper cannot intercept an abort inside an underlying allocator, so evidence covers the actual transitive operations rather than the wrapper's signature alone.
 
 _Required, established and admitted._
 What a route asks for and what its configuration can show are different questions, so the report answers them apart.
@@ -612,7 +655,7 @@ A route can need one of them not to wait and accept the declared wait of the oth
 So each guarantee limits its own operations, and none is refused or imposed on account of another.
 
 _Labels._
-An integrity level or a strict-mode state says what a deployment intends, not what its allocator does.
+An integrity level, an ASIL label or a strict-mode state says what a deployment intends, not what its allocator does.
 
 _The whole composition._
 The evidence names the whole composition because each part can change the answer.

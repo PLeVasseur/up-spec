@@ -22,7 +22,7 @@ Explanatory overviews below cover the combinations of wire and transport (<<inde
 [[req-ssr-heap-none]]
 === No heap in runtime mode on a native path
 
-[.specitem,oft-sid="req~ssr-heap-none~4",oft-title="No heap in runtime mode on a native path",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyWire"]
+[.specitem,oft-sid="req~ssr-heap-none~5",oft-title="No heap in runtime mode on a native path",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyWire"]
 --
 *Native paths.*
 In runtime mode, no part acquires or releases heap memory on a path that a native payload operation causes, except for the middleware allocation covered by "Named middleware allocation" below, and each part answers for its own work on such a path:
@@ -33,11 +33,11 @@ In runtime mode, no part acquires or releases heap memory on a path that a nativ
 * the element applies the native-route refusal of xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], and, for allocation inside a binding's middleware under a named permit, the transition check of xref:bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
 
 What an allocation provider is, is stated in xref:../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing].
-The rule follows the cause, whichever part's code does the work: it reaches the work that the operation causes on another thread or at a later time as well.
+The rule follows the cause, whichever part's code does the work: it reaches the work that the operation causes on another thread or at a later time as well, delayed work, drops, cancellation and release included.
 
 *Named middleware allocation.*
 Allocation inside a binding's middleware is an exception to this item's general native-path prohibition only for the operations and bound of a named permit that a matching named waiver admits, within the scope of xref:bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
-This exception does not apply to a native lease drop, frame return or other native release operation, retirement and deferred release included (xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+This exception does not apply to a native lease drop, frame return or other native release operation, retirement and deferred release included (xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]); it never becomes a general native-release exception.
 It replaces no other requirement on an operation.
 What the binding declares and what a permit establishes are stated in xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path], under "Middleware".
 
@@ -54,9 +54,9 @@ The native rule covers:
 * waits and wake-ups;
 * deadline service;
 * a peer dying and a peer restarting;
-* the wire, binding and control work that these cause, in whichever part's code it runs.
+* delayed work and the wire, binding and control work that these cause, in whichever part's code it runs.
 
-The element and each wire *MUST* keep the native rule in work that a native route shares with a serialized one.
+The element, each wire and each allocation provider *MUST* keep the native rule in work that a native route causes or shares with a serialized one.
 
 *What counts as heap use.*
 
@@ -66,12 +66,18 @@ The element and each wire *MUST* keep the native rule in work that a native rout
 
 *Serialized routes.*
 A route is native or serialized, as its wire decides (<<req-ssr-payload-route-form,A route's form is fixed at setup, by what the route declares and never by a name>>).
-On a serialized route whose declared class admits allocation, the element *MUST* confine heap use to two kinds:
+On a serialized route whose declared class admits allocation, the element *MUST* confine heap use—including where an explicitly selected serialized owned-value runtime adapter participates strictly as a wire or allocation-provider role or explicitly identified subcomponent thereof (xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations])—to two kinds:
 
-* an acquisition at an allocation point that the class names, made only after the operation's refusals that can come first (xref:../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]);
-* the release, exactly once, of what such an acquisition produced, when the ownership it created ends, by whichever transition ends it (xref:runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
+* an acquisition or resize at an allocation point that the class names, made only after the operation's refusals that can come first (xref:../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]);
+* the release, exactly once, of what such an acquisition or resize produced, when the ownership it created ends, by whichever transition ends it (xref:runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
 
-The element *MUST NOT* acquire or release anything in deciding, reporting or counting any outcome.
+An explicitly selected serialized owned-value runtime adapter is assessed strictly as a wire or allocation-provider participant, never as a fourth allocation actor with unbounded privileges:
+
+* the element *MUST NOT* admit a serialized owned-value runtime adapter outside an existing wire or allocation-provider role, and *MUST* include any selected serialized owned-value runtime adapter and all dependencies that it reaches in each route direction's heap class check (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]) and in each guarantee check and evidence binding for that route (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]);
+* each wire and each allocation provider that an explicitly selected serialized owned-value runtime adapter implements or serves as an explicitly identified subcomponent of *MUST* include that adapter and all dependencies that it reaches in its declared heap class, policy and guarantee evidence for each direction of the route, *MUST* confine that adapter's runtime heap activity strictly to acquisition or resize at named allocation points after refusals that can come first and exactly-once release of serialized message-owned values that it created, and *MUST NOT* perform control-state, report or outcome, startup-backing, native, shared-causal or general application allocation through it;
+* the element *MUST* require a non-native, non-shared ending path on which to end every serialized message-owned value, values created through a serialized owned-value runtime adapter included, and *MUST* refuse at setup, by name, a composition that offers no such ending path (xref:runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
+
+The element *MUST NOT* acquire or release anything in deciding, reporting or counting any outcome, and *MUST NOT* permit control-state, report or outcome, startup-backing, native, shared-causal or general application allocation under a serialized route's class.
 The element *MUST NOT* let such a release release a route, role, table, startup region or other runtime resource, or revoke an owner.
 
 *What a declaration does not reach.*
@@ -86,20 +92,26 @@ It admits the route's ordinary ownership, and it establishes nothing more:
 
 *When the rules apply.*
 These rules bind each transport from its own transition.
+
+*Scoped replacement.*
+This revision replaces revision 4 of this item for the element and each wire, and extends its serialized-route participant confinement and shared-work exclusion duties to each allocation provider whose role an explicitly selected serialized owned-value runtime adapter implements or serves as an explicitly identified subcomponent of under xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations].
+All causal native-path no-heap and no-free duties, all shared-work exclusions, the exact scope of named middleware permits and waivers, the distinction between general allocator activity in startup-obtained regions and fixed-slot return, and all serialized-route prohibitions of revision 4 of this item remain in force.
 --
 
 [horizontal]
-ID:: `+req~ssr-heap-none~4+`
+ID:: `+req~ssr-heap-none~5+`
 ASIL:: B
-Allocated to:: the element; each wire, in work that a native route shares with a serialized one
+Allocated to:: the element; each wire, in work that a native route causes or shares with a serialized one, and where a serialized owned-value runtime adapter implements or serves as an explicitly identified subcomponent of it, for including the adapter and all reached dependencies in each direction's heap class, policy and guarantee evidence and confining its runtime heap activity to permitted serialized message-owned value acquisition, resize and exactly-once release with no control-state, report or outcome, startup-backing, native, shared-causal or general application allocation; each allocation provider, in work that a native route causes or shares with a serialized one, and where a serialized owned-value runtime adapter implements or serves as an explicitly identified subcomponent of it, for including the adapter and all reached dependencies in each direction's heap class, policy and guarantee evidence and confining its runtime heap activity to permitted serialized message-owned value acquisition, resize and exactly-once release with no control-state, report or outcome, startup-backing, native, shared-causal or general application allocation
 Verification:: heap-window, review, gate
 * *heap-window*
-** Over native traffic, sending and receiving, with refusals and error returns, cancellation, lease drops and a frame's return, retirement and deferred release, waits and wake-ups, deadline service, and the wire, binding and control work that these cause; middleware allocation admitted by a matching waiver reported apart by permit and operation, with no heap acquisition or release in a native lease drop, frame return or other native release operation, retirement and deferred release included.
+** Over native traffic, sending and receiving, with refusals and error returns, cancellation, lease drops and a frame's return, retirement and deferred release, delayed work, waits and wake-ups, deadline service, and the wire, binding and control work that these cause; middleware allocation admitted by a matching waiver reported apart by permit and operation, with no heap acquisition or release in a native lease drop, frame return or other native release operation, retirement and deferred release included.
 ** Over native traffic while a peer dies and while a peer restarts, with middleware allocation admitted by a matching waiver reported apart by permit and operation, and native release work still acquiring and releasing no heap.
-** Over work that a native route shares with a serialized one, while the serialized route allocates under its declared class.
-** On a serialized route, its declared allocation and the release of what it admitted, including each release that a release service performs, are reported.
-** On a serialized route, no heap use in deciding, reporting or counting any outcome, a refusal, a discard and a peer's failure among them.
-* *review*: no general allocator activity in element code on any runtime path, inside a region obtained at startup included, beyond what a serialized route's declared class permits and setup admits.
+** Over work that a native route shares with a serialized one, while the serialized route allocates under its declared class, including through an explicitly selected serialized owned-value runtime adapter acting as a wire or allocation-provider participant.
+** On a serialized route, its declared acquisition, resize and exactly-once release of what it admitted—including activity through a selected serialized owned-value runtime adapter and each release that a release service performs—reported under its wire or allocation-provider role.
+** On a serialized route, no heap use in deciding, reporting or counting any outcome, a refusal, a discard and a peer's failure among them, and no control-state, report or outcome, startup-backing, native, shared-causal or general application allocation.
+* *review*
+** No general allocator activity in element code on any runtime path, inside a region obtained at startup included, beyond what a serialized route's declared class permits and setup admits, with fixed-slot return distinguished from general allocator activity and named middleware permits and waivers kept within their exact scope without becoming a general native-release exception.
+** Each selected serialized owned-value runtime adapter confined strictly to implementing or serving as an explicitly identified subcomponent of an existing wire or allocation-provider role (never admitted as a fourth unbounded allocation actor), with the adapter and all reached dependencies included in each direction's heap class, policy and guarantee evidence, and with a non-native, non-shared ending path required and a composition lacking one refused at setup by name.
 * *gate*: the crate builds without `+alloc+`.
 ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
@@ -107,11 +119,13 @@ ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 Taking or returning heap memory while traffic flows could crash the process or corrupt the memory that runtime traffic relies on.
 Runtime mode works instead in startup memory, placed during initialization and not released in runtime mode.
 
-The rule follows what a native operation causes, because heap use in a wire's work, in a binding's code or in shared control work harms the same process as heap use in element code.
+The rule follows what a native operation causes, because heap use in a wire's work, in a binding's code, in an allocation provider's work or in shared control work—delayed work, drops, cancellation and release included—harms the same process as heap use in element code.
 
 Ending an owned value is the only release a serialized route makes.
 Every transition that can end one uses that one rule: a release, a refusal, an overflow, a cancellation, an expiry or a peer's failure.
 So no transition needs heap of its own (xref:../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; xref:runtime.adoc#req-ssr-qos-overflow[Overflow acts as declared]; xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
+
+Confining a serialized owned-value runtime adapter strictly to an existing wire or allocation-provider role, with all reached dependencies in each direction's heap class and guarantee evidence and a required non-native, non-shared ending path, keeps serialized runtime allocation bounded to message-owned values without creating a fourth unbounded allocation actor or leaking cleanup into native or shared paths.
 
 An allocator working inside a pre-obtained region still allocates and frees, so the backing region's origin does not make it admissible on a native path.
 
