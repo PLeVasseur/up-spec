@@ -10,42 +10,12 @@ The Streamer and the Streamer binary are separate parts outside the `up-rust` el
 Conventions and tags: xref:../README.adoc[Safety and Assurance View].
 * *Related requirements.*
 The Streamer's runtime forwarding, carrier-route, validation, worker, gate, monitor, reporting and dispatch requirements are stated in xref:../../up-l2/streamer.adoc[uP-L2: ASIL Streamer].
-Shared build and handle-drop obligations allocated to the Streamer alongside the element are stated in xref:up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow], xref:up-rust/build.adoc#req-ssr-build-specified-functions-only[The ASIL build contains only specified functions] and xref:../../languages/rust.adoc#req-ssr-release-inert-drop[Dropping a runtime handle does nothing].
+Shared build, crate-isolation and handle-drop obligations allocated to the Streamer alongside the element or Rust crate isolation are stated in xref:up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow], xref:up-rust/build.adoc#req-ssr-build-specified-functions-only[The ASIL build contains only specified functions], xref:../../languages/rust.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate] and xref:../../languages/rust.adoc#req-ssr-release-inert-drop[Dropping a runtime handle does nothing].
 * *Assumptions of use.*
 The last three sections of this page are the up-rust SEooC's assumptions of use about operating the Streamer, as `seooc` in their IDs says.
 Whom they bind: xref:up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 Each "Violation" text uses the classes of xref:../assurance.adoc#req-ssr-violation-classes[How a violated assumption of use shows up], with the Streamer as the observer where the text names it, and they carry `SafetyManual` only (xref:up-rust/assumptions-of-use.adoc#coverage[tags and coverage]).
 ====
-
-[[req-ssr-crate-streamer-isolated]]
-== The ASIL Streamer is its own untaintable crate
-
-[.specitem,oft-sid="req~ssr-crate-streamer-isolated~4",oft-title="The ASIL Streamer is its own untaintable crate",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
---
-The Streamer *MUST* keep the ASIL Streamer's route table, admission, validation and forwarding loop in a crate of their own, which:
-
-* is `+no_std+`;
-* uses no `+alloc+`;
-* declares no Cargo features;
-* depends on no crate other than the safety crate;
-* uses no 64-bit atomic type.
-
-The Streamer *MUST* keep that crate so that no feature, dependency or build setting outside it can bring classic routes, `+std+`-only paths or heap use into it.
-
-The Streamer *MUST* have its `+std+` loader only parse deployment data, and *MUST* validate that data in this crate.
-What that validation covers is stated in xref:../../up-l2/streamer.adoc#req-ssr-streamer-config-validated[The Streamer validates its deployment data in full].
-
-So bindings and wires are linked by the binary that uses the crate, not by the crate.
---
-
-[horizontal]
-ID:: `+req~ssr-crate-streamer-isolated~4+`
-ASIL:: B
-Allocated to:: the Streamer
-Verification:: gate (the gates of the safety crate applied to this crate: its manifest, a build on a sysroot with neither `+alloc+` nor `+std+`, its resolved dependency closure, which holds only the safety crate, and its own panic-link fixture, which gives evidence for xref:../../up-l2/streamer.adoc#req-ssr-streamer-no-panic[The Streamer does not panic in runtime mode]; a build for a bare-metal 32-bit target without 64-bit atomics), review (the `+std+` loader, which only parses deployment data, with all validation of it in this crate)
-
-*Rationale.*
-Separating the data plane keeps a convenience dependency, or a feature that another package of the build enables on a dependency that they share, from bringing heap use into it (source: the Cargo Book, Rust 1.98.1, chapter https://doc.rust-lang.org/1.98.1/cargo/reference/features.html[Features], sections Feature unification and Feature resolver version 2).
 
 [[req-ssr-streamer-scope]]
 == What the Streamer is, and the bounded-runtime Streamer profile
@@ -53,16 +23,16 @@ Separating the data plane keeps a convenience dependency, or a feature that anot
 [.specitem,oft-sid="req~ssr-streamer-scope~2",oft-title="What the Streamer is, and the bounded-runtime Streamer profile",oft-needs="uman",oft-tags="SafetyStreamer"]
 --
 *The Streamer.*
-In the up-rust SEooC requirement family the Streamer is the ASIL Streamer: the uStreamer dispatcher (xref:../../up-l2/dispatchers/README.adoc#dispatcher-types[Types of Dispatchers]) whose route table, admission, validation and forwarding loop live in the crate that <<req-ssr-crate-streamer-isolated,The ASIL Streamer is its own untaintable crate>> requires.
+In the up-rust SEooC requirement family the Streamer is the ASIL Streamer: the uStreamer dispatcher (xref:../../up-l2/dispatchers/README.adoc#dispatcher-types[Types of Dispatchers]) whose route table, admission, validation and forwarding loop live in the crate that xref:../../languages/rust.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate] requires.
 It forwards frames between transports on its routes, each of them a carrier route (xref:../../up-l2/streamer.adoc#req-ssr-carrier-route[A carrier route takes each frame at its ingress and sends it at its egress]).
 It holds its route table, admits and validates the routes of its deployment data, gates, monitors and reports its routes, and runs the forwarding loop.
 
 *The Streamer binary.*
 The Streamer binary is the program that runs the Streamer.
-It links the Streamer with its bindings and wires, runs the Streamer's `+std+` loader, which parses the deployment data that the Streamer then validates (<<req-ssr-crate-streamer-isolated,The ASIL Streamer is its own untaintable crate>>), and creates the worker threads on which the Streamer runs its forwarding loop.
+It links the Streamer with its bindings and wires, runs the Streamer's `+std+` loader, which parses the deployment data that the Streamer then validates (xref:../../languages/rust.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]), and creates the worker threads on which the Streamer runs its forwarding loop.
 
 *Not parts of the element.*
-The Streamer and the Streamer binary are parts of their own, separately owned, declared and evidenced outside the element (<<req-ssr-crate-streamer-isolated,The ASIL Streamer is its own untaintable crate>>; xref:../../up-l2/streamer.adoc[uP-L2: ASIL Streamer]).
+The Streamer and the Streamer binary are parts of their own, separately owned, declared and evidenced outside the element (xref:../../languages/rust.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]; xref:../../up-l2/streamer.adoc[uP-L2: ASIL Streamer]).
 Of the Streamer's data plane, only the carrier primitives that the Streamer calls belong to the element (xref:up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
 
 *Startup provisioning for the route-table share.*
@@ -71,14 +41,13 @@ When that function is not so selected, the Streamer binary *MUST NOT* supply, an
 When that function is selected:
 
 * the Streamer *MUST* preserve unchanged its duties for placement, size, alignment and arithmetic checks, startup-memory sealing, capacity, process, partition or firmware-instance lifetime, and pre-acquisition failure disposition (xref:../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]; xref:../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]; xref:../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]; xref:../../up-l2/streamer.adoc#req-ssr-streamer-build-order[The Streamer builds every transport and role before `enter_runtime_all`]);
-* the Streamer and the Streamer binary *MUST NOT* treat this startup-provisioning admission as admitting the classic uStreamer, any execution of the Streamer's `+std+` loader during runtime mode, any optional asynchronous layer, or any new Streamer runtime heap allocation (<<req-ssr-crate-streamer-isolated,The ASIL Streamer is its own untaintable crate>>; xref:../../up-l2/streamer.adoc#req-ssr-streamer-heap-free[The Streamer allocates nothing in runtime mode]; xref:../../up-l2/streamer.adoc#req-ssr-streamer-sync-data-plane[The Streamer's data plane is synchronous]; xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode]);
+* the Streamer and the Streamer binary *MUST NOT* treat this startup-provisioning admission as admitting the classic uStreamer, any execution of the Streamer's `+std+` loader during runtime mode, any optional asynchronous layer, or any new Streamer runtime heap allocation (xref:../../languages/rust.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]; xref:../../up-l2/streamer.adoc#req-ssr-streamer-heap-free[The Streamer allocates nothing in runtime mode]; xref:../../up-l2/streamer.adoc#req-ssr-streamer-sync-data-plane[The Streamer's data plane is synchronous]; xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode]);
 * the Streamer and the Streamer binary remain separately owned and evidenced under their own declarations and composition evidence: admitting startup provisioning for the element does not admit it for the Streamer without the Streamer composition's own explicit selection, declaration and evidence, and does not transfer Streamer ownership or evidence to the element (xref:up-rust/assumptions-of-use.adoc#aou-seooc-startup-storage[Startup storage that the integrator provides is exclusive and lives as long as the process]).
 
 *The bounded-runtime Streamer profile.*
 The bounded-runtime Streamer profile is a named profile (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]), and the Streamer follows it.
 Its items are the requirements of xref:../../up-l2/streamer.adoc[the Streamer chapter] and this page that give the Streamer or the Streamer binary a duty by name:
 
-* <<req-ssr-crate-streamer-isolated,The ASIL Streamer is its own untaintable crate>>;
 * xref:../../up-l2/streamer.adoc#req-ssr-streamer-route-lock[Routes and subscriptions are locked at activation];
 * xref:../../up-l2/streamer.adoc#req-ssr-config-exact-addresses[ASIL Streamer routes name exact source addresses];
 * xref:../../up-l2/streamer.adoc#req-ssr-streamer-heap-free[The Streamer allocates nothing in runtime mode];
@@ -104,6 +73,7 @@ Its items are the requirements of xref:../../up-l2/streamer.adoc[the Streamer ch
 
 and the requirements of other pages that give the Streamer or the Streamer binary a duty by name:
 
+* xref:../../languages/rust.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate];
 * xref:up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow];
 * xref:up-rust/build.adoc#req-ssr-build-specified-functions-only[The ASIL build contains only specified functions];
 * xref:../../up-l1/wires/e2e.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop];
@@ -176,7 +146,7 @@ Each of the two suppliers *MUST* reassess its account of such a row when a chang
 *Generated code.*
 For all code that a generator emits into the Streamer or into the Streamer binary and that contains an `+unsafe+` site, the supplier of that part *MUST* account for the exact generator, configuration, inputs and generated output, and for the reviewed rows of the generator's own inventory, with their source-level proofs and input constraints, that cover each such site.
 The supplier *MUST* name those rows by reference without repeating them, and *MUST* establish that the inputs meet those constraints and that the proofs' applicable invariants hold in the consuming build.
-This clause admits into the Streamer's crate no dependency that <<req-ssr-crate-streamer-isolated,The ASIL Streamer is its own untaintable crate>> forbids.
+This clause admits into the Streamer's crate no dependency that xref:../../languages/rust.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate] forbids.
 
 *The acceptance check.*
 The supplier of the Streamer and the supplier of the Streamer binary *MUST* each have its part's build and release verification refuse a build until a reviewed row or a reviewed disposition accounts for each new, each changed and each removed `+unsafe+` site of the part's own code, and *MUST NOT* release a build that this check refuses.

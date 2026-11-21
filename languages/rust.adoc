@@ -90,6 +90,36 @@ Verification:: gate (manifest; restricted sysroot; `+forbid(unsafe_code)+`; a bu
 A separate wire crate keeps protection optional.
 It keeps the heap restrictions of the crate that holds the element's runtime path.
 
+[[req-ssr-crate-streamer-isolated]]
+=== The ASIL Streamer is its own untaintable crate
+
+[.specitem,oft-sid="req~ssr-crate-streamer-isolated~4",oft-title="The ASIL Streamer is its own untaintable crate",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
+--
+The Streamer *MUST* keep the ASIL Streamer's route table, admission, validation and forwarding loop in a crate of their own, which:
+
+* is `+no_std+`;
+* uses no `+alloc+`;
+* declares no Cargo features;
+* depends on no crate other than the safety crate;
+* uses no 64-bit atomic type.
+
+The Streamer *MUST* keep that crate so that no feature, dependency or build setting outside it can bring classic routes, `+std+`-only paths or heap use into it.
+
+The Streamer *MUST* have its `+std+` loader only parse deployment data, and *MUST* validate that data in this crate.
+What that validation covers is stated in xref:../up-l2/streamer.adoc#req-ssr-streamer-config-validated[The Streamer validates its deployment data in full].
+
+So bindings and wires are linked by the binary that uses the crate, not by the crate.
+--
+
+[horizontal]
+ID:: `+req~ssr-crate-streamer-isolated~4+`
+ASIL:: B
+Allocated to:: the Streamer
+Verification:: gate (the gates of the safety crate applied to this crate: its manifest, a build on a sysroot with neither `+alloc+` nor `+std+`, its resolved dependency closure, which holds only the safety crate, and its own panic-link fixture, which gives evidence for xref:../up-l2/streamer.adoc#req-ssr-streamer-no-panic[The Streamer does not panic in runtime mode]; a build for a bare-metal 32-bit target without 64-bit atomics), review (the `+std+` loader, which only parses deployment data, with all validation of it in this crate)
+
+*Rationale.*
+Separating the data plane keeps a convenience dependency, or a feature that another package of the build enables on a dependency that they share, from bringing heap use into it (source: the Cargo Book, Rust 1.98.1, chapter https://doc.rust-lang.org/1.98.1/cargo/reference/features.html[Features], sections Feature unification and Feature resolver version 2).
+
 == Soundness and safe-to-unsafe boundary
 
 [[req-ssr-unsafe-sound]]
@@ -156,43 +186,6 @@ The element's memory safety relies on a binding's claim that lent storage is exc
 up-spec's iceoryx2 chapter asks the same of a Rust payload's author, through iceoryx2's `+ZeroCopySend+` (xref:../up-l1/iceoryx2.adoc[the iceoryx2 transport]), which iceoryx2 declares as an `+unsafe trait+` (source: the code of iceoryx2, release 0.9.3, https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2-bb/elementary-traits/src/zero_copy_send.rs#L32[`+iceoryx2-bb/elementary-traits/src/zero_copy_send.rs+`, line 32], its declaration of the trait).
 ====
 
-[[req-ssr-binding-unsafe-inventory]]
-=== A binding inventories its own `+unsafe+`
-
-[.specitem,oft-sid="req~ssr-binding-unsafe-inventory~2",oft-title="A binding inventories its own `unsafe`",oft-needs="impl,utest",oft-tags="SafetyBinding"]
---
-*The inventory.*
-Each binding *MUST* state, at each `+unsafe+` site of its own code, the memory-safety obligation that the site relies on, and *MUST* keep each such site under a reviewed row of its own inventory.
-
-*Generated code.*
-Each binding *MUST* keep each `+unsafe+` site of the code that a generator, such as a derive, emits into the binding under a reviewed inventory row, its own or the generator's.
-For all such code, the binding *MUST* account, in what is released with it, for the exact generator, configuration, inputs and generated output, and for the reviewed rows of the generator's own inventory, with their source-level proofs and input constraints, that cover each such site.
-The binding *MUST* name those generator rows by reference without repeating them, and *MUST* establish that the inputs meet those constraints and that the proofs' applicable invariants hold in the consuming build.
-
-*Change detection.*
-Each binding *MUST* have its build and release verification refuse a new, a changed or a vanished `+unsafe+` site of its own code, or of the code that a generator emits into the binding, until a reviewed row of its inventory or, for generated code, of the generator's accounts for it.
-
-*Its own inventory.*
-The inventory is the binding's own.
-It is no part of the element's inventory (xref:../safety/assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified]), and the element's inventory check does not reach it.
-For each binding, this item replaces the clause on bindings of revision 3 of that requirement, which had each binding that this project ships keep its own inventory under the same gate as the element's.
---
-
-[horizontal]
-ID:: `+req~ssr-binding-unsafe-inventory~2+`
-ASIL:: B
-Allocated to:: each binding
-Verification:: gate (the binding's inventory check over its own sources and over the code that generators emit into the binding, with a negative control: a new, a changed and a vanished site, each refused), review (the exact generator, configuration, inputs and generated output; the referenced generator rows, their source-level proofs and input constraints; and the applicable invariants in the consuming build)
-
-*Rationale.*
-A binding's `+unsafe+` code runs on the same runtime paths as the element's.
-So its obligations need a reviewed record and a check of their own, as the element's do (xref:../safety/assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified]).
-
-.A binding's inventory in its own repository
-====
-A binding may keep its unsafe-site inventory in its repository and run the inventory check there.
-====
-
 == Rust mechanism navigation
 
 NOTE: This section is non-normative navigation; the linked items govern and add no duty here.
@@ -218,6 +211,7 @@ NOTE: This section is non-normative navigation; the linked items govern and add 
   xref:../basics/error_model.adoc#req-ssr-error-fixed-size[Errors are fixed-size diagnoses].
 * *`unsafe` inventory, panic-abort profile and checked-policy crate boundary:*
   xref:../safety/assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified];
+  xref:../safety/assurance.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`];
   xref:../safety/elements/up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow];
   xref:../safety/elements/up-rust/build.adoc#req-ssr-crate-core-only-binary[The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it].
 * *Native in-place layout, bit-validity, lent storage and frame destructors:*
@@ -232,4 +226,4 @@ NOTE: This section is non-normative navigation; the linked items govern and add 
 * *Bounded-runtime Streamer activation lock, synchronous data plane and crate isolation:*
   xref:../up-l2/streamer.adoc#req-ssr-streamer-route-lock[Routes and subscriptions are locked at activation];
   xref:../up-l2/streamer.adoc#req-ssr-streamer-sync-data-plane[The Streamer's data plane is synchronous];
-  xref:../safety/elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate].
+  <<req-ssr-crate-streamer-isolated,The ASIL Streamer is its own untaintable crate>>.

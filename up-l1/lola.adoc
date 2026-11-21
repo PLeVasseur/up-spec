@@ -669,7 +669,7 @@ It states nothing itself.
 | xref:../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]; <<req-ssr-binding-lola-assumptions,The LoLa binding keeps each of LoLa's assumptions of use, or names who does>>; xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-lola-assumptions-kept[A deployment on LoLa keeps the assumptions of LoLa that the binding names for the integrator]
 
 | Its own `+unsafe+` and its {cpp} code
-| xref:../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; <<req-ssr-binding-lola-foreign-boundary,Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path>>
+| xref:../safety/assurance.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; <<req-ssr-binding-lola-foreign-boundary,Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path>>
 |===
 
 [[errors]]

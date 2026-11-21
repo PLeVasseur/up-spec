@@ -13,7 +13,7 @@ The items on this page name no middleware.
 What only one binding must meet is stated with that binding (xref:README.adoc#one-binding[what is specific to one binding]).
 What a binding is, and what is not one: <<req-ssr-binding-scope,What a binding is, and the binding contract>>.
 * *Related chapters.*
-Runtime refusal and fixed-size error rules are stated in xref:../basics/error_model.adoc[uProtocol Error Model (UStatus)], route QoS declarations and overflow in xref:runtime.adoc[uP-L1 transport runtime], binding qualification records and waiver recording in xref:../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures] and xref:../safety/assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found], binding `+unsafe+` inventory rules in xref:../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`], and element scope in xref:../safety/elements/up-rust/README.adoc[the up-rust SEooC element].
+Runtime refusal and fixed-size error rules are stated in xref:../basics/error_model.adoc[uProtocol Error Model (UStatus)], route QoS declarations and overflow in xref:runtime.adoc[uP-L1 transport runtime], binding qualification records and waiver recording in xref:../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures] and xref:../safety/assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found], binding `+unsafe+` inventory rules in xref:../safety/assurance.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`], and element scope in xref:../safety/elements/up-rust/README.adoc[the up-rust SEooC element].
 ====
 
 == Loss counting and route reporting
@@ -1026,7 +1026,7 @@ Where its middleware can enlarge, move or map again such storage after the bindi
 The binding *MUST* give a loan or a frame of zero bytes an address that is not null and has the route's alignment.
 
 *How the claim is made.*
-A lending binding *MUST NOT* state these properties to the element other than through the `+unsafe+` interface of the binding contract, and *MUST* keep each site that makes the claim under a reviewed row of its own inventory (xref:../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]; xref:../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `+unsafe+`]).
+A lending binding *MUST NOT* state these properties to the element other than through the `+unsafe+` interface of the binding contract, and *MUST* keep each site that makes the claim under a reviewed row of its own inventory (xref:../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]; xref:../safety/assurance.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `+unsafe+`]).
 A declaration, a capability value or a passed test does not establish them.
 
 *Refusal to lend.*

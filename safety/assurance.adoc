@@ -178,7 +178,7 @@ For each wire, this entry and the clause "Outside these inventories" replace two
 * Each wire *MUST* keep each `+unsafe+` site of its code, generated code included, under a reviewed inventory row, its own or, for generated code, the generator's, and *MUST* have its build and release verification refuse a new, a changed or a vanished site until such a row accounts for it.
 
 *Bindings.*
-A binding's `+unsafe+` code is under inventory rows that are no part of the element's inventory: those rows, with the refusal of unreviewed sites, are stated in xref:../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`].
+A binding's `+unsafe+` code is under inventory rows that are no part of the element's inventory: those rows, with the refusal of unreviewed sites, are stated in <<req-ssr-binding-unsafe-inventory,A binding inventories its own `unsafe`>>.
 That item replaces, for each binding, the clause on bindings of revision 3 of this item.
 The integrator's use of such a binding on the ASIL path is stated in xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts].
 
@@ -199,6 +199,43 @@ Ordinary type, reference and borrowing rules still apply (source: the Rust Refer
 A generator's author knows the input constraints under which the code that it emits is sound, and the consuming build knows which generator and configuration it admitted, so each answers for its part.
 
 Keeping wires free of hand-written `+unsafe+` lets anyone write one without taking on memory-safety obligations.
+
+[[req-ssr-binding-unsafe-inventory]]
+== A binding inventories its own `+unsafe+`
+
+[.specitem,oft-sid="req~ssr-binding-unsafe-inventory~2",oft-title="A binding inventories its own `unsafe`",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+--
+*The inventory.*
+Each binding *MUST* state, at each `+unsafe+` site of its own code, the memory-safety obligation that the site relies on, and *MUST* keep each such site under a reviewed row of its own inventory.
+
+*Generated code.*
+Each binding *MUST* keep each `+unsafe+` site of the code that a generator, such as a derive, emits into the binding under a reviewed inventory row, its own or the generator's.
+For all such code, the binding *MUST* account, in what is released with it, for the exact generator, configuration, inputs and generated output, and for the reviewed rows of the generator's own inventory, with their source-level proofs and input constraints, that cover each such site.
+The binding *MUST* name those generator rows by reference without repeating them, and *MUST* establish that the inputs meet those constraints and that the proofs' applicable invariants hold in the consuming build.
+
+*Change detection.*
+Each binding *MUST* have its build and release verification refuse a new, a changed or a vanished `+unsafe+` site of its own code, or of the code that a generator emits into the binding, until a reviewed row of its inventory or, for generated code, of the generator's accounts for it.
+
+*Its own inventory.*
+The inventory is the binding's own.
+It is no part of the element's inventory (<<req-ssr-unsafe-inventory,Every `unsafe` is inventoried and justified>>), and the element's inventory check does not reach it.
+For each binding, this item replaces the clause on bindings of revision 3 of that requirement, which had each binding that this project ships keep its own inventory under the same gate as the element's.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-unsafe-inventory~2+`
+ASIL:: B
+Allocated to:: each binding
+Verification:: gate (the binding's inventory check over its own sources and over the code that generators emit into the binding, with a negative control: a new, a changed and a vanished site, each refused), review (the exact generator, configuration, inputs and generated output; the referenced generator rows, their source-level proofs and input constraints; and the applicable invariants in the consuming build)
+
+*Rationale.*
+A binding's `+unsafe+` code runs on the same runtime paths as the element's.
+So its obligations need a reviewed record and a check of their own, as the element's do (<<req-ssr-unsafe-inventory,Every `unsafe` is inventoried and justified>>).
+
+.A binding's inventory in its own repository
+====
+A binding may keep its unsafe-site inventory in its repository and run the inventory check there.
+====
 
 [[req-ssr-waiver-record]]
 == Waivers are recorded and can be found
@@ -338,6 +375,6 @@ It adds, changes and weakens no requirement or assumption of use; every obligati
 Related technical obligations outside assurance governance:
 
 * *Binding middleware permits and waiver scope:* xref:../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] and xref:../up-l1/bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
-* *Rust memory-safety soundness and safe-binding boundary:* xref:../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour], xref:../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety] and xref:../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`].
+* *Rust memory-safety soundness and safe-binding boundary:* xref:../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] and xref:../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety].
 * *Checked-wire memory safety:* xref:../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety].
 ====

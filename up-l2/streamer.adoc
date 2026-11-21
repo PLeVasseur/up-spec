@@ -459,7 +459,7 @@ Where the separately declared bounded-runtime Streamer composition explicitly se
 * before acquiring or taking any resource or initialized value during initialization, the Streamer and the Streamer binary *MUST* each establish one failure disposition for what it acquires—returned untouched, destroyed once within initialization as permitted, or retained only as startup storage and its contents under the configuration's stated retention policy—refusing before acquisition where none is available, and *MUST NOT* hand a refused startup resource to a runtime release service or pending-cleanup queue (xref:../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]).
 
 *No loader or startup provisioning in runtime mode.*
-In runtime mode, the Streamer and the Streamer binary *MUST NOT* execute the Streamer's `+std+` loader, invoke a startup-provisioning helper, or allocate or reclaim startup backing (<<req-ssr-streamer-heap-free,The Streamer allocates nothing in runtime mode>>; xref:../safety/elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]).
+In runtime mode, the Streamer and the Streamer binary *MUST NOT* execute the Streamer's `+std+` loader, invoke a startup-provisioning helper, or allocate or reclaim startup backing (<<req-ssr-streamer-heap-free,The Streamer allocates nothing in runtime mode>>; xref:../languages/rust.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]).
 
 *A refused startup.*
 Where startup-provisioning helper acquisition or its pre-acquisition failure disposition fails, the Streamer binary *MUST* report that refusal to the Streamer without handing anything to a runtime release service or pending-cleanup queue and without releasing storage reachable by an entered transport.
@@ -626,7 +626,7 @@ The element does not apply the workers' number, priority and affinity, the monit
 The Streamer validates them, and the Streamer binary applies the workers' settings only once they are validated.
 
 Refusing during initialization, by field, keeps every such mistake out of runtime mode, and the Streamer then does not start (<<req-ssr-streamer-build-order,The Streamer builds every transport and role before `enter_runtime_all`>>).
-Where the validation runs is stated in xref:../safety/elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate].
+Where the validation runs is stated in xref:../languages/rust.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate].
 
 Code carried in deployment data would run outside the program that was verified, while values can be checked against their ranges before the Streamer starts.
 
@@ -688,7 +688,7 @@ Creating or joining a thread in runtime mode would bring the heap and an unbound
 
 A fixed assignment of routes to workers, made at setup, lets each route's latency be analysed before start.
 
-Creating threads needs the operating system's thread services, which the Streamer's `+no_std+` crate does not have (xref:../safety/elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]).
+Creating threads needs the operating system's thread services, which the Streamer's `+no_std+` crate does not have (xref:../languages/rust.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]).
 So the Streamer binary creates the workers, and the Streamer runs its forwarding loop on them.
 
 [[req-ssr-streamer-route-gate]]
