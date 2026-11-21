@@ -12,7 +12,7 @@ This page describes intended specification scope: it is not a conformance claim,
 [[req-ssr-element-configurations]]
 == The ASIL path and supported configurations
 
-[.specitem,oft-sid="req~ssr-element-configurations~2",oft-title="The ASIL path and supported configurations",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer"]
+[.specitem,oft-sid="req~ssr-element-configurations~3",oft-title="The ASIL path and supported configurations",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer"]
 --
 *The ASIL path.*
 A configuration is on the ASIL path where an integrator claims the element's safety-assurance scope for it (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
@@ -25,6 +25,7 @@ A supported configuration package is a versioned package that states a configura
 A supported configuration is one for which the element's supplier provides such a package.
 The package is released with the element, and a configuration that has none is not a supported configuration.
 In each supported configuration package that it provides, the element's supplier *MUST* state each size on which the configuration's sizing relies and that the element's own computation does not give, such as the storage of a scheduler's tasks and timers, an allocator's overhead and each thread's stack, and *MUST* name each such size that the package does not establish (xref:../../basics/resources.adoc#req-ssr-memory-computable[Startup storage is computable before start]).
+Where a supported configuration package admits a startup-provisioning helper, the element's supplier *MUST* state in the package the helper's identity, its selected startup-provisioning functions, the storage regions that it supplies, its retained state, its dependencies and its supported execution contexts.
 A platform profile is a class of target, an operating system or a bare-metal environment with an architecture, that a supported configuration package names.
 
 *The deployment profile.*
@@ -38,27 +39,108 @@ A deployment profile is the selection that a deployment declaration names (xref:
 
 A part that the profile does not select is outside the deployment's claimed scope.
 
-*Optional layers.*
-The ASIL path admits no optional layer: a deployment profile on the ASIL path selects none.
-What a configuration needs to admit an optional layer, and what an admitted layer must not do, is stated in xref:../elements/up-rust/build.adoc#req-ssr-crate-core-only-binary[The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it].
-The contracts that items give an optional layer, such as those of an asynchronous layer, remain its own, and none of them admits it to the ASIL path.
+*Optional layers and startup-provisioning admission.*
+On the ASIL path, a configuration *MAY* either:
+
+* select no optional helper, retaining the minimal no-helper selection and its static or caller-provided storage-origin restriction (xref:../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]); or
+* explicitly select a named startup-provisioning helper whose admitted function on the ASIL path is limited to obtaining declared startup backing before the relevant transition and delegating placement, admission and transition to the element's safety crate (xref:../elements/up-rust/build.adoc#req-ssr-crate-core-only-binary[The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it]).
+
+All other optional layers—optional asynchronous layers, application-role layers, generic collection libraries, arbitrary helpers and whole `+alloc+` or `+std+` crates included—remain excluded from the ASIL path: a deployment profile on the ASIL path selects none of them.
+The contracts that items give an excluded optional layer, such as those of an asynchronous layer, remain its own, and none of them admits it to the ASIL path.
 That is a boundary of the ASIL path.
 It lifts no contract of an optional layer, of a classic route or of a wire that the ASIL path leaves out, it says nothing of their integrity level, and it leaves their ordinary use as it is.
+
+Linking, packaging or naming a startup-provisioning helper grants neither heap-origin startup-storage permission (xref:../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]) nor safety-assurance qualification (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
+An admitted startup-provisioning helper remains a separately composed part outside the element (xref:../elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
+
+Each startup-provisioning helper admitted on the ASIL path *MUST* declare, in what is released with it:
+
+* the startup-provisioning functions that it provides;
+* the storage regions and allocation domains that it obtains;
+* any state that it retains after acquisition, including any destruction or release code reachable after the acquisition object ends;
+* its dependencies;
+* the execution contexts from which it may be called.
+
+Each such startup-provisioning helper *MUST* obtain declared startup backing only before the relevant transition, *MUST* delegate placement, admission and transition to the element's safety crate, and *MUST NOT* exercise any other optional-layer function on the ASIL path.
+What a configuration needs to admit an optional layer, and what an admitted layer must not do, is stated in xref:../elements/up-rust/build.adoc#req-ssr-crate-core-only-binary[The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it].
+
+*Public extension.*
+The element *MUST* allow any party to supply a startup-provisioning helper through the element's public, documented interfaces, with no closed supplier allowlist, private registration or privilege by package or supplier name.
+For an SDK that declares the owned-frame SDK contract, xref:../../basics/configurations.adoc#req-sdk-owned-frame-extension-public[A part that an application selects is selected through public interfaces alone] states the corresponding ordinary extension rule; neither contract family merges its declaration or claim grammar into the other (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]; xref:../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it]).
+
+*Scoped replacement.*
+This revision replaces the blanket optional-layer exclusion of revision 2 of this item for the element, the element's supplier, the Streamer and each startup-provisioning helper admitted on the ASIL path, solely for ASIL-path configurations and deployments that explicitly select an admitted startup-provisioning helper to obtain declared startup backing before the relevant transition.
+For ASIL-path configurations that select no startup-provisioning helper, the minimal no-helper selection and its storage-origin restriction remain unchanged; for all other optional layers, the exclusion of revision 2 of this item remains in force.
 --
 
 [horizontal]
-ID:: `+req~ssr-element-configurations~2+`
+ID:: `+req~ssr-element-configurations~3+`
 ASIL:: B
-Allocated to:: the element's supplier, for the sizes that it states in each supported configuration package; the element, as the subject of the definitions
+Allocated to:: the element's supplier, for the sizes and admitted startup-provisioning helper scope that it states in each supported configuration package; the element, for permitting any startup-provisioning helper through public interfaces without a closed supplier allowlist, and as the subject of the definitions; each startup-provisioning helper admitted on the ASIL path, for its released declaration, its startup-only backing scope, delegating placement, admission and transition to the safety crate and exercising no other optional-layer function on the ASIL path
 Verification:: review
-* Each statement and allocation that names the ASIL path, an ASIL application, process, binary, image or build, a supported configuration or its package, a platform profile, a deployment profile or an optional layer, read against this item.
-* Each supported configuration package: each size on which its sizing relies and that the element's computation does not give, stated or named as not established.
+* Each statement and allocation that names the ASIL path, an ASIL application, process, binary, image or build, a supported configuration or its package, a platform profile, a deployment profile, an optional layer or a startup-provisioning helper, read against this item.
+* Each supported configuration package: each size on which its sizing relies and that the element's computation does not give, stated or named as not established; and where the package admits a startup-provisioning helper, the helper's identity, admitted functions, storage regions, retained state, dependencies and supported execution contexts.
+* The element's public interfaces for taking startup regions from a startup-provisioning helper: open to any party's helper with no closed supplier allowlist, private registration or privilege by package or supplier name.
+* Each startup-provisioning helper admitted on the ASIL path: its released declaration of functions, storage regions and allocation domains, retained state and reachable destruction or release code, dependencies and supported execution contexts; its startup-only backing acquisition before transition; its delegation of placement, admission and transition to the safety crate; and the exclusion of all other optional layers from the ASIL path.
 
 *Rationale.*
 The assumptions of use bind the integrator that claims the element's assurance for a configuration (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]), so the words of the ASIL path name exactly that claimed scope.
 A package states once what a supported configuration offers, so that every application team that selects one relies on that statement for its platform.
 The element computes its own startup storage, and the sizes that depend on a scheduler, an allocator or a thread's stack are known only to whoever puts the configuration together, so the package's supplier states them or says that they are not established.
 A deployment that names what it composes can be checked against that selection, and what merely runs beside it gains no place in the claim.
+Separating explicit startup-provisioning admission from general optional layers keeps runtime optional layers out of the ASIL path while allowing a declared helper to obtain startup backing before transition and hand it through the safety crate's unchanged checks.
+Keeping helper selection on public interfaces prevents a closed supplier allowlist without equating linkage with storage-origin permission or qualification.
+
+== Platform realization journeys
+
+[NOTE]
+====
+This section is AS-NEEDED, non-normative guidance summarizing intended platform configurations and refusal boundaries.
+It adds, changes and weakens no requirement or assumption of use, makes no supported-port or qualification claim, and establishes no safety rating from bare-metal execution, fixed pools, `+no_std+` or an operating system certificate.
+====
+
+=== General-purpose OS
+
+A general-purpose operating system configuration selects a real binding and wire, an explicit platform backend, storage or memory providers, and an explicit compiler, library and middleware scope.
+Applications can call the checked synchronous or polled core directly, or independently select optional role and asynchronous conveniences under their ordinary contracts.
+Hosted startup allocation can provision persistent startup storage in ordinary use, while native runtime causality (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]) still holds.
+A serialized route carrying owning values declares its heap class and resource and failure policy (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]) and requests any stronger guarantee by name (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+Running on a general-purpose operating system, or making no safety claim, waives no applicable ordinary duty.
+
+=== QNX or another safety OS
+
+A safety operating system configuration begins from the same ordinary contracts and identifies the exact OS product and version, target, library and API subset, toolchain, platform backend, scheduling and process model, memory provider and middleware.
+A platform backend can use OS services directly without depending on a host standard library; a startup convenience helper package is neither the OS platform backend nor the language standard library.
+On the ASIL path, the deployment either selects no optional helper (keeping static or caller-provided non-heap startup storage) or explicitly selects an admitted startup-provisioning helper under <<req-ssr-element-configurations,The ASIL path and supported configurations>>, precreating required resources and accounting for initialization influence, dependencies and retained state.
+A certified operating system contributes only within its own covered scope and does not qualify helpers or the assembled image; the composition releaser supplies compatibility and assembled evidence for its package, while the integrator matches the deployment and validates every applicable assumption of use (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
+
+=== Bare metal, concrete minimum
+
+An intended bare-metal configuration uses a target that genuinely exposes 32-bit atomic loads, stores and compare-and-swap (xref:../../basics/platform.adoc#req-ssr-atomic-width[No target needs an atomic width it lacks]; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-target-environment[The target environment is verified]), a coherent single-core memory model or an explicitly covered cross-core model, a supported frame binding, a checked native wire with fixed slots, and static or caller-owned startup backing.
+The platform backend supplies a synchronized wall clock together with the required monotonic timing service, explicit interrupt and thread contexts, expected-value wake semantics and source-bound backend evidence (xref:../../basics/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules]; xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-clock[The wall clock is read before runtime mode]; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-clock[The platform provides the clocks]).
+
+Key realization and refusal boundaries on bare metal:
+
+* *Atomics, masks and binding limits.*
+  A target without required 32-bit compare-and-swap is excluded by the target contract rather than made supported by an arbitrary emulation crate.
+  A private interrupt mask excludes only the participants that it masks; it is not a cross-core or DMA exclusion lock (xref:../../basics/platform.adoc#req-ssr-atomic-width[No target needs an atomic width it lacks]).
+  A selected binding can impose narrower target limits—for example, the pinned iceoryx2 0.9.3 profile excludes 32-bit targets (xref:../../up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-profile[The iceoryx2 binding follows one profile, stated for one release of iceoryx2]).
+* *Autonomous progress versus a main loop.*
+  A polled application can issue synchronous traffic calls, but required autonomous monitoring or progress duties require a platform service that progresses independently of the next application call; no generic application main loop substitutes for those duties.
+  A timer or interrupt mechanism can provide bounded monitoring or progress only where its documented memory ordering and execution contexts satisfy the platform contract.
+* *Startup backing, fixed slots and cleanup isolation.*
+  A memory provider's state outlives every owner that can release through it, fixed-slot return is distinct from general allocator release, and native paths perform no general runtime allocation even where an allocator exists elsewhere in the image.
+  Where an explicitly selected startup-provisioning helper obtains retained startup backing from a declared allocator over reserved RAM before transition, it does so under <<req-ssr-element-configurations,The ASIL path and supported configurations>> and xref:../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided].
+  On serialized routes carrying owning values, a release established not to wait can run inline; a possibly waiting release on a route that requires non-waiting release needs an initialization-created autonomous release service whose progress is independent of application calls and transitively isolated from bounded operations, deadline and accounting work, hand-offs and unrelated slot returns (xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
+  Placing a blocking destructor in a timer interrupt handler or another context does not satisfy that isolation.
+  Where a bare-metal platform cannot supply that service and isolation, setup refuses the requested route or guarantee by name, while ordinary serialized routes with a disclosed waiting route-specific cleanup path remain separately admissible; a finite cleanup deadline needs its own mechanism and evidence, and pending values remain charged.
+* *Whole reset domain.*
+  Reinitialization follows the baseline whole-process or whole-partition restart semantics, realized on bare metal as resetting the whole reset domain of all relevant memory users (xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
+  A producer-only watchdog reset cannot revoke backing still owned by another core, peer or DMA engine: those participants are stopped or quiesced before reuse, or their valid ownership is preserved rather than recycling memory behind them.
+  Independent supervision and coexistence or memory-protection measures are supplied where the claim requires them (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated]).
+* *Evidence boundary.*
+  Supplier evidence covers its own mechanisms and named participants and contexts; the integrator validates actual loads, priorities, clock accuracy, memory and access controls, uncovered participants, safe reactions and reset wiring.
+  Neither bare-metal execution, fixed pools nor `+no_std+` confers a safety rating.
 
 == Chapters carrying up-rust ASIL B SEooC obligations
 

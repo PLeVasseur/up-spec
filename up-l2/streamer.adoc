@@ -446,39 +446,61 @@ What becomes of a frame that is not forwarded, and what an RPC client is told, a
 [[req-ssr-streamer-build-order]]
 == The Streamer builds every transport and role before `+enter_runtime_all+`
 
-[.specitem,oft-sid="req~ssr-streamer-build-order~2",oft-title="The Streamer builds every transport and role before `enter_runtime_all`",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
+[.specitem,oft-sid="req~ssr-streamer-build-order~3",oft-title="The Streamer builds every transport and role before `enter_runtime_all`",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
 --
 *The order.*
-The Streamer *MUST* build every transport and every role it will use before it calls `+enter_runtime_all+`, and *MUST NOT* build one after that call.
+The Streamer *MUST* build every transport and every role it will use, and place its route table, before it calls `+enter_runtime_all+`, and *MUST NOT* build one or place startup storage after that call.
+
+*Startup-provisioning helper.*
+Where the separately declared bounded-runtime Streamer composition explicitly selects an admitted startup-provisioning helper to supply the Streamer's route-table share of startup storage (xref:../safety/elements/streamer.adoc#req-ssr-streamer-scope[What the Streamer is, and the bounded-runtime Streamer profile]; xref:../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]):
+
+* the Streamer binary *MUST* run the Streamer's `+std+` loader and finish the helper's declared startup-storage acquisition during initialization, before handing the resulting startup backing to the Streamer for route-table placement and before `+enter_runtime_all+` is called;
+* the Streamer *MUST* accept that backing only when so selected and after declared acquisition has finished, *MUST* keep route-table placement, sizing, alignment, arithmetic and admission checks in the Streamer alongside the element's admission checks and startup-memory sealing (xref:../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]; xref:../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]), and *MUST NOT* defer startup acquisition to first traffic or delegate placement, sealing or admission policy to the helper;
+* before acquiring or taking any resource or initialized value during initialization, the Streamer and the Streamer binary *MUST* each establish one failure disposition for what it acquires—returned untouched, destroyed once within initialization as permitted, or retained only as startup storage and its contents under the configuration's stated retention policy—refusing before acquisition where none is available, and *MUST NOT* hand a refused startup resource to a runtime release service or pending-cleanup queue (xref:../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]).
+
+*No loader or startup provisioning in runtime mode.*
+In runtime mode, the Streamer and the Streamer binary *MUST NOT* execute the Streamer's `+std+` loader, invoke a startup-provisioning helper, or allocate or reclaim startup backing (<<req-ssr-streamer-heap-free,The Streamer allocates nothing in runtime mode>>; xref:../safety/elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]).
 
 *A refused startup.*
+Where startup-provisioning helper acquisition or its pre-acquisition failure disposition fails, the Streamer binary *MUST* report that refusal to the Streamer without handing anything to a runtime release service or pending-cleanup queue and without releasing storage reachable by an entered transport.
 The Streamer *MUST* refuse its startup as a whole, and *MUST NOT* activate any route, in each of these cases:
 
-* the Streamer refuses its deployment data (<<req-ssr-streamer-config-integrity,The deployment data is checked before it is applied>>; <<req-ssr-streamer-config-validated,The Streamer validates its deployment data in full>>), a route of it, its operator interface (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>), a monitor (<<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>) or a live subscription source (<<req-ssr-streamer-route-lock,Routes and subscriptions are locked at activation>>), the Streamer binary reports a worker that it could not create (<<req-ssr-streamer-workers,Workers are fixed at initialization>>), or the build of a transport or of a role fails: the Streamer then *MUST NOT* call `+enter_runtime_all+`;
-* `+enter_runtime_all+` returns a failure: a transport that entered runtime mode before the failure stays in runtime mode (xref:../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]), and the Streamer *MUST NOT* forward a frame on it.
+* an unselected startup-provisioning helper is presented for the Streamer's route table, startup-provisioning acquisition fails or no permitted pre-acquisition failure disposition is available, the Streamer refuses its deployment data (<<req-ssr-streamer-config-integrity,The deployment data is checked before it is applied>>; <<req-ssr-streamer-config-validated,The Streamer validates its deployment data in full>>), a route of it, its operator interface (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>), a monitor (<<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>) or a live subscription source (<<req-ssr-streamer-route-lock,Routes and subscriptions are locked at activation>>), the Streamer binary reports a worker that it could not create (<<req-ssr-streamer-workers,Workers are fixed at initialization>>), or the build of a transport or of a role fails: the Streamer then *MUST NOT* call `+enter_runtime_all+`;
+* `+enter_runtime_all+` returns a failure: a transport that entered runtime mode before the failure stays in runtime mode (xref:../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]), startup memory is sealed (xref:../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]), and the Streamer *MUST NOT* forward a frame on it, roll it back or release storage reachable by a successful owner.
 
 What the Streamer reports then is stated in <<req-ssr-streamer-startup-report,The startup report says what will run>>.
 
 *Classic endpoints.*
 How the Streamer builds each of its ASIL routes, through the element's admission and with no classic endpoint, is stated in xref:../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode].
+
+*Replacement.*
+For the Streamer and the Streamer binary under the bounded-runtime Streamer profile, this revision replaces revision 2 of this item for the startup build sequence, startup-provisioning helper acquisition order, pre-acquisition failure disposition, whole-startup refusal handling and runtime exclusion of the loader and startup-provisioning helper.
+For configurations that select no startup-provisioning helper, every build-order and refusal duty of revision 2 remains in force.
 --
 
 [horizontal]
-ID:: `+req~ssr-streamer-build-order~2+`
+ID:: `+req~ssr-streamer-build-order~3+`
 ASIL:: B
-Allocated to:: the Streamer
-Verification:: test (every transport and every role the Streamer will use is built before it calls `+enter_runtime_all+`; refused deployment data, a refused route, a refused operator interface, a refused monitor, a refused live subscription source, a worker that could not be created, and a transport or a role whose build fails: no call of `+enter_runtime_all+` and no route activated; `+enter_runtime_all+` returning a failure after an earlier transport entered: no route activated and no frame forwarded), review (the Streamer's startup path builds no transport or role after that call)
+Allocated to:: the Streamer, for its build order, route-table placement and admission checks, pre-acquisition failure disposition, whole-startup refusal rules, and running no loader, startup-provisioning helper or startup-backing allocation or reclamation in runtime mode; the Streamer binary, for finishing loader execution and any explicitly selected startup-provisioning helper acquisition with its pre-acquisition failure disposition before route-table placement and `+enter_runtime_all+`, reporting any acquisition refusal without using a runtime release service or releasing storage reachable by an entered transport, and running no loader, startup-provisioning helper or startup-backing allocation or reclamation in runtime mode
+Verification:: test, heap-window, review
+* *test*
+** Every transport and every role the Streamer will use is built, and any explicitly selected startup-provisioning helper acquisition and route-table placement are finished, before `+enter_runtime_all+` is called.
+** An unselected startup-provisioning helper, a failed startup-provisioning acquisition, an unavailable pre-acquisition failure disposition, refused deployment data, a refused route, a refused operator interface, a refused monitor, a refused live subscription source, a worker that could not be created, and a transport or a role whose build fails: no call of `+enter_runtime_all+`, no route activated, no handoff to a runtime release service or pending-cleanup queue, and each acquired resource left in its pre-acquisition stated disposition.
+** `+enter_runtime_all+` returning a failure after an earlier transport entered: startup memory sealed, no route activated, no frame forwarded and no storage reachable by the entered transport released.
+* *heap-window*: runtime forwarding and reporting paths on a composition that selected a startup-provisioning helper, with no loader execution, startup-provisioning acquisition or startup-backing reclamation in runtime mode.
+* *review*: the Streamer's and the Streamer binary's startup and runtime paths: no transport, role, route-table placement, loader execution or startup-provisioning acquisition after `+enter_runtime_all+`; placement, sealing and admission checks kept in the element and the Streamer without delegation to the helper; pre-acquisition failure disposition established without runtime release or pending-cleanup services.
 
 *Rationale.*
 Once `+enter_runtime_all+` has returned, the startup memory is sealed, and a setup built on it is refused (xref:../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
 An application's own order is stated in xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-build-order[Applications build every transport and role before the last transition].
+Completing helper-supplied startup backing before route-table placement and sealing keeps admission, sizing and placement checks in core and Streamer code and prevents initialization work or loader activity from leaking into runtime mode.
 
 A Streamer that started without a route that its deployment data declares would lack that route's function, with no gate to show it.
 
 [[req-ssr-streamer-startup-report]]
 == The startup report says what will run
 
-[.specitem,oft-sid="req~ssr-streamer-startup-report~4",oft-title="The startup report says what will run",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
+[.specitem,oft-sid="req~ssr-streamer-startup-report~5",oft-title="The startup report says what will run",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
 --
 *The report.*
 Once `+enter_runtime_all+` has returned with every transport in runtime mode, and before the Streamer activates, the Streamer *MUST* produce a report, without heap, as fixed-size records.
@@ -490,6 +512,7 @@ The report *MUST* list:
 * every active waiver;
 * every finding that the Streamer's strict-mode checks record in the Report state (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>; <<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>);
 * the reaction bound that the Streamer's deployment data declares, or, where it declares none, that no reaction bound is established (xref:../safety/elements/streamer.adoc#aou-seooc-streamer-reaction-bound[A reaction claimed through the Streamer's monitors or watchdog hook is bounded end to end]);
+* whether an admitted startup-provisioning helper was selected for the Streamer's route-table share of startup storage (xref:../safety/elements/streamer.adoc#req-ssr-streamer-scope[What the Streamer is, and the bounded-runtime Streamer profile]): where one was selected, its identity, the declared route-table startup storage it supplied, and its declared resource, retention and failure-disposition policy, with any unknown point stated as unknown (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]); where none was selected, that the route table uses static or caller-provided startup storage with no startup-provisioning helper;
 * the digest of the Streamer's deployment data.
 
 *The digest.*
@@ -498,17 +521,34 @@ The digest reports what runs.
 It is not the integrity check of <<req-ssr-streamer-config-integrity,The deployment data is checked before it is applied>>, which the Streamer makes before it applies any of the data.
 
 *A refused startup.*
-When the Streamer refuses its startup (<<req-ssr-streamer-build-order,The Streamer builds every transport and role before `enter_runtime_all`>>), it *MUST* report the refusal in place of that report, naming its cause: the missing integrity code or the mismatch; the field of its deployment data that validation refused; the route, with the leg and the limit, or the other rule of setup that refused it, such as a source filter that is not exact or a classic endpoint; the finding for which it refused its operator interface or a monitor, with the routes that the finding concerns; the live subscription source that it refused; the worker that the Streamer binary could not create; or the build or the transition that failed.
+When the Streamer refuses its startup (<<req-ssr-streamer-build-order,The Streamer builds every transport and role before `enter_runtime_all`>>), it *MUST* report the refusal in place of that report, naming its cause: the missing integrity code or the mismatch; the field of its deployment data that validation refused; an unselected startup-provisioning helper, a failed startup-provisioning acquisition or an unavailable pre-acquisition failure disposition, naming the helper or policy failure; the route, with the leg and the limit, or the other rule of setup that refused it, such as a source filter that is not exact or a classic endpoint; the finding for which it refused its operator interface or a monitor, with the routes that the finding concerns; the live subscription source that it refused; the worker that the Streamer binary could not create; or the build or the transition that failed.
+
+*Observation limits.*
+The Streamer's startup report establishes only the startup checks, declarations and admitted parameters that it names, and nothing else.
+It is neither a component conformance claim nor a deployment conformance claim, neither qualifies the Streamer, the Streamer binary or any selected startup-provisioning helper, nor discharges any assumption of use (xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]; xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]; xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-startup-storage[Startup storage that the integrator provides is exclusive and lives as long as the process]).
+The Streamer *MUST NOT* present the startup report, or any startup-provisioning entry in it, as a safety qualification, a conformance claim or a discharge of an assumption of use.
+
+*Replacement.*
+For the Streamer under the bounded-runtime Streamer profile, this revision replaces revision 4 of this item for the content of the startup report and the refused-startup report, adding the reporting of startup-provisioning helper selection, declared route-table startup storage, retention and failure-disposition policy, named startup-provisioning refusals, and explicit observation limits, while keeping every reporting field, fixed-size no-heap constraint, digest rule and refusal cause of revision 4 in force.
 --
 
 [horizontal]
-ID:: `+req~ssr-streamer-startup-report~4+`
+ID:: `+req~ssr-streamer-startup-report~5+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: test (the report's records against the admitted routes: each field that the statement lists for a route, each route's encoding-filter report, each active waiver, each strict-mode finding recorded in the Report state, and the declared reaction bound or the statement that none is established; the number of workers, and each worker with its priority and affinity; the digest equal to one computed over the copy of the data from which the Streamer and the Streamer binary applied it; a refused startup reported with the route, the leg and the limit, for a refusal on an ingress leg and for one on an egress leg, a route refused for a source filter that is not exact and one refused for a classic endpoint each reported with the route and that rule, an operator interface and a monitor refused in the Enforce state each reported with its finding, a refused live subscription source, and a worker that could not be created; deployment data with no integrity code, and deployment data with an invalid field that belongs to no route, each reported as the refusal with its cause named; a failed build reported with the build that failed; a failure of `+enter_runtime_all+` after an earlier transport entered, reported with the transition that failed; in each of these cases no report of what will run), heap-window (producing the report)
+Verification:: test, heap-window, review
+* *test*
+** The report's records against the admitted routes: each field that the statement lists for a route, each route's encoding-filter report, each active waiver, each strict-mode finding recorded in the Report state, and the declared reaction bound or the statement that none is established.
+** The number of workers, and each worker with its priority and affinity.
+** Startup-provisioning reporting: on a composition without a startup-provisioning helper, reported as static or caller-provided startup storage with no helper; on a composition with an explicitly selected admitted startup-provisioning helper, reported with its identity, declared route-table startup storage and declared resource, retention and failure-disposition policy, with any unknown point reported as unknown.
+** The digest equal to one computed over the copy of the data from which the Streamer and the Streamer binary applied it.
+** A refused startup reported with its named cause and no report of what will run: an unselected startup-provisioning helper, a failed startup-provisioning acquisition and an unavailable pre-acquisition failure disposition, each naming the helper or policy failure; a refusal on an ingress leg and on an egress leg with the route, the leg and the limit; a route refused for a source filter that is not exact and one refused for a classic endpoint each reported with the route and that rule; an operator interface and a monitor refused in the Enforce state each reported with its finding; a refused live subscription source; a worker that could not be created; deployment data with no integrity code and deployment data with an invalid field that belongs to no route; a failed build reported with the build that failed; and a failure of `+enter_runtime_all+` after an earlier transport entered, reported with the transition that failed.
+* *heap-window*: producing the report.
+* *review*: the startup report and refused-startup report formats: no statement presenting the report or any startup-provisioning entry as a safety qualification, a conformance claim or a discharge of an assumption of use.
 
 *Rationale.*
 The report lists the admitted routes and their resources after the transition, in runtime mode, so producing it uses no heap (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+Recording whether a startup-provisioning helper supplied the route-table share of startup storage, together with its declared storage and policy or its named refusal, keeps startup backing inspectable without turning a runtime observation into a qualification claim or an assumption discharge.
 
 [[req-ssr-streamer-config-integrity]]
 == The deployment data is checked before it is applied

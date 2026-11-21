@@ -114,10 +114,13 @@ Traffic before the transition would run before every route is admitted and its s
 [[req-ssr-memory-static]]
 === ASIL-path storage is static or caller-provided
 
-[.specitem,oft-sid="req~ssr-memory-static~3",oft-title="ASIL-path storage is static or caller-provided",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyStreamer"]
+[.specitem,oft-sid="req~ssr-memory-static~4",oft-title="ASIL-path storage is static or caller-provided",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyStreamer"]
 --
 *Where storage comes from.*
-On the ASIL path (xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]), the element *MUST* place all storage that its runtime path uses during initialization, from static or caller-provided memory, and *MUST* check the size, alignment and arithmetic of each placement when it makes it.
+On the ASIL path (xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]), the element *MUST* place all storage that its runtime path uses during initialization, and *MUST* check the size, alignment and arithmetic of each placement when it makes it.
+In a minimal ASIL-path configuration that selects no startup-provisioning helper, that storage *MUST* come only from static or caller-provided non-heap memory: presenting heap-allocated memory as caller-provided memory without explicit startup-provisioning admission does not satisfy this restriction.
+Where an ASIL-path configuration explicitly selects an admitted startup-provisioning helper under xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations], the element *MAY* also place that startup storage from declared startup backing of heap origin that the selected helper obtains before the relevant transition, subject to every placement check, residency, exclusivity, full-lifetime and sealing rule of this item and of <<req-ssr-memory-sealed,Startup memory is sealed>>.
+Helper participation or linkage alone grants no heap-origin permission.
 
 *Checks before an object is reachable.*
 Before placed storage becomes reachable as an object, the element *MUST* have established that it:
@@ -131,65 +134,86 @@ The element *MUST* expose no object from a refused placement.
 *Storage covered.*
 The element's storage covers slots, startup slots, queues, peer and call tables, waker storage and route state, and the storage that the element provides to another part, such as the Streamer.
 The Streamer owns its route table and *MUST* place it in the same way, under the same conditions and with the same checks.
+Where a separately declared bounded-runtime Streamer composition on the ASIL path explicitly selects an admitted startup-provisioning helper for its route-table share of startup storage (xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]; xref:../safety/elements/streamer.adoc#req-ssr-streamer-scope[What the Streamer is, and the bounded-runtime Streamer profile]), the Streamer *MAY* place its route table from declared startup backing obtained by that selected helper before the relevant transition, keeping every placement, residency, exclusivity, full-lifetime, capacity, sealing and failure duty; that selection admits neither classic Streamer, nor loader execution in runtime mode, nor any optional asynchronous layer, nor any Streamer runtime allocation.
 The element answers for no storage of an application's own.
 
 *Regions.*
-The element *MUST* take a region only through an interface whose contract hands it the region exclusively and for the life of the process, and *MUST* check each region before it places from it.
-The element then owns the region: it places from it as from any other, and it *MUST NOT* release any of it in runtime mode.
-That a static or caller-provided region is exclusive and stays valid for the life of the process is the integrator's to ensure (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-startup-storage[Startup storage that the integrator provides is exclusive and lives as long as the process]).
+The element *MUST* take a region only through an interface whose contract hands it the region exclusively and for the full life of the process, partition or firmware instance, and *MUST* check each region and have it made resident (xref:platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules], clause "Prefault") before it places from it.
+The element then owns the region: it places from it as from any other, and it *MUST NOT* release or silently reclaim any of it in runtime mode.
+That a static or caller-provided region is exclusive and stays valid for the life of the process, partition or firmware instance is the integrator's to ensure (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-startup-storage[Startup storage that the integrator provides is exclusive and lives as long as the process]).
+Where an admitted startup-provisioning helper supplies a region, its declaration and its underlying memory provider's contract state how exclusivity and full process, partition or firmware-instance lifetime are maintained (xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]; <<req-sdk-owned-frame-provider-ownership,Memory from a provider stays valid while it is held, and is disposed of once under its provider's contract>>).
 
 *Startup memory from a heap.*
-The element *MUST* accept startup memory obtained from a heap only outside the ASIL path: from the memory source that an optional layer provides over the standard library's allocator, or from an allocation provider that the configuration declares (<<req-sdk-owned-frame-provider-selection,The selected memory provider is the only one used, and selecting it claims nothing>> states what each is).
+On the ASIL path, the element *MUST* accept startup memory obtained from a heap—general allocation within startup-reserved RAM included—only where the configuration explicitly selects an admitted startup-provisioning helper to obtain declared startup backing before the relevant transition.
+Passing heap-allocated memory as caller-provided memory without explicit startup-provisioning admission does not erase its heap origin or satisfy the minimal no-helper restriction.
+Outside the ASIL path, the element *MUST* accept startup memory obtained from a heap only from the memory source that an optional layer provides over the standard library's allocator, or from an allocation provider that the configuration declares (<<req-sdk-owned-frame-provider-selection,The selected memory provider is the only one used, and selecting it claims nothing>> states what each is).
+
+*Scoped replacement.*
+This revision replaces the unqualified ASIL-path prohibition on heap-origin startup memory of revision 3 of this item for the element and the Streamer, solely for ASIL-path configurations—including a separately declared bounded-runtime Streamer composition—that explicitly select an admitted startup-provisioning helper under xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations] to obtain declared startup backing before the relevant transition.
+For ASIL-path configurations that select no startup-provisioning helper, the minimal static or caller-provided non-heap restriction of revision 3 of this item remains in force, and all placement, size, alignment, arithmetic, residency, exclusivity, full-lifetime and no-runtime-release duties remain unchanged across all configurations.
 --
 
 [horizontal]
-ID:: `+req~ssr-memory-static~3+`
+ID:: `+req~ssr-memory-static~4+`
 ASIL:: B
 Allocated to:: the element; the Streamer, for its route table
 Verification:: test, gate, review
 * *test*
 ** A runtime path over static memory only.
-** A region from a declared allocation provider placed and checked like a static one.
+** A region from a declared allocation provider or an admitted startup-provisioning helper, placed and checked like a static one.
 ** Refused placements, zero-length and over-aligned requests, exposing no object.
 * *gate*: the crate builds on a sysroot without `+alloc+`.
-* *review*: the contract of each interface through which the element takes a region, for exclusivity and the life of the process; no release of a region in runtime mode; the Streamer's placement of its route table.
+* *review*: the contract of each interface through which the element takes a region, for exclusivity, residency and full process, partition or firmware-instance lifetime; no release or silent reclamation of a region in runtime mode; explicit admission selection required before accepting heap-origin startup backing on the ASIL path, with the minimal no-helper restriction preserved; the Streamer's placement of its route table, including where an explicitly selected startup-provisioning helper supplies its route-table share.
 ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
 *Rationale.*
 The safety crate is `+no_std+` with no `+alloc+` (xref:../languages/rust.adoc#req-ssr-crate-isolated[The safety crate cannot be tainted]).
-So its storage can come only from a static region or from bytes the caller provides.
+So its own placement works only on regions handed to it from static memory, from caller-provided bytes or, where a configuration explicitly selects one, from an admitted startup-provisioning helper before the transition.
+General allocation within startup-reserved RAM remains heap activity, and presenting heap-origin bytes through a caller interface does not change their origin; tying heap-origin permission to explicit startup-provisioning admission preserves the minimal no-helper path while allowing declared startup backing where selected.
 
 Exclusivity is a property of live ownership, so a region may occupy addresses that an earlier, ended owner used.
 
 [[req-ssr-memory-sealed]]
 === Startup memory is sealed
 
-[.specitem,oft-sid="req~ssr-memory-sealed~3",oft-title="Startup memory is sealed",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-memory-sealed~4",oft-title="Startup memory is sealed",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *When memory is sealed.*
-The element *MUST* seal a startup memory when the last live setup that uses the memory enters runtime mode, and in any case when `+enter_runtime_all+` returns, whether it succeeded or failed.
+The element *MUST* seal a startup memory—whether backed by static or caller-provided storage or by declared startup backing obtained by an admitted startup-provisioning helper—when the last live setup that uses the memory enters runtime mode, and in any case when `+enter_runtime_all+` returns, whether it succeeded or failed.
 
 *Once it is sealed.*
 Once a startup memory is sealed:
 
 * the element refuses every further placement from it, as xref:../up-l1/runtime.adoc#req-ssr-mode-backstop[Run-time refusal only where types cannot reach] states;
-* the element *MUST NOT* ask a memory source or an allocation provider for memory when it refuses a placement;
+* the element *MUST NOT* ask a memory source, an allocation provider or a startup-provisioning helper for memory when it refuses a placement;
 * the element *MUST* refuse a setup built on it.
 
-A sealed startup memory stays sealed until the process ends, so a later initialization in the process needs startup memory that is not sealed (xref:../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]).
+A sealed startup memory stays sealed until the process, partition or firmware instance ends, so a later initialization in that instance needs startup memory that is not sealed (xref:../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]).
+
+*Partial group success and retained backing.*
+Where `+enter_runtime_all+` fails after one or more earlier transports have entered runtime mode, each earlier successful transport *MUST* survive that later failure and remain in runtime mode (xref:../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]; xref:../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]).
+In sealing shared startup memory or refusing a later transport, the element *MUST NOT* free or invalidate storage—admitted startup-provisioning backing included—that any successful owner can still reach, *MUST NOT* roll back an entered transport, and *MUST NOT* leave a refused transport partly entered (xref:../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]).
+Where a configuration's stated retention policy permits retaining startup backing obtained by an admitted startup-provisioning helper after sealing or refusal, the element *MUST NOT* silently reclaim that retained backing during runtime mode.
 
 *Setups still alive.*
 When `+enter_runtime_all+` returns, the element *MUST* report each setup that is still alive on that memory and has not entered runtime mode.
+
+*Scoped replacement.*
+This revision replaces revision 3 of this item for the element across all configurations, incorporating declared startup backing obtained by an explicitly selected startup-provisioning helper into the sealing, partial-group-success survival and non-reclamation duties while preserving every sealing and reporting duty of revision 3 of this item for static, caller-provided and non-ASIL startup memory.
 --
 
 [horizontal]
-ID:: `+req~ssr-memory-sealed~3+`
+ID:: `+req~ssr-memory-sealed~4+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test (each case of the statement, and a setup kept alive with `+mem::forget+`), heap-window (a placement refused after sealing, asking no memory source or allocation provider for memory)
+Verification:: test, heap-window, review
+* *test*: each case of the statement, including a setup kept alive with `+mem::forget+`, shared startup memory backed by an admitted startup-provisioning helper, and a failed `+enter_runtime_all+` after an earlier transport has entered runtime mode with the earlier transport surviving, no storage reachable by successful owners freed or invalidated, no entered transport rolled back and no refused transport left partly entered.
+* *heap-window*: a placement refused after sealing, asking no memory source, allocation provider or startup-provisioning helper for memory, and no reclamation of retained startup backing during runtime mode.
+* *review*: sealing and non-reclamation paths for static, caller-provided and admitted startup-provisioning backing until the process, partition or firmware instance ends.
 
 *Rationale.*
-A startup memory that several setups share places nothing once initialization ends, including after a failed `+enter_runtime_all+`, which can leave some transports in runtime mode.
+A startup memory that several setups share—whether static, caller-provided or provisioned before transition by an admitted startup-provisioning helper—places nothing once initialization ends, including after a failed `+enter_runtime_all+`, which can leave some transports in runtime mode.
+Keeping storage reachable by successful owners intact and forbidding silent reclamation of permitted retained startup backing prevents a later setup refusal from corrupting live transports or introducing runtime reclamation.
 
 [[req-ssr-memory-computable]]
 === Startup storage is computable before start

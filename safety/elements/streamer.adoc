@@ -50,7 +50,7 @@ Separating the data plane keeps a convenience dependency, or a feature that anot
 [[req-ssr-streamer-scope]]
 == What the Streamer is, and the bounded-runtime Streamer profile
 
-[.specitem,oft-sid="req~ssr-streamer-scope~1",oft-title="What the Streamer is, and the bounded-runtime Streamer profile",oft-needs="uman",oft-tags="SafetyStreamer"]
+[.specitem,oft-sid="req~ssr-streamer-scope~2",oft-title="What the Streamer is, and the bounded-runtime Streamer profile",oft-needs="uman",oft-tags="SafetyStreamer"]
 --
 *The Streamer.*
 In the up-rust SEooC requirement family the Streamer is the ASIL Streamer: the uStreamer dispatcher (xref:../../up-l2/dispatchers/README.adoc#dispatcher-types[Types of Dispatchers]) whose route table, admission, validation and forwarding loop live in the crate that <<req-ssr-crate-streamer-isolated,The ASIL Streamer is its own untaintable crate>> requires.
@@ -62,8 +62,17 @@ The Streamer binary is the program that runs the Streamer.
 It links the Streamer with its bindings and wires, runs the Streamer's `+std+` loader, which parses the deployment data that the Streamer then validates (<<req-ssr-crate-streamer-isolated,The ASIL Streamer is its own untaintable crate>>), and creates the worker threads on which the Streamer runs its forwarding loop.
 
 *Not parts of the element.*
-The Streamer and the Streamer binary are parts of their own.
+The Streamer and the Streamer binary are parts of their own, separately owned, declared and evidenced outside the element (<<req-ssr-crate-streamer-isolated,The ASIL Streamer is its own untaintable crate>>; xref:../../up-l2/streamer.adoc[uP-L2: ASIL Streamer]).
 Of the Streamer's data plane, only the carrier primitives that the Streamer calls belong to the element (xref:up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
+
+*Startup provisioning for the route-table share.*
+The Streamer binary *MAY* invoke, and the Streamer *MAY* accept regions from, an admitted startup-provisioning function (xref:../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]; xref:../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]) to supply the Streamer's route-table share of startup storage *only* when the separately declared bounded-runtime Streamer composition explicitly selects that function for it.
+When that function is not so selected, the Streamer binary *MUST NOT* supply, and the Streamer *MUST NOT* accept, helper-provisioned startup backing for the Streamer's route table, and the route table stays on static or caller-provided memory.
+When that function is selected:
+
+* the Streamer *MUST* preserve unchanged its duties for placement, size, alignment and arithmetic checks, startup-memory sealing, capacity, process, partition or firmware-instance lifetime, and pre-acquisition failure disposition (xref:../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]; xref:../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]; xref:../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]; xref:../../up-l2/streamer.adoc#req-ssr-streamer-build-order[The Streamer builds every transport and role before `enter_runtime_all`]);
+* the Streamer and the Streamer binary *MUST NOT* treat this startup-provisioning admission as admitting the classic uStreamer, any execution of the Streamer's `+std+` loader during runtime mode, any optional asynchronous layer, or any new Streamer runtime heap allocation (<<req-ssr-crate-streamer-isolated,The ASIL Streamer is its own untaintable crate>>; xref:../../up-l2/streamer.adoc#req-ssr-streamer-heap-free[The Streamer allocates nothing in runtime mode]; xref:../../up-l2/streamer.adoc#req-ssr-streamer-sync-data-plane[The Streamer's data plane is synchronous]; xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode]);
+* the Streamer and the Streamer binary remain separately owned and evidenced under their own declarations and composition evidence: admitting startup provisioning for the element does not admit it for the Streamer without the Streamer composition's own explicit selection, declaration and evidence, and does not transfer Streamer ownership or evidence to the element (xref:up-rust/assumptions-of-use.adoc#aou-seooc-startup-storage[Startup storage that the integrator provides is exclusive and lives as long as the process]).
 
 *The bounded-runtime Streamer profile.*
 The bounded-runtime Streamer profile is a named profile (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]), and the Streamer follows it.
@@ -118,20 +127,27 @@ A uStreamer that is not the ASIL Streamer, and every other dispatcher, is not th
 Where an item of this profile replaces a rule of that chapter, or an earlier rule of the up-rust SEooC requirement family, it replaces it for the Streamer under this profile and for no other dispatcher or configuration.
 
 *What the profile changes.*
-The profile adds no duty and removes none.
-Each of its items binds as its own statement says, and a requirement of the up-rust SEooC requirement family whose statement gives the Streamer or the Streamer binary a duty binds it, as its statement says, whether or not these lists name it.
+The profile's lists add no duty beyond the items they list and remove none: this item's own startup-provisioning admission and boundary duties bind the Streamer and the Streamer binary as stated above, and each other requirement of the up-rust SEooC requirement family whose statement gives the Streamer or the Streamer binary a duty binds it, as its statement says, whether or not these lists name it.
+
+*Replacement.*
+For the Streamer and the Streamer binary under the bounded-runtime Streamer profile, this revision replaces revision 1 of this item for configurations whose separately declared bounded-runtime Streamer composition explicitly selects an admitted startup-provisioning function to supply the route-table share of startup storage.
+For configurations that do not select that function, and for every other dispatcher, including a classic uStreamer, the static or caller-provided storage boundary and the dispatcher chapter rules stay unchanged.
 --
 
 [horizontal]
-ID:: `+req~ssr-streamer-scope~1+`
+ID:: `+req~ssr-streamer-scope~2+`
 ASIL:: B
-Allocated to:: the Streamer; the Streamer binary
-Verification:: review (each statement and allocation that uses a word that this item defines, read with this item; the profile's lists against the requirements of the up-rust SEooC requirement family that give the Streamer or the Streamer binary a duty by name, and against those that bind every part that a requirement of the up-rust SEooC requirement family binds)
+Allocated to:: the Streamer, for accepting helper-provisioned route-table startup backing only when explicitly selected by its declared composition while preserving its placement, sealing, capacity, lifetime, failure-disposition and exclusion duties, and as a subject of the definitions; the Streamer binary, for supplying helper-provisioned route-table startup backing only when explicitly selected by its declared composition and keeping the stated exclusions, and as a subject of the definitions
+Verification:: review
+* Each statement and allocation that uses a word that this item defines, read with this item.
+* The profile's lists against the requirements of the up-rust SEooC requirement family that give the Streamer or the Streamer binary a duty by name, and against those that bind every part that a requirement of the up-rust SEooC requirement family binds.
+* Each bounded-runtime Streamer composition that selects an admitted startup-provisioning function for the route-table share of startup storage: its explicit selection, separate declaration and evidence, preservation of placement, sealing, capacity, lifetime and failure-disposition rules, and exclusion of the classic uStreamer, runtime loader execution, optional asynchronous layers and new runtime heap allocation.
 
 *Rationale.*
 Whom a duty of the Streamer binds, the Streamer or the program that runs it, depends on what each of them is.
 A claim that rests on the Streamer's contract can name that contract as one profile, at one revision of this repository.
 Where an item of the profile replaces a rule of the dispatcher chapter, it does so for the Streamer under this profile only, and the rule stays in force for every other dispatcher, a uStreamer of another kind included.
+Permitting an explicitly selected startup-provisioning function to supply the route-table share of startup storage keeps startup backing coherent across element and Streamer storage without weakening the Streamer's isolated crate, runtime heap-free forwarding or separate ownership and evidence boundary.
 
 [[req-ssr-streamer-memory-safety]]
 == The Streamer's own code cannot cause undefined behaviour, and its `+unsafe+` is inventoried

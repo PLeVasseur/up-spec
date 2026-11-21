@@ -784,24 +784,46 @@ The element knows its own layout, so it computes the sizes that the declared loa
 [[aou-seooc-startup-storage]]
 == Startup storage that the integrator provides is exclusive and lives as long as the process
 
-[.specitem,oft-sid="aou~seooc-startup-storage~1",oft-title="Startup storage that the integrator provides is exclusive and lives as long as the process",oft-needs="uman",oft-tags="SafetyManual"]
+[.specitem,oft-sid="aou~seooc-startup-storage~2",oft-title="Startup storage that the integrator provides is exclusive and lives as long as the process",oft-needs="uman",oft-tags="SafetyManual"]
 --
-Where the integrator provides the element with static or caller-provided memory for its startup storage, the integrator *SHALL* hand each region to the element exclusively, and *SHALL* keep the region valid, and unused by anything else, for the life of the process.
+*Minimal no-helper path.*
+Where the integrator provides the element, or the Streamer for its route table, with static or caller-provided memory for startup storage without selecting an admitted startup-provisioning helper, the integrator *SHALL* hand each region exclusively, and *SHALL* keep the region valid, resident (<<aou-seooc-target-environment,The target environment is verified>>) and unused by anything else for the whole lifetime of the process, partition or firmware instance.
 
-What the element checks of each region, and how it places from it and owns it, is stated in xref:../../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided].
+*Admitted startup-provisioning helper.*
+Where a configuration on the ASIL path explicitly selects an admitted startup-provisioning helper (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]; xref:../../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]), including where the separately declared bounded-runtime Streamer composition explicitly selects it for the Streamer's route-table share of startup storage (xref:../streamer.adoc#req-ssr-streamer-scope[What the Streamer is, and the bounded-runtime Streamer profile]), the integrator *SHALL* validate for the item:
+
+* every selected function, declared allocation domain, supplied region, retained state, reached dependency and release code of the helper and its underlying memory provider, including any retained ownership or destruction remaining after the acquisition object ends, and that all of them are accounted for in the binary's complete-image declaration and claimed safety dependency graph (<<aou-seooc-build-configuration,The ASIL binary is built from its claimed graph, with the ASIL profile>>);
+* that every region supplied for startup storage is exclusive, resident (<<aou-seooc-target-environment,The target environment is verified>>), drawn only from the declared domain with no silent fallback (xref:../../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing]), and kept valid without secret reclamation during runtime for the whole process, partition or firmware-instance reset-domain lifetime;
+* that the pre-acquisition failure disposition and any retention policy for refused startup storage match the item's startup and restart assumptions, without relying on a runtime release service or pending-cleanup queue on setup refusal (xref:../../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]).
+
+*Whole reset-domain lifetime.*
+The integrator *SHALL* define the process, partition or firmware-instance reset domain that bounds the lifetime of startup storage and *SHALL* align reinitialization with a whole restart of that domain (<<aou-seooc-supervisor-restart,A supervisor outside the process restarts it>>; xref:../../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]).
+The integrator *SHALL* ensure that a partial or producer-only watchdog reset never revokes, recycles or invalidates startup backing that another core, peer or DMA participant still owns without first stopping or quiescing those participants or preserving their valid ownership.
+
+*Integrator validation and supplier evidence.*
+Reusable supplier evidence, including a supported configuration package, a composition-package releaser's assembled evidence or a helper or provider contract statement, assists the integrator's validation and never discharges this assumption of use or any other applicable assumption of use.
+Under <<aou-seooc-assumptions-bind,An assumption of use binds the integrator who claims the scope, and replaces no requirement>>, the integrator *SHALL* still determine applicability and validate this assumption for the item before relying on the safety-assurance scope.
+
+What the element and the Streamer check of each region, and how they place from it, own it and seal it, is stated in xref:../../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided] and xref:../../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed].
+
+*Replacement.*
+For the integrator that claims the element's safety-assurance scope, this revision replaces revision 1 of this item for configurations on the ASIL path with or without an explicitly selected startup-provisioning helper, including bare-metal firmware-instance reset domains and multi-core or DMA deployments, preserving the integrator's caller-storage duties on the minimal no-helper path while extending integrator validation to helper-supplied startup backing, its retained state, dependencies, release code and reset-domain lifetime.
 --
 
 *Violation:*
 
-* A region that another owner also uses, or that ends before the process does, is *undetectable* by the element.
+* A region that another owner also uses, that ends before the process, partition or firmware-instance lifetime ends, or that is revoked or recycled by a partial or producer-only watchdog reset while another core, peer or DMA participant still holds valid ownership is *undetectable* by the element.
+* Unaccounted retained state, dependencies or release code of a startup-provisioning helper, secret reclamation of a retained region in runtime mode, and reliance on supplier evidence without integrator validation for the item are *undetectable* by the element, except where the declared-graph check observes an unaccounted crate, which is reported in the Report state and *refused at setup* in the Enforce and Locked states (xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement]).
+* An unselected startup-provisioning helper, a region that fails placement, alignment or size checks, or a placement after sealing is *refused at setup* (xref:../../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]; xref:../../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]; xref:../../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]).
 
 [horizontal]
-ID:: `+aou~seooc-startup-storage~1+`
+ID:: `+aou~seooc-startup-storage~2+`
 ASIL:: B
 
 *Rationale.*
-The element can check that a placement lies within its region, is aligned and sized for its object, and is held by no live object of its own (xref:../../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]).
-It cannot see whether another owner uses the same memory, or how long that memory lives.
+The element can check that a placement lies within its region, is aligned and sized for its object, and is held by no live object of its own, and can seal startup memory at the transition (xref:../../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]; xref:../../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
+It cannot see whether another owner uses the same memory, whether helper-retained state or release code reclaims a region behind active owners, or whether a partial or producer-only watchdog reset recycles backing still owned by another core, peer or DMA participant.
+Supplier evidence can establish a component's mechanisms and internal dependency closure, whereas only the integrator can validate the item's actual reset domain, participants, memory protection and deployment environment (<<aou-seooc-assumptions-bind,An assumption of use binds the integrator who claims the scope, and replaces no requirement>>).
 
 [[aou-seooc-application-reacts]]
 == The application reacts to what the element reports
