@@ -143,50 +143,55 @@ Tags are trace metadata, and decide no actor, scope or status (<<aou-seooc-assum
 [[aou-seooc-supervisor-restart]]
 == A supervisor outside the process restarts it
 
-[.specitem,oft-sid="aou~seooc-supervisor-restart~6",oft-title="A supervisor outside the process restarts it",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-supervisor-restart~7",oft-title="A supervisor outside the process restarts it",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
-The integrator *SHALL* provide a supervisor outside every process that uses the element.
-The integrator *SHALL* have the supervisor detect that a process has exited, crashed or been killed, and restart that process or take the item, in ISO 26262's sense, to its safe state, under a restart policy that the integrator sets (rate limit, escalation).
+The integrator *SHALL* provide a supervisor outside every process, partition or firmware instance that uses the element.
+The integrator *SHALL* have the supervisor detect that a process, partition or firmware instance has exited, crashed, been killed or faulted, and restart that process, partition or firmware-instance reset domain or take the item, in ISO 26262's sense, to its safe state, under a restart policy that the integrator sets (rate limit, escalation).
 
-* *Recovery.* That the element offers no recovery, in the process, of a transport that has entered runtime mode, and how a process leaves runtime mode, is stated in xref:../../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back] and xref:../../../up-l1/runtime.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode].
-Where a panic aborts a process that runs an ASIL binary, the integrator *SHALL* have the supervisor's restart policy treat that abort as a crash of the process (xref:build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]; <<aou-seooc-build-configuration,The ASIL binary is built from its claimed graph, with the ASIL profile>>).
+* *Recovery.* That the element offers no recovery, in the process, partition or firmware instance, of a transport that has entered runtime mode, and how a process, partition or firmware instance leaves runtime mode, is stated in xref:../../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back] and xref:../../../up-l1/runtime.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode].
+Where a panic aborts a process, partition or firmware instance that runs an ASIL binary, the integrator *SHALL* have the supervisor's restart policy treat that abort as a crash (xref:build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]; <<aou-seooc-build-configuration,The ASIL binary is built from its claimed graph, with the ASIL profile>>).
 * *Setup errors.* After an initialization or transition error, the application *SHALL NOT* go on with the transport whose setup was refused.
-It *SHALL* either exit, so that the supervisor restarts the process, or make a fresh initialization.
-What a fresh initialization in the same process is, and when the element admits one, is stated in xref:../../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back] and xref:../../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed].
-Once a transport of the process has entered runtime mode, the application *SHALL NOT* attempt in the process a rollback, re-admission, re-enable, rebuild or replacement of that transport, or of a route or role of it; a fault in runtime mode is recovered by the supervisor's restart.
-* *Startup time.* Where the item relies on a process's startup within a time, the integrator *SHALL* have the supervisor bound that startup with a timeout of its own: the bounds of setup are logical deadlines, which cannot fire in a process that the OS does not run (xref:../../../up-l1/runtime.adoc#req-ssr-mode-bounded-startup[Setup never waits without a bound]).
-* *Whole process or partition.* The integrator *SHALL NOT* let a thread or interrupt handler that calls the element be terminated on its own.
-Where the supervisor restarts, the integrator *SHALL* have it restart as a whole the process, or on an MCU the partition or OS application partition, that holds the element's memory.
-* *Fresh initialization.* What a restart is and does, and what it needs from the process that died, is stated in xref:../../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization] and xref:../../../up-l1/runtime.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode].
-* *Reaction time.* Where the item relies on the restart or the safe state within a time, the integrator *SHALL* bound the whole chain, from the detection of the exit through the supervisor's decision and the restart or isolation to the physical safe state, against the allocated fault tolerant time interval, and *SHALL* argue the supervisor's own clock, resources and independence from the process it supervises; a supervisor that can share the failure it detects does not establish that bound.
-* *Strict states.* In the Report, Enforce and Locked states, the integrator *SHALL* declare the restart path, a supervisor or, on an MCU, a partition restart.
+It *SHALL* either exit or halt for reset, so that the supervisor restarts the process, partition or firmware-instance reset domain, or make a fresh initialization.
+What a fresh initialization in the same process, partition or firmware instance is, and when the element admits one, is stated in xref:../../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back] and xref:../../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed].
+Once a transport of the process, partition or firmware instance has entered runtime mode, the application *SHALL NOT* attempt in it a rollback, re-admission, re-enable, rebuild or replacement of that transport, or of a route or role of it; a fault in runtime mode is recovered by the supervisor's restart.
+* *Startup time.* Where the item relies on a process's, partition's or firmware instance's startup within a time, the integrator *SHALL* have the supervisor bound that startup with a timeout of its own: the bounds of setup are logical deadlines, which cannot fire in a process or instance that the OS or scheduler does not run (xref:../../../up-l1/runtime.adoc#req-ssr-mode-bounded-startup[Setup never waits without a bound]).
+* *Whole process, partition or reset domain.* The integrator *SHALL NOT* let a thread or interrupt handler that calls the element be terminated on its own.
+Where the supervisor restarts, the integrator *SHALL* have it restart as a whole the process, the partition or OS application partition, or on bare metal the whole reset domain of all relevant memory users that holds or shares the element's memory.
+The integrator *SHALL NOT* let a partial or producer-only watchdog reset revoke, recycle or invalidate backing still owned by another core, peer or DMA participant without first stopping or quiescing those participants or preserving their valid ownership (xref:../../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]; <<aou-seooc-startup-storage,Startup storage that the integrator provides is exclusive and lives as long as the process>>).
+* *Fresh initialization.* What a restart is and does, and what it needs from the instance that died or reset, is stated in xref:../../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization] and xref:../../../up-l1/runtime.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode].
+* *Reaction time.* Where the item relies on the restart or the safe state within a time, the integrator *SHALL* bound the whole chain, from the detection of the exit or fault through the supervisor's decision and the restart or isolation to the physical safe state, against the allocated fault tolerant time interval, and *SHALL* argue the supervisor's own clock, resources and independence from what it supervises; a supervisor that can share the failure it detects does not establish that bound.
+* *Strict states.* In the Report, Enforce and Locked states, the integrator *SHALL* declare the restart path, a supervisor, a partition restart or, on bare metal, a whole-reset-domain restart.
 What the compliance report shows of the restart path, declared or not, is stated in xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
+
+*Scoped replacement.*
+For the integrator that claims the element's safety-assurance scope, this revision replaces the process- and partition-only restart wording of revision 6 of this item, extending supervisor restart, crash-abort policy, fresh-initialization and whole-domain recovery duties to bare-metal firmware instances and whole reset domains and forbidding partial or producer-only watchdog resets from revoking or recycling backing still owned by unquiesced cores, peers or DMA participants, while preserving all other restart, startup-timeout, reaction-time and strict-state duties of revision 6 of this item.
 --
 
 *Violation:*
 
-* The death itself is *undetectable* by the process that died.
+* The death or reset itself is *undetectable* by the instance that died.
 * Survivors see silence.
 It is *counted* as missed deadlines on routes that declare a deadline, as RPC calls ending with an error, or as a reported peer loss where the binding reports peers (xref:../../../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
 On a route with no deadline, silence is *undetectable* by the element.
 * An application cannot go on with a transport whose setup was refused: the refusal leaves no runtime-mode value (xref:../../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]).
 * A fresh initialization on a startup memory that is sealed, or that finds too little startup memory left, is *refused at setup* (xref:../../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]; xref:../../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]).
 * An application that neither makes a fresh initialization nor exits is *undetectable* by the element.
-* The element provides no operation that recovers, in the process, a transport that has entered runtime mode, or a route or role of it (xref:../../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]); an attempt that builds a setup on sealed startup memory is *refused at setup* (xref:../../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]), and any other attempt by the application to recover such a transport, route or role in the process is *undetectable* by the element.
-* A startup that the OS never runs is *undetectable* by the element; only the supervisor's own timeout shows it.
+* The element provides no operation that recovers, in the process, partition or firmware instance, a transport that has entered runtime mode, or a route or role of it (xref:../../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]); an attempt that builds a setup on sealed startup memory is *refused at setup* (xref:../../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]), and any other attempt by the application to recover such a transport, route or role in place is *undetectable* by the element.
+* A startup that is never run is *undetectable* by the element; only the supervisor's own timeout shows it.
+* A partial or producer-only watchdog reset that revokes or recycles backing still owned by another core, peer or DMA participant without stopping or quiescing it is *undetectable* by the element.
 * What a thread terminated inside the element leaves behind depends on its configuration's exclusion mechanism (xref:../../../basics/platform.adoc#req-ssr-atomic-width[No target needs an atomic width it lacks]).
 ** Where the element changes its metadata in exclusive steps, the domain such a step holds stays held, and the work that needs it makes no further progress; survivors and the supervisor see silence, which a deadline or a call's TTL shows only where its own service can still run.
 ** Only the restart recovers what the thread left behind.
 * A supervisor that shares the failure it should detect, and a reaction chain without a bound, are *undetectable* by the element.
 
 [horizontal]
-ID:: `+aou~seooc-supervisor-restart~6+`
+ID:: `+aou~seooc-supervisor-restart~7+`
 ASIL:: B
 ISO 26262:: 10-9.2.4 (part-clause numbers only)
 
 *Rationale.*
-Restarting the entire process or partition also replaces its startup memory and internal synchronization state.
-Restarting one thread cannot provide that recovery.
+Restarting the whole process, partition or bare-metal reset domain also replaces its startup memory and internal synchronization state without recycling shared backing behind surviving cores, peers or DMA participants.
+Restarting one thread or issuing a partial producer-only reset cannot provide that recovery.
 
 A watchdog or supervisor can support a fail-silent reaction even where delivery has no hard deadline.
 But only a chain that is bounded end to end, by a supervisor that does not fail with what it supervises, gives the item a reaction time.
@@ -269,7 +274,7 @@ The usual pattern is an ASIL B process that relays to the C or D partition over 
 [[aou-seooc-timing-budgets]]
 == Timing claims rest on a supported configuration, and the item's budgets are the integrator's
 
-[.specitem,oft-sid="aou~seooc-timing-budgets~9",oft-title="Timing claims rest on a supported configuration, and the item's budgets are the integrator's",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-timing-budgets~10",oft-title="Timing claims rest on a supported configuration, and the item's budgets are the integrator's",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
 Where the item, in ISO 26262's sense, relies on the element within a time, the integrator *SHALL* select a supported configuration whose package states each timing claim it offers, with its endpoint, execution model, workload envelope and evidence, and *SHALL* keep the deployment within that package: its scheduling, priorities, CPU budgets, affinity and interrupt load.
 
@@ -314,13 +319,16 @@ The integrator *SHALL* budget for L and for J separately, and *SHALL* include in
 * *The monitor's wait bound.* Where a route's monitor uses the one-word tick representation, the integrator *SHALL* keep each wait of a thread inside the element, between reading the clock and storing an arrival or a check, below 2^28^ ticks of the shortest-scaled monitored route: under the watchdog above, `+T_wd+` below 0.27 s when a route uses the shortest admitted threshold (1.024 µs), and below 2.3 minutes at 1 ms. A full-width monitor has no such bound (xref:../../../basics/platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window]).
 
 How the element bounds its work per call, in frames and iterations, is stated in xref:../../../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data].
-Execution time belongs to a supported configuration's timing analysis, which the element's supplier provides with the package; a measured maximum is evidence that can refute that analysis, not a bound by itself.
+Execution time belongs to a supported configuration's timing analysis, which the package's releaser (the element's supplier for an element-supported configuration package, or the explicit extension composer for an explicit extension package) provides with the package; a measured maximum is evidence that can refute that analysis, not a bound by itself.
 
 In the Report, Enforce and Locked states, the integrator *SHALL* declare a deadline or an explicit `+event_only()+` for each ASIL receive route other than a detector route of the E2E wire and, at every integrity level, for each RPC client's response route that selects the E2E wire.
 For a detector route of the E2E wire, which xref:../../../up-l1/runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup] defines, the deadline that the integrator declares in every state is stated in <<aou-seooc-e2e-protection,The integrator decides which routes need end-to-end protection>>.
 What setup admits and refuses for a route with neither, for a route with both, and for a detector route of the E2E wire without a deadline, in each strict state, is stated in xref:../../../up-l1/runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup].
 
 What setup admits and refuses for timing, and what the compliance report lists of it, is stated in xref:../../../up-l1/runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup], xref:../../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored], xref:../../../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened] and xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
+
+*Scoped replacement.*
+For the integrator that claims the element's safety-assurance scope, this revision replaces the element-supplier-only timing-analysis attribution of revision 9 of this item so that a supported configuration's timing analysis is provided by the supported composition package's releaser (the element's supplier for an element-supported configuration package, or the explicit extension composer for an explicit extension package), while preserving all interval allocation, reaction-budget, deadline, monitor and watchdog duties of revision 9 of this item unchanged.
 --
 
 *Violation:*
@@ -338,7 +346,7 @@ What setup admits and refuses for timing, and what the compliance report lists o
 * A route that declares a deadline and a reaction budget, where its detection bound exceeds that budget or no finite detection bound is established for it, and a declared servicing period longer than its transport's servicing bound, are *refused at setup* in the Enforce and Locked states, and reported as a forbidden finding in the Report state (xref:../../../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]; xref:../../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored]).
 
 [horizontal]
-ID:: `+aou~seooc-timing-budgets~9+`
+ID:: `+aou~seooc-timing-budgets~10+`
 ASIL:: B
 ISO 26262:: 10-4.4.1, 6-7.4.13 (part-clause numbers only)
 
@@ -346,7 +354,7 @@ ISO 26262:: 10-4.4.1, 6-7.4.13 (part-clause numbers only)
 A bounded number of operations is not a bound on elapsed time.
 So detection, scheduling and the reaction are fitted into one budget, the item's fault tolerant time interval.
 
-The scheduling and synchronization argument for a supported configuration is made once, by the element's supplier, for every application team that uses it.
+The scheduling and synchronization argument for a supported configuration is made once, by the supported composition package's releaser (the element's supplier for an element-supported configuration package, or the explicit extension composer for an explicit extension package), for every application team that uses it.
 The item's hazards, its fault tolerant time interval and its reaction stay the integrator's.
 
 [[aou-seooc-clock]]
@@ -432,33 +440,39 @@ Which permit a binding ships, and what a failed allocation under it does, are th
 [[aou-seooc-resource-guarantees]]
 == A resource guarantee the item relies on is required by name
 
-[.specitem,oft-sid="aou~seooc-resource-guarantees~2",oft-title="A resource guarantee the item relies on is required by name",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-resource-guarantees~3",oft-title="A resource guarantee the item relies on is required by name",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
-*Owning wires.*
-Where a serialized route declares its allocation (xref:../../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), the integrator need supply nothing further for the ownership of a wire that decodes into values that own what they hold, heap memory included.
-What setup admits there is stated in xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], "Ordinary ownership", and xref:../../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "Routes that declare allocation".
+*Owning wires and serialized ending paths.*
+Where a serialized route declares its allocation (xref:../../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]) together with a non-native, non-shared ending path on which to end owned values (xref:../../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]), and uses no assured helper or adapter admission that brings claim dependencies, ordinary serialized ownership—including a disclosed waiting route-specific cleanup path—needs no unrequested stronger resource guarantee (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 That declaration admits allocation on that route only: what holds on a native route is stated in xref:../../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path].
 
 *Requiring a guarantee.*
-Where the item, in ISO 26262's sense, relies on panic-free cleanup, non-waiting acquisition, non-waiting release or recoverable exhaustion on such a route, the integrator *SHALL* require that guarantee in the route's declaration, and *SHALL* use a supported configuration whose package establishes it for the exact type, wires, binding and allocation provider (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; what an allocation provider is, is stated in xref:../../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing]).
+Where the item, in ISO 26262's sense, relies on panic-free cleanup, non-waiting acquisition, non-waiting release or recoverable exhaustion on a route, the integrator *SHALL* require that guarantee in the route's declaration, and *SHALL* use a supported configuration whose package establishes it with evidence bound across every covered transitive operation for the exact message type, wires, directions, binding, allocation provider—any admitted serialized owned-value runtime adapter included—setup-created values, reached dependencies, build and covered execution contexts (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; what a memory provider and an allocation provider are, is stated in xref:../../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing]).
+
+*Assured helper admissions.*
+Where an ASIL-path configuration selects an assured startup-provisioning helper or an assured serialized owned-value runtime adapter (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]), the integrator *SHALL* validate that recoverable exhaustion and panic-free cleanup are named explicitly as claim dependencies in the composition assurance contract and in each affected transport, route and supported composition package (for an assured startup-provisioning helper, every transport and route backed by that helper's startup regions, native-only transports included) and established by bound evidence across every covered transitive operation—startup-backing acquisition, failure-disposition cleanup, runtime acquisition, resize and owned-value cleanup, setup-created values and all reached dependencies included—without inferring either guarantee from an ASIL label or accepting a fallible wrapper over an allocator whose stated contract may abort (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+Non-waiting acquisition, non-waiting release and a finite timing bound remain separately requested guarantees: an assured helper admission neither imposes nor establishes any of them by default, and the integrator *SHALL* require and validate them separately where the item relies on them.
 
 *A guarantee that is not required.*
 What a route that does not require a guarantee is promised, and what its report shows of that guarantee, is stated in xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
+
+*Scoped replacement.*
+For the integrator that claims the element's safety-assurance scope, this revision replaces revision 2 of this item, qualifying ordinary serialized ownership with the mandatory non-native, non-shared ending path requirement, integrating assured-helper claim-dependency validation (explicit naming and transitive evidence for recoverable exhaustion and panic-free cleanup on assured startup-provisioning helper and serialized owned-value runtime adapter admissions, native-only transports backed by an assured startup-provisioning helper included), and expanding evidence scope to admitted serialized owned-value runtime adapters, directions, setup-created values, reached dependencies, build and covered execution contexts while leaving ordinary serialized routes free of unrequested stronger guarantees.
 --
 
 *Violation:*
 
-* A route that requires a stronger resource guarantee that is not established for it is *refused at setup*, by name (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+* A serialized route admitting owned values without a declared non-native, non-shared ending path, a route that requires a stronger resource guarantee that is not established for it, and an affected transport or route (a native-only transport backed by an assured startup-provisioning helper included) under an assured helper or adapter admission missing explicit naming or bound transitive evidence for recoverable exhaustion or panic-free cleanup are *refused at setup*, by name (xref:../../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 * A guarantee that the item relies on and no route requires is not admitted, even where evidence establishes it.
 That is *undetectable* by the element, whose report shows the guarantee as not required and not admitted (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+* Reliance on an ASIL label or on a fallible wrapper over an aborting allocator without covered transitive evidence for an unrequested deployment property is *undetectable* beyond the setup checks named above, and is *refused at setup* where the helper or composition contract declares that gap.
 
 [horizontal]
-ID:: `+aou~seooc-resource-guarantees~2+`
+ID:: `+aou~seooc-resource-guarantees~3+`
 ASIL:: B
 
 *Rationale.*
-The element admits owning wires under ordinary ownership and gives a stronger resource guarantee only where a route requires it (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
-An item that relies on such a guarantee therefore has to ask for it.
+Ordinary serialized ownership remains admissible with a declared non-native, non-shared ending path and without unrequested stronger guarantees, while assured helper and adapter admissions depend explicitly on recoverable exhaustion and panic-free cleanup across every covered transitive operation, and stronger guarantees depend on bound evidence covering the exact composition, setup-created values and reached dependencies rather than an ASIL label or wrapper signature (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 
 [[aou-seooc-e2e-protection]]
 == The integrator decides which routes need end-to-end protection
@@ -551,11 +565,11 @@ It cannot establish the truth of the deployment declarations or supply protectio
 [[aou-seooc-target-environment]]
 == The target environment is verified
 
-[.specitem,oft-sid="aou~seooc-target-environment~6",oft-title="The target environment is verified",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-target-environment~7",oft-title="The target environment is verified",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
 The integrator *SHALL* use a target that a supported configuration's package names, with the exact compiler release, target, options and library scope, OS or RTOS, BSP and hardware revision it was verified on, or *SHALL* treat a target or configuration that no package supports as an explicit extension with a custom platform (<<aou-seooc-integrator-platform,A custom platform keeps the platform's rules>>).
 
-* *What verification is.* Upstream support for a target, a compiler qualification for another scope and a successful build are each distinct from that verification. The element's supplier supplies that verification in the package, and the evidence for the conditions below, for the parts, cores, execution contexts and participants the package names; for a supported configuration the integrator *SHALL* confirm that the deployment matches them, and supply an argument of its own for a context or participant the package does not cover; it needs no argument of its own for one that the package covers.
+* *What verification is.* Upstream support for a target, a compiler qualification for another scope and a successful build are each distinct from that verification. The package's releaser (the element's supplier for an element-supported configuration package, or the explicit extension composer for an explicit extension package) supplies that verification in the package, and the evidence for the conditions below, for the parts, cores, execution contexts and participants the package names; for a supported configuration the integrator *SHALL* confirm that the deployment matches them, and supply an argument of its own for a context or participant the package does not cover; it needs no argument of its own for one that the package covers.
 * *Profiles.* A supported configuration's package names the platform profile that it covers (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]). A backend that exists only as source, which no toolchain or device has run, is not a platform profile. A platform profile is not a claim that every binding runs on it, and no platform profile carries an ASIL of its own.
 * *Atomics.* The integrator *SHALL* use a target whose core provides 32-bit atomic loads, stores and compare-and-swap for the memory that the element uses, and whose compiler target provides them as 32-bit atomics with compare-and-swap.
 The name of a core's family does not establish that: the exact core revision and its compiler target do.
@@ -567,11 +581,14 @@ What setup refuses between peers of different ABIs is stated in xref:../../../up
 * *Interrupt masks.* A private interrupt mask excludes only what it masks. For an unmasked interrupt, a non-maskable interrupt, a fault handler or a DMA engine that the deployment actually has and that can reach the element's memory, the integrator *SHALL* supply an argument for that participant, taken from the package where the package names it.
 * *Backends and custom platforms.* A supported configuration's package names the platform backend it uses. What an integrator that supplies a platform backend of its own provides is stated in <<aou-seooc-integrator-platform,A custom platform keeps the platform's rules>>.
 * *Stacks and departures.* The integrator *SHALL* size the stacks of threads that call the element using its upper estimates, and analyse where the environment the element was verified in departs from the target.
-* *Resident startup memory.* The integrator *SHALL* keep the element's startup memory resident while the process runs (xref:../../../basics/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules], "Prefault").
+* *Resident startup memory.* The integrator *SHALL* keep the element's startup memory resident for the whole lifetime of the process, partition or firmware instance (xref:../../../basics/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules], "Prefault").
 * *A required assurance scope.* Where the item, in ISO 26262's sense, relies on a timing bound or a safety-assurance scope on a route, the integrator *SHALL* require it in that route's declaration.
 What setup does, in every state of strict mode, Off included, with a route that explicitly requires one that its configuration's package does not establish is stated in xref:../../../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened].
 An integrity level or a strict state is not such a requirement.
 What the Enforce and Locked states check for every configuration, with or without an assurance package, and what the compliance report lists of the coherence and stack-sizing duties, is stated in xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks] and xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
+
+*Scoped replacement.*
+For the integrator that claims the element's safety-assurance scope, this revision replaces the element-supplier-only target-verification attribution and process-only residency wording of revision 6 of this item so that target verification and condition evidence in a supported configuration package are supplied by the package's releaser (the element's supplier for an element-supported configuration package, or the explicit extension composer for an explicit extension package) and startup-memory residency spans the whole lifetime of the process, partition or firmware instance, while preserving all profile, atomic, multi-core, ABI, interrupt-mask, custom-platform, stack and required-assurance-scope duties of revision 6 of this item unchanged.
 --
 
 *Violation:*
@@ -583,10 +600,10 @@ What the Enforce and Locked states check for every configuration, with or withou
 * A route that explicitly requires an assurance scope that its configuration's package does not establish is *refused at setup*, by name, in every state of strict mode, Off included (xref:../../../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]); a configuration without an assurance package is not refused for that alone.
 * A timing bound or a safety-assurance scope that the item relies on and that no route's declaration requires is *undetectable* by the element: setup admits no such claim for the route, and the route's report shows none (xref:../../../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]).
 * The behaviour of an unverified backend, a participant that a private mask leaves unmasked, a toolchain or target outside its package's verified scope, and a stack overflow are *undetectable* by the element.
-* Startup memory that is paged out while the process runs is *undetectable* by the element; a write to it in runtime mode can then take a page fault.
+* Startup memory that is paged out while the process, partition or firmware instance runs is *undetectable* by the element; a write to it in runtime mode can then take a page fault.
 
 [horizontal]
-ID:: `+aou~seooc-target-environment~6+`
+ID:: `+aou~seooc-target-environment~7+`
 ASIL:: B
 ISO 26262:: 6-9.4.5, 6-10.4.7 (part-clause numbers only)
 
@@ -683,7 +700,7 @@ A build without overflow checks is *undetectable* by the element whether or not 
 * A claimed graph that is not declared, or member information that the build does not supply, in a process that runs an ASIL binary, is reported in the Report state and *refused at setup* in the Enforce and Locked states (xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement]).
 * An ASIL binary built with the element's test-hook configuration set is *undetectable* by the element.
 * A process that runs an ASIL binary built with unwinding is *refused at setup* in the Enforce and Locked states, and reported as a finding in the Report state (xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]).
-* A binding, wire, allocation provider or admitted serialized owned-value runtime adapter of the declared graph that is not on the integrator's qualified list, an invalid or incomplete helper or adapter selection declaration, and a custom platform that names no contract-test evidence are *refused at setup* in the Enforce and Locked states, and reported as a finding in the Report state (xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]).
+* A binding, wire, allocation provider, admitted startup-provisioning helper or admitted serialized owned-value runtime adapter of the declared graph that is not on the integrator's qualified list, an invalid or incomplete helper or adapter selection declaration, and a custom platform that names no contract-test evidence are *refused at setup* in the Enforce and Locked states, and reported as a finding in the Report state (xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]).
 No requirement has the element check what else a declared graph holds: the refusal outside the declared graph reaches only a crate, helper selection or route that the declared graph does not admit (xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement]).
 * No requirement has the element compare the final image with the declaration: such a comparison is verification evidence of this assumption, made outside the element.
 * In the Off state, an ASIL binary whose claimed graph is not declared, or whose member information is not supplied, is *undetectable* by the element.
@@ -886,9 +903,9 @@ A full-width runtime monitor needs no such servicing (xref:../../../basics/platf
 [[aou-seooc-integrator-platform]]
 == A custom platform keeps the platform's rules
 
-[.specitem,oft-sid="aou~seooc-integrator-platform~6",oft-title="A custom platform keeps the platform's rules",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-integrator-platform~7",oft-title="A custom platform keeps the platform's rules",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
-A supported configuration's platform backend is the one that the element's supplier provides with its package (<<aou-seooc-target-environment,The target environment is verified>>), and an integrator that uses such a configuration unchanged need supply no backend of its own.
+A supported configuration's platform backend is the one that the package's releaser (the element's supplier for an element-supported configuration package, or the explicit extension composer for an explicit extension package) provides with its package (<<aou-seooc-target-environment,The target environment is verified>>), and an integrator that uses such a configuration unchanged need supply no backend of its own.
 An integrator that supplies a platform backend of its own, a custom platform, for a target or configuration that no package supports or in place of a supported configuration's backend, *SHALL* treat it as an explicit extension, with its own authoring contract and evidence boundary, and *SHALL* supply:
 
 * a runtime platform that keeps every rule that xref:../../../basics/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules] states for a platform backend of the element, with the contracts that the same requirement has a backend state for its package written down for this platform;
@@ -904,6 +921,9 @@ A custom platform belongs to a claimed safety dependency graph only once it is s
 
 In the Report, Enforce and Locked states, the integrator *SHALL* name the custom platform's contract-test evidence.
 What the Enforce and Locked states refuse without it, and what the compliance report lists of the entropy duty and the platform contract test, is stated in xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks] and xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
+
+*Scoped replacement.*
+For the integrator that claims the element's safety-assurance scope, this revision replaces the element-supplier-only platform-backend attribution of revision 6 of this item so that a supported configuration's platform backend is provided by the supported composition package's releaser (the element's supplier for an element-supported configuration package, or the explicit extension composer for an explicit extension package), while preserving all custom-platform backend, contract-test, declaration, qualification and strict-state duties of revision 6 of this item unchanged.
 --
 
 *Violation:*
@@ -916,7 +936,7 @@ Message IDs can also repeat across restarts (xref:../../../basics/uuid.adoc#req-
 * A custom platform that is not qualified is *undetectable* by the element; what the declared-graph check refuses of a platform backend that the declared graph does not admit is stated in xref:strict-mode.adoc#req-ssr-strict-lock[The locked build allows only enforcement].
 
 [horizontal]
-ID:: `+aou~seooc-integrator-platform~6+`
+ID:: `+aou~seooc-integrator-platform~7+`
 ASIL:: B
 
 *Rationale.*
@@ -1058,7 +1078,7 @@ A declared integrity level supports setup admission but cannot prove how a proce
 --
 The integrator *SHALL* use on the ASIL path only bindings and wires that pass the contract suites (the binding contract suite, the QoS contract suite and the wire contract suite) on the integrator's own target, at the exact versions and configuration whose evidence its supported configuration records.
 The integrator *SHALL NOT* take evidence of one state for another, such as compiled, linked, exercised, source-reviewed, composition-verified or qualified, each as the qualification record of the binding or wire names its states (xref:../../assurance.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for]), and *SHALL NOT* take the evidence of one binding or wire for another.
-For each combination of a wire, a binding, an allocation provider and any admitted serialized owned-value runtime adapter acting within its wire or allocation-provider role that it uses on the ASIL path, the integrator *SHALL* use assembled evidence of that combination, at its exact target, versions, configuration and covered execution contexts, and *SHALL NOT* take a wire's, provider's or adapter's results on one binding or composition for its results on another.
+For each combination of a wire, a binding, an allocation provider, an admitted startup-provisioning helper and any admitted serialized owned-value runtime adapter acting within its wire or allocation-provider role that it uses on the ASIL path, the integrator *SHALL* use assembled evidence of that combination, at its exact target, versions, configuration and covered execution contexts, and *SHALL NOT* take a wire's, provider's, helper's or adapter's results on one binding or composition for its results on another.
 
 * *Pull routes with a deadline.* For a pull route that declares a deadline, the integrator *SHALL* use only a binding whose deadline checks of the QoS contract suite pass for each use that the deployment makes of the route: on a subscriber, and on a carrier ingress.
 What such a binding reports and declares is stated in xref:../../../up-l1/bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is], and what the element records, monitors and counts in xref:../../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] and xref:../../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once].
@@ -1086,8 +1106,8 @@ Source-level `+unsafe+` proof obligations remain with the actual code owner of e
 The integrator *SHALL* use one on the ASIL path only where that code is qualified: by the inventory and source-level proof evidence that its own qualification record gives (xref:../../../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`]), or by a qualification that the integrator makes itself.
 
 *The qualified list.*
-The qualified list is the integrator's list of the bindings, wires, allocation providers and admitted serialized owned-value runtime adapters (within their wire or allocation-provider role) that it has qualified as this assumption asks, each at the exact version, configuration and covered contexts whose evidence its supported configuration or explicit extension package records.
-In the Report, Enforce and Locked states, the integrator *SHALL* have every binding, wire, allocation provider and admitted serialized owned-value runtime adapter that it uses on its qualified list, and *SHALL* give strict mode that list, the composition package's authority record and its acknowledgement of each part or composition-package deviation that a route of its deployment reaches, at the deviation's current revision.
+The qualified list is the integrator's list of the bindings, wires, allocation providers, admitted startup-provisioning helpers and admitted serialized owned-value runtime adapters (within their wire or allocation-provider role) that it has qualified as this assumption asks, each at the exact version, configuration and covered contexts whose evidence its supported configuration or explicit extension package records.
+In the Report, Enforce and Locked states, the integrator *SHALL* have every binding, wire, allocation provider, admitted startup-provisioning helper and admitted serialized owned-value runtime adapter that it uses on its qualified list, and *SHALL* give strict mode that list, the composition package's authority record and its acknowledgement of each part or composition-package deviation that a route of its deployment reaches, at the deviation's current revision.
 What strict mode reports in its Report state, and refuses in its Enforce state, the Locked state included, for a part off the list, for a composition-package authority mismatch, for a deviation whose acknowledgement is missing or stale and for a known failure, is stated in xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks], xref:strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision] and xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
 
 *Supplier evidence and integrator validation.*
@@ -1095,15 +1115,15 @@ Reusable supplier and composition-package evidence assists the integrator's vali
 Under <<aou-seooc-assumptions-bind,An assumption of use binds the integrator who claims the scope, and replaces no requirement>>, the integrator *SHALL* still determine applicability and validate every applicable assumption of use for the item before relying on the safety-assurance scope.
 
 *Scoped replacement.*
-For the integrator that claims the element's safety-assurance scope, this revision replaces revision 9 of this item for bindings, wires, allocation providers, admitted serialized owned-value runtime adapters and composed configurations on the ASIL path, incorporating composition-package releaser compatibility and assembled supplier evidence, validation of admitted serialized owned-value runtime adapters within their wire or allocation-provider role (with reached dependencies, assured claim dependencies for recoverable exhaustion and panic-free cleanup, and covered execution contexts), the rule that a bundle of individually reviewed parts is not by itself proof of their combination, exact-scope limits of certified operating systems and dependencies, source-level `+unsafe+` obligations remaining with the actual code owner (with tests and Miri not substituting for them), and non-discharge of applicable assumptions of use by reusable supplier or package evidence, while preserving all contract-suite, pull-deadline, response-route, cross-core, limits/deviations/known-failures, external `+unsafe+` and qualified-list duties of revision 9 of this item.
+For the integrator that claims the element's safety-assurance scope, this revision replaces revision 9 of this item for bindings, wires, allocation providers, admitted startup-provisioning helpers, admitted serialized owned-value runtime adapters and composed configurations on the ASIL path, incorporating composition-package releaser compatibility and assembled supplier evidence, qualified-list and combination-evidence coverage of admitted startup-provisioning helpers alongside validation of admitted serialized owned-value runtime adapters within their wire or allocation-provider role (with reached dependencies, assured claim dependencies for recoverable exhaustion and panic-free cleanup, and covered execution contexts), the rule that a bundle of individually reviewed parts is not by itself proof of their combination, exact-scope limits of certified operating systems and dependencies, source-level `+unsafe+` obligations remaining with the actual code owner (with tests and Miri not substituting for them), and non-discharge of applicable assumptions of use by reusable supplier or package evidence, while preserving all contract-suite, pull-deadline, response-route, cross-core, limits/deviations/known-failures, external `+unsafe+` and qualified-list duties of revision 9 of this item.
 --
 
 *Violation:*
 
 * A wire or allocation provider that declares heap use on a native route, a binding that declares middleware heap use without a waiver, an omitted adapter or reached dependency in a route's heap class or policy, a serialized composition with no non-native, non-shared ending path, or an assured helper route missing explicit naming or bound transitive evidence for recoverable exhaustion or panic-free cleanup is *refused at setup* (xref:../../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
-* That a binding, wire, allocation provider or admitted serialized owned-value runtime adapter keeps the contract that it declares, for example that its frame destructor frees nothing on a native route, is a limit of the contract: no requirement has the element check it at runtime, apart from the checks that a requirement names, such as that of a wire's writer (xref:../../../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]).
+* That a binding, wire, allocation provider, admitted startup-provisioning helper or admitted serialized owned-value runtime adapter keeps the contract that it declares, for example that its frame destructor frees nothing on a native route, is a limit of the contract: no requirement has the element check it at runtime, apart from the checks that a requirement names, such as that of a wire's writer (xref:../../../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]).
 * A deviation accepted here is not a waiver.
-* In strict mode's Enforce state, the Locked state included, a binding, wire, allocation provider or admitted serialized owned-value runtime adapter off the qualified list, a composition-package authority violation checked by strict mode, each route within the scope of a part or composition-package deviation whose acknowledgement is missing or stale, and each route that a known failure affects, whatever is acknowledged, are *refused at setup*; in the Report state they are reported, and nothing is refused for them (xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]; xref:strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]).
+* In strict mode's Enforce state, the Locked state included, a binding, wire, allocation provider, admitted startup-provisioning helper or admitted serialized owned-value runtime adapter off the qualified list, a composition-package authority violation checked by strict mode, each route within the scope of a part or composition-package deviation whose acknowledgement is missing or stale, and each route that a known failure affects, whatever is acknowledged, are *refused at setup*; in the Report state they are reported, and nothing is refused for them (xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]; xref:strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]).
 * That a deviation accepted here has not lapsed is a limit of the contract: no requirement has a part check it, and strict mode judges whether an acknowledgement holds by the identifier and the revision of the deviation that it names (xref:strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]).
 * Whether individually reviewed parts combine safely without assembled composition evidence, whether a certified operating system, middleware or dependency covers the deployment's exact scope, whether source-level `+unsafe+` obligations hold for external code, and whether the integrator validated this assumption for the item rather than relying on supplier or package evidence alone are *undetectable* by the element.
 

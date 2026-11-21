@@ -245,7 +245,7 @@ The element can check that the argument is named, but not that it holds.
 [[req-ssr-binding-readme]]
 == A binding's qualification record states its limits and its failures
 
-[.specitem,oft-sid="req~ssr-binding-readme~3",oft-title="A binding's qualification record states its limits and its failures",oft-needs="uman",oft-tags="SafetyBinding"]
+[.specitem,oft-sid="req~ssr-binding-readme~4",oft-title="A binding's qualification record states its limits and its failures",oft-needs="uman",oft-tags="SafetyBinding"]
 --
 *The record.*
 Each binding *MUST* keep a qualification record, versioned with the binding, that states for each revision of the binding:
@@ -260,16 +260,17 @@ Each binding *MUST* keep a qualification record, versioned with the binding, tha
 The record is the authoritative statement of each of these.
 
 *Limits, deviations and known failures.*
-These definitions apply to the qualification record of each part.
+These definitions apply to the qualification record of each part and to each supported composition package (xref:profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]).
 An entry has one of three classes:
 
-* a _limit_: something that the part does not serve, or serves only within a stated bound, where the requirements of the up-rust SEooC requirement family let that part declare what it serves;
-* a _deviation_, which the up-rust SEooC requirement family also calls a _known anomaly_, and once it is accepted an accepted anomaly: a departure from a requirement that binds that part, with an exact scope and exact bounds, which no requirement of the up-rust SEooC requirement family excludes from acceptance, such as a binding's accepted instance of xref:../up-l1/bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input];
-* a _known failure_: any other violation of a requirement that binds that part.
+* a _limit_: something that the part or supported composition package does not serve, or serves only within a stated bound, where the requirements of the up-rust SEooC requirement family let it declare what it serves;
+* a _deviation_, which the up-rust SEooC requirement family also calls a _known anomaly_, and once it is accepted an accepted anomaly: a departure from a requirement that binds that part or composition, with an exact scope and exact bounds, which no requirement of the up-rust SEooC requirement family excludes from acceptance, such as a binding's accepted instance of xref:../up-l1/bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input];
+* a _known failure_: any other violation of a requirement that binds that part or composition.
 
 For each deviation the binding *MUST* state in the record an identifier and a revision, its exact scope and bounds, the evidence that it rests on and the date on which it lapses.
 In the record, the binding *MUST* keep its known failures apart from its limits and its deviations.
 Nothing makes a known failure a limit or a deviation: not its disclosure, not an acknowledgement and not a waiver.
+For each supported composition package, the composition-package releaser's duty to record the identifier, revision, exact scope and bounds, evidence and lapse date of each composition-package deviation and to keep composition-package known failures apart from limits and deviations is stated in xref:profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations].
 
 *Whose defect.*
 For each limit, deviation and known failure, the binding *MUST* say in the record whether its cause lies in the binding's own code or in its middleware, and *MUST* name the exact source that the entry relies on: the document or file, its revision and the place in it.
@@ -286,19 +287,22 @@ Where a binding or its middleware uses shared memory, the binding *MUST* disclos
 *The README.*
 The binding's README is a concise profile and index of the binding, and the binding *MAY* have its README link to the record.
 Where the README speaks of a matter that the record states, the record governs.
+
+*Scoped replacement.*
+This revision replaces revision 3 of this item for each binding, each part and each supported composition package, extending the definitions of _limit_, _deviation_ and _known failure_ and the non-acceptance of known failures to supported composition packages while cross-referencing xref:profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations] for the composition-package releaser's deviation-field and separation duties and preserving all binding qualification-record and README duties of revision 3 of this item unchanged.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-readme~3+`
+ID:: `+req~ssr-binding-readme~4+`
 ASIL:: B
-Allocated to:: each binding, for its record and README; each part, as the subject of the definitions of limit, deviation and known failure
-Verification:: review (every binding's record: the targets and configurations that it claims; each entry and its class; the identifier, revision, scope, bounds, evidence and lapse date of each deviation; the cause and the exact source of each limit, deviation and known failure; what its README says of the matters that the record states; and the definitions applied to entries of a binding, a wire and the element, each against the requirements that bind that part)
+Allocated to:: each binding, for its record and README; each part and each supported composition package, as the subjects of the definitions of limit, deviation and known failure
+Verification:: review (every binding's record: the targets and configurations that it claims; each entry and its class; the identifier, revision, scope, bounds, evidence and lapse date of each deviation; the cause and the exact source of each limit, deviation and known failure; what its README says of the matters that the record states; and the definitions applied to entries of a binding, a wire, the element and a supported composition package, each against the requirements that bind that part or composition)
 
 *Rationale.*
 A deployment decision needs the limits of the middleware underneath the binding, including limits that setup declarations cannot remove.
 
 The timing budgets that the record discloses as the integrator's duty are the system's allocation.
-A timing package that a supported configuration offers is the element's supplier's (xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+A timing package that a supported configuration offers is the supported composition package's releaser's (the element's supplier for an element-supported configuration package, or the explicit extension composer for an explicit extension package; xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 
 The end-to-end protection that the record discloses as the integrator's duty is whatever the system supplies.
 

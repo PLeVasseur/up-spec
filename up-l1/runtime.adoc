@@ -79,7 +79,7 @@ The entry conditions are these, each a requirement of its own:
 * a waiver for every permit, complete and approved by someone other than its author (xref:bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]; xref:../safety/assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found]);
 * QoS that can be honored, means something, and agrees between declarations, and every timing or assurance claim that a route requires admitted under its configuration (<<req-ssr-qos-no-downgrade,QoS is honored or refused, never weakened>>; <<req-ssr-qos-invalid-refused,Meaningless QoS is refused at setup>>; <<req-ssr-qos-consistent-declarations,Two declarations of one route agree>>);
 * integrity levels declared, and every crossing they imply admissible (xref:integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]);
-* all runtime storage placed under the startup-memory policy of the configuration (xref:../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]; xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]): on the ASIL path, from static or caller-provided non-heap memory in a no-helper configuration, or from declared startup backing obtained before the transition by an explicitly selected, admitted startup-provisioning helper;
+* all runtime storage placed under the startup-memory policy of the configuration (xref:../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]; xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]): on the ASIL path, from static or caller-provided non-heap memory in a no-helper configuration, or from declared startup backing obtained before the transition by an explicitly selected, admitted startup-provisioning helper—and where that selection is an assured startup-provisioning helper admission, with recoverable exhaustion and panic-free cleanup named explicitly and established across every covered startup-backing acquisition and failure-disposition cleanup operation for every transport and route backed by that helper, native-only transports included, in every strict-mode state (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]);
 * in strict mode's Enforce state, the Locked state included, no forbidden finding and no denied finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]).
 
 *Startup acquisition before transition.*
@@ -100,7 +100,7 @@ Verification:: compile-fail, test, review
 * *compile-fail*: the initialization value is consumed.
 * *test*
 ** One refusal for each condition.
-** An ASIL-path transport using declared startup backing obtained before transition by an explicitly selected, admitted startup-provisioning helper, admitted with every entry condition checked; and a transport with un-admitted heap-origin startup storage, unfinished startup acquisition or an attempted check bypass refused at the transition, with no silent provider switch.
+** An ASIL-path transport using declared startup backing obtained before transition by an explicitly selected, admitted startup-provisioning helper, admitted with every entry condition checked; and a transport (including a native-only transport backed by an assured startup-provisioning helper) with un-admitted heap-origin startup storage, unfinished startup acquisition, missing or un-evidenced assured-helper recoverable exhaustion or panic-free cleanup across strict mode `Off`, `Report`, `Enforce` and `Locked`, or an attempted check bypass refused at the transition, with no silent provider switch.
 ** With several transports entering together, a later refusal leaves an entered transport in runtime mode under its own duties.
 ** A process whose transports have not all entered runtime mode is not in runtime mode, and is in runtime mode once the last of them has entered.
 ** The Streamer's process: in runtime mode once `+enter_runtime_all+` has returned with every transport in runtime mode; not in runtime mode when it returns a refusal with some transports not entered, with startup memory sealed all the same and no runtime-mode value for a refused transport.
@@ -204,43 +204,46 @@ A route admitted only to refuse traffic that it declared looks healthy at setup 
 [[req-ssr-mode-one-way]]
 === There is no way back
 
-[.specitem,oft-sid="req~ssr-mode-one-way~4",oft-title="There is no way back",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding,SafetyStreamer"]
+[.specitem,oft-sid="req~ssr-mode-one-way~5",oft-title="There is no way back",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding,SafetyStreamer"]
 --
 *No way back.*
 The element, each binding and the Streamer *MUST NOT* have an operation that takes a transport, a handle or the Streamer from runtime mode back to initialization mode.
 
-*Runtime mode ends with the process.*
-The element *MUST* let runtime mode end only when the process ends.
-Each binding *MUST* let the runtime mode of its transport end only when the process ends.
-The Streamer *MUST* let its own runtime mode end only when the process ends.
+*Runtime mode ends with the process, partition or firmware instance.*
+The element *MUST* let runtime mode end only when the process, partition or firmware instance ends.
+Each binding *MUST* let the runtime mode of its transport end only when the process, partition or firmware instance ends.
+The Streamer *MUST* let its own runtime mode end only when the process, partition or firmware instance ends.
 
 *No recovery after entry.*
-Once a transport has entered runtime mode, the element *MUST NOT* provide in that process an operation that rolls its entry back, or that re-admits, re-enables, rebuilds or replaces the transport or a route or role of it.
-That holds whatever fault the transport, a route or a peer has met, and whatever became of another transport of the process.
+Once a transport has entered runtime mode, the element *MUST NOT* provide in that process, partition or firmware instance an operation that rolls its entry back, or that re-admits, re-enables, rebuilds or replaces the transport or a route or role of it.
+That holds whatever fault the transport, a route or a peer has met, and whatever became of another transport of the process, partition or firmware instance.
 
 *A fresh attempt before entry.*
 A transport whose initialization or transition was refused has not entered runtime mode (<<req-ssr-mode-init-failure,Initialization failure>>).
-The element *MUST NOT* refuse a later initialization in the same process for the sole reason that an earlier one was refused.
+The element *MUST NOT* refuse a later initialization in the same process, partition or firmware instance for the sole reason that an earlier one was refused.
 The element *MUST* treat that later initialization as a first one: it starts from a new initialization value, the element checks and places again everything that is declared on it, and the element reuses no admission result and no runtime-mode value of the refused attempt.
 Startup memory that is sealed admits no new setup, so a later initialization needs startup memory that is not sealed (xref:../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
 
 *Recovery from outside.*
-A fault of a transport in runtime mode is recovered by a restart of the whole process or partition, which a supervisor outside it makes (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]), and the restarted process initializes as <<req-ssr-mode-restart,A restart is an initialization>> states.
+A fault of a transport in runtime mode is recovered by a restart of the whole process, partition or bare-metal firmware-instance reset domain, which a supervisor outside it makes (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]), and the restarted instance initializes as <<req-ssr-mode-restart,A restart is an initialization>> states.
+
+*Scoped replacement.*
+This revision replaces the process- and partition-only runtime-lifetime and restart wording of revision 4 of this item for the element, each binding and the Streamer, extending runtime-mode end, fresh-initialization and external recovery scope consistently to bare-metal firmware instances and whole reset domains while preserving all one-way mode, no-rollback and non-reuse duties of revision 4 of this item.
 --
 
 [horizontal]
-ID:: `+req~ssr-mode-one-way~4+`
+ID:: `+req~ssr-mode-one-way~5+`
 ASIL:: B
 Allocated to:: the element; each binding, for its own operations and the runtime mode of its transport; the Streamer, for its own operations and its runtime mode
-Verification:: compile-fail (the initialization value is consumed), test (after a refused initialization or transition, a fresh initialization in the same process, admitted on the terms of a first one with every check made again), review (no operation takes a transport, a handle or the Streamer back to initialization mode; after entry, no operation rolls an entry back or re-admits, re-enables, rebuilds or replaces a transport, a route or a role)
+Verification:: compile-fail (the initialization value is consumed), test (after a refused initialization or transition, a fresh initialization in the same process, partition or firmware instance, admitted on the terms of a first one with every check made again), review (no operation takes a transport, a handle or the Streamer back to initialization mode; after entry, no operation rolls an entry back or re-admits, re-enables, rebuilds or replaces a transport, a route or a role; process, partition and firmware-instance lifetime preserved)
 ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
 A way back would reopen setup, which runtime code never reaches (xref:../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
 Every guarantee that rests on setup being over would then need a run-time check.
 
-Recovery of an entered transport inside the process could replace neither the startup memory placed for it, which the element does not release in runtime mode (xref:../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]), nor its internal synchronization state.
-So a failed runtime recovers by a restart of the whole process or partition.
+Recovery of an entered transport inside the same running instance could replace neither the startup memory placed for it, which the element does not release in runtime mode (xref:../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]), nor its internal synchronization state.
+So a failed runtime recovers by a restart of the whole process, partition or bare-metal firmware-instance reset domain.
 
 Before entry, nothing has been promised to traffic: a refused attempt has consumed its initialization value and left a stated disposition for what it acquired, so a fresh attempt repeats every check and inherits nothing unchecked.
 
@@ -278,7 +281,7 @@ The element's setup and each admitted startup-provisioning helper *MUST* choose 
 * _Returned._
 The element's setup or admitted startup-provisioning helper returns a value that a caller handed to it, untouched, to that caller, or refuses before it takes the value, such as by reserving what the value needs first.
 * _Destroyed._
-The element's setup or admitted startup-provisioning helper destroys a value itself, once, within setup and on the refusing path, and the element *MUST* then say in the refusal that setup destroyed it.
+The element's setup or admitted startup-provisioning helper destroys a value itself, once, within setup and on the refusing path; where an admitted startup-provisioning helper destroys an acquired resource or initialized value on refusal, that helper *MUST* report each destruction explicitly in its refusal outcome to the element or caller, and the element *MUST* then say in the refusal that setup or that helper destroyed it.
 The element's setup and each admitted startup-provisioning helper *MUST* destroy a value only in one of two cases:
 ** nothing in the configuration requires panic-free cleanup or non-waiting release of that value (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]), and then what the destruction does is the value's own, under its declared policy where it has one;
 ** a route or a claim requires one of those guarantees of the value, and the guarantee is established for it.
@@ -302,21 +305,21 @@ In refusing, the element's setup and each admitted startup-provisioning helper *
 * start traffic on that transport; or
 * leave anything that stops a successor process, partition or firmware instance from initializing.
 
-A refused transition has consumed the transport's initialization value; what may follow in the same process is stated in <<req-ssr-mode-one-way,There is no way back>>.
+A refused transition has consumed the transport's initialization value; what may follow in the same process, partition or firmware instance is stated in <<req-ssr-mode-one-way,There is no way back>>.
 
 *Scoped replacement.*
-This revision replaces revision 5 of this item for the element across all configurations and extends its setup-failure, pre-acquisition disposition, non-release-service, non-reclamation and refusal-outcome duties to each startup-provisioning helper admitted on the ASIL path under xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations].
+This revision replaces revision 5 of this item for the element across all configurations and extends its setup-failure, pre-acquisition disposition, explicit helper-destruction refusal reporting, non-release-service, non-reclamation and refusal-outcome duties to each startup-provisioning helper admitted on the ASIL path under xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations].
 All duties of revision 5 of this item for the element remain in force for configurations with and without a startup-provisioning helper.
 --
 
 [horizontal]
 ID:: `+req~ssr-mode-init-failure~6+`
 ASIL:: B
-Allocated to:: the element; each startup-provisioning helper admitted on the ASIL path, for its own initialization code and for every resource and initialized value that it acquires or creates
+Allocated to:: the element; each startup-provisioning helper admitted on the ASIL path, for its own initialization code, for every resource and initialized value that it acquires or creates, and for reporting each destruction it performs on refusal explicitly in its refusal outcome
 Verification:: test, review, fault-injection
 * *test*
 ** Each refusal returned as an error that names its cause, its route where there is one, and the setter to change.
-** A refusal injected at each placement, provider request and admitted startup-provisioning helper acquisition, with every acquired resource or value returned, destroyed once or retained as stated under a disposition chosen before acquisition, refusal before acquiring where no disposition is available, and no storage of a successful owner released or invalidated.
+** A refusal injected at each placement, provider request and admitted startup-provisioning helper acquisition, with every acquired resource or value returned, destroyed once or retained as stated under a disposition chosen before acquisition, any helper-performed destruction reported explicitly in the helper's refusal outcome and surfaced by the element, refusal before acquiring where no disposition is available, and no storage of a successful owner released or invalidated.
 ** A refused caller input returned untouched, refused before it was taken, or destroyed once and reported as destroyed.
 ** Where a route requires panic-free cleanup or non-waiting release, only values for which it is established destroyed by setup.
 ** Nothing handed to a runtime release service or pending-cleanup queue, refusal returned within setup's logical bound, and no silent reclamation during runtime mode of a permitted retained startup region.
@@ -411,30 +414,33 @@ A peer that stayed up sees another instance's death and restart only as silence,
 [[req-ssr-mode-no-shutdown]]
 === No shutdown in runtime mode
 
-[.specitem,oft-sid="req~ssr-mode-no-shutdown~2",oft-title="No shutdown in runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-mode-no-shutdown~3",oft-title="No shutdown in runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 The element *MUST NOT* offer a shutdown, teardown or departure operation in runtime mode.
 
-A transport's runtime mode ends only when its process ends, by exit, crash or kill (<<req-ssr-mode-one-way,There is no way back>>).
+A transport's runtime mode ends only when its process, partition or firmware instance ends, by exit, crash, kill or reset (<<req-ssr-mode-one-way,There is no way back>>).
 The element *MUST NOT* make a correctness property of its own, or one that a peer relies on from it, depend on a destructor, an exit handler or a departure notice running.
 
 *No degraded mode.*
-The element has no degraded mode with rules of its own: each requirement stated for runtime mode binds every transport and every route until the process ends, the route that an event concerns included.
+The element has no degraded mode with rules of its own: each requirement stated for runtime mode binds every transport and every route until the process, partition or firmware instance ends, the route that an event concerns included.
 A refusal, a counted drop, a missed deadline or the loss of a peer concerns the route, or the routes, on which it occurs.
 The element *MUST NOT* react to such an event by stopping or suspending another route, by refusing another route's traffic, or by changing the rules under which a route runs.
 What a gate of the Streamer does on one of its routes is stated in xref:../up-l2/streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate] and xref:../up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route].
+
+*Scoped replacement.*
+This revision replaces the process-only termination wording of revision 2 of this item for the element, extending runtime-mode end and unchanged-rule scope to processes, partitions and bare-metal firmware instances while preserving all no-shutdown, destructor-independence and no-degraded-mode duties of revision 2 of this item.
 --
 
 [horizontal]
-ID:: `+req~ssr-mode-no-shutdown~2+`
+ID:: `+req~ssr-mode-no-shutdown~3+`
 ASIL:: B
 Allocated to:: the element
-Verification:: review, test (a refusal, a counted drop, a missed deadline and the loss of a peer on one route, with the other routes of the transport carrying on under unchanged rules), fault-injection (peers survive a kill at representative points)
+Verification:: review, test (a refusal, a counted drop, a missed deadline and the loss of a peer on one route, with the other routes of the transport carrying on under unchanged rules), fault-injection (peers survive a kill or reset at representative points)
 ISO 26262:: 6-7.4.5 (part-clause numbers only)
 
 *Rationale.*
 A crash or a forced termination can prevent destructors and exit handlers from running.
-So a correctness property that depended on their completion could fail exactly when a process fails.
+So a correctness property that depended on their completion could fail exactly when a process, partition or firmware instance fails.
 
 Even without a crash, Rust does not guarantee that destructors run: `+mem::forget+` is safe, and `+process::exit+` ends the process without running the destructor of any value on a thread's stack (source: the standard library documentation, Rust 1.98.1, `+std::mem::forget+`, its description and its section "Safety": https://doc.rust-lang.org/1.98.1/std/mem/fn.forget.html#safety[`+std::mem::forget+`]; and `+std::process::exit+`, its description: https://doc.rust-lang.org/1.98.1/std/process/fn.exit.html[`+std::process::exit+`]).
 
@@ -446,36 +452,40 @@ So an event on one route changes nothing for the others, and the route that it c
 [[req-ssr-mode-bounded-startup]]
 === Setup never waits without a bound
 
-[.specitem,oft-sid="req~ssr-mode-bounded-startup~3",oft-title="Setup never waits without a bound",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
+[.specitem,oft-sid="req~ssr-mode-bounded-startup~4",oft-title="Setup never waits without a bound",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
 --
 *Bounded waits.*
-An initialization step of the element's own *MUST NOT* wait without a bound.
-The element *MUST* give each wait for a service or for the clock a bound from deployment data or from the binding's declared limit.
-When the bound expires, the element *MUST* fail setup with an error naming what it waited for.
+An initialization step of the element's own or of any startup-provisioning helper admitted on the ASIL path *MUST NOT* wait without a bound (xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]).
+The element *MUST* give each wait for a service or for the clock a bound from deployment data or from the binding's declared limit, and each admitted startup-provisioning helper *MUST* give each wait of its own initialization step a bound from deployment data or from the helper's declared startup-backing limit.
+When the bound expires, the element or that admitted startup-provisioning helper *MUST* fail setup with an error naming what it waited for.
 Each such bound is a logical deadline, as <<req-ssr-bound-wait,Every bounded wait has a logical deadline>> states for a setup bound.
 
 *Waits inside a declared allocation domain.*
-A request to a memory source or allocation provider, and a destruction that a refusal performs, can wait inside the allocation domain that its declared policy names (<<req-ssr-bound-wait,Every bounded wait has a logical deadline>>).
+A request to a memory source or allocation provider (whether by the element's setup or by an admitted startup-provisioning helper), and a destruction that a refusal performs, can wait inside the allocation domain that its declared policy names (<<req-ssr-bound-wait,Every bounded wait has a logical deadline>>).
 That wait is the declared policy's, and it is reported as xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
 Each non-waiting guarantee limits its own operation in setup, and neither limits the other's (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]):
 
-* Where a route requires non-waiting acquisition, each request that the element's setup makes for that route is held to it, and the route is refused by name where it is not established (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], clause "Setup").
-* Where a route or a claim requires non-waiting release of a value, the element's setup disposes of that value as <<req-ssr-mode-init-failure,Initialization failure>> states.
+* Where a route requires non-waiting acquisition, each request that the element's setup or an admitted startup-provisioning helper makes for that route is held to it, and the route is refused by name where it is not established (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], clause "Setup").
+* Where a route or a claim requires non-waiting release of a value, the element's setup or that admitted startup-provisioning helper disposes of that value as <<req-ssr-mode-init-failure,Initialization failure>> states.
 * A declared wait in a request stands where only non-waiting release is required, and a declared wait in a refusal's destruction stands where only non-waiting acquisition is required.
 
 *A missing peer.*
 The element *MUST NOT* fail setup, or refuse a route itself, because the route's peer is missing: a route that every other check admits is admitted with a report that it waits for its peer, unless the route's binding refuses it by name.
 Each binding that refuses a route whose peer is missing *MUST* refuse it by name.
 In runtime mode, the element *MUST* treat a route's missing peer as silence, under the route's deadline.
+
+*Scoped replacement.*
+This revision replaces revision 3 of this item for the element and extends its logical startup-wait bound and expiry-refusal duties to each startup-provisioning helper admitted on the ASIL path, establishing the logical setup-wait bound source for admitted startup-provisioning helpers invoked under <<req-ssr-mode-init-failure,Initialization failure>> while preserving all missing-peer and declared-allocation-domain wait duties of revision 3 of this item unchanged.
 --
 
 [horizontal]
-ID:: `+req~ssr-mode-bounded-startup~3+`
+ID:: `+req~ssr-mode-bounded-startup~4+`
 ASIL:: B
-Allocated to:: the element; each binding, for its refusal by name of a route whose peer is missing
+Allocated to:: the element; each binding, for its refusal by name of a route whose peer is missing; each startup-provisioning helper admitted on the ASIL path, for giving each initialization wait of its own a logical deadline from deployment data or its declared startup-backing limit and failing setup by name on expiry
 Verification:: test, fault-injection (a peer that never starts; a service that never appears)
 * *test*
 ** A provider whose request can wait, reported on a route that does not require non-waiting acquisition, one that requires only non-waiting release included, and refused by name on a route that requires it.
+** An initialization wait of an admitted startup-provisioning helper, bounded logically from deployment data or the helper's declared startup-backing limit, and failing setup with a named error upon expiry.
 ** A refusal's destruction that can wait, performed and reported where nothing requires non-waiting release of the value, a route that requires only non-waiting acquisition included, and not performed where that guarantee is required of the value and not established.
 
 *Rationale.*
@@ -709,23 +719,26 @@ Waits that stay private to one process cannot be left in that state by another p
 [[req-ssr-release-none]]
 === Nothing is released in runtime mode
 
-[.specitem,oft-sid="req~ssr-release-none~3",oft-title="Nothing is released in runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
+[.specitem,oft-sid="req~ssr-release-none~4",oft-title="Nothing is released in runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
 --
-In runtime mode the element *MUST* keep each route, role, slot table, binding resource, worker and transport allocated and attached for the life of the process.
-In runtime mode each binding *MUST* keep its resources, its workers and its transport allocated and attached for the life of the process.
+In runtime mode the element *MUST* keep each route, role, slot table, binding resource, worker and transport allocated and attached for the life of the process, partition or firmware instance.
+In runtime mode each binding *MUST* keep its resources, its workers and its transport allocated and attached for the life of the process, partition or firmware instance.
 
 * The element *MUST* keep each worker created during initialization running and *MUST NOT* let one be joined in runtime mode.
 * Each binding *MUST* keep each of its workers created during initialization running and *MUST NOT* let one be joined in runtime mode.
 
 *The Streamer.*
 What the Streamer's routes and gates, and the workers of the Streamer binary, keep in runtime mode is stated with the Streamer (xref:../up-l2/streamer.adoc#req-ssr-streamer-route-lock[Routes and subscriptions are locked at activation]; xref:../up-l2/streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate]; xref:../up-l2/streamer.adoc#req-ssr-streamer-workers[Workers are fixed at initialization]).
+
+*Scoped replacement.*
+This revision replaces the process-only lifetime wording of revision 3 of this item for the element and each binding, extending runtime retention scope consistently to processes, partitions and bare-metal firmware instances while preserving all resource-retention, attachment and worker-non-joining duties of revision 3 of this item unchanged.
 --
 
 [horizontal]
-ID:: `+req~ssr-release-none~3+`
+ID:: `+req~ssr-release-none~4+`
 ASIL:: B
 Allocated to:: the element; each binding, for its resources, its workers and its transport
-Verification:: compile-fail (for the Streamer, a delete after activation), review
+Verification:: compile-fail (for the Streamer, a delete after activation), review (retention for the life of the process, partition or firmware instance)
 ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
 *Rationale.*
