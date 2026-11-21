@@ -108,6 +108,56 @@
     }
   },
   "$defs": {
+    "wire_direction_type_provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wire",
+        "direction",
+        "message_type",
+        "allocation_provider"
+      ],
+      "properties": {
+        "wire": {
+          "type": "string",
+          "minLength": 1
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "send",
+            "receive",
+            "bidirectional"
+          ]
+        },
+        "message_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allocation_provider": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "memory_provider": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        }
+      }
+    },
     "component_identity": {
       "type": "object",
       "additionalProperties": false,
@@ -229,34 +279,58 @@
           ]
         }
       },
-      "if": {
-        "properties": {
-          "access_class": {
-            "enum": [
-              "controlled_access_artifact",
-              "historical_or_unavailable_locator"
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "access_class": {
+                "enum": [
+                  "controlled_access_artifact",
+                  "historical_or_unavailable_locator"
+                ]
+              }
+            },
+            "required": [
+              "access_class"
             ]
+          },
+          "then": {
+            "properties": {
+              "public_composer_verified": {
+                "const": false
+              },
+              "access_limited_assessor": {
+                "type": "string",
+                "minLength": 1
+              },
+              "assessment_basis_and_limits": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
           }
         },
-        "required": [
-          "access_class"
-        ]
-      },
-      "then": {
-        "properties": {
-          "public_composer_verified": {
-            "const": false
+        {
+          "if": {
+            "properties": {
+              "access_class": {
+                "const": "public_portable_artifact"
+              }
+            },
+            "required": [
+              "access_class"
+            ]
           },
-          "access_limited_assessor": {
-            "type": "string",
-            "minLength": 1
-          },
-          "assessment_basis_and_limits": {
-            "type": "string",
-            "minLength": 1
+          "then": {
+            "properties": {
+              "digest_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
           }
         }
-      }
+      ]
     },
     "historical_intake_link": {
       "type": "object",
@@ -448,9 +522,13 @@
               ]
             },
             "wire_direction_type_provider": {
-              "type": [
-                "object",
-                "null"
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/$defs/wire_direction_type_provider"
+                }
               ]
             },
             "assurance_scope": {
@@ -492,7 +570,8 @@
             },
             "observation_boundary_date": {
               "type": "string",
-              "minLength": 1
+              "minLength": 1,
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
             },
             "scope_label": {
               "type": "string",
@@ -609,34 +688,94 @@
             "behavior_gaps": {
               "type": "array",
               "items": {
-                "type": "string"
+                "type": "string",
+                "minLength": 1
               }
             },
             "evidence_gaps": {
               "type": "array",
               "items": {
-                "type": "string"
-              }
-            }
-          },
-          "if": {
-            "properties": {
-              "applicability": {
-                "const": "not_applicable"
-              }
-            },
-            "required": [
-              "applicability"
-            ]
-          },
-          "then": {
-            "properties": {
-              "applicability_reason": {
                 "type": "string",
                 "minLength": 1
               }
             }
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "applicability": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "applicability"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "applicability_reason": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "implementation_fulfillment": {
+                    "const": "not_applicable"
+                  },
+                  "evidence_sufficiency": {
+                    "const": "not_applicable"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "applicability": {
+                    "enum": [
+                      "unknown",
+                      "applicable"
+                    ]
+                  }
+                },
+                "required": [
+                  "applicability"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "implementation_fulfillment": {
+                    "not": {
+                      "const": "not_applicable"
+                    }
+                  },
+                  "evidence_sufficiency": {
+                    "not": {
+                      "const": "not_applicable"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "implementation_fulfillment": {
+                    "const": "fulfilled"
+                  }
+                },
+                "required": [
+                  "implementation_fulfillment"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "behavior_gaps": {
+                    "maxItems": 0
+                  }
+                }
+              }
+            }
+          ]
         },
         "evidence": {
           "type": "array",
@@ -660,7 +799,51 @@
             }
           ]
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "type": "object",
+                "properties": {
+                  "evidence_sufficiency": {
+                    "const": "sufficient"
+                  }
+                },
+                "required": [
+                  "evidence_sufficiency"
+                ]
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "minItems": 1
+              },
+              "status": {
+                "type": "object",
+                "properties": {
+                  "evidence_gaps": {
+                    "maxItems": 0
+                  }
+                },
+                "required": [
+                  "evidence_gaps"
+                ]
+              }
+            },
+            "required": [
+              "evidence",
+              "status"
+            ]
+          }
+        }
+      ]
     }
   }
 }

@@ -11,14 +11,17 @@ It accompanies the immutable historical intake catalogue in [`../README.md`](../
 ## Design rules
 
 1. **Exact-subject and separate assessment identity.**
-   A record binds an exact `subject` (component or composed release, exact `spec_commit`, requirement ID and revision, actor/duty and contract family, component/source/build/artifact identities, target, configuration digest, selected functions, wire/direction/type/provider tuple, and optional assurance scope) separately from its `assessment` identity (`assessment_id`, `assessment_revision`, `producer_authority`, `assessor_review_identity`, `observation_boundary_date`, `scope_label`, and `supersedes_or_revises`). The same duty on Linux serialized, QNX native, and an unoffered bare-metal combination carries separate scoped records.
+   A record binds an exact `subject` (component or composed release, exact `spec_commit`, requirement ID and revision, actor/duty and contract family, component/source/build/artifact identities, target, configuration digest, selected functions, structured `wire_direction_type_provider` object or `null` with required `wire`, `direction`, `message_type`, and nullable `allocation_provider` plus optional `memory_provider`, and optional assurance scope) separately from its `assessment` identity (`assessment_id`, `assessment_revision`, `producer_authority`, `assessor_review_identity`, ISO-8601 `YYYY-MM-DD` `observation_boundary_date`, `scope_label`, and `supersedes_or_revises`). The same duty on Linux serialized, QNX native, and an unoffered bare-metal combination carries separate scoped records.
 
-2. **Independent status dimensions.**
-   A record separates `applicability` (`unknown`, `applicable`, or `not_applicable` with required reason), `implementation_fulfillment`, `evidence_sufficiency`, `offering_support_status`, `formal_claim_status`, `publication_transfer_status`, and simultaneous `behavior_gaps` and `evidence_gaps`. Neither supplier offering nor a single metric collapses the others, and `unoffered` does not automatically mean `not_applicable`.
+2. **Independent status dimensions and coherence invariants.**
+   A record separates `applicability` (`unknown`, `applicable`, or `not_applicable`), `implementation_fulfillment`, `evidence_sufficiency`, `offering_support_status`, `formal_claim_status`, `publication_transfer_status`, and non-empty `behavior_gaps` and `evidence_gaps` entries. Neither supplier offering nor a single metric collapses the others, and `unoffered` does not automatically mean `not_applicable`. To prevent contradictory records while keeping dimensions independent, the schema enforces:
+   - `applicability: "not_applicable"` requires non-empty `applicability_reason` and `"not_applicable"` for both `implementation_fulfillment` and `evidence_sufficiency`, whereas `"applicable"` and `"unknown"` forbid `"not_applicable"` in either dimension.
+   - `implementation_fulfillment: "fulfilled"` requires `behavior_gaps: []`.
+   - `evidence_sufficiency: "sufficient"` requires at least one entry in `evidence` and `evidence_gaps: []`.
 
 3. **Evidence access classes and verification limits.**
    Each immutable evidence entry declares its exact `source_helper_artifact_bindings` (preserving source/helper/artifact pins and freshness boundary) and one of four access classes:
-   - `public_portable_artifact`
+   - `public_portable_artifact` (requires a non-null 64-character lowercase hex `digest_sha256`)
    - `public_pinned_link`
    - `controlled_access_artifact`
    - `historical_or_unavailable_locator`
