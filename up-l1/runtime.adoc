@@ -8,11 +8,21 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 This page holds transport-layer runtime requirements of the up-rust SEooC requirement family (`+req~ssr-*+`): mode transition, setup checks, initialization failure, restart, startup bounds, bounded work and waiting, runtime retention, lease drops, pending cleanup, decoded-value destruction, synchronous or polled traffic, and route QoS declarations and overflow.
 Whom each item binds, and how the three requirement families meet, is stated in xref:../contract-generations.adoc[Which requirements an implementation follows] (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]); classic-route exclusion from runtime mode is stated in xref:../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode].
 
-Shared two-mode types, startup storage, heap classes and stronger resource guarantees are stated in xref:../basics/resources.adoc[shared resource lifecycle and storage] (including xref:../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types], xref:../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode] and xref:../basics/resources.adoc#req-ssr-mode-no-traffic-before-runtime[Traffic is impossible before runtime mode]).
-Binding-facing loss counting, route reporting, arrival-deadline monitoring, TTL expiry checks and middleware waivers are stated in xref:bindings.adoc[uP-L1 binding observation, deadlines, TTL and waivers].
+* *Section map:*
+  <<sec-mode-transitions,Transport mode transition, checks, failure, restart and bounds>>;
+  <<sec-bounded-work,Bounded work, waits and synchronization>>;
+  <<sec-retention-cleanup,Runtime retention, lease drops, pending cleanup and decoded value destruction>>;
+  <<sec-sync-traffic,Synchronous or polled traffic>>;
+  <<sec-route-qos,Route QoS declarations and overflow>>.
+* *Related chapters:*
+  Shared two-mode types, startup storage, heap classes and stronger resource guarantees are stated in xref:../basics/resources.adoc[shared resource lifecycle and storage] (including xref:../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types], xref:../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode] and xref:../basics/resources.adoc#req-ssr-mode-no-traffic-before-runtime[Traffic is impossible before runtime mode]).
+  Binding-facing loss counting, route reporting, arrival-deadline monitoring, TTL expiry checks and middleware waivers are stated in xref:bindings.adoc[uP-L1 binding observation, deadlines, TTL and waivers].
 ====
 
+[[sec-mode-transitions]]
 == Transport mode transition, checks, failure, restart and bounds
+
+Transport setup transition, setup refusal/failure handling, whole-instance restarts and bounded initialization steps:
 
 [[req-ssr-mode-backstop]]
 === Run-time refusal only where types cannot reach
@@ -503,7 +513,10 @@ Setup hands nothing to a release service to dispose of a refusal (<<req-ssr-mode
 _An allocation domain's wait._
 A wait inside a declared allocation domain, an allocator's own lock included, is treated as <<req-ssr-bound-wait,Every bounded wait has a logical deadline>> states, because an ordinary provider cannot promise a bound for it.
 
+[[sec-bounded-work]]
 == Bounded work, waits and synchronization
+
+Per-call work bounds, logical wait deadlines and process-private synchronization boundaries:
 
 [[req-ssr-bound-work]]
 === Work per call is bounded by setup data
@@ -714,7 +727,10 @@ A lock it shares can then be left held, with the state it guards half changed an
 
 Waits that stay private to one process cannot be left in that state by another process's death.
 
+[[sec-retention-cleanup]]
 == Runtime retention, lease drops, pending cleanup and decoded value destruction
+
+Runtime resource retention, fixed-table lease returns, isolated release services and decoded-value destruction:
 
 [[req-ssr-release-none]]
 === Nothing is released in runtime mode
@@ -1105,7 +1121,10 @@ So the element records outcome, identity and logical deadline decisions before e
 Rust does not promise that a destructor runs (<<req-ssr-mode-no-shutdown,No shutdown in runtime mode>>).
 So a forgotten value is leaked with its slot and never reclaimed behind a live reference.
 
+[[sec-sync-traffic]]
 == Synchronous or polled traffic
+
+This section states the synchronous and polled execution requirements for runtime traffic processing.
 
 [[req-ssr-crate-sync-path]]
 === Traffic is synchronous or polled
@@ -1129,7 +1148,10 @@ Offering traffic in synchronous or polled form, with no futures, tasks or pinnin
 
 Which compiler releases, targets, library modules and options a qualification covers is stated by its supplier for an exact release.
 
+[[sec-route-qos]]
 == Route QoS declarations and overflow
+
+This section states setup-time route QoS declaration and overflow behavior requirements.
 
 [[req-ssr-qos-declared]]
 === QoS is declared per route at setup

@@ -218,23 +218,23 @@ For the Streamer: xref:../../../up-l2/streamer.adoc#req-ssr-streamer-containment
 
 | Provided to applications
 | L2 handles, the transition, bounded waits, route reports, counters and waiver records
-| xref:../../../basics/resources.adoc[Resources and startup memory]; xref:../../../basics/configurations.adoc[Configurations]; xref:../../../basics/error_model.adoc[Error model]; xref:../../../up-l1/runtime.adoc[Transport runtime]; xref:../../../up-l1/payload-paths.adoc[Payload paths]; xref:../../../up-l1/bindings.adoc[Binding observations and waivers]; xref:../../assurance.adoc[Assurance governance]; xref:../../../up-l1/integrity.adoc[Integrity levels]; xref:../../../up-l1/peers.adoc[Peers of a transport]; xref:../../../up-l2/api.adoc[RPC and message identity]
+| xref:../../../basics/resources.adoc[Resources, Startup Memory, Heap Classes and Memory Providers]; xref:../../../basics/configurations.adoc[Configurations and Application-Selectable Parts]; xref:../../../basics/error_model.adoc[Error model]; xref:../../../basics/uuid.adoc[Message identifiers (UUID)]; xref:../../../up-l1/runtime.adoc[uP-L1 transport runtime]; xref:../../../up-l1/payload-paths.adoc[Payload paths]; xref:../../../up-l1/bindings.adoc[uP-L1 Transport Bindings]; xref:../../assurance.adoc[Safety Assurance Governance, Verification and Evidence]; xref:../../../up-l1/integrity.adoc[uP-L1 Integrity Levels and Copy Routes]; xref:../../../up-l1/peers.adoc[uP-L1 Peers and Fault Model]; xref:../../../up-l2/api.adoc[Communication Layer APIs and RPC interaction rules]; xref:../../../up-l2/execution.adoc[Execution and asynchronous seam]; xref:../../../languages/rust.adoc[Rust language mapping]
 
 | Provided to the Streamer
 | Carrier routes, the capacity check, park, the shared signal
-| xref:../../../up-l1/runtime.adoc[Transport runtime]; xref:../../../up-l1/bindings.adoc[Binding observations and deadlines]; xref:../../../up-l1/integrity.adoc[Integrity levels]; xref:../../../up-l2/streamer.adoc[Streamer]
+| xref:../../../up-l1/runtime.adoc[uP-L1 transport runtime]; xref:../../../up-l1/bindings.adoc[uP-L1 Transport Bindings]; xref:../../../up-l1/integrity.adoc[uP-L1 Integrity Levels and Copy Routes]; xref:../../../up-l2/streamer.adoc[Streamer]
 
 | Provided to integrators
-| The end-to-end protection wire; strict mode and its report; the Streamer's operator interface, mode report, watchdog hook and startup report
-| xref:../../../up-l2/streamer.adoc[Streamer]; xref:../../../up-l1/wires/e2e.adoc[The end-to-end protection wire]; xref:build.adoc[Build and shipped content]; xref:strict-mode.adoc[Strict mode]
+| The end-to-end protection wire; strict mode and its report; the Streamer's boundary, operator interface, mode report, watchdog hook and startup report
+| xref:../streamer.adoc[Streamer Safety Element]; xref:../../../up-l2/streamer.adoc[Streamer]; xref:../../../up-l1/wires/e2e.adoc[The end-to-end protection wire]; xref:build.adoc[Build and shipped content]; xref:strict-mode.adoc[Strict mode]
 
 | Required from bindings
 | The lending or handoff contract, and the bindings' duties
-| The items whose statements give a binding a duty, most of them in xref:../../../up-l1/bindings.adoc[Allocated to each binding], xref:../../../up-l1/iceoryx2.adoc[iceoryx2], xref:../../../up-l1/iceoryx2-frame.adoc[The iceoryx2 physical frame], xref:../../../up-l1/lola.adoc[LoLa] and xref:../../../up-l1/lola-envelope.adoc[The LoLa physical envelope]; xref:assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]
+| The items whose statements give a binding a duty, most of them in xref:../../../up-l1/bindings.adoc[uP-L1 Transport Bindings], xref:../../../up-l1/iceoryx2.adoc[iceoryx2], xref:../../../up-l1/iceoryx2-frame.adoc[The iceoryx2 physical frame], xref:../../../up-l1/lola.adoc[LoLa] and xref:../../../up-l1/lola-envelope.adoc[The LoLa physical envelope], alongside xref:../../assurance.adoc[Safety Assurance Governance, Verification and Evidence] and xref:../../../languages/rust.adoc[Rust language mapping]; xref:assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]
 
 | Required from wires
 | The wire contract, and the wires' duties
-| The items whose statements give a wire a duty, in xref:../../../up-l1/wires/README.adoc[Allocated to each wire], xref:../../../up-l1/wires/serialized.adoc[Serialized wires], xref:../../../up-l1/wires/xcdrv2.adoc[XCDR2], xref:../../../up-l1/wires/e2e.adoc[The end-to-end protection wire], xref:../../../up-l1/payload-paths.adoc[Payload paths], xref:../../assurance.adoc[Assurance governance] and xref:../../../up-l1/peers.adoc[Peers and fault model]
+| The items whose statements give a wire a duty, in xref:../../../up-l1/wires/README.adoc[Wires and the wire contract], xref:../../../up-l1/wires/native.adoc[Native wire], xref:../../../up-l1/wires/serialized.adoc[Serialized wires], xref:../../../up-l1/wires/xcdrv2.adoc[XCDR2], xref:../../../up-l1/wires/e2e.adoc[The end-to-end protection wire], xref:../../../up-l1/payload-paths.adoc[Payload paths], xref:../../assurance.adoc[Safety Assurance Governance, Verification and Evidence] and xref:../../../up-l1/peers.adoc[uP-L1 Peers and Fault Model]
 
 | Provided by the element's supplier or another supported composition-package releaser
 | Versioned supported configuration (composition) packages, compatibility statements and assembled supplier evidence
@@ -250,5 +250,5 @@ For the Streamer: xref:../../../up-l2/streamer.adoc#req-ssr-streamer-containment
 
 | Required from the integrator that claims the element's safety-assurance scope
 | Its assumptions of use
-| xref:assumptions-of-use.adoc[The assumptions of use], which indexes every assumption and links to those that a layer part states
+| xref:assumptions-of-use.adoc[up-rust SEooC: Assumptions of use] (states the 26 element, deployment, transport, middleware and message-identity assumptions and indexes all 29, linking to the 3 Streamer operational assumptions in xref:../streamer.adoc[Streamer Safety Element])
 |===

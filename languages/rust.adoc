@@ -189,6 +189,7 @@ up-spec's iceoryx2 chapter asks the same of a Rust payload's author, through ice
 == Rust mechanism navigation
 
 NOTE: This section is non-normative navigation; the linked items govern and add no duty here.
+On native Rust paths, an explicit `derive` or inventoried `+unsafe+` layout declaration classifies a type only after source-level verification against the native layout and bit-validity rules (xref:../up-l1/wires/native.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout]; xref:../safety/assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified]); arbitrary user casts or unverified derives confer no native admission.
 
 * *Type-state two-mode compile-time checks:*
   xref:../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types];
@@ -214,10 +215,12 @@ NOTE: This section is non-normative navigation; the linked items govern and add 
   xref:../safety/assurance.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`];
   xref:../safety/elements/up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow];
   xref:../safety/elements/up-rust/build.adoc#req-ssr-crate-core-only-binary[The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it].
-* *Native in-place layout, bit-validity, lent storage and frame destructors:*
+* *Native in-place layout, bit-validity, ABI agreement, lent storage and frame destructors:*
   xref:../up-l1/wires/native.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout];
+  xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout];
   xref:../up-l1/wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused];
   xref:../up-l1/integrity.adoc#req-ssr-integrity-any-bits[In-place types accept every bit pattern];
+  xref:../up-l1/peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI];
   xref:../up-l1/bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held];
   xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
 * *Foreign FFI boundary and callback lifetimes (LoLa):*

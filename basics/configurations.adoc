@@ -8,14 +8,17 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 * *Contract-family membership and claim vs. selection grammar.*
 Filing on this page does not decide whom an item binds, and neither merges the repository's requirement families nor binds classic protocol implementations (xref:../contract-generations.adoc[Which requirements an implementation follows]).
 This page holds items from two distinct contract families:
-** *The owned-frame SDK contract (`+req~sdk-owned-frame-*+`, ordinary obligations, no ASIL, `OwnedFrame*` tags)*: <<_application_selectable_parts,Application-selectable parts>>.
+** *The owned-frame SDK contract (`+req~sdk-owned-frame-*+`, ordinary obligations, no ASIL, `OwnedFrame*` tags)*: <<sec-selectable-parts,Application-selectable parts>>.
 It binds a part only where its declaration names the owned-frame SDK contract (xref:../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it]; xref:../contract-generations.adoc#owned-frame-conventions[Owned-frame SDK conventions and tags]).
-** *The up-rust SEooC requirement family (`+req~ssr-*+`, `ASIL:: B`, `Safety*` tags)*: <<_deployment_data,Deployment data>>.
+** *The up-rust SEooC requirement family (`+req~ssr-*+`, `ASIL:: B`, `Safety*` tags)*: <<sec-deployment-data,Deployment data>>.
 Each item binds only the actors to which its statement gives a duty (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
 Configuration selection of parts by an application is distinct from making a component or deployment conformance claim or declaring a specification-named profile under xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
 ====
 
+[[sec-selectable-parts]]
 == Application-selectable parts
+
+Non-exhaustive public selection of owned-frame SDK parts through documented interfaces:
 
 [[req-sdk-owned-frame-extension-public]]
 === A part that an application selects is selected through public interfaces alone
@@ -80,6 +83,7 @@ A selection that needed the SDK's source, a private interface or a privileged li
 A name, an origin or a packaging says nothing about what a part does, while its declaration and the setup checks do.
 Each kind of part keeps its own contract, so selecting a part neither adds to its duties nor lifts them.
 
+[[sec-deployment-data]]
 == Deployment data
 
 NOTE: The items in this section belong to the up-rust SEooC requirement family (`+req~ssr-*+`): conventions and tags are stated in xref:../safety/README.adoc[the safety overview], and scope and element boundary in xref:../safety/elements/up-rust/README.adoc[the up-rust SEooC element].

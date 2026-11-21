@@ -11,9 +11,12 @@ Each assumption of use states what the integrator provides or guarantees.
 
 NOTE: This page indexes the element's twenty-nine assumptions of use, and states twenty-six of them: the element and deployment assumptions, the three transport-wide assumptions, the two iceoryx2 deployment assumptions, the LoLa deployment assumption and the message-identity assumption.
 The other three, about operating the Streamer, are stated in xref:../streamer.adoc[Streamer Safety Element] (<<summary>>).
+Section map: <<who,Who these assumptions bind>> | <<violation-classes,How a violation shows up>> | <<coverage,Tags and coverage>> | <<summary,Summary>> | <<transport-clause-map,Where transport assumption clauses are stated>>.
 
 [[who]]
 == Who these assumptions bind
+
+Scope and binding rules in this section govern when an assumption of use applies and how an integrator claims it.
 
 [[aou-seooc-assumptions-bind]]
 === An assumption of use binds the integrator who claims the scope, and replaces no requirement
@@ -66,6 +69,8 @@ If either could stand in for the other, a duty could be left with nobody.
 [[violation-classes]]
 == How a violation shows up
 
+Violation-class definitions in this section govern how undetectable integration violations must be covered.
+
 [[aou-seooc-violation-classes]]
 === The integrator covers each violation that its observer cannot detect
 
@@ -104,7 +109,7 @@ Tags are trace metadata, and decide no actor, scope or status (<<aou-seooc-assum
 [[summary]]
 == Summary
 
-* *Every transport. Stated on this page (transport deployment overview: xref:../../../up-l1/deployment.adoc[uP-L1 transport deployment prerequisites]).*
+* *Every transport. Stated on this page (transport deployment overview: xref:../../../up-l1/README.adoc#transport-deployment-prerequisites[uP-L1 transport deployment prerequisites]).*
 ** <<aou-seooc-peer-access,Only authorized processes reach the transport>>
 ** <<aou-seooc-integrity-levels,Each transport's integrity level is assigned correctly>>
 ** <<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>
@@ -1283,6 +1288,7 @@ ASIL:: B
 Random seeding gives a quantified collision probability, not a guarantee that two starts differ.
 Only a construction that persists across restarts, used under its stated conditions, can establish that IDs never repeat, and only the integrator knows whether the item relies on that.
 
+[[transport-clause-map]]
 == Where transport assumption clauses are stated
 
 The clauses in this table name a rule that a requirement or another assumption states.
@@ -1303,7 +1309,7 @@ The contracts that a binding and a wire pass: xref:../../../up-l1/bindings.adoc#
 | <<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>, "Response routes" | xref:../../../up-l1/bindings.adoc#req-ssr-binding-response-delivery[A binding delivers one response route from one thread at a time]; xref:../../../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]
 | <<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>, "Cores without coherent atomics" | <<aou-seooc-target-environment,The target environment is verified>>
 | <<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>, "Limits, deviations and known failures" | xref:../../assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]
-| <<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>, "``+unsafe+`` code outside the element" | xref:../../assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified]; xref:../../assurance.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`]
+| <<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>, "`+unsafe+` code outside the element" | xref:../../assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified]; xref:../../assurance.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`]
 | <<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>>, "The qualified list" | xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks]; xref:strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]; xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run]
 | Each assumption's sentence on what one binding adds | The page of that binding (xref:../../../up-l1/README.adoc#one-binding[what is specific to one binding])
 |===

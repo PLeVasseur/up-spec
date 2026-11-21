@@ -12,11 +12,19 @@ Filing on this page does not bind classic protocol implementations; whom each it
 The items on this page name no middleware.
 What only one binding must meet is stated with that binding (xref:README.adoc#one-binding[what is specific to one binding]).
 What a binding is, and what is not one: <<req-ssr-binding-scope,What a binding is, and the binding contract>>.
-* *Related chapters.*
+* *Section map:*
+  <<sec-loss-reporting,Loss counting and route reporting>>;
+  <<sec-deadlines-ttl,Deadlines and TTL across bindings>>;
+  <<sec-middleware-waivers,Middleware allocation permits and waivers>>;
+  <<sec-common-binding-contract,Common binding contract>>.
+* *Related chapters:*
 Runtime refusal and fixed-size error rules are stated in xref:../basics/error_model.adoc[uProtocol Error Model (UStatus)], route QoS declarations and overflow in xref:runtime.adoc[uP-L1 transport runtime], binding qualification records and waiver recording in xref:../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures] and xref:../safety/assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found], binding `+unsafe+` inventory rules in xref:../safety/assurance.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`], and element scope in xref:../safety/elements/up-rust/README.adoc[the up-rust SEooC element].
 ====
 
+[[sec-loss-reporting]]
 == Loss counting and route reporting
+
+Per-route error reporting and non-silent fault/flow counter accounting:
 
 [[req-ssr-error-no-silent-loss]]
 === No silent loss, and each loss counted once
@@ -121,7 +129,10 @@ Verification:: test (the form: native or serialized, lent or handed off and, on 
 Each report names its permit through its heap class, and the transport's waiver list holds the waivers recorded at its transition (xref:../safety/assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found]).
 So each permit joins to the waiver that admitted it.
 
+[[sec-deadlines-ttl]]
 == Deadlines and TTL across bindings
+
+Arrival-latency monitoring, deadline detection bounds and message-TTL expiry rules:
 
 [[req-ssr-qos-deadline]]
 === Deadlines are monitored
@@ -358,7 +369,10 @@ A check of a TTL reads only the frame's attributes, so it comes before any look 
 A TTL of 0 is the protocol's value for a message that does not expire, and an RPC call needs a deadline, so a request cannot use it.
 Refusing such a request as invalid calls no message with a TTL of 0 expired.
 
+[[sec-middleware-waivers]]
 == Middleware allocation permits and waivers
+
+Middleware permit matching, named waiver requirements and waiver scope limits:
 
 [[req-ssr-waiver-required]]
 === Middleware heap needs a named waiver
@@ -412,7 +426,10 @@ A known anomaly or a known failure of middleware, such as a panic that it can re
 
 A serialized route's heap class admits only the allocation that the route declares, and nothing that a native operation causes.
 
+[[sec-common-binding-contract]]
 == Common binding contract
+
+This section defines the common binding scope and contractual obligations shared across uProtocol transport bindings.
 
 [[req-ssr-binding-scope]]
 === What a binding is, and the binding contract
@@ -1026,7 +1043,7 @@ Where its middleware can enlarge, move or map again such storage after the bindi
 The binding *MUST* give a loan or a frame of zero bytes an address that is not null and has the route's alignment.
 
 *How the claim is made.*
-A lending binding *MUST NOT* state these properties to the element other than through the `+unsafe+` interface of the binding contract, and *MUST* keep each site that makes the claim under a reviewed row of its own inventory (xref:../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]; xref:../safety/assurance.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `+unsafe+`]).
+A lending binding *MUST NOT* state these properties to the element other than through the `+unsafe+` interface of the binding contract, and *MUST* keep each site that makes the claim under a reviewed row of its own inventory (xref:../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]; xref:../safety/assurance.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`]).
 A declaration, a capability value or a passed test does not establish them.
 
 *Refusal to lend.*

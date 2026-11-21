@@ -191,17 +191,17 @@ NOTE: This index is non-normative navigation; whom each item binds is stated onl
 |===
 | Scope | Chapters
 
-| Contract governance and assurance
-| xref:../../contract-generations.adoc[Contract generations and family binding]; xref:../assurance.adoc[Safety assurance governance, verification and evidence]; xref:../fault-models.adoc[Safety fault models and hypotheses]
+| Contract governance, profile and assurance
+| xref:../../contract-generations.adoc[Contract generations and family binding]; <<req-ssr-element-configurations,The ASIL path and supported configurations>>; xref:../assurance.adoc[Safety assurance governance, verification and evidence]
 
 | Element boundary, assumptions, build and strict mode
 | xref:../elements/up-rust/README.adoc[up-rust SEooC element overview]; xref:../elements/up-rust/assumptions-of-use.adoc[Assumptions of use]; xref:../elements/up-rust/build.adoc[Build and shipped content]; xref:../elements/up-rust/strict-mode.adoc[Strict mode]; xref:../elements/streamer.adoc[Streamer safety element]
 
 | Shared fundamentals (`basics/`)
-| xref:../../basics/ownership.adoc[Ownership]; xref:../../basics/resources.adoc[Resources, startup memory and heap classes]; xref:../../basics/configurations.adoc[Configurations and deployment-data validation]; xref:../../basics/error_model.adoc[Error model and runtime refusal]; xref:../../basics/uuid.adoc[Message identifiers (UUID)]; xref:../../basics/platform.adoc[Platform contracts and atomics]
+| xref:../../basics/resources.adoc[Resources, startup memory and heap classes]; xref:../../basics/configurations.adoc[Configurations and deployment-data validation]; xref:../../basics/error_model.adoc[Error model and runtime refusal]; xref:../../basics/uuid.adoc[Message identifiers (UUID)]; xref:../../basics/platform.adoc[Platform contracts and atomics]
 
 | Transport layer (`up-l1/`)
-| xref:../../up-l1/README.adoc[Transport layer overview]; xref:../../up-l1/runtime.adoc[Transport runtime, modes, bounds, QoS and cleanup]; xref:../../up-l1/payload-paths.adoc[Payload paths]; xref:../../up-l1/bindings.adoc[Binding contract, observations, deadlines, TTL and waivers]; xref:../../up-l1/peers.adoc[Peers and fault model]; xref:../../up-l1/integrity.adoc[Integrity levels and copy routes]; xref:../../up-l1/deployment.adoc[Transport deployment prerequisites]; xref:../../up-l1/iceoryx2.adoc[iceoryx2 binding]; xref:../../up-l1/iceoryx2-frame.adoc[iceoryx2 physical frame]; xref:../../up-l1/lola.adoc[LoLa binding]; xref:../../up-l1/lola-envelope.adoc[LoLa physical envelope]; xref:../../up-l1/wires/README.adoc[Wires] (xref:../../up-l1/wires/native.adoc[native], xref:../../up-l1/wires/serialized.adoc[serialized], xref:../../up-l1/wires/xcdrv2.adoc[XCDR2], xref:../../up-l1/wires/e2e.adoc[end-to-end protection])
+| xref:../../up-l1/runtime.adoc[Transport runtime, modes, bounds, QoS and cleanup]; xref:../../up-l1/payload-paths.adoc[Payload paths]; xref:../../up-l1/bindings.adoc[Binding contract, observations, deadlines, TTL and waivers]; xref:../../up-l1/peers.adoc[Peers and fault model]; xref:../../up-l1/integrity.adoc[Integrity levels and copy routes]; xref:../../up-l1/iceoryx2.adoc[iceoryx2 binding]; xref:../../up-l1/iceoryx2-frame.adoc[iceoryx2 physical frame]; xref:../../up-l1/lola.adoc[LoLa binding]; xref:../../up-l1/lola-envelope.adoc[LoLa physical envelope]; xref:../../up-l1/wires/README.adoc[Wires] (xref:../../up-l1/wires/native.adoc[native], xref:../../up-l1/wires/serialized.adoc[serialized], xref:../../up-l1/wires/xcdrv2.adoc[XCDR2], xref:../../up-l1/wires/e2e.adoc[end-to-end protection])
 
 | Communication layer (`up-l2/`)
 | xref:../../up-l2/api.adoc[Communication Layer APIs and RPC interaction rules]; xref:../../up-l2/execution.adoc[Execution and asynchronous seam]; xref:../../up-l2/streamer.adoc[Bounded-runtime Streamer]
@@ -209,3 +209,6 @@ NOTE: This index is non-normative navigation; whom each item binds is stated onl
 | Language mapping (`languages/`)
 | xref:../../languages/rust.adoc[Rust language mapping]
 |===
+
+Non-normative overview and fault-model navigation pages live at xref:../README.adoc#fault-models[safety fault-model navigation], xref:../../up-l1/README.adoc[uP-L1 transport overview] and xref:../../up-l1/README.adoc#transport-deployment-prerequisites[transport deployment prerequisites].
+Ordinary non-ASIL owned-frame SDK contract pages (`xref:../../basics/ownership.adoc[basics/ownership.adoc]` and `xref:../../up-l2/roles.adoc[up-l2/roles.adoc]`) carry zero `Safety*` / ASIL B obligations.

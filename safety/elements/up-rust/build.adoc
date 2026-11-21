@@ -94,7 +94,7 @@ The Streamer binary *MUST* keep its refusal out of every other build of its work
 
 *What the profile permits.*
 The ASIL profile is a condition of the build.
-It permits no reachable panic or abort on a runtime path, which xref:../../../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths] forbids for element code and xref:../../../up-l2/streamer.adoc#req-ssr-streamer-no-panic[The Streamer does not panic in runtime mode] forbids for the Streamer's own code and for the Streamer binary's own code, and no memory-safety failure, which xref:../../../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] forbids for the element and xref:../streamer.adoc#req-ssr-streamer-memory-safety[The Streamer's own code cannot cause undefined behaviour, and its `+unsafe+` is inventoried] forbids for the Streamer's own code and for the Streamer binary's own code.
+It permits no reachable panic or abort on a runtime path, which xref:../../../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths] forbids for element code and xref:../../../up-l2/streamer.adoc#req-ssr-streamer-no-panic[The Streamer does not panic in runtime mode] forbids for the Streamer's own code and for the Streamer binary's own code, and no memory-safety failure, which xref:../../../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] forbids for the element and xref:../streamer.adoc#req-ssr-streamer-memory-safety[The Streamer's own code cannot cause undefined behaviour, and its `unsafe` is inventoried] forbids for the Streamer's own code and for the Streamer binary's own code.
 --
 
 [horizontal]

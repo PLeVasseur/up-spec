@@ -606,7 +606,6 @@ Conventions, tags and assurance governance live in xref:../safety/README.adoc[Sa
 | xref:bindings.adoc[`bindings.adoc`] | `SafetyBinding`, `SafetyBindingPull`, `SafetyUpRustCore` | What a binding is, the common binding contract (heap, lazy state, frame drop, no panic, peer identity, QoS capability, arrival reports, response delivery, receiver count, bounded work, predecessor cleanup, integrity level, lent storage and shared state), loss counting, route reporting, deadlines, TTL and middleware waivers
 | xref:peers.adoc[`peers.adoc`] | `SafetyUpRustCore`, `SafetyStreamer`, `SafetyBinding`, `SafetyWire` | The faulty-peer model, peer failure, native ABI agreement, stale-peer rejection and declared peer admission
 | xref:integrity.adoc[`integrity.adoc`] | `SafetyUpRustCore` | One integrity level per transport, the zero-copy rule, the copy route, in-place types and upward carrier crossings
-| xref:deployment.adoc[`deployment.adoc`] | — | Non-normative overview of ordinary transport-deployment prerequisites and links to the claim-scoped integrator assumptions of use
 | xref:iceoryx2.adoc[`iceoryx2.adoc`] | `TransportLayerImpl`, `SafetyIceoryx2` | Classic v0.6.1 iceoryx2 protocol contract (xref:iceoryx2.adoc#classic-iceoryx2-v0-6-1[v0.6.1 section]) and the up-rust SEooC iceoryx2 0.9.3 binding profile
 | xref:iceoryx2-frame.adoc[`iceoryx2-frame.adoc`] | `SafetyIceoryx2`, `SafetyUpRustCore` | How the iceoryx2 binding places one frame in one iceoryx2 sample, what it checks before any of it is used, and what it wipes
 | xref:lola.adoc[`lola.adoc`] | `SafetyLola` | Requirements specific to the LoLa binding, upstream LoLa reference context and an index of the general rules that reach a route on LoLa
@@ -616,10 +615,24 @@ Conventions, tags and assurance governance live in xref:../safety/README.adoc[Sa
 
 Related shared foundations and cross-cutting rules live in xref:../basics/ownership.adoc[frame and value ownership], xref:../basics/resources.adoc[shared resource lifecycle and storage], xref:../basics/configurations.adoc[configurations and deployment-data validation], xref:../basics/error_model.adoc[error model], xref:../basics/platform.adoc[platform contracts], xref:../languages/rust.adoc[Rust language mapping] and xref:../safety/elements/up-rust/README.adoc[the up-rust SEooC element].
 
+[[transport-deployment-prerequisites]]
+=== Transport deployment prerequisites
+
+NOTE: This subsection is a non-normative overview indexing transport-layer deployment prerequisites of the up-rust SEooC requirement family (`+req~ssr-*+` and `+aou~seooc-*+`); the linked canonical items govern.
+
+* *Ordinary transport-layer prerequisites:* xref:../basics/configurations.adoc[Configuration and deployment data], xref:../basics/platform.adoc[platform contracts and atomics], xref:bindings.adoc[binding contract], xref:peers.adoc[peers and fault model], xref:integrity.adoc[integrity levels and copy routes], xref:wires/README.adoc[wires], xref:../safety/assurance.adoc[assurance governance] and <<one-binding,what is specific to one binding>>.
+* *Claim-scoped integrator assumptions of use (xref:../safety/elements/up-rust/assumptions-of-use.adoc[the element's assumptions of use]):*
+  xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected];
+  xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport];
+  xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly];
+  xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts];
+  xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-iceoryx2-level-separation[On iceoryx2, each integrity level has its own processes, domain and OS user] and xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-iceoryx2-limits[A deployment on iceoryx2 accepts that binding's limits, and no known failure as one];
+  xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-lola-assumptions-kept[A deployment on LoLa keeps the assumptions of LoLa that the binding names for the integrator].
+
 [[one-binding]]
 == What is specific to one binding
 
-The duties of every binding (xref:bindings.adoc[uP-L1 transport bindings]) and the transport-wide assumptions of use (xref:../safety/elements/up-rust/assumptions-of-use.adoc[the element's assumptions of use]; overview in xref:deployment.adoc[transport deployment prerequisites]) name no middleware.
+The duties of every binding (xref:bindings.adoc[uP-L1 transport bindings]) and the transport-wide assumptions of use (xref:../safety/elements/up-rust/assumptions-of-use.adoc[the element's assumptions of use]; overview in <<transport-deployment-prerequisites,transport deployment prerequisites>>) name no middleware.
 What only one binding must meet, and what only a deployment on it provides, is stated with that binding, in items that are specific to it: they name no other binding, and one of them can give the element a duty of its own.
 
 [cols="2,3,5",options="header"]

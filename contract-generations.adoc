@@ -13,7 +13,7 @@ For some behaviours the repository holds rules from more than one contract famil
 | Family | How its items are identified | Who follows them
 
 | Classic protocol-chapter rules
-| The items in xref:basics/README.adoc[`basics/`], xref:up-l1/README.adoc[`up-l1/`], xref:up-l2/README.adoc[`up-l2/`], xref:up-l3/README.adoc[`up-l3/`] and xref:languages.adoc[`languages.adoc`] carrying classic protocol tags (`LanguageLibrary`, `TransportLayerImpl`, `CommunicationLayerImpl`, `ServiceConsumer`, `ServiceProvider`, `LocalUriProvider`, `uSubscription`, `uTwin`)
+| The items in xref:basics/README.adoc[`basics/`], xref:up-l1/README.adoc[`up-l1/`], xref:up-l2/README.adoc[`up-l2/`], xref:up-l3/README.adoc[`up-l3/`] and xref:languages.adoc[`languages.adoc`] carrying classic protocol tags (such as `LanguageLibrary`, `TransportLayerImpl`, `TransportLayerImplPull`, `TransportLayerImplPush`, `CommunicationLayerImpl`, `ServiceConsumer`, `ServiceProvider`, `LocalUriProvider`, `uSubscription` and `uTwin`)
 | The implementations that each chapter's rules cover, as the chapter states; how a classic protocol-chapter rule and an item of the up-rust SEooC requirement family meet: <<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>
 
 | The up-rust SEooC requirement family
@@ -455,7 +455,7 @@ Every item of the owned-frame SDK contract carries a tag of this legend, and no 
 The classic APIs are the Transport Layer API of xref:up-l1/README.adoc[uP-L1], which sends and receives a xref:basics/umessage.adoc[`UMessage`], and the Communication Layer APIs of xref:up-l2/api.adoc[uP-L2], with their default implementation over it.
 
 *Their contract.*
-The classic protocol chapters that state them stay their contract, each key word with the strength that its chapter gives it.
+The classic protocol-chapter rules that state them stay their contract, each key word with the strength that its chapter gives it.
 
 *Additive.*
 An SDK that offers the classic APIs beside owned-frame routes *MUST NOT* let the presence of owned-frame routes, of a layer above the core, of an adapter that the application has not selected for a call, of a memory provider or of a scheduler integration, in the same build or process, change the behaviour, the results or the defaults of a classic operation for the same input and the same configuration.
@@ -478,7 +478,7 @@ Verification:: test, review
 * *review*: no path from a classic API into an owned-frame route, or back, outside an adapter that the application selects.
 
 *Rationale.*
-Applications and libraries written against the classic APIs rely on the behaviour, results and defaults that the classic protocol chapters state, with the strength of each key word.
+Applications and libraries written against the classic APIs rely on the behaviour, results and defaults that the classic protocol-chapter rules state, with the strength of each key word.
 If owned-frame routes in the same library or process changed any of them, those applications would break with no change of their own.
 A classic message owns its payload, while an owned-frame route lends storage that has one owner at a time.
 So a silent substitution in either direction would change who owns a payload, and for how long.

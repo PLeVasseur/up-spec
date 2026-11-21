@@ -17,7 +17,7 @@ These items say how the element lends or copies shared memory between integrity 
 * The integrator's part, assigning each transport's level, is xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly] in xref:../safety/elements/up-rust/assumptions-of-use.adoc[the element's assumptions of use].
 * The integrator's duties for access, for two-way shared state and for a zero-copy writer are xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], on the same page.
 * The integrator's duties for data above ASIL B, and for the element inside a process or partition that holds software at ASIL C or D, are xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element], on the same page.
-* What a level is, its values, their order and its default: <<req-ssr-integrity-declared,Each transport declares one integrity level>>; what a level is not: xref:../safety/README.adoc#concepts[Shared concepts and fault models] and xref:../safety/fault-models.adoc[Safety fault models and hypotheses].
+* What a level is, its values, their order and its default: <<req-ssr-integrity-declared,Each transport declares one integrity level>>; what a level is not: xref:../safety/README.adoc#concepts[Shared concepts and fault models] and xref:../safety/README.adoc#fault-models[Fault models and fault-containment map].
 
 [[req-ssr-integrity-declared]]
 == Each transport declares one integrity level

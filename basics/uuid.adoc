@@ -18,6 +18,7 @@ SPDX-FileType: DOCUMENTATION
 SPDX-License-Identifier: Apache-2.0
 ----
 
+[[uuid-overview]]
 == Overview
 
 NOTE: Universal Unique Identifiers (UUID) are used in uProtocol to uniquely identify instances of xref:umessage.adoc[`UMessage`]. For more explanation of the use cases for the uProtocol UUID, please refer to xref:uattributes.adoc[UAttributes Specifications].
@@ -146,7 +147,7 @@ Verification:: review, test, heap-window
 * *heap-window*: the first ID on a cold thread, IDs generated while the wall clock cannot be read, and an ID generated on a serialized route that declares allocation.
 
 *Rationale.*
-up-spec requires the UUIDs in UAttributes to be UUIDv7 (<<Overview,UUID>>, `+dsn~uuid-spec~1+`).
+up-spec requires the UUIDs in UAttributes to be UUIDv7 (<<uuid-overview,UUID>>, `+dsn~uuid-spec~1+`).
 
 Correlation depends on distinguishing requests across time and reuse.
 A finite generator needs explicit refusal bounds when its clock cannot advance.

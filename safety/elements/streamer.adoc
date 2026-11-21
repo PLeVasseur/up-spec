@@ -52,7 +52,7 @@ Its items are the requirements of xref:../../up-l2/streamer.adoc[the Streamer ch
 * xref:../../up-l2/streamer.adoc#req-ssr-config-exact-addresses[ASIL Streamer routes name exact source addresses];
 * xref:../../up-l2/streamer.adoc#req-ssr-streamer-heap-free[The Streamer allocates nothing in runtime mode];
 * xref:../../up-l2/streamer.adoc#req-ssr-streamer-no-panic[The Streamer does not panic in runtime mode];
-* <<req-ssr-streamer-memory-safety,The Streamer's own code cannot cause undefined behaviour, and its `+unsafe+` is inventoried>>;
+* <<req-ssr-streamer-memory-safety,The Streamer's own code cannot cause undefined behaviour, and its `unsafe` is inventoried>>;
 * xref:../../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes];
 * xref:../../up-l2/streamer.adoc#req-ssr-streamer-no-ingress-block[An egress never blocks an ingress];
 * xref:../../up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route];
@@ -154,7 +154,7 @@ The check covers the part's own sources and the generated output of the build th
 It is made on the build before its release: it is no check of strict mode and no check of a running Streamer.
 
 *The element's code.*
-xref:../../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] and xref:../assurance.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified] state these duties for the element, the carrier primitives that the Streamer calls included, and give neither the Streamer nor the Streamer binary a duty.
+xref:../../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] and xref:../assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified] state these duties for the element, the carrier primitives that the Streamer calls included, and give neither the Streamer nor the Streamer binary a duty.
 This requirement states them for the Streamer's own code and for the Streamer binary's own code.
 --
 

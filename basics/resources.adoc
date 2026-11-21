@@ -8,14 +8,17 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 * *Contract-family membership.*
 Filing on this page does not decide whom an item binds, and neither merges the repository's requirement families nor binds classic protocol implementations (xref:../contract-generations.adoc[Which requirements an implementation follows]).
 This page holds items from two distinct contract families:
-** *The up-rust SEooC requirement family (`+req~ssr-*+`, `ASIL:: B`, `Safety*` tags)*: <<_mode_phase_boundary_and_resource_lifetime_types,Mode phase boundary and resource-lifetime types>>, <<_startup_memory_and_capacities,Startup memory and capacities>>, and <<_heap_classes_lazy_state_and_stronger_guarantees,Heap classes, lazy state and stronger guarantees>>.
+** *The up-rust SEooC requirement family (`+req~ssr-*+`, `ASIL:: B`, `Safety*` tags)*: <<sec-mode-types,Mode phase boundary and resource-lifetime types>>, <<sec-startup-memory,Startup memory and capacities>>, and <<sec-heap-classes,Heap classes, lazy state and stronger guarantees>>.
 Each item binds the actors to which its statement gives a duty (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
-** *The owned-frame SDK contract (`+req~sdk-owned-frame-*+`, ordinary obligations, no ASIL, `OwnedFrame*` tags)*: <<_memory_sources_and_allocation_providers,Memory sources and allocation providers>>.
+** *The owned-frame SDK contract (`+req~sdk-owned-frame-*+`, ordinary obligations, no ASIL, `OwnedFrame*` tags)*: <<sec-memory-providers,Memory sources and allocation providers>>.
 Each item binds a part only where its declaration names the owned-frame SDK contract and within the conditions its statement sets (xref:../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it]; xref:../contract-generations.adoc#owned-frame-conventions[Owned-frame SDK conventions and tags]).
+* *Section map.*
+<<sec-words,Words used on this page>> -> <<sec-mode-types,Mode phase boundary and resource-lifetime types>> -> <<sec-startup-memory,Startup memory and capacities>> -> <<sec-heap-classes,Heap classes, lazy state and stronger guarantees>> -> <<sec-memory-providers,Memory sources and allocation providers>>.
 * *Related chapters.*
 Mode transition, runtime bounds and release mechanics are stated in xref:../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation], the native-path heap-free rule in xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path], frame/value ownership in xref:ownership.adoc[Ownership of Frame Storage and Decoded Values], and public selection of parts in xref:configurations.adoc[Configurations and Application-Selectable Parts].
 ====
 
+[[sec-words]]
 == Words used on this page
 
 These words have the meaning that the linked items give them.
@@ -33,7 +36,10 @@ Where an SDK's core is not the element, a word that an item of the up-rust SEooC
 * A *guarantee*: <<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>>.
 * A *memory provider*, a *memory source* and an *allocation provider*: <<req-sdk-owned-frame-provider-selection,The selected memory provider is the only one used, and selecting it claims nothing>>.
 
+[[sec-mode-types]]
 == Mode phase boundary and resource-lifetime types
+
+Mode separation at type level and lifecycle boundaries between initialization and runtime:
 
 [[req-ssr-mode-two-types]]
 === Two modes, as two types
@@ -109,7 +115,10 @@ ISO 26262:: 6-6.4.2 g (part-clause numbers only)
 *Rationale.*
 Traffic before the transition would run before every route is admitted and its storage placed, which is what the transition checks (xref:../up-l1/runtime.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode]).
 
+[[sec-startup-memory]]
 == Startup memory and capacities
+
+Compile-time/initialization placement, capacity computation and sealing of startup memory:
 
 [[req-ssr-memory-static]]
 === ASIL-path storage is static or caller-provided
@@ -275,7 +284,10 @@ A report that counted only live objects would understate two things:
 
 Sizes that depend on a scheduler's tasks and timers, an allocator's overhead or a thread's stack depend on the supported configuration, whose package states its sizing (xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]).
 
+[[sec-heap-classes]]
 == Heap classes, lazy state and stronger guarantees
+
+Lazy initialization forcing, per-route declared heap classes and separately requested stronger resource guarantees:
 
 [[req-ssr-heap-lazy-forced]]
 === Lazy state is forced before runtime mode
@@ -672,7 +684,10 @@ _Mechanisms._
 A release service is how a configuration gives non-waiting release over a dependency that can wait (xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
 A configuration that has none cannot give that guarantee.
 
+[[sec-memory-providers]]
 == Memory sources and allocation providers
+
+This section states how callers select explicit memory sources and allocation providers across owned-frame and runtime paths.
 
 [[req-sdk-owned-frame-provider-selection]]
 === The selected memory provider is the only one used, and selecting it claims nothing
