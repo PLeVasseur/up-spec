@@ -55,8 +55,11 @@ The reading order across these chapters is: message and protocol meaning -> appl
 
 == Conformance records
 
-The link:conformance/README.md[conformance catalogue] presents versioned
-implementation and evidence observations against an exact specification revision.
+The link:conformance/README.md[conformance intake catalogue] preserves the
+immutable historical baseline intake against an exact specification revision.
+Separately identified exact-subject assessments follow the successor documentary
+format in link:conformance/assessments/README.md[conformance assessments]
+(currently unpopulated; all historical intake slots remain unassessed).
 These non-normative records neither add nor waive requirements.
 
 == Tracing Requirements
