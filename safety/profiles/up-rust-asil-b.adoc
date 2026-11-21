@@ -66,7 +66,7 @@ NOTE: This index is non-normative navigation; whom each item binds is stated onl
 
 [cols="2,5",options="header"]
 |===
-| Area | Chapters
+| Scope | Chapters
 
 | Contract governance and assurance
 | xref:../../contract-generations.adoc[Contract generations and family binding]; xref:../assurance.adoc[Safety assurance governance, verification and evidence]; xref:../fault-models.adoc[Safety fault models and hypotheses]
@@ -75,17 +75,14 @@ NOTE: This index is non-normative navigation; whom each item binds is stated onl
 | xref:../elements/up-rust/README.adoc[up-rust SEooC element overview]; xref:../elements/up-rust/assumptions-of-use.adoc[Assumptions of use]; xref:../elements/up-rust/build.adoc[Build and shipped content]; xref:../elements/up-rust/strict-mode.adoc[Strict mode]; xref:../elements/streamer.adoc[Streamer safety element]
 
 | Shared fundamentals (`basics/`)
-| xref:../../basics/ownership.adoc[Ownership]; xref:../../basics/resources.adoc[Resources, startup memory and heap classes]; xref:../../basics/configurations.adoc[Configurations and deployment-data validation]; xref:../../basics/error_model.adoc[Error model and runtime refusal]; xref:../../basics/platform.adoc[Platform contracts and atomics]
+| xref:../../basics/ownership.adoc[Ownership]; xref:../../basics/resources.adoc[Resources, startup memory and heap classes]; xref:../../basics/configurations.adoc[Configurations and deployment-data validation]; xref:../../basics/error_model.adoc[Error model and runtime refusal]; xref:../../basics/uuid.adoc[Message identifiers (UUID)]; xref:../../basics/platform.adoc[Platform contracts and atomics]
 
 | Transport layer (`up-l1/`)
-| xref:../../up-l1/runtime.adoc[Transport runtime, modes, bounds, QoS and cleanup]; xref:../../up-l1/payload-paths.adoc[Payload paths]; xref:../../up-l1/bindings.adoc[Binding observations, deadlines, TTL and waivers]; xref:../../up-l1/peers.adoc[Peers and fault model]; xref:../../up-l1/wires/README.adoc[Wires]
+| xref:../../up-l1/README.adoc[Transport layer overview]; xref:../../up-l1/runtime.adoc[Transport runtime, modes, bounds, QoS and cleanup]; xref:../../up-l1/payload-paths.adoc[Payload paths]; xref:../../up-l1/bindings.adoc[Binding contract, observations, deadlines, TTL and waivers]; xref:../../up-l1/peers.adoc[Peers and fault model]; xref:../../up-l1/integrity.adoc[Integrity levels and copy routes]; xref:../../up-l1/deployment.adoc[Transport deployment prerequisites]; xref:../../up-l1/iceoryx2.adoc[iceoryx2 binding]; xref:../../up-l1/iceoryx2-frame.adoc[iceoryx2 physical frame]; xref:../../up-l1/lola.adoc[LoLa binding]; xref:../../up-l1/lola-envelope.adoc[LoLa physical envelope]; xref:../../up-l1/wires/README.adoc[Wires] (xref:../../up-l1/wires/native.adoc[native], xref:../../up-l1/wires/serialized.adoc[serialized], xref:../../up-l1/wires/xcdrv2.adoc[XCDR2], xref:../../up-l1/wires/e2e.adoc[end-to-end protection])
 
 | Communication layer (`up-l2/`)
-| xref:../../up-l2/execution.adoc[Execution and asynchronous seam]
+| xref:../../up-l2/api.adoc[Communication Layer APIs and RPC interaction rules]; xref:../../up-l2/execution.adoc[Execution and asynchronous seam]; xref:../../up-l2/streamer.adoc[Bounded-runtime Streamer]
 
 | Language mapping (`languages/`)
 | xref:../../languages/rust.adoc[Rust language mapping]
-
-| Remaining chapters (pending subsequent relocation commits)
-| xref:../../up-l1/wires/e2e.adoc[The end-to-end protection wire]; xref:../../up-l1/README.adoc[Transport-layer bindings, wires, integrity, peers, middleware and deployment]; xref:../up-l2/README.adoc[RPC/message identity and Streamer]
 |===

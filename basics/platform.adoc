@@ -119,7 +119,7 @@ The element *MUST* refuse setup, with a report, on a failed read and on a source
 *Non-repetition across starts.*
 Random entropy makes a repeated value improbable, not impossible.
 So the element *MUST NOT* rest a guarantee that a value never repeats across starts on entropy: where it gives such a guarantee, it *MUST* rest it on a checked persistent construction.
-The rule for message IDs is stated in xref:../safety/up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique].
+The rule for message IDs is stated in xref:uuid.adoc#req-ssr-ids-unique[Message IDs are unique].
 
 *A custom platform.*
 Each platform backend that an integrator supplies *MUST* keep the rules that this item gives a platform backend of the element, and the element keeps its own rules of this item with it.
@@ -286,7 +286,7 @@ The windows that remain are:
 * a fault counter's saturation at 2^32^ − 1, which a read reports as saturated, not as a difference;
 * a deadline count's saturation at the end of its range, which the report states (xref:../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored]);
 * a pool's reuse count and a call slot's generation, whose exhaustion retires that pool for good, after the warning its lifetime policy states, instead of reusing a value;
-* the message-ID generator's period, 2^64^ IDs of one route, stated with its refusal bounds (xref:../safety/up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]).
+* the message-ID generator's period, 2^64^ IDs of one route, stated with its refusal bounds (xref:uuid.adoc#req-ssr-ids-unique[Message IDs are unique]).
 
 The element *MUST* report a read of a saturated fault counter as saturated, never as a wrapped value or as a difference.
 
@@ -304,7 +304,7 @@ ASIL:: B
 Allocated to:: the element; each platform backend of the element (part E4), for the windows that its representation adds
 Verification:: test, review
 * *test*
-** Each remaining window's boundary driven through a test hook: a flow counter's wrap, a fault counter's and the deadline count's saturation, a pool retired, after the warning that its lifetime policy states, before its reuse count or a slot's generation wraps, and a route's message-ID generator at the end of its period, refusing as xref:../safety/up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique] states.
+** Each remaining window's boundary driven through a test hook: a flow counter's wrap, a fault counter's and the deadline count's saturation, a pool retired, after the warning that its lifetime policy states, before its reuse count or a slot's generation wraps, and a route's message-ID generator at the end of its period, refusing as xref:uuid.adoc#req-ssr-ids-unique[Message IDs are unique] states.
 ** A read of a saturated fault counter, reported as saturated.
 ** The tie of identity to tenure at each claim and at each expiry, peer failure and retirement.
 ** For the narrowed 32-bit-word representation, the one-word monitor's boundaries and an arrival racing a refresh, under Miri, under Stacked Borrows and under Tree Borrows.

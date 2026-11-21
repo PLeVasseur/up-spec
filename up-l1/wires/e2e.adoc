@@ -166,7 +166,7 @@ A response is judged by <<req-ssr-e2e-rpc-echo,An E2E response answers exactly i
 
 * A frame that passes these checks and then fails the inner wire's decode *MUST* have advanced the reference.
 * Each refusal *MUST* name what failed, without heap and without panicking.
-* Which refused requests are answered, and how, is stated in <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>> and xref:../../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
+* Which refused requests are answered, and how, is stated in <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>> and xref:../../up-l2/api.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
 
 *No timeout of its own.*
 The E2E wire *MUST NOT* keep a timeout of its own: it judges only the frames that it is given.
@@ -387,7 +387,7 @@ A copy that another server answers is refused as an undeclared data ID when the 
 
 *Several declared servers.*
 Where a client declares several servers for one method, an answer from another declared server to a misaddressed copy meets every condition, so the E2E wire accepts it: its check cannot tell that answer from the call's own (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
-The element's own checks of a response still apply (xref:../../safety/up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
+The element's own checks of a response still apply (xref:../../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
 
 *A response with no E2E header.*
 How the element refuses, names and counts a response with no E2E header on an RPC client's response route that selects the E2E wire is stated in <<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>>.
@@ -585,8 +585,8 @@ For such a frame, these rules replace that item's refusal, result and count for 
 *Calls and frames.*
 
 * The element *MUST* release a refused frame at once.
-* What a refused response does to its call is stated in xref:../../safety/up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
-* Which refused requests are answered is stated in <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>; whether a request with no E2E header is answered, in xref:../../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
+* What a refused response does to its call is stated in xref:../../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
+* Which refused requests are answered is stated in <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>; whether a request with no E2E header is answered, in xref:../../up-l2/api.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
 * Which check counts a response, a request or a frame on a topic's or a notification's receive route with no E2E header that a check of its TTL also refuses is stated in xref:../bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed].
 --
 
@@ -639,7 +639,7 @@ For a refusal that has a kind and a class, the E2E wire *MUST* encode the refusa
 *The element answers.*
 At a server, the element *MUST* give every request that the E2E wire refuses exactly one answer, except a corrupt one, to which it *MUST* give none:
 
-* to a request whose data ID was not declared, `+InvalidArgument+`, sent as xref:../../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered] states;
+* to a request whose data ID was not declared, `+InvalidArgument+`, sent as xref:../../up-l2/api.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered] states;
 * to every other refused request, the wire's refusal answer, in every state of strict mode.
 The element *MUST* send the class that the wire gave, and *MUST NOT* change it.
 
@@ -649,7 +649,7 @@ The element *MUST* try a refusal answer once, whatever the response route's over
 *Counting at the server.*
 At a server, the element *MUST* count each request that the E2E wire refuses, under the refusal's name: corrupt, undeclared data ID, or its kind.
 That count is the refusal's one count in the E2E counter (<<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>>), and no second count of the request.
-The count of an unsent wire refusal answer is stated under "Sending a refusal answer"; the count of an unsent `+InvalidArgument+` answer is stated in xref:../../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
+The count of an unsent wire refusal answer is stated under "Sending a refusal answer"; the count of an unsent `+InvalidArgument+` answer is stated in xref:../../up-l2/api.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
 
 *At the client.*
 
@@ -766,7 +766,7 @@ NOTE: Which figures an application reads to react within the fault tolerant time
 --
 *Carriage.*
 The Streamer *MUST* ensure that a frame protected by the E2E wire passes that wire's check at the receiving endpoint after any allowed Streamer hop, also between legs whose envelopes differ or whose bindings adapt different middleware.
-It does so by carrying the frame's payload bytes and its payload encoding identifier unchanged (xref:../../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
+It does so by carrying the frame's payload bytes and its payload encoding identifier unchanged (xref:../../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
 
 *Detection.*
 Between them, the Streamer and the E2E wire *MUST* ensure that a byte of such a frame that is corrupted between hops is detected at the receiving endpoint.
@@ -783,6 +783,6 @@ Allocated to:: the Streamer; the E2E wire, for its check at the receiving endpoi
 Verification:: test (frames carried through a test double of the Streamer's forwarding, between legs whose envelopes differ, and between legs whose bindings adapt different middleware, each passing its check at the receiving endpoint; the same through the ASIL Streamer, after each allowed hop), fault-injection (a byte corrupted between hops, detected at the receiving endpoint, the frame refused as corrupt)
 
 *Rationale.*
-A carrier forwards a frame's identifiers and payload bytes unchanged (xref:../../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
+A carrier forwards a frame's identifiers and payload bytes unchanged (xref:../../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
 So a check over those bytes at the receiving endpoint covers every hop before it.
 The Streamer holds no part of the protection, so it can neither restore it nor vouch for it, and detection is the receiving wire's.

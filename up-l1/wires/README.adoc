@@ -181,7 +181,7 @@ Where a requirement that is specific to one binding fixes one of these facts for
 
 *Writing.*
 On a route that selects a wire to decode its frame metadata, the element *MUST* encode the metadata of each frame that it originates in that wire's stated metadata format.
-Metadata re-encoding when a frame is forwarded is stated in xref:../../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes], "Metadata at egress".
+Metadata re-encoding when a frame is forwarded is stated in xref:../../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes], "Metadata at egress".
 
 *Decoding.*
 The wire *MUST* decode metadata in that format only.

@@ -21,7 +21,7 @@ For some behaviours the repository holds rules from more than one contract famil
 | <<req-ssr-requirements-bind,A requirement binds the actors to which it gives a duty>>; xref:safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]
 
 | The owned-frame SDK contract
-| Every requirement with identifier `+req~sdk-owned-frame-*+`, carrying `OwnedFrame*` tags, wherever in this repository it is filed (entry pages: xref:basics/ownership.adoc[`basics/ownership.adoc`], xref:basics/resources.adoc[`basics/resources.adoc`], xref:sdk/owned-frame/application.adoc[`sdk/owned-frame/application.adoc`])
+| Every requirement with identifier `+req~sdk-owned-frame-*+`, carrying `OwnedFrame*` tags, wherever in this repository it is filed (entry pages: xref:basics/ownership.adoc[`basics/ownership.adoc`], xref:basics/resources.adoc[`basics/resources.adoc`], xref:basics/configurations.adoc[`basics/configurations.adoc`], xref:up-l1/payload-paths.adoc[`up-l1/payload-paths.adoc`], xref:up-l2/roles.adoc[`up-l2/roles.adoc`], xref:up-l2/execution.adoc[`up-l2/execution.adoc`])
 | <<req-sdk-owned-frame-contract,The owned-frame SDK contract binds the parts that declare it>>
 |===
 
@@ -53,7 +53,7 @@ Whom a classic protocol-chapter rule binds is stated by its chapter, and whom an
 | Ordinary functional behaviour; native resource behaviour; a finite timing bound; or a safety-assurance scope, with its evidence and its assumptions of use (<<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>, "What a claim covers").
 |===
 
-NOTE: So an item of the up-rust SEooC requirement family (`+req~ssr-*+`) can state ordinary functional behaviour of the up-rust SEooC, whether it is filed in a protocol chapter, a language mapping or under `safety/`.
+NOTE: So an item of the up-rust SEooC requirement family (`+req~ssr-*+`) can state ordinary functional behaviour of the up-rust SEooC, whether it is filed in a protocol chapter, a language mapping or the safety and assurance view.
 
 These items state when an item binds, whatever its kind of claim:
 
@@ -119,7 +119,7 @@ A statement names other parts to say whose input, storage or declaration a duty 
 Pages, tags, tracing runs and repositories change as the specification is organized and traced.
 If whom a requirement binds depended on them, such a change could move a duty to another part or leave it with none.
 
-NOTE: How a contributor keeps a statement and its "Allocated to" line in agreement, and corrects a disagreement, is stated in xref:CONTRIBUTING.adoc#safety-area[Changing the safety area of the specification].
+NOTE: How a contributor keeps a statement and its "Allocated to" line in agreement, and corrects a disagreement, is stated in xref:CONTRIBUTING.adoc#safety-area[Changing contract-family requirements and safety pages].
 
 [[req-ssr-contract-transition]]
 === What a part declares and claims, and when a replacement takes effect

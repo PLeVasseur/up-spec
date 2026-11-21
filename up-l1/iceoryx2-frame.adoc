@@ -243,7 +243,7 @@ The binding *MUST* accept the element's record of the metadata that it wrote onl
 It *MUST* publish a loan only on the route that it was lent for, and only once that record is made.
 
 *Receive.*
-A receive route's _retained budget_ is the number of received frames that the route can hold at once, as its declaration states; on a route of the Streamer it is the retained budget of the route's declared budget (xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route]).
+A receive route's _retained budget_ is the number of received frames that the route can hold at once, as its declaration states; on a route of the Streamer it is the retained budget of the route's declared budget (xref:../up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route]).
 The binding *MUST* keep a received sample for as long as the element's lease of the frame lasts, and *MUST* charge it to the route's retained budget from before it takes the sample from iceoryx2 to after it has given the sample back.
 A view of the payload *MUST* cover exactly the payload's extent, and the binding's view of the metadata exactly the metadata's extent.
 A view *MUST NOT* outlive the sample that holds it, and giving the sample back ends every view of it (xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).

@@ -80,7 +80,7 @@ It admits the route's ordinary ownership, and it establishes nothing more:
 
 * It excuses no lazy first-use initialization (xref:../basics/resources.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]).
 * It does not reach a native operation, the work one causes or the work a native route shares.
-* It does not reach an operation that its own item requires to use no heap on every route, such as the generation of a message ID (xref:../safety/up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]) or the acquisition, copy and validation of an integrity copy route (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
+* It does not reach an operation that its own item requires to use no heap on every route, such as the generation of a message ID (xref:../basics/uuid.adoc#req-ssr-ids-unique[Message IDs are unique]) or the acquisition, copy and validation of an integrity copy route (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 * It relaxes no duty of element code, which keeps xref:../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data] and xref:runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] on every route.
 * What it establishes of the stronger guarantees, and what a route's report shows of them, is stated in xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
 
@@ -172,7 +172,7 @@ An adapter *MUST NOT* build a classic message that borrows such storage.
 A crossing from a frame of an owned-frame route to a classic message is a stated copy into storage that the classic message owns, or it is refused.
 
 *Waiting.*
-Which operations an adapter may offer as a nonblocking attempt or as a progress step: xref:../sdk/owned-frame/application.adoc#req-sdk-owned-frame-operation-kinds[Each message operation is a nonblocking attempt, a bounded wait or asynchronous, and none hides a wait].
+Which operations an adapter may offer as a nonblocking attempt or as a progress step: xref:../up-l2/execution.adoc#req-sdk-owned-frame-operation-kinds[Each message operation is a nonblocking attempt, a bounded wait or asynchronous, and none hides a wait].
 --
 
 [horizontal]
@@ -247,7 +247,7 @@ Between a sender and a receiver on one transport, a payload is then copied only 
 For the element on a native route, this clause replaces the clause "The only copies" of revision 1 of xref:wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], and its two cases are those of that clause.
 
 *A carrier.*
-What a carrier may copy on a hop is stated with the carrier (xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]; xref:integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused]).
+What a carrier may copy on a hop is stated with the carrier (xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]; xref:integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused]).
 --
 
 [horizontal]
@@ -393,7 +393,7 @@ A frame that a check made before this comparison refuses, such as the TTL check 
 * The element *MUST NOT* take a payload's encoding from its bytes, and *MUST NOT* try one wire after another.
 * The element *MUST* compare the identifiers as numbers, and `0` as any other.
 A frame that carries `0` reaches only a wire that declares `0`, for an encoding that an applicable contract defines.
-* On an RPC server, whether and how the refusal of a request under this item is answered, and where this comparison stands among the checks of a request, are stated in xref:../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
+* On an RPC server, whether and how the refusal of a request under this item is answered, and where this comparison stands among the checks of a request, are stated in xref:../up-l2/api.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
 
 *Present, empty and absent.*
 
@@ -408,7 +408,7 @@ Where the declared contract of an operation permits a message with no payload, t
 
 *A response to an RPC call.*
 For a response tied to an RPC call, the operation is the call, and this item's refusal of the response neither ends the call nor itself returns its result to the call's caller.
-The refused response completes nothing, leaves the call open and is counted once under the cause of its refusal, as xref:../safety/up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it] states.
+The refused response completes nothing, leaves the call open and is counted once under the cause of its refusal, as xref:../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it] states.
 What the call names where it ends at its TTL, and the responses for which that item replaces this item's refusal, result and count, are stated in that item.
 
 *A message on an end-to-end protected receive route.*
@@ -426,7 +426,7 @@ It identifies no type, and neither does a decoding that succeeds.
 
 *Typed sending and receiving.*
 This item applies where a payload is written or read as a typed value, on a typed send and on a typed receive.
-It does not apply where a payload is only carried (xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
+It does not apply where a payload is only carried (xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
 --
 
 [horizontal]
@@ -443,14 +443,14 @@ Verification:: test, fault-injection, review
 ** On a receive route that does not select the end-to-end protection wire, a typed operation that requires a value, given a message with no payload that no earlier check refused, other than a response tied to an RPC call: refused with `+missing_payload+`, returned to its caller where the operation returns a result, and otherwise counted once under that cause.
 ** On a receive route that does not select the end-to-end protection wire, an operation whose declared contract permits a message with no payload, given such a message that no earlier check refused, other than a tied response whose commstatus is not `+Ok+`, and, for a response, after it was tied to its call and admitted by its TTL check: the absence reported as that contract states.
 ** On a response route that does not select the end-to-end protection wire, a response tied to its call, with commstatus `+Ok+` and admitted by its TTL check, with no payload, to a call whose operation requires a value, and one whose payload names an encoding that no wire of the route declares: each given to no wire, counted once under its own cause, completing nothing and leaving the call open, and a later acceptable copy completing the call.
-** On a response route that does not select the end-to-end protection wire, a tied response whose commstatus is not `+Ok+` and that its TTL check admitted, one with no payload to a call whose operation requires a value and one whose payload names an encoding that no wire of the route declares: each given to no wire, with none of this item's refusals, results or counts, and the call completed with that commstatus, as xref:../safety/up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it] states.
+** On a response route that does not select the end-to-end protection wire, a tied response whose commstatus is not `+Ok+` and that its TTL check admitted, one with no payload to a call whose operation requires a value and one whose payload names an encoding that no wire of the route declares: each given to no wire, with none of this item's refusals, results or counts, and the call completed with that commstatus, as xref:../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it] states.
 ** On each of an RPC client's response route, an RPC server's request route, a topic's receive route and a notification's receive route that selects the end-to-end protection wire, a message with no payload, also one to an operation whose declared contract permits that absence, and a message with a payload of another encoding, also one of the inner wire's encoding and one of another declared wire's encoding, also one of length zero, none refused by an earlier check: each refused once as `+unprotected+` and counted once in that counter, with no mismatch or `+missing_payload+` result or count and no absence reported, and no wire given the payload.
 ** A frame that a check of its TTL refuses, one with no payload and one whose identifier no wire of the route declares, on a route that selects the end-to-end protection wire and on one that does not: each given to no wire and counted once under that check's cause, with none of this item's refusals, results or counts, as xref:bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states.
 ** An RPC request that no earlier check refused, with no payload, to a server whose operation requires a value: on a route that does not select the end-to-end protection wire, answered `+InvalidArgument+`; on a route that selects it, refused before any wire as `+unprotected+`, counted once in that counter, and not answered.
 ** An RPC request that no earlier check refused, with an identifier that the server's route does not declare: on a route that does not select the end-to-end protection wire, answered `+InvalidArgument+`; on a route that selects it, refused before any wire as `+unprotected+`, counted once in that counter, and not answered.
 ** A value that encodes to no bytes: sent with a present payload of length zero and its identifier.
 ** A message whose payload a wire wrote: sent with the identifier that the wire declares.
-** A frame on a route that only carries it: no wire is given its payload under this item (carriage is checked under xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
+** A frame on a route that only carries it: no wire is given its payload under this item (carriage is checked under xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
 * *fault-injection*: frames with arbitrary identifiers, with no panic and each one refused or decoded by the right wire, or, for a tied response whose commstatus is not `+Ok+`, given to no other wire.
 * *review*: no path on which a payload's bytes reach a wire before the comparison.
 
@@ -467,7 +467,7 @@ So an absent payload never becomes an empty input.
 A typed operation that requires a value has none to give for such a message, so it refuses the message by a result that names the cause.
 
 _Typed sending and receiving._
-A carrier forwards a serialized payload without reading it, as xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes] states.
+A carrier forwards a serialized payload without reading it, as xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes] states.
 
 [[independent]]
 == A wire and a transport are chosen apart
@@ -476,7 +476,7 @@ NOTE: A message's wire, such as the native wire or Protobuf, and a route's trans
 
 * The native wire, on either kind of binding: xref:wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused].
 * A serialized wire, on either kind of binding: xref:wires/serialized.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns].
-* A payload that is only carried, with no wire: xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes].
+* A payload that is only carried, with no wire: xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes].
 * What a lending binding owes is xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], whatever the wire.
 * What a handoff binding owes for its one copy is <<req-ssr-payload-written-once,A payload is written once, into the storage that carries it>>, whatever the wire.
 * What the LoLa binding adds is on xref:lola.adoc[the LoLa page] and xref:lola-envelope.adoc[the LoLa physical envelope], and what the iceoryx2 binding adds is on xref:iceoryx2.adoc[the iceoryx2 page] and xref:iceoryx2-frame.adoc[the iceoryx2 physical frame].
@@ -614,8 +614,8 @@ Each cell names the items that state the rule.
 | <<req-ssr-payload-route-form,A route's form is fixed at setup, by what the route declares and never by a name>>
 
 | Carried by a Streamer
-| xref:peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]; xref:integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused]
-| xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]
+| xref:peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]; xref:integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused]
+| xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]
 |===
 
 [[lifetime]]
@@ -638,13 +638,13 @@ Each entry names the items that state the rule, for both kinds of route.
 * *Reading.*
 <<req-ssr-wire-encoding-checked,A wire is given only a payload of its own encoding>>.
 * *Carrying.*
-xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes].
+xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes].
 * *An encoding filter, which only a route of the Streamer has.*
-xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-qos-per-leg[Both legs are checked, at setup and per frame]; xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes].
+xref:../up-l2/streamer.adoc#req-ssr-streamer-qos-per-leg[Both legs are checked, at setup and per frame]; xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes].
 * *A native representation.*
 xref:peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused].
 
 === RPC and end-to-end protection
 
-* The rules for an RPC request that cannot be decoded, and for a response, are those of xref:../safety/up-l2/interaction.adoc[the interaction rules].
+* The rules for an RPC request that cannot be decoded, and for a response, are those of xref:../up-l2/api.adoc[the interaction rules].
 * What the end-to-end protection wire adds to a route is stated in xref:wires/e2e.adoc[the end-to-end protection wire].

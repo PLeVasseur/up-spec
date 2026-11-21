@@ -62,7 +62,7 @@ A process is in runtime mode once every transport that it built is in runtime mo
 That process-level definition is used for three things only:
 
 * sealing shared startup memory;
-* the runtime mode of the Streamer, which the Streamer's requirements name and in which it makes its startup report (xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-startup-report[The startup report says what will run]);
+* the runtime mode of the Streamer, which the Streamer's requirements name and in which it makes its startup report (xref:../up-l2/streamer.adoc#req-ssr-streamer-startup-report[The startup report says what will run]);
 * process-level statements for integrators.
 
 Startup memory is sealed whenever `+enter_runtime_all+` returns, whether it succeeded or failed (xref:../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
@@ -125,7 +125,7 @@ The element owns admission, as it owns the two modes, the transition and the sta
 So every binding's routes meet the same checks.
 
 A route that cannot be served then fails setup by name instead of failing its first message.
-A refused carrier leg, for one, reports the route, the leg, the setting and the cause (xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-qos-per-leg[Both legs are checked, at setup and per frame]; <<req-ssr-mode-init-failure,Initialization failure>>).
+A refused carrier leg, for one, reports the route, the leg, the setting and the cause (xref:../up-l2/streamer.adoc#req-ssr-streamer-qos-per-leg[Both legs are checked, at setup and per frame]; <<req-ssr-mode-init-failure,Initialization failure>>).
 
 [[req-ssr-mode-entry-clock]]
 === The wall clock is read before runtime mode
@@ -388,7 +388,7 @@ The element *MUST NOT* make a correctness property of its own, or one that a pee
 The element has no degraded mode with rules of its own: each requirement stated for runtime mode binds every transport and every route until the process ends, the route that an event concerns included.
 A refusal, a counted drop, a missed deadline or the loss of a peer concerns the route, or the routes, on which it occurs.
 The element *MUST NOT* react to such an event by stopping or suspending another route, by refusing another route's traffic, or by changing the rules under which a route runs.
-What a gate of the Streamer does on one of its routes is stated in xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate] and xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route].
+What a gate of the Streamer does on one of its routes is stated in xref:../up-l2/streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate] and xref:../up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route].
 --
 
 [horizontal]
@@ -578,7 +578,7 @@ The element *MUST* state, in the contract of each operation that takes a deadlin
 * A wait's timeout and a setup bound are compared with the platform's monotonic clock.
 The acceptance event is the observation of the awaited state.
 * An RPC call's TTL is compared in wall time from the request's creation (xref:bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
-The acceptance event is the element's completion of the call with a response that its wire check accepted (xref:../safety/up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
+The acceptance event is the element's completion of the call with a response that its wire check accepted (xref:../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
 
 For every logical deadline in the element, a wait's timeout, an RPC call's TTL and a setup bound alike, the deadline decides the outcome.
 
@@ -684,7 +684,7 @@ In runtime mode each binding *MUST* keep its resources, its workers and its tran
 * Each binding *MUST* keep each of its workers created during initialization running and *MUST NOT* let one be joined in runtime mode.
 
 *The Streamer.*
-What the Streamer's routes and gates, and the workers of the Streamer binary, keep in runtime mode is stated with the Streamer (xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-route-lock[Routes and subscriptions are locked at activation]; xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate]; xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-workers[Workers are fixed at initialization]).
+What the Streamer's routes and gates, and the workers of the Streamer binary, keep in runtime mode is stated with the Streamer (xref:../up-l2/streamer.adoc#req-ssr-streamer-route-lock[Routes and subscriptions are locked at activation]; xref:../up-l2/streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate]; xref:../up-l2/streamer.adoc#req-ssr-streamer-workers[Workers are fixed at initialization]).
 --
 
 [horizontal]
@@ -1108,7 +1108,7 @@ A detector route of the E2E wire is a receive route that selects the E2E wire an
 * The element *MUST* refuse such a route that gives a deadline together with `+event_only()+`, as it refuses any other.
 * The route's deadline is the timeout of its end-to-end detection.
 The element monitors it as xref:bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] states; that the E2E wire keeps no timeout of its own is stated in xref:wires/e2e.adoc#req-ssr-e2e-detects[The E2E wire detects each fault].
-* An RPC client's response route is no detector route: the E2E wire keeps no receiving slot for it (xref:wires/e2e.adoc#req-ssr-e2e-receiver-state[E2E receiving state is one fixed slot per declared data ID]), and each call ends by its TTL (xref:../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-ends[RPC calls always end]).
+* An RPC client's response route is no detector route: the E2E wire keeps no receiving slot for it (xref:wires/e2e.adoc#req-ssr-e2e-receiver-state[E2E receiving state is one fixed slot per declared data ID]), and each call ends by its TTL (xref:../up-l2/api.adoc#req-ssr-peer-rpc-ends[RPC calls always end]).
 The clauses on a deadline or `+event_only()+` apply to it.
 * In strict mode's Enforce and Locked states, the element *MUST* refuse at setup, as a forbidden finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]), at every integrity level, an RPC client's response route that selects the E2E wire and declares neither, naming the route and the setting.
 In the Report state, the element *MUST* report such a route as that finding.

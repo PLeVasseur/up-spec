@@ -264,7 +264,7 @@ Each row names the rules that govern a step.
 | <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>; xref:../payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]; xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]
 
 | A frame is carried
-| xref:../../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]
+| xref:../../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]
 
 | A frame reaches a typed reader
 | xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]
@@ -320,7 +320,7 @@ The rules are xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap cl
 
 | An RPC request with such an identifier, or with a payload that does not decode
 | At the server
-| xref:../../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered]
+| xref:../../up-l2/api.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered]
 
 | An input that is malformed, that ends inside an element, or that carries bytes the format does not accept
 | Decoding

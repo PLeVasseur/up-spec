@@ -1,112 +1,18 @@
-= uP-L2 safety: Streamer
+= uP-L2: ASIL Streamer
 :toc: preamble
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions and tags: xref:../README.adoc[the safety area's README].
-This layer, and whom its items bind: xref:README.adoc[safety at uP-L2].
-Scope and element boundary: xref:../elements/up-rust/README.adoc[the up-rust SEooC's README].
-
-Whom an item binds: xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
-
-The last three sections are the assumptions of use about operating the Streamer.
-
-* Whom they bind: xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
-
 [NOTE]
 ====
-* They are the up-rust SEooC's assumptions, as `seooc` in their IDs says.
-* Each "Violation" text uses the classes of xref:../assurance.adoc#req-ssr-violation-classes[How a violated assumption of use shows up], with the Streamer as the observer where the text names it.
-* They carry `SafetyManual` only (xref:../elements/up-rust/assumptions-of-use.adoc#coverage[tags and coverage]).
+* *Contract-family membership.*
+This chapter holds the bounded-runtime forwarding, carrier-route, validation, worker, gate, monitor, reporting and dispatch requirements of the up-rust SEooC requirement family (`+req~ssr-*+`, `ASIL:: B`, `SafetyStreamer` and `SafetyUpRustCore` tags) for the ASIL Streamer and the element's carrier primitives.
+Whom each item binds, and how a scoped replacement takes effect, is stated in xref:../contract-generations.adoc[Which requirements an implementation follows] (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
+Other dispatchers—including any uStreamer outside the bounded-runtime Streamer profile—remain bound by xref:dispatchers/README.adoc[the dispatcher chapter] unchanged.
+* *Streamer safety element and assumptions of use.*
+The Streamer's isolated crate, its scope and bounded-runtime Streamer profile, its memory-safety and `+unsafe+` inventory duties, and the three integrator assumptions of use about operating the Streamer are stated in xref:../safety/elements/streamer.adoc[Streamer Safety Element].
+Element boundary, strict-mode states (`Off`, `Report`, `Enforce` and `Locked`), and conventions are stated in xref:../safety/elements/up-rust/README.adoc[the up-rust SEooC element], xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states] and xref:../safety/README.adoc[Safety and Assurance View].
 ====
-
-* The strict states that the items of this page name, Off, Report, Enforce and Locked, are the states of the element's strict mode (xref:../elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]).
-
-[[req-ssr-streamer-scope]]
-== What the Streamer is, and the bounded-runtime Streamer profile
-
-[.specitem,oft-sid="req~ssr-streamer-scope~1",oft-title="What the Streamer is, and the bounded-runtime Streamer profile",oft-needs="uman",oft-tags="SafetyStreamer"]
---
-*The Streamer.*
-In this area the Streamer is the ASIL Streamer: the uStreamer dispatcher (xref:../../up-l2/dispatchers/README.adoc#dispatcher-types[Types of Dispatchers]) whose route table, admission, validation and forwarding loop live in the crate that xref:../elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate] requires.
-It forwards frames between transports on its routes, each of them a carrier route (<<req-ssr-carrier-route,A carrier route takes each frame at its ingress and sends it at its egress>>).
-It holds its route table, admits and validates the routes of its deployment data, gates, monitors and reports its routes, and runs the forwarding loop.
-
-*The Streamer binary.*
-The Streamer binary is the program that runs the Streamer.
-It links the Streamer with its bindings and wires, runs the Streamer's `+std+` loader, which parses the deployment data that the Streamer then validates (xref:../elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]), and creates the worker threads on which the Streamer runs its forwarding loop.
-
-*Not parts of the element.*
-The Streamer and the Streamer binary are parts of their own.
-Of the Streamer's data plane, only the carrier primitives that the Streamer calls belong to the element (xref:../elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
-
-*The bounded-runtime Streamer profile.*
-The bounded-runtime Streamer profile is a named profile (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]), and the Streamer follows it.
-Its items are the requirements of this page that give the Streamer or the Streamer binary a duty by name:
-
-* <<req-ssr-streamer-route-lock,Routes and subscriptions are locked at activation>>;
-* <<req-ssr-config-exact-addresses,ASIL Streamer routes name exact source addresses>>;
-* <<req-ssr-streamer-heap-free,The Streamer allocates nothing in runtime mode>>;
-* <<req-ssr-streamer-no-panic,The Streamer does not panic in runtime mode>>;
-* <<req-ssr-streamer-memory-safety,The Streamer's own code cannot cause undefined behaviour, and its `+unsafe+` is inventoried>>;
-* <<req-ssr-streamer-byte-identity,Carriage keeps the bytes>>;
-* <<req-ssr-streamer-no-ingress-block,An egress never blocks an ingress>>;
-* <<req-ssr-streamer-containment,A fault stays on its route>>;
-* <<req-ssr-streamer-qos-per-leg,Both legs are checked, at setup and per frame>>;
-* <<req-ssr-streamer-build-order,The Streamer builds every transport and role before `enter_runtime_all`>>;
-* <<req-ssr-streamer-startup-report,The startup report says what will run>>;
-* <<req-ssr-streamer-config-integrity,The deployment data is checked before it is applied>>;
-* <<req-ssr-streamer-config-validated,The Streamer validates its deployment data in full>>;
-* <<req-ssr-streamer-sync-data-plane,The Streamer's data plane is synchronous>>;
-* <<req-ssr-streamer-workers,Workers are fixed at initialization>>;
-* <<req-ssr-streamer-route-gate,Each route has a heap-free gate>>;
-* <<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>;
-* <<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>;
-* <<req-ssr-streamer-mode-report,The Streamer reports degraded>>;
-* <<req-ssr-streamer-watchdog-hook,A watchdog hook shows progress>>;
-* <<req-ssr-streamer-dispatch-obligations,Undeliverable messages are counted, never sent as dead letters>>;
-* <<req-ssr-streamer-rpc-error-response,An RPC request that cannot be dispatched is answered, best effort>>;
-
-and the requirements of other pages that give the Streamer or the Streamer binary a duty by name:
-
-* xref:../elements/up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow];
-* xref:../elements/up-rust/build.adoc#req-ssr-build-specified-functions-only[The ASIL build contains only specified functions];
-* xref:../elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate];
-* xref:../../up-l1/wires/e2e.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop];
-* xref:../../languages/rust.adoc#req-ssr-release-inert-drop[Dropping a runtime handle does nothing];
-* xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back];
-* xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode];
-* xref:../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided];
-
-and the requirements that bind every part that a requirement of this area binds:
-
-* xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty];
-* xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect];
-* xref:../../up-l1/peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer].
-
-*Definitions.*
-The items of the profile use the words that xref:../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations] and <<req-ssr-carrier-route,A carrier route takes each frame at its ingress and sends it at its egress>> define.
-Neither item gives the Streamer a duty.
-
-*Other dispatchers.*
-A uStreamer that is not the ASIL Streamer, and every other dispatcher, is not the Streamer that the requirements of this area name, and does not follow this profile: xref:../../up-l2/dispatchers/README.adoc[the dispatcher chapter] binds it unchanged.
-Where an item of this profile replaces a rule of that chapter, or an earlier rule of this area, it replaces it for the Streamer under this profile and for no other dispatcher or configuration.
-
-*What the profile changes.*
-The profile adds no duty and removes none.
-Each of its items binds as its own statement says, and a requirement of this area whose statement gives the Streamer or the Streamer binary a duty binds it, as its statement says, whether or not these lists name it.
---
-
-[horizontal]
-ID:: `+req~ssr-streamer-scope~1+`
-ASIL:: B
-Allocated to:: the Streamer; the Streamer binary
-Verification:: review (each statement and allocation that uses a word that this item defines, read with this item; the profile's lists against the requirements of this area that give the Streamer or the Streamer binary a duty by name, and against those that bind every part that a requirement of this area binds)
-
-*Rationale.*
-Whom a duty of the Streamer binds, the Streamer or the program that runs it, depends on what each of them is.
-A claim that rests on the Streamer's contract can name that contract as one profile, at one revision of this repository.
-Where an item of the profile replaces a rule of the dispatcher chapter, it does so for the Streamer under this profile only, and the rule stays in force for every other dispatcher, a uStreamer of another kind included.
 
 [[req-ssr-streamer-route-lock]]
 == Routes and subscriptions are locked at activation
@@ -138,7 +44,7 @@ Verification:: compile-fail (add or delete after activation; change a route's fi
 ISO 26262:: 6-7.4.3, 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
-A route added or changed while traffic flows would run without the setup checks that admitted the others, through a configuration nobody validated (xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
+A route added or changed while traffic flows would run without the setup checks that admitted the others, through a configuration nobody validated (xref:../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
 
 A live subscription source would change the routes in effect from outside, at run time.
 
@@ -170,7 +76,7 @@ An exact source filter bounds route matching and lets the Streamer refuse and co
 
 It does not authenticate a sending process: a faulty process using a reserved address can pass the filter.
 Physical service selection does not establish that identity either.
-Restricting which processes reach a transport, the level that each peer process is developed to, and end-to-end protection are separate measures, each with its own assumptions and limits (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly]; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+Restricting which processes reach a transport, the level that each peer process is developed to, and end-to-end protection are separate measures, each with its own assumptions and limits (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]; xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly]; xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 The element's carrier primitives ask one physical service of a lending leg (<<req-ssr-carrier-lending-service,A lending leg names one physical service>>).
 The Streamer asks more: an exact source address on every route.
@@ -199,12 +105,12 @@ ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
 *Rationale.*
 The Streamer forwards every frame between its transports.
-So heap use on its path would break runtime mode for every route it carries (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+So heap use on its path would break runtime mode for every route it carries (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
 An ASIL route through the Streamer is only as sound as the Streamer, so it cannot be left as a QM carrier.
 
 A serialized leg's declared allocation belongs to that leg's wire or binding and is reported per route.
-It never reaches the Streamer's own forwarding paths, or a native leg (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+It never reaches the Streamer's own forwarding paths, or a native leg (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
 [[req-ssr-streamer-no-panic]]
 == The Streamer does not panic in runtime mode
@@ -219,10 +125,10 @@ The Streamer's own code and the Streamer binary's own code, where reachable in r
 
 The arithmetic of that code on runtime paths *MUST* be checked, saturating or wrapping by intent, and *MUST NOT* reach an overflow panic.
 
-These duties hold against everything that xref:../../up-l1/peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer] lets a peer do.
+These duties hold against everything that xref:../up-l1/peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer] lets a peer do.
 
 *The element's code.*
-xref:../../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths] states the same for element code, the carrier primitives that the Streamer calls included, and gives neither the Streamer nor the Streamer binary a duty.
+xref:../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths] states the same for element code, the carrier primitives that the Streamer calls included, and gives neither the Streamer nor the Streamer binary a duty.
 This requirement states it for the Streamer's own code and for the Streamer binary's own code.
 --
 
@@ -240,80 +146,10 @@ The inbound metadata, payload, peer reference and TTL are fed as opaque inputs, 
 ISO 26262:: 6-Table 1 (part-clause numbers only)
 
 *Rationale.*
-In the ASIL build, a panic aborts the process (xref:../elements/up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]).
+In the ASIL build, a panic aborts the process (xref:../safety/elements/up-rust/build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]).
 So a panic in the Streamer's code that a peer's bytes or a clock reading could set off, or in the Streamer binary's own code in runtime mode, would silence every route of the Streamer at once, where a fault is meant to stay on its route (<<req-ssr-streamer-containment,A fault stays on its route>>).
 
-The Streamer and the Streamer binary are parts of their own, outside the element, so the element's rule reaches neither the Streamer's code nor the Streamer binary's own code (xref:../elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
-
-[[req-ssr-streamer-memory-safety]]
-== The Streamer's own code cannot cause undefined behaviour, and its `+unsafe+` is inventoried
-
-[.specitem,oft-sid="req~ssr-streamer-memory-safety~1",oft-title="The Streamer's own code cannot cause undefined behaviour, and its `unsafe` is inventoried",oft-needs="impl,utest",oft-tags="SafetyStreamer"]
---
-*Safe calls.*
-The Streamer's own code and the Streamer binary's own code *MUST NOT* cause undefined behaviour, in initialization, at the transition and in runtime mode, for any sequence and any interleaving of calls that their safe interfaces permit, whatever their documentation asks of a caller.
-Their safe interfaces include the Streamer's public API, with the items hidden from its documentation but reachable from safe code, its operator interface and its watchdog hook.
-This duty holds against everything that xref:../../up-l1/peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer] lets a peer do.
-
-*Own code.*
-The Streamer's own code includes its `+std+` loader.
-The Streamer binary's own code includes the code with which it sets up the Streamer with its bindings and wires, runs the Streamer's loader and creates the worker threads.
-The own code of each of the two includes the code that a generator, such as a derive, emits into it.
-Neither of the two answers under this requirement for the other's code, for element code, or for the code of a binding, a wire or another dependency that it links.
-
-*The inventory.*
-The Streamer and the Streamer binary *MUST* each have each `+unsafe+` site of its own code state the memory-safety obligation that the site relies on.
-The supplier of the Streamer and the supplier of the Streamer binary *MUST* each keep each such site of its part's own code under a reviewed row of that part's own inventory or, for a site in generated code, of the generator's.
-Each of the two suppliers *MUST* establish at the source, in the review of each row used to account for an `+unsafe+` site of its part's own code, that the obligation of each such site holds in that part, whether the row is in the part's own inventory or is referenced from the generator's.
-A run under Miri, a test or a target build does not replace that argument.
-For a generated site, that argument uses the generator's proof by reference as "Generated code" states.
-Each of the two suppliers *MUST* reassess its account of such a row when a change affects the obligation of a site under it or the argument that the obligation holds in its part, also where the site's `+unsafe+` text and the generator's row are unchanged.
-
-*Generated code.*
-For all code that a generator emits into the Streamer or into the Streamer binary and that contains an `+unsafe+` site, the supplier of that part *MUST* account for the exact generator, configuration, inputs and generated output, and for the reviewed rows of the generator's own inventory, with their source-level proofs and input constraints, that cover each such site.
-The supplier *MUST* name those rows by reference without repeating them, and *MUST* establish that the inputs meet those constraints and that the proofs' applicable invariants hold in the consuming build.
-This clause admits into the Streamer's crate no dependency that xref:../elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate] forbids.
-
-*The acceptance check.*
-The supplier of the Streamer and the supplier of the Streamer binary *MUST* each have its part's build and release verification refuse a build until a reviewed row or a reviewed disposition accounts for each new, each changed and each removed `+unsafe+` site of the part's own code, and *MUST NOT* release a build that this check refuses.
-The check covers the part's own sources and the generated output of the build that it accepts.
-It is made on the build before its release: it is no check of strict mode and no check of a running Streamer.
-
-*The element's code.*
-xref:../../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] and xref:../assurance.adoc#req-ssr-unsafe-inventory[Every `+unsafe+` is inventoried and justified] state these duties for the element, the carrier primitives that the Streamer calls included, and give neither the Streamer nor the Streamer binary a duty.
-This requirement states them for the Streamer's own code and for the Streamer binary's own code.
---
-
-[horizontal]
-ID:: `+req~ssr-streamer-memory-safety~1+`
-ASIL:: B
-Allocated to:: the Streamer, for its own code; the Streamer binary, for its own code; the supplier of the Streamer and the supplier of the Streamer binary, each for the reviewed rows that account for its part's own code, including referenced generator rows, with their source arguments and reassessment when a change affects an obligation or its argument, for the account of generated code and the establishment of its input constraints and applicable invariants, and for its part's acceptance check and releasing no build that the check refuses
-Verification:: miri, compile-fail, test, fault-injection, gate, review
-* *miri*: programs of safe calls that attempt undefined behaviour through the Streamer's public API, its operator interface and its watchdog hook, alone and interleaved with forwarding on the workers, in initialization, at the transition and in runtime mode.
-* *compile-fail*: each misuse of the Streamer's public API from which undefined behaviour would follow and that the Streamer's types rule out.
-* *test*: the operator interface and the watchdog hook used while the workers forward; a startup refused before `+enter_runtime_all+`, and one refused after it returned a failure.
-* *fault-injection*: malformed and truncated frames, and a peer dying or restarting, while the Streamer forwards.
-* *gate*: each supplier's acceptance check over its part's own sources and the generated output of the build, with a negative control: a new, a changed and a removed `+unsafe+` site, each refused until a reviewed row or a reviewed disposition accounts for it.
-* *review*
-** Each row of each inventory, with the source-level argument that the obligation of each site under it holds.
-** A change of safe code that affects a site's obligation or its argument while the site's `+unsafe+` text stays the same, such as a safe helper that changes an invariant that the site relies on: the supplier's account reassessed, for a row of the part's own inventory and for a referenced generator row.
-** For generated code that contains an `+unsafe+` site, the exact generator, configuration, inputs and generated output that each part's build admits, the referenced generator rows with their source-level proofs and input constraints, and the applicable invariants in the consuming build.
-** The Streamer binary's own code, its creation of the worker threads and its hand-over of the Streamer to them included.
-** Each release of each part: no build released that its acceptance check refused.
-ISO 26262:: 6-Annex D.2.3 (part-clause numbers only)
-
-*Rationale.*
-Undefined behaviour can corrupt memory in ways that no later check can see, and in the Streamer it can reach every route that the Streamer carries, where a fault is meant to stay on its route (<<req-ssr-streamer-containment,A fault stays on its route>>).
-The Streamer and the Streamer binary are parts of their own, outside the element, so the element's memory-safety rules reach neither the Streamer's code nor the Streamer binary's own code (xref:../elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
-The Streamer binary's own code creates the worker threads at startup and hands the Streamer to them, so undefined behaviour there would reach the forwarding loop of every worker.
-
-What `+unsafe+` marks, and what undefined behaviour is, are as the source note of xref:../../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] states.
-A safe interface can be called in any order that its types allow, so its soundness cannot rest on an order that its documentation asks for.
-
-_The inventory._
-A change of safe code can break the obligation of an `+unsafe+` site whose text stays the same, such as a helper that shortens the life of a buffer that the site reads, so a count or a comparison of the sites does not show that their arguments still hold.
-
-Memory safety is a property of its own: what the Streamer may allocate, and whether the Streamer and the Streamer binary may panic, are stated in <<req-ssr-streamer-heap-free,The Streamer allocates nothing in runtime mode>> and <<req-ssr-streamer-no-panic,The Streamer does not panic in runtime mode>>.
+The Streamer and the Streamer binary are parts of their own, outside the element, so the element's rule reaches neither the Streamer's code nor the Streamer binary's own code (xref:../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
 
 [[req-ssr-carrier-route]]
 == A carrier route takes each frame at its ingress and sends it at its egress
@@ -325,15 +161,15 @@ A carrier route is a route that takes each frame at its ingress and sends it at 
 Its ingress and its egress are its legs.
 
 *Whose routes.*
-The element's carrier primitives carry a carrier route: they receive, send and park its frames and check its capacity (xref:../elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
-A route of the Streamer is a carrier route that the Streamer builds from those primitives and holds in its route table (<<req-ssr-streamer-scope,What the Streamer is, and the bounded-runtime Streamer profile>>).
+The element's carrier primitives carry a carrier route: they receive, send and park its frames and check its capacity (xref:../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
+A route of the Streamer is a carrier route that the Streamer builds from those primitives and holds in its route table (xref:../safety/elements/streamer.adoc#req-ssr-streamer-scope[What the Streamer is, and the bounded-runtime Streamer profile]).
 
 *A carrier.*
 A carrier is a part that forwards frames on a carrier route: the element, in what its carrier primitives do on a carrier route, and the Streamer, in what it does on a route of its own.
 The word names a role and gives no part a duty: a requirement that binds a carrier names the element, the Streamer or both, each for its own part in the forwarding.
 
 *Kinds of leg.*
-A lending leg is a leg whose transport's binding is a lending binding (xref:../../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]), and a lending ingress and a lending egress are such legs.
+A lending leg is a leg whose transport's binding is a lending binding (xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]), and a lending ingress and a lending egress are such legs.
 A byte-only egress is an egress that has no loan to copy the ingress bytes into.
 
 *A hop.*
@@ -377,7 +213,7 @@ Verification:: test (a lending leg whose source filter is one exact address, adm
 
 *Rationale.*
 A lending leg lends a reader the memory that one service's writers wrote.
-A leg that could attach to several services would have no one memory to lend and no one set of writers to check a reader against (xref:../../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
+A leg that could attach to several services would have no one memory to lend and no one set of writers to check a reader against (xref:../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 
 [[req-ssr-streamer-byte-identity]]
 == Carriage keeps the bytes
@@ -411,7 +247,7 @@ A carrier *MUST NOT* stage already-serialized input:
 
 *Metadata at egress.*
 Where the egress envelope differs from the ingress envelope, a carrier *MUST* re-encode the metadata only.
-Where the egress route selects a wire to decode frame metadata, a carrier *MUST* use that wire's stated metadata format for any metadata that it re-encodes for that egress (xref:../../up-l1/wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
+Where the egress route selects a wire to decode frame metadata, a carrier *MUST* use that wire's stated metadata format for any metadata that it re-encodes for that egress (xref:../up-l1/wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
 --
 
 [horizontal]
@@ -431,11 +267,11 @@ Verification:: test
 ** A control: a carrier that refuses a frame because no wire of the route names its identifier fails.
 
 *Rationale.*
-up-spec makes a component that only carries or forwards a message keep its identifier and payload bytes unchanged, with no decoder needed (xref:../../basics/payload_encoding_registry.adoc#acceptance[the payload encoding registry, "Carrying a Payload versus Reading It"]).
+up-spec makes a component that only carries or forwards a message keep its identifier and payload bytes unchanged, with no decoder needed (xref:../basics/payload_encoding_registry.adoc#acceptance[the payload encoding registry, "Carrying a Payload versus Reading It"]).
 
 _No reader._
 The same rule keeps such a component from refusing carriage because an identifier is reserved, unassigned, private or unknown to it.
-The registry states it as an assumption of use, and leaves a component's own requirement to that component's specification (xref:../../basics/payload_encoding_registry.adoc#obligations[the payload encoding registry, "Requirement Ownership"]).
+The registry states it as an assumption of use, and leaves a component's own requirement to that component's specification (xref:../basics/payload_encoding_registry.adoc#obligations[the payload encoding registry, "Requirement Ownership"]).
 
 A route's wires are named when the route is set up (<<req-ssr-streamer-route-lock,Routes and subscriptions are locked at activation>>).
 If carriage depended on them, a payload that only its endpoints read could cross a Streamer only after the Streamer's deployment data had been changed for it.
@@ -447,7 +283,7 @@ That choice is the route's encoding filter, which the route's deployment data st
 It is kept apart from what a carrier can read, so that no route starts to refuse an identifier because a wire or a decoder is missing.
 
 _Presence._
-A payload and its identifier are present together or absent together (xref:../../basics/uattributes.adoc#common-attributes[UAttributes], `payloadEncodingId`).
+A payload and its identifier are present together or absent together (xref:../basics/uattributes.adoc#common-attributes[UAttributes], `payloadEncodingId`).
 So keeping the identifier unchanged keeps the presence too.
 A different egress envelope writes the metadata again, and an envelope that could not tell an absent payload from an empty one would lose the difference.
 
@@ -455,7 +291,7 @@ _A native representation._
 A reader borrows a native representation in place, so a frame that names one has no serialized payload and is not carried as serialized bytes.
 <<req-ssr-streamer-qos-per-leg,Both legs are checked, at setup and per frame>> says when a leg carries it.
 
-Unchanged bytes let a check made at the endpoints, such as end-to-end protection, cover every hop (xref:../../up-l1/wires/e2e.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop]).
+Unchanged bytes let a check made at the endpoints, such as end-to-end protection, cover every hop (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop]).
 A copy staged on the way would add work and a buffer for nothing.
 
 [[req-ssr-streamer-no-ingress-block]]
@@ -495,7 +331,7 @@ A route's declared budget is the work and the capacity that its deployment data 
 
 *No bound in time.*
 A declared budget bounds work and capacity, and states no bound in time.
-A bound in time on a route's delay is a timing claim of a supported configuration, with its scheduler and resource argument (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+A bound in time on a route's delay is a timing claim of a supported configuration, with its scheduler and resource argument (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 --
 
 [horizontal]
@@ -520,7 +356,7 @@ When a route is set up, the Streamer *MUST* check the QoS of both of the route's
 The Streamer *MUST* report at setup, for each route, whether it has an encoding filter and which identifiers the filter names.
 
 *Per frame.*
-Before each frame is forwarded, the Streamer *MUST* check it against the egress leg's own limits on every forwarding path, and, where the frame's TTL is positive, against its TTL as xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states.
+Before each frame is forwarded, the Streamer *MUST* check it against the egress leg's own limits on every forwarding path, and, where the frame's TTL is positive, against its TTL as xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states.
 A leg's limits are:
 
 * the payload size;
@@ -531,7 +367,7 @@ A leg's limits are:
 
 *Counting.*
 The Streamer *MUST* ensure that each frame that a check of this requirement refuses is counted exactly once on its route, under a cause that names the limit.
-Where the element's carrier primitives make a check and count its refusal (xref:../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]), that count is the one count, and the Streamer *MUST NOT* count the frame again.
+Where the element's carrier primitives make a check and count its refusal (xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]), that count is the one count, and the Streamer *MUST NOT* count the frame again.
 The Streamer *MUST* count each refusal that its own check makes.
 
 *A native representation.*
@@ -583,20 +419,20 @@ A limit checked on one forwarding path and not on another lets a frame through o
 
 _What a leg can refuse._
 A leg refuses what it cannot hold or cannot express: a payload longer than its storage, a token longer than its bound, a header that its envelope cannot represent.
-One count per refused frame, under the limit that it met, shows which limit stopped it; where the element's carrier primitives make the check, their count is that one count (xref:../../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+One count per refused frame, under the limit that it met, shows which limit stopped it; where the element's carrier primitives make the check, their count is that one count (xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 
 _A native representation._
 A reader borrows a native representation in place, so carrying one is not carrying bytes.
-It is carried only where the route's setup agreed it (xref:../../up-l1/peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:../../up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]).
+It is carried only where the route's setup agreed it (xref:../up-l1/peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:../up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]).
 Carrying it as bytes, or under another name, would hand a reader memory that nothing agreed.
 An encoding identifier is no part of that agreement, and a filter that names one admits no native representation.
 That a route's wires name a representation selects a frame for carriage and proves nothing about it.
-A layout, initialized storage and ownership are established by the reader's own admission (xref:../../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
+A layout, initialized storage and ownership are established by the reader's own admission (xref:../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
 A name that a frame carries establishes none of them.
 
 _The encoding identifier._
 A carrier does not read a payload.
-So the identifier of a serialized payload changes nothing that a leg holds or expresses, and by itself it is no reason to refuse a frame (xref:../../basics/payload_encoding_registry.adoc#acceptance[the payload encoding registry, "Carrying a Payload versus Reading It"]).
+So the identifier of a serialized payload changes nothing that a leg holds or expresses, and by itself it is no reason to refuse a frame (xref:../basics/payload_encoding_registry.adoc#acceptance[the payload encoding registry, "Carrying a Payload versus Reading It"]).
 
 _The encoding filter._
 A deployment may want a route to forward only the encodings that it names.
@@ -619,12 +455,12 @@ The Streamer *MUST* build every transport and every role it will use before it c
 The Streamer *MUST* refuse its startup as a whole, and *MUST NOT* activate any route, in each of these cases:
 
 * the Streamer refuses its deployment data (<<req-ssr-streamer-config-integrity,The deployment data is checked before it is applied>>; <<req-ssr-streamer-config-validated,The Streamer validates its deployment data in full>>), a route of it, its operator interface (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>), a monitor (<<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>) or a live subscription source (<<req-ssr-streamer-route-lock,Routes and subscriptions are locked at activation>>), the Streamer binary reports a worker that it could not create (<<req-ssr-streamer-workers,Workers are fixed at initialization>>), or the build of a transport or of a role fails: the Streamer then *MUST NOT* call `+enter_runtime_all+`;
-* `+enter_runtime_all+` returns a failure: a transport that entered runtime mode before the failure stays in runtime mode (xref:../../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]), and the Streamer *MUST NOT* forward a frame on it.
+* `+enter_runtime_all+` returns a failure: a transport that entered runtime mode before the failure stays in runtime mode (xref:../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]), and the Streamer *MUST NOT* forward a frame on it.
 
 What the Streamer reports then is stated in <<req-ssr-streamer-startup-report,The startup report says what will run>>.
 
 *Classic endpoints.*
-How the Streamer builds each of its ASIL routes, through the element's admission and with no classic endpoint, is stated in xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode].
+How the Streamer builds each of its ASIL routes, through the element's admission and with no classic endpoint, is stated in xref:../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode].
 --
 
 [horizontal]
@@ -634,8 +470,8 @@ Allocated to:: the Streamer
 Verification:: test (every transport and every role the Streamer will use is built before it calls `+enter_runtime_all+`; refused deployment data, a refused route, a refused operator interface, a refused monitor, a refused live subscription source, a worker that could not be created, and a transport or a role whose build fails: no call of `+enter_runtime_all+` and no route activated; `+enter_runtime_all+` returning a failure after an earlier transport entered: no route activated and no frame forwarded), review (the Streamer's startup path builds no transport or role after that call)
 
 *Rationale.*
-Once `+enter_runtime_all+` has returned, the startup memory is sealed, and a setup built on it is refused (xref:../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
-An application's own order is stated in xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-build-order[Applications build every transport and role before the last transition].
+Once `+enter_runtime_all+` has returned, the startup memory is sealed, and a setup built on it is refused (xref:../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
+An application's own order is stated in xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-build-order[Applications build every transport and role before the last transition].
 
 A Streamer that started without a route that its deployment data declares would lack that route's function, with no gate to show it.
 
@@ -653,7 +489,7 @@ The report *MUST* list:
 * for every route, the encoding-filter report that <<req-ssr-streamer-qos-per-leg,Both legs are checked, at setup and per frame>> requires;
 * every active waiver;
 * every finding that the Streamer's strict-mode checks record in the Report state (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>; <<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>);
-* the reaction bound that the Streamer's deployment data declares, or, where it declares none, that no reaction bound is established (<<aou-seooc-streamer-reaction-bound,A reaction claimed through the Streamer's monitors or watchdog hook is bounded end to end>>);
+* the reaction bound that the Streamer's deployment data declares, or, where it declares none, that no reaction bound is established (xref:../safety/elements/streamer.adoc#aou-seooc-streamer-reaction-bound[A reaction claimed through the Streamer's monitors or watchdog hook is bounded end to end]);
 * the digest of the Streamer's deployment data.
 
 *The digest.*
@@ -672,7 +508,7 @@ Allocated to:: the Streamer
 Verification:: test (the report's records against the admitted routes: each field that the statement lists for a route, each route's encoding-filter report, each active waiver, each strict-mode finding recorded in the Report state, and the declared reaction bound or the statement that none is established; the number of workers, and each worker with its priority and affinity; the digest equal to one computed over the copy of the data from which the Streamer and the Streamer binary applied it; a refused startup reported with the route, the leg and the limit, for a refusal on an ingress leg and for one on an egress leg, a route refused for a source filter that is not exact and one refused for a classic endpoint each reported with the route and that rule, an operator interface and a monitor refused in the Enforce state each reported with its finding, a refused live subscription source, and a worker that could not be created; deployment data with no integrity code, and deployment data with an invalid field that belongs to no route, each reported as the refusal with its cause named; a failed build reported with the build that failed; a failure of `+enter_runtime_all+` after an earlier transport entered, reported with the transition that failed; in each of these cases no report of what will run), heap-window (producing the report)
 
 *Rationale.*
-The report lists the admitted routes and their resources after the transition, in runtime mode, so producing it uses no heap (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+The report lists the admitted routes and their resources after the transition, in runtime mode, so producing it uses no heap (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
 [[req-ssr-streamer-config-integrity]]
 == The deployment data is checked before it is applied
@@ -724,7 +560,7 @@ The Streamer *MUST* admit values only in its schema for its deployment data, and
 The Streamer binary *MUST* apply a value of the Streamer's deployment data only after the Streamer has validated that data, and *MUST NOT* apply any of it where the Streamer refuses it.
 
 *The element's part.*
-xref:../../basics/configurations.adoc#req-ssr-config-validated[Deployment data is validated in full] defines deployment data, has the element validate the deployment data that the element applies, and gives neither the Streamer nor the Streamer binary a duty.
+xref:../basics/configurations.adoc#req-ssr-config-validated[Deployment data is validated in full] defines deployment data, has the element validate the deployment data that the element applies, and gives neither the Streamer nor the Streamer binary a duty.
 This requirement states the same for the Streamer's deployment data.
 --
 
@@ -750,7 +586,7 @@ The element does not apply the workers' number, priority and affinity, the monit
 The Streamer validates them, and the Streamer binary applies the workers' settings only once they are validated.
 
 Refusing during initialization, by field, keeps every such mistake out of runtime mode, and the Streamer then does not start (<<req-ssr-streamer-build-order,The Streamer builds every transport and role before `enter_runtime_all`>>).
-Where the validation runs is stated in xref:../elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate].
+Where the validation runs is stated in xref:../safety/elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate].
 
 Code carried in deployment data would run outside the program that was verified, while values can be checked against their ranges before the Streamer starts.
 
@@ -775,10 +611,10 @@ The transports' reserved slots *MUST* be its only queues.
 ID:: `+req~ssr-streamer-sync-data-plane~1+`
 ASIL:: B
 Allocated to:: the Streamer
-Verification:: gate (the crate's dependency set, and the token scan of xref:../../up-l1/runtime.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled]), review (no queue on the forwarding path other than the transports' reserved slots)
+Verification:: gate (the crate's dependency set, and the token scan of xref:../up-l1/runtime.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled]), review (no queue on the forwarding path other than the transports' reserved slots)
 
 *Rationale.*
-The Streamer is built from the element's carrier primitives, which offer traffic in synchronous or polled form with no futures, tasks or pinning (xref:../../up-l1/runtime.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled]).
+The Streamer is built from the element's carrier primitives, which offer traffic in synchronous or polled form with no futures, tasks or pinning (xref:../up-l1/runtime.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled]).
 An async runtime on top would bring back the heap they avoid.
 
 A channel adds a queue beside the transports' reserved slots, where a frame could wait under no route's depth or overflow policy.
@@ -808,11 +644,11 @@ Allocated to:: the Streamer binary, for creating the workers, for reporting a wo
 Verification:: test (the workers created during initialization, with the number, priority and affinity that the deployment data states; each route assigned to one worker; a worker that the Streamer binary cannot create with the priority or the affinity that the deployment data states: reported, and the startup refused with no route activated; no worker created, stopped or joined in runtime mode), review (the forwarding loop has no path that returns in runtime mode)
 
 *Rationale.*
-Creating or joining a thread in runtime mode would bring the heap and an unbounded wait into the data path (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
+Creating or joining a thread in runtime mode would bring the heap and an unbounded wait into the data path (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
 
 A fixed assignment of routes to workers, made at setup, lets each route's latency be analysed before start.
 
-Creating threads needs the operating system's thread services, which the Streamer's `+no_std+` crate does not have (xref:../elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]).
+Creating threads needs the operating system's thread services, which the Streamer's `+no_std+` crate does not have (xref:../safety/elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate]).
 So the Streamer binary creates the workers, and the Streamer runs its forwarding loop on them.
 
 [[req-ssr-streamer-route-gate]]
@@ -831,10 +667,10 @@ The Streamer *MUST* count a later disable or trip of a route whose gate is not e
 
 *Until a restart.*
 A disable or a trip holds until the Streamer's process ends.
-A route is enabled again only in a new process, after a restart of the process or of its OS application partition from outside it and a fresh initialization (xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]; xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]).
+A route is enabled again only in a new process, after a restart of the process or of its OS application partition from outside it and a fresh initialization (xref:../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]; xref:../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]).
 
 *What this replaces.*
-Under the bounded-runtime Streamer profile (<<req-ssr-streamer-scope,What the Streamer is, and the bounded-runtime Streamer profile>>), this requirement and the items that rest on it (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>; <<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>; <<aou-seooc-operator-access,Only authorized operators reach the Streamer's operator interface>>; <<aou-seooc-monitor-thresholds,Monitor thresholds allow for peers' restarts>>) replace, for the Streamer and for the integrator who operates it, every earlier rule of this area by which an operator's re-enable returned a disabled or tripped route to service, or cleared a monitor's trip, in the running process.
+Under the bounded-runtime Streamer profile (xref:../safety/elements/streamer.adoc#req-ssr-streamer-scope[What the Streamer is, and the bounded-runtime Streamer profile]), this requirement and the items that rest on it (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>; <<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>; xref:../safety/elements/streamer.adoc#aou-seooc-operator-access[Only authorized operators reach the Streamer's operator interface]; xref:../safety/elements/streamer.adoc#aou-seooc-monitor-thresholds[Monitor thresholds allow for peers' restarts]) replace, for the Streamer and for the integrator who operates it, every earlier rule of the up-rust SEooC requirement family by which an operator's re-enable returned a disabled or tripped route to service, or cleared a monitor's trip, in the running process.
 No such rule is part of this profile, and none can be claimed for it.
 
 *While the gate is not enabled.*
@@ -867,14 +703,14 @@ Verification:: test, review, heap-window
 * *heap-window*: each change of a gate, and a frame dropped at a gate that is not enabled.
 
 *Rationale.*
-The Streamer's safe state is fail-silent per route, through its route gates (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's], "Fail-silent routes").
+The Streamer's safe state is fail-silent per route, through its route gates (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's], "Fail-silent routes").
 So a gate silences one route while every other route carries on (<<req-ssr-streamer-containment,A fault stays on its route>>).
 
-A gate changes forwarding state only, and fixed storage lets it change without heap and with the route's storage left in place (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:../../up-l1/runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode]).
+A gate changes forwarding state only, and fixed storage lets it change without heap and with the route's storage left in place (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:../up-l1/runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode]).
 
 _One way._
-Runtime mode has no way back, and a gate follows the same rule (xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]).
-A route re-enabled in place would carry traffic again without the checks of a start, while a new process runs every one of them (xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]).
+Runtime mode has no way back, and a gate follows the same rule (xref:../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]).
+A route re-enabled in place would carry traffic again without the checks of a start, while a new process runs every one of them (xref:../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]).
 
 A request on a route whose gate is not enabled is answered `+Unavailable+` where the reverse route can carry it.
 So a client without the E2E wire can learn of the outage from that answer, without waiting out its TTL (<<req-ssr-streamer-rpc-error-response,An RPC request that cannot be dispatched is answered, best effort>>).
@@ -898,7 +734,7 @@ The Streamer *MUST NOT* offer an operator any operation that re-enables a route 
 A disable holds as <<req-ssr-streamer-route-gate,Each route has a heap-free gate>> states.
 
 *Strict mode.*
-In strict mode's Enforce and Locked states, the Streamer *MUST* refuse at setup, as a forbidden finding (xref:../elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]), an operator interface that names an ASIL route, unless the interface's declaration names that route in `+operator_may_disable+` (<<aou-seooc-operator-access,Only authorized operators reach the Streamer's operator interface>>).
+In strict mode's Enforce and Locked states, the Streamer *MUST* refuse at setup, as a forbidden finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]), an operator interface that names an ASIL route, unless the interface's declaration names that route in `+operator_may_disable+` (xref:../safety/elements/streamer.adoc#aou-seooc-operator-access[Only authorized operators reach the Streamer's operator interface]).
 In the Report state the Streamer *MUST NOT* refuse the interface for that, and *MUST* record the finding, which its startup report lists (<<req-ssr-streamer-startup-report,The startup report says what will run>>).
 --
 
@@ -911,7 +747,7 @@ Verification:: test (a disable only through the interface declared at setup, and
 *Rationale.*
 Disabling an ASIL route removes its function.
 So the only way to do it at run time is declared at setup, bounded and shown in the reports.
-Who may use it is the integrator's to restrict (<<aou-seooc-operator-access,Only authorized operators reach the Streamer's operator interface>>).
+Who may use it is the integrator's to restrict (xref:../safety/elements/streamer.adoc#aou-seooc-operator-access[Only authorized operators reach the Streamer's operator interface]).
 
 _No re-enable._
 A route that an operator switched back on in place would carry traffic again without the checks of a start.
@@ -927,10 +763,10 @@ The Streamer *MUST* monitor each worker and each transport leg.
 The Streamer *MUST* state each monitor's trip condition for integrators, and *MUST* take the condition's thresholds from deployment data.
 
 *Thresholds and restart times.*
-In strict mode's Enforce and Locked states, the Streamer *MUST* refuse at setup, each as a forbidden finding (xref:../elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]):
+In strict mode's Enforce and Locked states, the Streamer *MUST* refuse at setup, each as a forbidden finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]):
 
 * a monitor one of whose routes has a peer with no declared worst-case restart time;
-* a monitor threshold below the declared worst-case restart time of a peer on that monitor's routes, unless `+outage_on_restart+` names the accepted outage (<<aou-seooc-monitor-thresholds,Monitor thresholds allow for peers' restarts>>).
+* a monitor threshold below the declared worst-case restart time of a peer on that monitor's routes, unless `+outage_on_restart+` names the accepted outage (xref:../safety/elements/streamer.adoc#aou-seooc-monitor-thresholds[Monitor thresholds allow for peers' restarts]).
 
 In the Report state the Streamer *MUST NOT* refuse for either, and *MUST* record each as a finding, which its startup report lists (<<req-ssr-streamer-startup-report,The startup report says what will run>>).
 
@@ -954,10 +790,10 @@ When a monitor trips, the Streamer:
 
 *Latching.*
 A trip *MUST* latch: the Streamer *MUST NOT* let a monitor, a cleared condition or an operator return a tripped route to enabled.
-The trip holds as <<req-ssr-streamer-route-gate,Each route has a heap-free gate>> states, and <<aou-seooc-monitor-thresholds,Monitor thresholds allow for peers' restarts>> gives the integrator's part.
+The trip holds as <<req-ssr-streamer-route-gate,Each route has a heap-free gate>> states, and xref:../safety/elements/streamer.adoc#aou-seooc-monitor-thresholds[Monitor thresholds allow for peers' restarts] gives the integrator's part.
 
 *Reaction bound.*
-A reaction bound that a deployment claims through a monitor is the integrator's to establish (<<aou-seooc-streamer-reaction-bound,A reaction claimed through the Streamer's monitors or watchdog hook is bounded end to end>>).
+A reaction bound that a deployment claims through a monitor is the integrator's to establish (xref:../safety/elements/streamer.adoc#aou-seooc-streamer-reaction-bound[A reaction claimed through the Streamer's monitors or watchdog hook is bounded end to end]).
 What the Streamer's startup report states of it, declared or not established, is stated in <<req-ssr-streamer-startup-report,The startup report says what will run>>.
 --
 
@@ -991,7 +827,7 @@ Because a trip latches, a route whose fault comes and goes cannot flap between f
 A tripped route returns with the Streamer's next start, whose initialization checks it again (<<req-ssr-streamer-route-gate,Each route has a heap-free gate>>).
 
 The latch turns a peer's normal restart into an outage where a threshold is shorter than that restart.
-So the thresholds are the integrator's to set (<<aou-seooc-monitor-thresholds,Monitor thresholds allow for peers' restarts>>).
+So the thresholds are the integrator's to set (xref:../safety/elements/streamer.adoc#aou-seooc-monitor-thresholds[Monitor thresholds allow for peers' restarts]).
 
 _Completion._
 A heartbeat from an interrupt can keep ticking while the forwarding loop is stuck, so only completed work counts as progress.
@@ -1049,7 +885,7 @@ So a watchdog outside it, told of progress, can see the stall and act on it.
 A worker's loop never returns (<<req-ssr-streamer-workers,Workers are fixed at initialization>>), so its progress is what a watchdog can check.
 
 The hook reports progress.
-It establishes neither the watchdog's independence nor a bounded reaction, which an integrator who claims one has to establish (<<aou-seooc-streamer-reaction-bound,A reaction claimed through the Streamer's monitors or watchdog hook is bounded end to end>>).
+It establishes neither the watchdog's independence nor a bounded reaction, which an integrator who claims one has to establish (xref:../safety/elements/streamer.adoc#aou-seooc-streamer-reaction-bound[A reaction claimed through the Streamer's monitors or watchdog hook is bounded end to end]).
 
 [[req-ssr-streamer-dispatch-obligations]]
 == Undeliverable messages are counted, never sent as dead letters
@@ -1064,7 +900,7 @@ It is no delivery to the message's receiver, and this requirement states no deli
 *When a message is discarded.*
 The Streamer *MUST* discard a message only in these cases:
 
-* its TTL check refuses it, as xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states: its positive TTL has passed, or its positive TTL cannot be judged because the wall clock cannot be read;
+* its TTL check refuses it, as xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states: its positive TTL has passed, or its positive TTL cannot be judged because the wall clock cannot be read;
 * its egress is full (<<req-ssr-streamer-no-ingress-block,An egress never blocks an ingress>>);
 * one of four admission refusals, each stated by its own item:
 ** a gate that is not enabled, at admission or for a frame that its route holds parked (<<req-ssr-streamer-route-gate,Each route has a heap-free gate>>; "Bounded retry" below);
@@ -1073,12 +909,12 @@ The Streamer *MUST* discard a message only in these cases:
 ** the route's encoding filter (<<req-ssr-streamer-qos-per-leg,Both legs are checked, at setup and per frame>>).
 
 The Streamer *MUST* count each admission refusal under its own cause, apart from expiry and apart from a full egress.
-A refusal of the TTL check is counted as xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states.
+A refusal of the TTL check is counted as xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states.
 A malformed frame carries no message: the Streamer refuses it and counts it as a fault on its route (<<req-ssr-streamer-containment,A fault stays on its route>>).
 
 *Bounded retry.*
-The Streamer *MUST NOT* wait for an egress: a carrier egress has no QoS wait (xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
-The Streamer's only retry *MUST* be the resending of a parked frame, within the route's retained budget and until the frame expires (xref:../../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
+The Streamer *MUST NOT* wait for an egress: a carrier egress has no QoS wait (xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
+The Streamer's only retry *MUST* be the resending of a parked frame, within the route's retained budget and until the frame expires (xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
 The Streamer *MUST NOT* resend a parked frame, or forward any other frame, on a route whose gate is not enabled, and *MUST* count each frame that such a route held parked as dropped.
 
 *Overflow.*
@@ -1088,7 +924,7 @@ What the Streamer does when an egress can take no further frame is stated in <<r
 An RPC request that the Streamer does not forward also gets the best-effort error response of <<req-ssr-streamer-rpc-error-response,An RPC request that cannot be dispatched is answered, best effort>>.
 
 *The dispatcher chapter.*
-For the Streamer, under the bounded-runtime Streamer profile (<<req-ssr-streamer-scope,What the Streamer is, and the bounded-runtime Streamer profile>>), this requirement replaces three rules of xref:../../up-l2/dispatchers/README.adoc[the dispatcher chapter], which stay in force for every other dispatcher, a uStreamer outside that profile included:
+For the Streamer, under the bounded-runtime Streamer profile (xref:../safety/elements/streamer.adoc#req-ssr-streamer-scope[What the Streamer is, and the bounded-runtime Streamer profile]), this requirement replaces three rules of xref:dispatchers/README.adoc[the dispatcher chapter], which stay in force for every other dispatcher, a uStreamer outside that profile included:
 
 * `+dsn~dispatcher-dead-letter-topic~1+`: the Streamer sends no message that it does not forward to a dead-letter topic, and offers no such topic.
 Its counters and reports are not a dead-letter topic.
@@ -1118,7 +954,7 @@ When the Streamer does not forward an RPC request on one of its routes, the Stre
 
 * `+Unavailable+`, for a request on a route whose gate is not enabled;
 * `+PermissionDenied+`, for a request that the route's encoding filter refuses: here the code states that the route's deployment does not permit that encoding to be forwarded, and says nothing of the client's authorization at the service;
-* for every other cause, the code that xref:../../up-l2/dispatchers/README.adoc#commstatus-codes[the dispatcher chapter's table] gives for it.
+* for every other cause, the code that xref:dispatchers/README.adoc#commstatus-codes[the dispatcher chapter's table] gives for it.
 
 *Best effort.*
 The response is best effort:
@@ -1129,15 +965,15 @@ The response is best effort:
 
 *The call.*
 The response reports a failure to the client, and nothing guarantees that the client learns of it.
-By itself it decides nothing about the call: what the client's element does with it, and without it, is stated in xref:interaction.adoc#req-ssr-peer-rpc-ends[RPC calls always end] and xref:interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
+By itself it decides nothing about the call: what the client's element does with it, and without it, is stated in xref:api.adoc#req-ssr-peer-rpc-ends[RPC calls always end] and xref:api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
 So the client's element completes the call with the error response only where it accepts that response while the call is still pending; an error response that the Streamer did not send, or that the element refused, overrides no response that the element accepts later; an error response that arrives after the call has ended completes nothing; and a call that is still pending when its TTL passes ends at that TTL.
 
 *Clients that use the E2E wire.*
 On a route whose client uses the E2E wire, the response carries no end-to-end protection, because the Streamer never opens a payload.
-What that client's side then does, its refusal of the response as unprotected, the count of that refusal and the end of its call, is stated in xref:../../up-l1/wires/e2e.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call], xref:../../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once] and xref:interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
+What that client's side then does, its refusal of the response as unprotected, the count of that refusal and the end of its call, is stated in xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call], xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once] and xref:api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
 
 *The dispatcher chapter.*
-For the Streamer, under the bounded-runtime Streamer profile (<<req-ssr-streamer-scope,What the Streamer is, and the bounded-runtime Streamer profile>>), this requirement replaces `+dsn~dispatcher-rpc-error-response~1+` of xref:../../up-l2/dispatchers/README.adoc[the dispatcher chapter], which stays in force for every other dispatcher, a uStreamer outside that profile included: the Streamer sends the response only under the conditions above, and counts as not sent a response that those conditions exclude.
+For the Streamer, under the bounded-runtime Streamer profile (xref:../safety/elements/streamer.adoc#req-ssr-streamer-scope[What the Streamer is, and the bounded-runtime Streamer profile]), this requirement replaces `+dsn~dispatcher-rpc-error-response~1+` of xref:dispatchers/README.adoc[the dispatcher chapter], which stays in force for every other dispatcher, a uStreamer outside that profile included: the Streamer sends the response only under the conditions above, and counts as not sent a response that those conditions exclude.
 A response that is sent best effort does not meet that rule.
 The meaning that this requirement gives `+PermissionDenied+` for a request that an encoding filter refuses is this requirement's own.
 --
@@ -1151,93 +987,4 @@ Verification:: test (each cause with its code: a request on a route whose gate i
 *Rationale.*
 The Streamer can report a known forwarding failure promptly without forwarding through a route whose gate is not enabled.
 The response is a courtesy to the client and never the guarantee: a send that blocked, retried or allocated to answer a failure would put the failing route's cost on the reverse route.
-The request's TTL is the bound of a call that is still pending then, and that bound is logical (xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]): it decides the call's outcome, while when a descheduled client sees it depends on the client running.
-
-[[aou-seooc-operator-access]]
-== Only authorized operators reach the Streamer's operator interface
-
-[.specitem,oft-sid="aou~seooc-operator-access~4",oft-title="Only authorized operators reach the Streamer's operator interface",oft-needs="uman",oft-tags="SafetyManual"]
---
-The integrator *SHALL* restrict the Streamer's operator interface (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>) to the parties allowed to disable routes.
-
-The integrator *SHALL* treat an operator's disable of an ASIL route as a loss of that route's function that lasts until the Streamer's process is restarted (<<req-ssr-streamer-route-gate,Each route has a heap-free gate>>), and *SHALL* ensure that the item, in ISO 26262's sense, tolerates that loss.
-
-What the Streamer checks of an operator interface that names an ASIL route, and in which strict states it refuses one without `+operator_may_disable+`, is stated in <<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>; what strict mode's report lists of the ASIL routes that an operator can disable, in xref:../elements/up-rust/strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
---
-
-*Violation:*
-
-* Every disable made through the interface is *counted* by the Streamer and reported with its cause, so an unintended disable is seen.
-* In strict mode's Enforce and Locked states, an operator interface that names an ASIL route without `+operator_may_disable+` is *refused at setup* by the Streamer; in the Report state it is a finding of the Streamer's startup report.
-* Who made a change is *undetectable* by the Streamer.
-
-[horizontal]
-ID:: `+aou~seooc-operator-access~4+`
-ASIL:: B
-
-*Rationale.*
-The operator interface can switch an ASIL route off at run time (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>).
-So whoever can reach it can remove that route's function until the Streamer's next start.
-
-The Streamer counts and reports every disable with its cause, but cannot tell who made it.
-So who may make one is the integrator's to control.
-
-[[aou-seooc-monitor-thresholds]]
-== Monitor thresholds allow for peers' restarts
-
-[.specitem,oft-sid="aou~seooc-monitor-thresholds~4",oft-title="Monitor thresholds allow for peers' restarts",oft-needs="uman",oft-tags="SafetyManual"]
---
-The integrator *SHALL* set each Streamer monitor's thresholds, in deployment data, above the worst-case restart time of the peers on the routes that monitor trips, or accept that a peer's normal restart trips such a route until the Streamer's process is restarted.
-
-What a trip does, and how long it holds, is stated in <<req-ssr-streamer-monitors,Worker and transport monitors trip routes>> and <<req-ssr-streamer-route-gate,Each route has a heap-free gate>>.
-
-In the Report, Enforce and Locked states, the integrator *SHALL* also declare each peer's worst-case restart time in the deployment data.
-In the Report, Enforce and Locked states, where a monitor's threshold is below the declared restart time of a peer on that monitor's routes, the integrator *SHALL* name in `+outage_on_restart+` the outage that it accepts.
-What the Enforce and Locked states refuse with those restart times, what the Report state records, and what strict mode's report lists of the routes that a Streamer monitor trips, is stated in <<req-ssr-streamer-monitors,Worker and transport monitors trip routes>> and xref:../elements/up-rust/strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
---
-
-*Violation:*
-
-* A threshold below a peer's worst-case restart trips the route on that restart.
-* The trip is *counted* by the Streamer with its cause, and the mode report shows degraded.
-* The route stays tripped until the Streamer's process is restarted.
-* In strict mode's Enforce and Locked states, a peer with no declared restart time is *refused at setup* by the Streamer, and so is a threshold below a peer's declared restart time unless `+outage_on_restart+` names the accepted outage; in the Report state each is a finding of the Streamer's startup report.
-* Whether that outage is acceptable for the item, in ISO 26262's sense, is *undetectable* by the Streamer.
-
-[horizontal]
-ID:: `+aou~seooc-monitor-thresholds~4+`
-ASIL:: B
-
-*Rationale.*
-A peer recovers from a fault by restarting, since the element has no recovery inside a process (xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]; xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
-A monitor's trip holds until the Streamer's own process is restarted (<<req-ssr-streamer-route-gate,Each route has a heap-free gate>>).
-So a threshold below a peer's worst-case restart turns that peer's normal restart into an outage of the route that only a restart of the Streamer ends, and only the analysis of the item itself, in ISO 26262's sense, can say whether that outage is acceptable.
-
-Declared restart times make the duty checkable.
-Setup can compare every threshold with them before any route carries traffic, and in the Enforce and Locked states refuse a missing one, and a short threshold unless its outage is accepted by name.
-
-[[aou-seooc-streamer-reaction-bound]]
-== A reaction claimed through the Streamer's monitors or watchdog hook is bounded end to end
-
-[.specitem,oft-sid="aou~seooc-streamer-reaction-bound~1",oft-title="A reaction claimed through the Streamer's monitors or watchdog hook is bounded end to end",oft-needs="uman",oft-tags="SafetyManual"]
---
-Where the integrator claims a safety reaction that relies on a Streamer monitor's trip (<<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>) or on the Streamer's watchdog hook (<<req-ssr-streamer-watchdog-hook,A watchdog hook shows progress>>), the integrator *SHALL* bound the whole chain from the fault to the safe state against the system's allocated fault tolerant time interval: detection, the monitor's or the watchdog's own execution, the observation of the trip or of the stall, the decision, the isolation or reset, and the physical safe state.
-
-The integrator *SHALL* include in that bound the monitor's or the watchdog's clock and its common-cause dependencies, and *SHALL NOT* rely on a monitor or a watchdog that shares the fault that it detects.
-
-The integrator *SHALL* declare the claimed bound in the Streamer's deployment data.
-What the Streamer's startup report states, with and without that declaration, is stated in <<req-ssr-streamer-startup-report,The startup report says what will run>>.
---
-
-*Violation:*
-
-* A chain without a bound, and a monitor or a watchdog that shares the fault that it should detect, are *undetectable* by the Streamer.
-* Without a declared bound, the Streamer's startup report states that no reaction bound is established.
-
-[horizontal]
-ID:: `+aou~seooc-streamer-reaction-bound~1+`
-ASIL:: B
-
-*Rationale.*
-A monitor or a watchdog can support a fail-silent reaction, but it bounds neither the chain that follows its detection nor its own independence from the fault.
-So a reaction time is a claim of the system, which only the integrator can bound end to end (xref:../elements/up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
+The request's TTL is the bound of a call that is still pending then, and that bound is logical (xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]): it decides the call's outcome, while when a descheduled client sees it depends on the client running.

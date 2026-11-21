@@ -229,3 +229,7 @@ NOTE: This section is non-normative navigation; the linked items govern and add 
 * *Foreign FFI boundary and callback lifetimes (LoLa):*
   xref:../up-l1/lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path];
   xref:../up-l1/lola.adoc#req-ssr-binding-lola-callbacks[What the LoLa binding gives LoLa stays valid for as long as LoLa can use it].
+* *Bounded-runtime Streamer activation lock, synchronous data plane and crate isolation:*
+  xref:../up-l2/streamer.adoc#req-ssr-streamer-route-lock[Routes and subscriptions are locked at activation];
+  xref:../up-l2/streamer.adoc#req-ssr-streamer-sync-data-plane[The Streamer's data plane is synchronous];
+  xref:../safety/elements/streamer.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate].

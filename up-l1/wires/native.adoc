@@ -282,7 +282,7 @@ The element *MUST* meet each rule of this item without relying on a destructor t
 *The only copies.*
 Which copies of a payload a route may take, each chosen at setup and reported, is stated for every route in xref:../payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it] and xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name], and for the copy route in xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader].
 Those rules hold for a native payload as for any other.
-What a carrier copies when it forwards a native frame is stated with the carrier (xref:../../safety/up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]; xref:../integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused]).
+What a carrier copies when it forwards a native frame is stated with the carrier (xref:../../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]; xref:../integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused]).
 
 *No substitute.*
 The element *MUST NOT* serve a native route by a serialized encoding, by a staged copy or by a conversion of the representation.

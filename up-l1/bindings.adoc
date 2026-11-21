@@ -31,7 +31,7 @@ For every frame that it refuses, drops, evicts or expires in runtime mode, the e
 
 *Whose count.*
 The element counts the refusals, drops, evictions and expiries that its own code decides, those of its carrier primitives on a route of the Streamer included.
-The element *MUST NOT* count again a frame that another part refused and counted in a check of its own, such as a check of the Streamer's on a carrier route (xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-qos-per-leg[Both legs are checked, at setup and per frame]).
+The element *MUST NOT* count again a frame that another part refused and counted in a check of its own, such as a check of the Streamer's on a carrier route (xref:../up-l2/streamer.adoc#req-ssr-streamer-qos-per-leg[Both legs are checked, at setup and per frame]).
 
 *Losses the element cannot see.*
 A loss that the element cannot see, such as a drop-oldest eviction inside the middleware, is not a counted event.
@@ -285,7 +285,7 @@ Where the element takes a TTL in a unit finer than a millisecond, it *MUST* set 
 
 *Expired frames.*
 A frame whose TTL is greater than 0 expires as this item states.
-The element *MUST NOT* deliver an expired frame to the application, or let a carrier (xref:../safety/up-l2/streamer.adoc#req-ssr-carrier-route[A carrier route takes each frame at its ingress and sends it at its egress]) forward it, and *MUST* count it as expired.
+The element *MUST NOT* deliver an expired frame to the application, or let a carrier (xref:../up-l2/streamer.adoc#req-ssr-carrier-route[A carrier route takes each frame at its ingress and sends it at its egress]) forward it, and *MUST* count it as expired.
 
 *A TTL of 0.*
 The element *MUST NOT* refuse a frame whose TTL is 0 as expired, or count it as expired, however much time has passed: when the frame reaches its route, when it is taken, and before a carrier forwards it.
@@ -293,7 +293,7 @@ The clauses "How expiry is judged" and "An unreadable clock" apply to a TTL grea
 A frame whose TTL is 0 needs no reading of the clock, and the element *MUST NOT* refuse it because the clock cannot be read.
 
 *RPC requests.*
-The protocol requires an RPC request's TTL to be greater than 0 (`+dsn~up-attributes-request-ttl~1+`), and a call ends by that TTL (xref:../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-ends[RPC calls always end]), so a request whose TTL is 0 is invalid, not expired.
+The protocol requires an RPC request's TTL to be greater than 0 (`+dsn~up-attributes-request-ttl~1+`), and a call ends by that TTL (xref:../up-l2/api.adoc#req-ssr-peer-rpc-ends[RPC calls always end]), so a request whose TTL is 0 is invalid, not expired.
 The element *MUST* refuse an RPC request whose TTL is 0:
 
 * at a client, before the request is sent, with an error that names the TTL;
@@ -307,7 +307,7 @@ Measured from that time:
 * the element *MUST* always refuse the frame once its TTL, rounded up to a whole millisecond, plus one more millisecond has passed.
 
 An ID made while the sender's wall clock could not be read records the last good time, so its frame can be refused before its TTL has passed in real time, by up to the time the clock was unreadable.
-For a generator that keeps the last good time only to 64 ms, such a frame can be refused by up to 64 ms more (xref:../safety/up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]).
+For a generator that keeps the last good time only to 64 ms, such a frame can be refused by up to 64 ms more (xref:../basics/uuid.adoc#req-ssr-ids-unique[Message IDs are unique]).
 
 *An unreadable clock.*
 If the wall clock cannot be read at the check of a frame whose TTL is greater than 0, the element *MUST* refuse the frame and count it once, under a cause that names the unreadable clock and not as expired.
@@ -347,7 +347,7 @@ The bound allows for that millisecond.
 
 A frame that is refused because the clock cannot be read has not been shown to be expired, so it is counted under a cause of its own.
 
-A sender that cannot read its clock reuses the last good time in its IDs, so they keep working (xref:../safety/up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]).
+A sender that cannot read its clock reuses the last good time in its IDs, so they keep working (xref:../basics/uuid.adoc#req-ssr-ids-unique[Message IDs are unique]).
 
 Expiry is judged at the element's checks, when a frame reaches its route and when it is taken.
 TTL decides which frames those checks accept.
@@ -810,7 +810,7 @@ Read as an arrival, a delivery or a loss, it would put into a count an event tha
 --
 On a response route that it serves by push, a binding *MUST* make its deliveries one at a time: it *MUST NOT* start a delivery on that route while another delivery on the same route is in progress, on any thread.
 
-The element's checks of an arriving response are stated in xref:../safety/up-l2/interaction.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it], and this item relaxes none of them.
+The element's checks of an arriving response are stated in xref:../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it], and this item relaxes none of them.
 On a response route that a binding serves by pull, the element takes each frame itself, and this item gives the binding no duty.
 --
 
@@ -839,7 +839,7 @@ A binding that declares an exact receiver count *MUST* report that number to the
 It *MUST NOT* report in its place a count of notification listeners, a discovery result or a count that it took at another time.
 
 *The element's side.*
-What the element does with that report, and on a binding that declares no exact receiver count, is stated in xref:../safety/up-l2/interaction.adoc#req-ssr-peer-rpc-no-server[A call with no server fails at once].
+What the element does with that report, and on a binding that declares no exact receiver count, is stated in xref:../up-l2/api.adoc#req-ssr-peer-rpc-no-server[A call with no server fails at once].
 --
 
 [horizontal]
@@ -878,7 +878,7 @@ A binding *MUST* bound its other work, its worker loops, dispatch and wake paths
 A binding *MUST NOT* let anything that a binding call, an arrival report or a health report needs wait behind a pending release.
 
 *Carrier ingress.*
-At the ingress of a carrier route (xref:../safety/up-l2/streamer.adoc#req-ssr-carrier-route[A carrier route takes each frame at its ingress and sends it at its egress]), the element *MUST* take pulled or retained frames, and never a borrowed frame whose carriage would need a staged copy.
+At the ingress of a carrier route (xref:../up-l2/streamer.adoc#req-ssr-carrier-route[A carrier route takes each frame at its ingress and sends it at its egress]), the element *MUST* take pulled or retained frames, and never a borrowed frame whose carriage would need a staged copy.
 --
 
 [horizontal]

@@ -83,7 +83,7 @@ How a violated assumption of use shows up to an observer, and the integrator's d
 * *Wires:*
   xref:../up-l1/wires/README.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic].
 * *The Streamer:*
-  xref:up-l2/streamer.adoc#req-ssr-config-exact-addresses[ASIL Streamer routes name exact source addresses];
-  xref:up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route];
-  xref:up-l2/streamer.adoc#req-ssr-streamer-no-panic[The Streamer does not panic in runtime mode];
-  xref:up-l2/streamer.adoc#req-ssr-streamer-memory-safety[The Streamer's own code cannot cause undefined behaviour, and its `+unsafe+` is inventoried].
+  xref:../up-l2/streamer.adoc#req-ssr-config-exact-addresses[ASIL Streamer routes name exact source addresses];
+  xref:../up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route];
+  xref:../up-l2/streamer.adoc#req-ssr-streamer-no-panic[The Streamer does not panic in runtime mode];
+  xref:elements/streamer.adoc#req-ssr-streamer-memory-safety[The Streamer's own code cannot cause undefined behaviour, and its `unsafe` is inventoried].

@@ -243,7 +243,7 @@ Verification:: test
 *Rationale.*
 Each rule checks a declaration or a condition on which an assumption of use rests, so that the Enforce state refuses a configuration that lacks it.
 
-NOTE: Refusals of the Enforce state that concern another item's own subject are stated with that subject: xref:../../../up-l1/runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup], xref:../../../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened], xref:../../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored], xref:../../assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found], xref:../../up-l2/streamer.adoc#req-ssr-streamer-operator-control[Operator changes go through a declared interface] and xref:../../up-l2/streamer.adoc#req-ssr-streamer-monitors[Worker and transport monitors trip routes].
+NOTE: Refusals of the Enforce state that concern another item's own subject are stated with that subject: xref:../../../up-l1/runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup], xref:../../../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened], xref:../../../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored], xref:../../assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found], xref:../../../up-l2/streamer.adoc#req-ssr-streamer-operator-control[Operator changes go through a declared interface] and xref:../../../up-l2/streamer.adoc#req-ssr-streamer-monitors[Worker and transport monitors trip routes].
 
 [[req-ssr-strict-ack-revision]]
 == An acknowledgement names a deviation by ID and revision
@@ -337,8 +337,8 @@ Strict mode *MUST* also include in the report:
 * every route's capacities (xref:assumptions-of-use.adoc#aou-seooc-capacity-sizing[Capacities are sized for the worst case]);
 * each route's declared peers and the shared-memory permissions its binding requests (xref:assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]);
 * each shared route, with what one faulty peer can starve there (xref:assumptions-of-use.adoc#aou-seooc-peer-rates[Peer rates on shared routes are the integrator's]);
-* which ASIL routes an operator can disable, and that a disable stays latched until an external restart of the process or partition (xref:../../up-l2/streamer.adoc#aou-seooc-operator-access[Only authorized operators reach the Streamer's operator interface]);
-* every route that a Streamer monitor can trip, and that a trip stays latched until such a restart (xref:../../up-l2/streamer.adoc#aou-seooc-monitor-thresholds[Monitor thresholds allow for peers' restarts]).
+* which ASIL routes an operator can disable, and that a disable stays latched until an external restart of the process or partition (xref:../streamer.adoc#aou-seooc-operator-access[Only authorized operators reach the Streamer's operator interface]);
+* every route that a Streamer monitor can trip, and that a trip stays latched until such a restart (xref:../streamer.adoc#aou-seooc-monitor-thresholds[Monitor thresholds allow for peers' restarts]).
 
 *The deployment.*
 Strict mode *MUST* also include in the report:

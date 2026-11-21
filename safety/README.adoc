@@ -37,32 +37,30 @@ Each obligation is stated once in a single canonical item, and views, profiles a
 | The `up-rust` SEooC element boundary (E1 to E7) and claims (`README.adoc`), xref:elements/up-rust/assumptions-of-use.adoc[assumptions of use], xref:elements/up-rust/build.adoc[build and shipped content], and xref:elements/up-rust/strict-mode.adoc[strict mode]
 
 | xref:elements/streamer.adoc[`elements/streamer.adoc`]
-| The Streamer safety element boundary and untaintable-crate rule (separate from E1 to E7)
+| The Streamer safety element boundary, untaintable-crate rule, memory-safety requirement and integrator assumptions of use (separate from E1 to E7)
 |===
 
 === Responsibility-led technical chapters
 
 [cols="2,5",options="header"]
 |===
-| Chapter | Relocated up-rust SEooC and shared technical content
+| Chapter | Technical obligations of the up-rust SEooC and owned-frame families
 
 | xref:../contract-generations.adoc[`contract-generations.adoc`]
 | Requirement-family membership, actor binding, declaration and claim grammar, replacement precedence, item reading rules and classic-route exclusion from runtime mode
 
 | xref:../basics/README.adoc[`basics/`]
-| xref:../basics/ownership.adoc[Ownership], xref:../basics/resources.adoc[resources, startup memory and heap classes], xref:../basics/configurations.adoc[configurations and deployment-data validation], xref:../basics/error_model.adoc[error model and runtime refusal], and xref:../basics/platform.adoc[platform contracts and atomics]
+| xref:../basics/ownership.adoc[Ownership], xref:../basics/resources.adoc[resources, startup memory and heap classes], xref:../basics/configurations.adoc[configurations and deployment-data validation], xref:../basics/error_model.adoc[error model and runtime refusal], xref:../basics/uuid.adoc[message identifiers (UUID)], and xref:../basics/platform.adoc[platform contracts and atomics]
 
 | xref:../up-l1/README.adoc[`up-l1/`]
-| xref:../up-l1/runtime.adoc[Transport runtime, mode transitions, bounds, QoS and cleanup], xref:../up-l1/payload-paths.adoc[payload paths], xref:../up-l1/bindings.adoc[binding observations, deadlines, TTL and waivers], xref:../up-l1/peers.adoc[peers and faulty-peer model], and xref:../up-l1/wires/README.adoc[wires]
+| xref:../up-l1/runtime.adoc[Transport runtime, mode transitions, bounds, QoS and cleanup], xref:../up-l1/payload-paths.adoc[payload paths], xref:../up-l1/bindings.adoc[binding contract, observations, deadlines, TTL and waivers], xref:../up-l1/peers.adoc[peers and faulty-peer model], xref:../up-l1/integrity.adoc[integrity levels and copy routes], xref:../up-l1/deployment.adoc[transport deployment prerequisites], middleware bindings (xref:../up-l1/iceoryx2.adoc[iceoryx2], xref:../up-l1/iceoryx2-frame.adoc[iceoryx2 frame], xref:../up-l1/lola.adoc[LoLa], xref:../up-l1/lola-envelope.adoc[LoLa envelope]), and xref:../up-l1/wires/README.adoc[wires] (xref:../up-l1/wires/native.adoc[native], xref:../up-l1/wires/serialized.adoc[serialized], xref:../up-l1/wires/xcdrv2.adoc[XCDR2], xref:../up-l1/wires/e2e.adoc[E2E protection])
 
 | xref:../up-l2/README.adoc[`up-l2/`]
-| xref:../up-l2/execution.adoc[Execution and asynchronous seam] and xref:../up-l2/dispatchers/README.adoc[dispatchers]
+| xref:../up-l2/api.adoc[Communication Layer APIs and RPC interaction rules], xref:../up-l2/roles.adoc[application roles], xref:../up-l2/execution.adoc[execution and asynchronous seam], xref:../up-l2/streamer.adoc[bounded-runtime Streamer] and xref:../up-l2/dispatchers/README.adoc[dispatchers]
 
 | xref:../languages/rust.adoc[`languages/rust.adoc`]
 | Rust-specific mechanisms: crate isolation, runtime handle drop discipline, memory-safety soundness and safe-binding boundary
 |===
-
-NOTE: Remaining `up-rust` SEooC chapters still pending subsequent relocation commits are indexed at xref:../up-l1/wires/e2e.adoc[the end-to-end protection wire], xref:../up-l1/README.adoc[the transport-layer bindings, wires, integrity, peers, middleware and deployment pages] and xref:up-l2/README.adoc[the communication-layer RPC/message identity and Streamer pages].
 
 [[filing]]
 === Filing and scope

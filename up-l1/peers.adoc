@@ -9,7 +9,7 @@ This page holds transport-layer peer fault-model requirements of the up-rust SEo
 Filing on this page does not broaden any requirement to all uP-L1 implementations: whom each item binds, and how the repository's requirement families meet, is stated in xref:../contract-generations.adoc[Which requirements an implementation follows] (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
 
 Additional safety-view fault-model navigation is indexed in xref:../safety/fault-models.adoc[Safety fault models and hypotheses], and element scope in xref:../safety/elements/up-rust/README.adoc[the up-rust SEooC element].
-A peer's death and restart are stated in <<req-ssr-peer-failure-normal,Peer failure is normal input>> and <<req-ssr-peer-stale-rejected,Stale peers are rejected>>, a peer of another ABI in <<req-ssr-native-abi-agreed,A native representation never crosses an ABI>>, declared peer admission in <<req-ssr-peer-admission,Undeclared peers cannot lock out declared ones>>, and RPC calls and message identity in xref:../safety/up-l2/interaction.adoc[the communication layer's interaction rules].
+A peer's death and restart are stated in <<req-ssr-peer-failure-normal,Peer failure is normal input>> and <<req-ssr-peer-stale-rejected,Stale peers are rejected>>, a peer of another ABI in <<req-ssr-native-abi-agreed,A native representation never crosses an ABI>>, declared peer admission in <<req-ssr-peer-admission,Undeclared peers cannot lock out declared ones>>, and RPC calls and message identity in xref:../up-l2/api.adoc[the communication layer's interaction rules].
 ====
 
 [[req-ssr-peer-fault-model]]

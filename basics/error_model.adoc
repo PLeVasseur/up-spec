@@ -258,7 +258,7 @@ Examples are the destructor of an owned value, an allocator's release or a depen
 
 A panic in element code is a defect on every route, whatever the route requires.
 
-The Streamer's own code and the Streamer binary's own code have their own rule (xref:../safety/up-l2/streamer.adoc#req-ssr-streamer-no-panic[The Streamer does not panic in runtime mode]).
+The Streamer's own code and the Streamer binary's own code have their own rule (xref:../up-l2/streamer.adoc#req-ssr-streamer-no-panic[The Streamer does not panic in runtime mode]).
 
 [[req-ssr-error-fixed-size]]
 === Errors are fixed-size diagnoses
