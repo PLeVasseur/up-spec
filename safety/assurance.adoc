@@ -334,6 +334,6 @@ It adds, changes and weakens no requirement or assumption of use; every obligati
 Related technical obligations outside assurance governance:
 
 * *Binding middleware permits and waiver scope:* xref:../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] and xref:../up-l1/bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
-* *Rust memory-safety soundness and safe-binding boundary:* xref:../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] xref:../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety] and xref:../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`].
+* *Rust memory-safety soundness and safe-binding boundary:* xref:../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour], xref:../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety] and xref:../languages/rust.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`].
 * *Checked-wire memory safety:* xref:../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety].
 ====

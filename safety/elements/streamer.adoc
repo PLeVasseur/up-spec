@@ -130,8 +130,8 @@ Where an item of this profile replaces a rule of that chapter, or an earlier rul
 The profile's lists add no duty beyond the items they list and remove none: this item's own startup-provisioning admission and boundary duties bind the Streamer and the Streamer binary as stated above, and each other requirement of the up-rust SEooC requirement family whose statement gives the Streamer or the Streamer binary a duty binds it, as its statement says, whether or not these lists name it.
 
 *Replacement.*
-For the Streamer and the Streamer binary under the bounded-runtime Streamer profile, this revision replaces revision 1 of this item for configurations whose separately declared bounded-runtime Streamer composition explicitly selects an admitted startup-provisioning function to supply the route-table share of startup storage.
-For configurations that do not select that function, and for every other dispatcher, including a classic uStreamer, the static or caller-provided storage boundary and the dispatcher chapter rules stay unchanged.
+For the Streamer and the Streamer binary under the bounded-runtime Streamer profile, this revision replaces revision 1 of this item both for configurations whose separately declared bounded-runtime Streamer composition explicitly selects an admitted startup-provisioning function to supply the route-table share of startup storage and for configurations that do not select that function (where the static or caller-provided storage boundary and the prohibition on helper-provisioned route-table backing apply).
+For every other dispatcher, including a classic uStreamer, the dispatcher chapter rules stay unchanged.
 --
 
 [horizontal]

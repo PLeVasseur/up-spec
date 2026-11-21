@@ -94,7 +94,7 @@ It admits the route's ordinary ownership, and it establishes nothing more:
 These rules bind each transport from its own transition.
 
 *Scoped replacement.*
-This revision replaces revision 4 of this item for the element and each wire, and extends its serialized-route participant confinement and shared-work exclusion duties to each allocation provider whose role an explicitly selected serialized owned-value runtime adapter implements or serves as an explicitly identified subcomponent of under xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations].
+This revision replaces revision 4 of this item for the element and each wire, extends its native-caused and shared-work exclusion duties to each allocation provider, and extends its serialized-route participant confinement duties to each allocation provider whose role an explicitly selected serialized owned-value runtime adapter implements or serves as an explicitly identified subcomponent of under xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations].
 All causal native-path no-heap and no-free duties, all shared-work exclusions, the exact scope of named middleware permits and waivers, the distinction between general allocator activity in startup-obtained regions and fixed-slot return, and all serialized-route prohibitions of revision 4 of this item remain in force.
 --
 

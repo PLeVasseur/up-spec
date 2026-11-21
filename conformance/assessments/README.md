@@ -2,7 +2,7 @@
 
 This directory defines the successor documentary format for **separately identified conformance assessments** ([`schema.json`](schema.json) and [`index.json`](index.json)).
 
-It accompanies the immutable historical intake catalogue in [`../README.md`](../README.md) (`../INPUT-MANIFEST.v2.json` and `../intake.v2.json`) without modifying any historical intake record, generator output, or unassessed status. All 29 files in the historical intake catalogue remain reproducible via `python3 -B generate.py --check` in `../`.
+It accompanies the immutable historical intake catalogue in [`../README.md`](../README.md) (`../INPUT-MANIFEST.v2.json` and `../intake.v2.json`) without modifying any historical intake record, generator output, or unassessed status. All 31 files in the historical intake catalogue remain reproducible via `python3 -B generate.py --check` in `../`.
 
 ## Current state
 

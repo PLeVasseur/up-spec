@@ -28,7 +28,7 @@ The Streamer is a separate part outside the element: xref:../streamer.adoc[Strea
 [[req-ssr-element-boundary]]
 === The parts of the element, and element code
 
-[.specitem,oft-sid="req~ssr-element-boundary~3",oft-title="The parts of the element, and element code",oft-needs="uman",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-element-boundary~3",oft-title="The parts of the element, and element code",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
 --
 *The parts.*
 The element is the up-rust SEooC.
