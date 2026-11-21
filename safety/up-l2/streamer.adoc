@@ -7,7 +7,7 @@ Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom its items bind: xref:README.adoc[safety at uP-L2].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
-Whom an item binds: xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
+Whom an item binds: xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
 
 The last three sections are the assumptions of use about operating the Streamer.
 
@@ -41,7 +41,7 @@ The Streamer and the Streamer binary are parts of their own.
 Of the Streamer's data plane, only the carrier primitives that the Streamer calls belong to the element (xref:../seooc-up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
 
 *The bounded-runtime Streamer profile.*
-The bounded-runtime Streamer profile is a named profile (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]), and the Streamer follows it.
+The bounded-runtime Streamer profile is a named profile (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]), and the Streamer follows it.
 Its items are the requirements of this page that give the Streamer or the Streamer binary a duty by name:
 
 * <<req-ssr-streamer-route-lock,Routes and subscriptions are locked at activation>>;
@@ -75,13 +75,13 @@ and the requirements of other pages that give the Streamer or the Streamer binar
 * xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop];
 * xref:../seooc-up-rust/release.adoc#req-ssr-release-inert-drop[Dropping a runtime handle does nothing];
 * xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-one-way[There is no way back];
-* xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode];
+* xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode];
 * xref:../seooc-up-rust/startup-memory.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided];
 
 and the requirements that bind every part that a requirement of this area binds:
 
-* xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty];
-* xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect];
+* xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty];
+* xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect];
 * xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer].
 
 *Definitions.*
@@ -624,7 +624,7 @@ The Streamer *MUST* refuse its startup as a whole, and *MUST NOT* activate any r
 What the Streamer reports then is stated in <<req-ssr-streamer-startup-report,The startup report says what will run>>.
 
 *Classic endpoints.*
-How the Streamer builds each of its ASIL routes, through the element's admission and with no classic endpoint, is stated in xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode].
+How the Streamer builds each of its ASIL routes, through the element's admission and with no classic endpoint, is stated in xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode].
 --
 
 [horizontal]

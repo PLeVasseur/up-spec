@@ -11,14 +11,14 @@ This page holds what an SDK offers an application above its core, on owned-frame
 * what a layer above the core leaves as it is: the route, and each result of the core;
 * the kinds of message operation, the asynchronous layer, and the scheduler integrations that join that layer to a scheduler.
 
-What the SDK, the core and a layer above the core are, and whom an item of this area binds, is stated in xref:README.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
+What the SDK, the core and a layer above the core are, and whom an item of this area binds, is stated in xref:../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
 
 == Words used on this page
 
 These words have the meaning that the items give them.
-Where an SDK's core is not the element, a word that an item of the safety area defines for the element or for a part that works with it is read as the clause "Words of the safety area" of xref:README.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it] states.
+Where an SDK's core is not the element, a word that an item of the safety area defines for the element or for a part that works with it is read as the clause "Words of the safety area" of xref:../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it] states.
 
-* An *owned-frame route*: xref:README.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
+* An *owned-frame route*: xref:../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
 * An *adapter*: xref:README.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name].
 * A *memory provider* and an *allocation provider*: xref:providers.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing].
 * The *Communication Layer APIs*: xref:../../up-l2/api.adoc[Communication Layer APIs].
@@ -44,7 +44,7 @@ Where an SDK's core is not the element, a word that an item of the safety area d
 *The roles.*
 The application roles take their names and messaging patterns from the xref:../../up-l2/api.adoc[Communication Layer APIs] of uP-L2: publisher, subscriber, notifier, notification listener, RPC client and RPC server.
 The application-role layer is the layer above the core through which an application declares and uses roles on owned-frame routes.
-It is not the classic Communication Layer APIs, which keep their contract beside it (xref:README.adoc#req-sdk-owned-frame-classic-apis[The classic APIs keep their contract beside owned-frame routes]).
+It is not the classic Communication Layer APIs, which keep their contract beside it (xref:../../contract-generations.adoc#req-sdk-owned-frame-classic-apis[The classic APIs keep their contract beside owned-frame routes]).
 
 *On its own.*
 Where an SDK offers an application-role layer, the layer *MUST* let an application declare and use any subset of the roles that it offers.
@@ -62,7 +62,7 @@ The layer *MUST* state in its documentation, with the role, each such difference
 
 *Both levels.*
 The layer *MUST* make each role usable by an application that implements no binding, no wire and no memory provider of its own.
-Use without the application-role layer: a layer above the core is one that an application can leave out (xref:README.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it]); where the core is the element, xref:../../safety/seooc-up-rust/crate-isolation.adoc#req-ssr-crate-core-only-binary[The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it] keeps the element's checked policy usable without any optional application layer.
+Use without the application-role layer: a layer above the core is one that an application can leave out (xref:../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it]); where the core is the element, xref:../../safety/seooc-up-rust/crate-isolation.adoc#req-ssr-crate-core-only-binary[The checked policy stays in the safety crate, and no admitted optional layer bypasses or reimplements it] keeps the element's checked policy usable without any optional application layer.
 --
 
 [horizontal]

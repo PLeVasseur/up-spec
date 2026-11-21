@@ -53,7 +53,7 @@ Element code is the code of the parts that belong to the element.
 Code that runs on a runtime path but that the element does not own, such as the destructor of an owned value, an allocator's release or a dependency that they reach, is not element code.
 
 *Each part keeps its own requirements.*
-Whom a requirement binds is stated in xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
+Whom a requirement binds is stated in xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
 Belonging to the element moves no duty from one part to another.
 
 *Outside the element.*
@@ -64,14 +64,14 @@ These are parts of their own, each with its own requirements, and none is a part
 * a platform backend that an integrator supplies (xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]);
 * the Streamer and the Streamer binary (xref:../up-l2/streamer.adoc#req-ssr-streamer-scope[What the Streamer is, and the bounded-runtime Streamer profile]);
 * each optional layer, such as an allocation-aware layer or an asynchronous layer, and the scheduler that drives an asynchronous layer;
-* each memory provider, scheduler integration and adapter (xref:../../sdk/owned-frame/README.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it]).
+* each memory provider, scheduler integration and adapter (xref:../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it]).
 
 The Streamer uses the carrier primitives of E5.
 A requirement whose statement gives a duty only to the element, to element code or to a part of the element gives the Streamer no duty.
 The application's own logic, the safety function of the item, in ISO 26262's sense, with its hazards, its fault tolerant time interval, its workload and its safe state, the operating system, the hardware, the supervisor, the clock source and the deployment data are outside the element too, and the assumptions of use cover them.
 
 *Composition.*
-A deployment conformance claim (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]) covers the parts that the deployment's profile selects (<<req-ssr-element-configurations,The ASIL path and supported configurations>>).
+A deployment conformance claim (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]) covers the parts that the deployment's profile selects (<<req-ssr-element-configurations,The ASIL path and supported configurations>>).
 Running in one process, being linked into one binary or being kept in one repository establishes no claim and merges no requirements.
 A composition that is claimed as one unit has its own explicit boundary, the revisions of its parts and of their named profiles with their dependency closure, its lifecycle, its assumptions of use and its evidence.
 
@@ -111,7 +111,7 @@ In each supported configuration package that it provides, the element's supplier
 A platform profile is a class of target, an operating system or a bare-metal environment with an architecture, that a supported configuration package names.
 
 *The deployment profile.*
-A deployment profile is the selection that a deployment declaration names (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]):
+A deployment profile is the selection that a deployment declaration names (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]):
 
 * the parts that the deployment composes, each with its declaration;
 * the interfaces between them;
@@ -150,9 +150,9 @@ The entries below point at the items that govern some of it.
 
 === Classic routes
 
-How the classic contract of the protocol chapters and the items of this area meet: xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
-What keeps a classic route out of runtime mode: xref:runtime-modes.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode].
-How the classic APIs stand beside owned-frame routes, and what an adapter between them keeps or refuses: xref:../../sdk/owned-frame/README.adoc#req-sdk-owned-frame-classic-apis[The classic APIs keep their contract beside owned-frame routes]; xref:../../sdk/owned-frame/README.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name].
+How the classic contract of the protocol chapters and the items of this area meet: xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
+What keeps a classic route out of runtime mode: xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode].
+How the classic APIs stand beside owned-frame routes, and what an adapter between them keeps or refuses: xref:../../contract-generations.adoc#req-sdk-owned-frame-classic-apis[The classic APIs keep their contract beside owned-frame routes]; xref:../../sdk/owned-frame/README.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name].
 
 === Asynchronous layers
 
@@ -181,7 +181,7 @@ What a binding and its middleware are: xref:../up-l1/bindings.adoc#req-ssr-bindi
 == What the element relies on
 
 * *Bindings and wires*: what each is, and whether it is part of the element, xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract] and xref:../up-l1/wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
-Whom an item binds: xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
+Whom an item binds: xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
 Which bindings and wires an integrator uses: xref:../up-l1/deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts].
 * *The derive*: what it is, <<req-ssr-element-boundary,The parts of the element, and element code>>; what holds for the code that it generates, xref:memory-safety.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified]; what it refuses, xref:../up-l1/native-wire.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout].
 * *Test tooling and test doubles*: what a test double is, xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]; what a result on one shows, <<req-ssr-verification-methods,The verification methods, and what a Verification line asks for>>.
@@ -189,7 +189,7 @@ Which bindings and wires an integrator uses: xref:../up-l1/deployment.adoc#aou-s
 [[claims]]
 == Claims
 
-Kinds of claim, and what a claim covers: xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
+Kinds of claim, and what a claim covers: xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
 The items that state what a route offers, requires and reports: xref:qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]; xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path].
 
 === Ordinary ownership and stronger resource guarantees
@@ -299,7 +299,7 @@ It is no evidence that a real part of that kind meets its requirements (xref:../
 
 *The evidence.*
 The supplier of each part that a requirement of this area binds *MUST* show, in its evidence for the duties that the requirement gives that part, each method that the requirement's "Verification" line names, in the scope that the method has for the requirement, applied to the paths and cases of those duties that the method covers.
-The evidence of a component conformance claim (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]) is that evidence for each requirement that the claim rests on.
+The evidence of a component conformance claim (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]) is that evidence for each requirement that the claim rests on.
 Revision 1 of this item gave the duty to show that evidence to each part that a requirement of this area names; this revision gives it to that part's supplier.
 The supplier *MUST* report each piece of evidence by its state, which is what was done to obtain it, with the exact inputs, tool and configuration revisions that it was obtained with, its observation scope and its limitations, and *MUST NOT* present evidence of one state as evidence of another.
 The supplier *MUST* name the test double in each piece of evidence that rests on one.

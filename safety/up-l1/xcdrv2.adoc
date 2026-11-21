@@ -15,7 +15,7 @@ In the standard's words (<<dds-xtypes,DDS-XTypes 1.3>>), a type of this profile 
 
 == Whom the items bind
 
-* Each item's statement names whom it binds: here, each wire of the XCDR2 little-endian appendable profile, as <<req-ssr-xcdr2-types,The profile encodes structures of fixed-width fields, and nothing else>> defines it (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
+* Each item's statement names whom it binds: here, each wire of the XCDR2 little-endian appendable profile, as <<req-ssr-xcdr2-types,The profile encodes structures of fixed-width fields, and nothing else>> defines it (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 * The duties of every wire and of every serialized wire hold beside them.
 * The rules of a native type: xref:native-wire.adoc[the native wire].
 
@@ -394,7 +394,7 @@ The wire *MUST NOT* state for the profile an identifier that the same agreement 
 Revision 1 of the items `+req~ssr-xcdr2-types+`, `+req~ssr-xcdr2-encoding+`, `+req~ssr-xcdr2-length+`, `+req~ssr-xcdr2-decoding+` and `+req~ssr-xcdr2-identity+` binds each wire of the fixed-layout XCDR2 profile, and states that other format, each of whose encodings begins with the four bytes `06 00 00 00`.
 Revision 2 of those five items, with <<req-ssr-xcdr2-evolution,A type grows only by fields added at its end, and a receiving end reads only the types that it admits>>, states the XCDR2 little-endian appendable profile in place of that format, in everything that revision 1 stated: the types of the format, its bytes, its length, its decoding and the identity of a type.
 Revision 2 binds each wire of the XCDR2 little-endian appendable profile.
-For each wire of the fixed-layout XCDR2 profile, revision 1 stays in force as the contract of that format: revision 2 neither retires its duties nor gives them to another part (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "Replacement").
+For each wire of the fixed-layout XCDR2 profile, revision 1 stays in force as the contract of that format: revision 2 neither retires its duties nor gives them to another part (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "Replacement").
 No input is an encoding of both formats, because their first bytes differ.
 A route moves from one format to the other only through a change of its declaration at both of its ends, because a wire of the XCDR2 little-endian appendable profile:
 
@@ -402,7 +402,7 @@ A route moves from one format to the other only through a change of its declarat
 * *MUST NOT* choose between formats by the bytes of an input;
 * *MUST NOT* convert an encoding of one of the two formats into an encoding of the other.
 
-Evidence for revision 1 is no evidence for revision 2 (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "Component claims").
+Evidence for revision 1 is no evidence for revision 2 (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "Component claims").
 --
 
 [horizontal]

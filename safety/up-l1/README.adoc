@@ -20,7 +20,7 @@ NOTE: Where an item is filed says which layer it concerns (xref:../README.adoc#f
 The items here were written for the up-rust SEooC (xref:../seooc-up-rust/README.adoc[its README]) and for the bindings and wires that work with it.
 They are not protocol requirements of uP-L1, and none of them names a transport implementation of another SDK, or an SDK of another language.
 * *Requirements.*
-Each requirement's statement says whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]): such as every binding or those among them that it names, every wire, every serialized wire apart from the end-to-end protection wire, each wire of the XCDR2 little-endian appendable profile, one named binding (<<one-binding>>), or the element itself.
+Each requirement's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]): such as every binding or those among them that it names, every wire, every serialized wire apart from the end-to-end protection wire, each wire of the XCDR2 little-endian appendable profile, one named binding (<<one-binding>>), or the element itself.
 +
 NOTE: Its tags say which repositories cover it (xref:../README.adoc#tags[the tags]).
 
@@ -28,7 +28,7 @@ NOTE: Its tags say which repositories cover it (xref:../README.adoc#tags[the tag
 The assumptions of use filed here are that element's: those about every transport (xref:deployment.adoc[what a deployment provides for its transports]), and those about one binding and its middleware (<<one-binding>>).
 Whom they bind: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 * *The protocol chapter.*
-The protocol chapter, xref:../../up-l1/README.adoc[the Transport & Session Layer (uP-L1)] with its transport pages, stays in force for what it covers until an adopted replacement takes effect for it (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
+The protocol chapter, xref:../../up-l1/README.adoc[the Transport & Session Layer (uP-L1)] with its transport pages, stays in force for what it covers until an adopted replacement takes effect for it (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
 
 == Words used in this part
 
@@ -81,14 +81,14 @@ What only one binding must meet, and what only a deployment on it provides, is s
 | LoLa | Requirements (tag `SafetyLola`) in xref:lola.adoc[the LoLa page], and requirements in xref:lola-envelope.adoc[the LoLa physical envelope], one of which, on a frame's metadata, gives the element a duty as well, and, for a deployment on it, xref:lola.adoc#aou-seooc-lola-assumptions-kept[A deployment on LoLa keeps the assumptions of LoLa that the binding names for the integrator] | Both kinds of route, its counts and its storage, the boundary to LoLa's C++ code, the life of a subscription and of what LoLa is given, and LoLa's own assumptions of use are stated there. Its panic paths are treated in xref:lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path]. Its limits, deviations and known failures are those that its qualification record states (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures])
 |===
 
-* *Bindings without a page, and bindings on another middleware.* What a binding's contract holds: xref:bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract] and xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
+* *Bindings without a page, and bindings on another middleware.* What a binding's contract holds: xref:bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract] and xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
 * *Evidence.*
 What the evidence of one binding shows for another is stated in xref:deployment.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts].
 
 == Items filed with the element
 
 NOTE: Some items that concern a transport or a wire are filed with the element, because they are rules of the element's own modes, memory and reports.
-In their statements, some of these name a binding or a wire beside the element (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
+In their statements, some of these name a binding or a wire beside the element (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 
 A binding or wire author reads them in xref:../seooc-up-rust/README.adoc[the element's part]:
 

@@ -121,11 +121,11 @@ It binds the contributors and committers of this repository, and no implementati
 
 === Statements, allocations and verification lines
 
-* A new or revised statement *MUST* name the actor that answers for each of its duties, with every condition, qualifier and exclusion, and *MUST* state each duty with a key word (xref:safety/README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:safety/README.adoc#req-ssr-item-reading[How an item is read]).
+* A new or revised statement *MUST* name the actor that answers for each of its duties, with every condition, qualifier and exclusion, and *MUST* state each duty with a key word (xref:contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:contract-generations.adoc#req-ssr-item-reading[How an item is read]).
 A clause that only defines a term carries no key word.
 * The "Allocated to" line of a requirement *MUST* agree with its statement, and *MUST NOT* introduce a part, a condition, a qualifier or an exclusion that the statement lacks.
 A disagreement between the statement and the line is a defect of the requirement, and *MUST* be corrected by a reviewed change of the specification.
-* The "Verification" line of a requirement *MUST* name one or more methods of the vocabulary and no other method, and *MUST NOT* state a duty (xref:safety/seooc-up-rust/README.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for]; xref:safety/README.adoc#req-ssr-item-reading[How an item is read]).
+* The "Verification" line of a requirement *MUST* name one or more methods of the vocabulary and no other method, and *MUST NOT* state a duty (xref:safety/seooc-up-rust/README.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for]; xref:contract-generations.adoc#req-ssr-item-reading[How an item is read]).
 Where a method cannot show a duty of the statement, the line *MUST* be changed, in a reviewed change, to a method that can: the duty is not waived, and the requirement is not recorded as verified.
 * A duty, a permission, a condition or a definition that an item relies on *MUST* stand in an item's statement.
 A table, an index or a summary *MUST NOT* restate a duty: it links to the item under its title, or it is a labelled worked example that adds no duty.
@@ -144,7 +144,7 @@ These rules bind the specification's contributors and committers, and no part: e
 * A change of an item's meaning *MUST* raise its revision by one.
 A change of wording that provably keeps the meaning keeps the revision, and where that cannot be shown, the revision rises.
 A repair that only brings a requirement's statement and its "Allocated to" line into agreement, and changes nothing that the requirement binds, keeps the revision.
-* A change that gives a duty to another actor, or that retires a duty, *MUST* name the rule that it replaces, reallocates or retires, the actors that the rule bound, and the implementations and the behaviour for which it does so, which is what a replacement names under xref:safety/README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]; so *MUST* a change after which an item no longer gives a duty to an actor to which its earlier revision gave one.
+* A change that gives a duty to another actor, or that retires a duty, *MUST* name the rule that it replaces, reallocates or retires, the actors that the rule bound, and the implementations and the behaviour for which it does so, which is what a replacement names under xref:contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]; so *MUST* a change after which an item no longer gives a duty to an actor to which its earlier revision gave one.
 A duty that moves to another item, for an actor to which both revisions of the item that it leaves give a duty, needs no such sentence.
 No duty is retired by being left out of a new revision.
 * When an item's meaning changes, each item that links to it *MUST* be read again against the new text.

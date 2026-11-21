@@ -475,40 +475,9 @@ Liveness therefore rests on the transport's receive, wait and service operations
 A degraded mode would be a third mode, with rules that no setup admitted.
 So an event on one route changes nothing for the others, and the route that it concerns stays under the rules of runtime mode.
 
-[[req-ssr-mode-classic-excluded]]
-== Classic routes never enter runtime mode
+== Classic routes
 
-[.specitem,oft-sid="req~ssr-mode-classic-excluded~3",oft-title="Classic routes never enter runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyStreamer"]
---
-*Excluded from runtime mode.*
-The element *MUST NOT* let a classic `+UTransport+` or `+UMessage+` route enter runtime mode under any waiver.
-The element *MUST* refuse at setup, by name, deployment data that puts a classic endpoint on an ASIL route, including a Streamer route.
-
-*Streamer routes.*
-The Streamer *MUST* build each of its ASIL routes through the element's admission, and *MUST* refuse at setup, by name, a route configuration that puts a classic endpoint on one of them.
-
-*Scope.*
-The exclusion reaches runtime mode only, and it withdraws no classic API: a classic route stays under its own contract outside the two-mode contract (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
---
-
-[horizontal]
-ID:: `+req~ssr-mode-classic-excluded~3+`
-ASIL:: B
-Allocated to:: the element; the Streamer, for building its ASIL routes through the element's admission and for refusing a classic endpoint on one of them
-Verification:: compile-fail (a classic `+UTransport+` cannot stand where a two-mode setup is required), test (deployment data naming a classic endpoint on an ASIL route, and a Streamer route configuration naming one, each refused at setup by name), review (every ASIL route of the Streamer built through the element's admission)
-ISO 26262:: 6-7.4.8 (part-clause numbers only)
-
-*Rationale.*
-A classic route is declared and admitted by no two-mode setup, so nothing checks it or places its storage before traffic, and its contract states no heap class.
-A waiver covers allocation inside a binding's middleware only (xref:waivers.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
-So no waiver can admit a classic route.
-
-A two-mode type is not a classic route, whichever crate re-exports it.
-
-.The classic API outside the two-mode contract
-====
-In ordinary use, an application uses the classic API for a route outside the two-mode contract.
-====
+See xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode].
 
 [[req-ssr-mode-bounded-startup]]
 == Setup never waits without a bound

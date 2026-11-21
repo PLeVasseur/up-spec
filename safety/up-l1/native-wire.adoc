@@ -23,7 +23,7 @@ This page holds:
 
 == Whom the items bind
 
-Each item's statement says whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
+Each item's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 
 * A binding carries a native route as it carries any other (xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]).
 It does not know the type.

@@ -424,7 +424,7 @@ Strict mode *MUST* base the refusal on the actual dependency graph and each rout
 * a wire that uses the heap is refused on a native route and admitted on a serialized route that declares its allocation;
 * code that the claimed graph does not contain keeps its ordinary use.
 
-Classic routes stay outside the two-mode contract, as xref:runtime-modes.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode] states.
+Classic routes stay outside the two-mode contract, as xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode] states.
 --
 
 [horizontal]
@@ -579,7 +579,7 @@ Strict mode *MUST* include in the report:
 * for each cited item, its revision and its adoption status.
 
 *The report's status words.*
-The adoption status of a cited item is the status that the versioned status record of this repository states for that item at that revision, for the revision of this repository that the element declares (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
+The adoption status of a cited item is the status that the versioned status record of this repository states for that item at that revision, for the revision of this repository that the element declares (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
 The report reproduces that status, and it uses two status words of its own:
 
 * _Draft_: the status record states no adoption of the cited item at that revision;

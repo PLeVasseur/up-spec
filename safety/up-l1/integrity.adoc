@@ -8,7 +8,7 @@ This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These items say how the element lends or copies shared memory between integrity levels.
-Each item's statement says whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
+Each item's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 
 * A binding's part, recording and reporting the writer's level, is xref:bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level] in xref:bindings.adoc[the duties of every binding].
 * A lending binding's statement of which way its ports write shared state is xref:bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state], on the same page.

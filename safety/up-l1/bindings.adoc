@@ -8,7 +8,7 @@ This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 The element whose contract these duties belong to: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These requirements give duties to every binding, or to every binding of one kind; requirements filed elsewhere in this area give a binding duties too (xref:README.adoc[safety at uP-L1]).
-Each item's statement says whom it binds: every binding or some of them, and the element where an item's statement gives it a duty (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
+Each item's statement says whom it binds: every binding or some of them, and the element where an item's statement gives it a duty (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 
 [NOTE]
 ====
@@ -29,7 +29,7 @@ What only one binding must meet is stated with that binding, in requirements tha
 A binding is a uP-L1 transport implementation that adapts the element to one middleware and is written against the element's lending or handoff runtime contract, part E2 of the element (xref:../seooc-up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
 
 *The binding contract.*
-The binding contract of a binding is that runtime contract together with every duty that the statement of a requirement of this area gives that binding (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]), wherever the requirement is filed:
+The binding contract of a binding is that runtime contract together with every duty that the statement of a requirement of this area gives that binding (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]), wherever the requirement is filed:
 
 * each duty that a statement gives each binding;
 * each duty that a statement gives the bindings of its kind or of its profile, such as each lending binding or each binding on a route that it serves by pull;

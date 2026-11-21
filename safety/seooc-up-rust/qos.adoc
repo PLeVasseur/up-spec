@@ -133,7 +133,7 @@ Verification:: test, review
 *Rationale.*
 Silently substituting a supported policy would leave the application relying on a guarantee the route does not provide.
 
-Functional communication, a finite timing bound and a safety-assurance scope are independent properties (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], clause "What a claim covers").
+Functional communication, a finite timing bound and a safety-assurance scope are independent properties (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], clause "What a claim covers").
 Ordinary use needs only the first.
 Refusing it for want of the others would make a safety package a prerequisite for non-safety use.
 Granting a required stronger claim without its evidence would be a silent downgrade of that claim.

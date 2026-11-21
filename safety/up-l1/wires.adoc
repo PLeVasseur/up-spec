@@ -7,7 +7,7 @@ Conventions and tags: xref:../README.adoc[the safety area's README].
 This layer, and whom its items bind: xref:README.adoc[safety at uP-L1].
 The element whose interface a wire is written against: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
-Each item's statement says whom it binds: here, each wire under the conditions that the statement gives, and the element for the metadata encoding duty in <<req-ssr-wire-metadata-format,A wire states the format of its frame metadata, and decodes it>> (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
+Each item's statement says whom it binds: here, each wire under the conditions that the statement gives, and the element for the metadata encoding duty in <<req-ssr-wire-metadata-format,A wire states the format of its frame metadata, and decodes it>> (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 What a wire is, and what is not one: <<req-ssr-wire-scope,What a wire is, and the wire contract>>.
 
 What depends on the kind of payload a wire carries is listed in <<one-wire>>.
@@ -23,7 +23,7 @@ A wire is the part through which a route writes a payload into the storage that 
 It is written against the interface between the element and a wire, whose side in the element is in part E1 of the element (xref:../seooc-up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
 
 *The wire contract.*
-The wire contract of a wire is that interface together with every duty that the statement of a requirement of this area gives that wire (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]):
+The wire contract of a wire is that interface together with every duty that the statement of a requirement of this area gives that wire (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]):
 
 * each duty that a statement gives each wire;
 * each duty that a statement gives the wires of its kind or of its profile, such as each serialized wire or each wire of one profile;

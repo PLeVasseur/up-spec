@@ -13,7 +13,7 @@ The duties of every binding: xref:bindings.adoc[allocated to each binding].
 The format of the frame's metadata, which the route's selected wire states: xref:wires.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it].
 The revision and the configuration of LoLa that the requirements of this page speak of: xref:lola.adoc#req-ssr-binding-lola-terms[What LoLa, the LoLa binding, a loan and a sample are].
 
-Each requirement's statement says whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
+Each requirement's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 The LoLa binding's panic paths: xref:lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path].
 
 [[req-ssr-binding-lola-envelope-layout]]

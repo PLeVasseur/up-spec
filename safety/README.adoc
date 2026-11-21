@@ -11,7 +11,7 @@ The area is named for its safety requirements and assumptions of use.
 It also holds what they rest on: the up-rust SEooC's ordinary functional contract, and its resource and fault obligations.
 * *Beside the protocol chapters.*
 Most items add to the protocol chapters, and some differ from them on purpose.
-How an item and a rule of the protocol chapters meet: <<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>.
+How an item and a rule of the protocol chapters meet: xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
 ====
 
 [[layout]]
@@ -49,14 +49,14 @@ No empty directory mirrors a protocol chapter.
 === Filing and scope
 
 Where an item is filed says which protocol responsibility it concerns.
-The item states whom it binds, wherever it is filed: for a requirement, <<req-ssr-requirements-bind,A requirement binds the actors to which it gives a duty>>; for an assumption of use, xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
+The item states whom it binds, wherever it is filed: for a requirement, xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; for an assumption of use, xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
 
 * *Other implementations.*
-Which implementations the items of this area bind, and how another implementation claims one of their contracts: <<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>.
+Which implementations the items of this area bind, and how another implementation claims one of their contracts: xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
 * *An assumption of use keeps `seooc` in its ID wherever it is filed.*
 It is that element's assumption (xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
 * *The protocol chapters.*
-How long a rule of the protocol chapters stays in force, and what replaces one: <<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>.
+How long a rule of the protocol chapters stays in force, and what replaces one: xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
 
 [[concepts]]
 == Shared concepts and fault models
@@ -71,160 +71,11 @@ An entry that is not an item names the items that state its concept.
 |===
 | Kind | Type | Who meets it
 
-| Software safety requirement | `req` | <<req-ssr-requirements-bind,A requirement binds the actors to which it gives a duty>>
+| Software safety requirement | `req` | xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]
 | Assumption of use | `aou` | xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]
 |===
 
-The key words of each kind: <<req-ssr-item-reading,How an item is read>>.
-
-[[req-ssr-requirements-bind]]
-=== A requirement binds the actors to which it gives a duty
-
-[.specitem,oft-sid="req~ssr-requirements-bind~3",oft-title="A requirement binds the actors to which it gives a duty",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
---
-*Whom it binds.*
-The statement of each software safety requirement of this area names the actor that answers for each of its duties, and states the conditions, qualifiers and exclusions that determine the reach of each duty.
-An actor is a part, or the supplier of a part.
-The requirement binds the actors to which its statement gives a duty, and no other, wherever it is filed.
-Each of them *MUST* meet each duty that the statement gives it, within that duty's reach, which only the statement determines.
-
-*Parts and suppliers.*
-A part is a software component that a statement names explicitly: the element or one of its named parts, a binding, a wire, a platform backend, the Streamer, an optional layer, or another named component.
-A part meets a duty in its code or, where the statement says so, in what is released with it, such as its declaration, its documentation or its qualification record.
-A part's supplier is the party that releases the part.
-The supplier answers for a duty on the part's records or evidence where a statement gives the supplier that duty.
-
-*A mention gives no duty.*
-A statement can name a part, a supplier, an integrator or anything else as the source, the recipient, the object, the place or the condition of another actor's duty.
-What is named only so answers for nothing there.
-An actor meets the duties that statements give it, and not every duty of an item that names it.
-
-*The "Allocated to" line.*
-Each requirement of this area has an "Allocated to" line, its explicit, reviewable allocation.
-The line mirrors the statement: it names each actor to which the statement gives a duty, with the qualifier that limits that actor's share, and it holds no actor, condition, qualifier or exclusion that the statement lacks.
-The line of a requirement whose statement only defines names the subject of its definitions, and gives nothing a duty by naming it.
-A line that names the subject of definitions beside the actors of its statement's duties says so, and gives that subject no duty.
-Where the line and the statement differ, the statement determines whom the requirement binds, and how far.
-
-*What does not decide it.*
-None of these changes whom a requirement binds, or how far: the page or the directory that holds it; its tags; a trace filter or a tracing run; the repository that implements or covers it, and who owns that repository; a status that a record keeps of its adoption, its implementation or its qualification.
-
-*Assumptions of use.*
-Whom an assumption of use binds is stated by xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
---
-
-[horizontal]
-ID:: `+req~ssr-requirements-bind~3+`
-ASIL:: B
-Allocated to:: each part, and each supplier of a part, that a requirement of this area binds
-Verification:: review
-* Each requirement's statement: it names the actor that answers for each of its duties, with the conditions, qualifiers and exclusions that determine each duty's reach.
-* Each requirement's "Allocated to" line: it names the actors to which the statement gives a duty, with their qualifiers, and holds nothing that the statement lacks.
-* That no page, directory, tag, trace filter, tracing run, repository, repository owner or recorded status is used to decide whom a requirement binds, or how far.
-
-*Rationale.*
-A requirement is read on its own, so whom it binds, and how far, is read from its statement.
-One text then decides that scope, and a claim or a safety manual that quotes the statement carries all of it.
-The "Allocated to" line keeps the allocation explicit, so that a review can check it against the statement.
-A statement names other parts to say whose input, storage or declaration a duty concerns, and a duty that fell on each of them would have no single part to answer for it.
-Pages, tags, tracing runs and repositories change as the specification is organized and traced.
-If whom a requirement binds depended on them, such a change could move a duty to another part or leave it with none.
-
-NOTE: How a contributor keeps a statement and its "Allocated to" line in agreement, and corrects a disagreement, is stated in xref:../CONTRIBUTING.adoc#safety-area[Changing the safety area of the specification].
-
-[[req-ssr-contract-transition]]
-=== What a part declares and claims, and when a replacement takes effect
-
-[.specitem,oft-sid="req~ssr-contract-transition~2",oft-title="What a part declares and claims, and when a replacement takes effect",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
---
-*What binds a part.*
-A requirement of this area binds a part as <<req-ssr-requirements-bind,A requirement binds the actors to which it gives a duty>> states, at the revision in force for that part, whether or not the part has a declaration.
-A declaration, a component or deployment conformance claim, a change of tags and a tracing or coverage run change neither which requirements bind a part nor how far.
-A claim of a safety-assurance scope changes whom a requirement binds only where the requirement's own stated condition names such a claim.
-
-*Revisions.*
-A revision of the specification is one adopted state of the text of this repository.
-It is separate from the revision of an item, and it holds each item at one revision (<<req-ssr-item-reading,How an item is read>>).
-
-*The declaration.*
-Each part that a requirement of this area binds *MUST* state, in a declaration that is released with it, which part it is, the revision of the specification that its claims rest on, and each named profile that it follows.
-A named profile is one that an item of the specification names, with each of its items by identifier or link, and the part *MUST NOT* name any other profile in its declaration.
-The profile's own statement of its version is read at the declared revision.
-The dependency closure of an item is each item that its statement names or links, and each item that those name or link in turn; that of a named profile is that of its items.
-For the part's claims, the declared revision fixes the revision of each item and of its closure.
-The closure adds no duty: it makes no part answer for a duty of another part.
-
-*Component claims.*
-A component conformance claim is a claim that a part meets items of this area.
-In each such claim, the part *MUST* name its declaration and each item that the claim rests on, at the revision that the declared revision of the specification fixes.
-A claim that rests on an item rests on its dependency closure too.
-Where a claim rests on fewer than all the requirements that bind the part, the part *MUST* rest it on a named profile that it declares.
-A claim's evidence is evidence for those revisions, for that profile and for the configuration that the evidence names, and for nothing else.
-
-*The supplier.*
-The supplier of each such part *MUST* release the part's declaration, and each component conformance claim made for the part, with the part.
-The supplier *MUST* keep a record of where the part implements each item of this area that binds it, and of who made each entry of that record.
-For an SDK, this duty of its supplier replaces the earlier convention of this area that an SDK which implements an item keeps its own record of where it does so.
-The record is kept with the part, outside the specification, and it is no statement of this area.
-What the supplier shows as the evidence of a claim is stated in xref:seooc-up-rust/README.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for].
-
-*Deployment claims.*
-A deployment declaration names the deployment's profile (xref:seooc-up-rust/README.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]), the revision of the specification, and each part that the deployment composes, with that part's declaration.
-A deployment conformance claim is a claim that a deployment meets the assumptions of use.
-Both belong to the integrator, and both are separate from every component conformance claim.
-When the integrator makes them, and what a deployment conformance claim names, are stated in xref:seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement].
-A component conformance claim is no claim about a deployment, and a deployment conformance claim adds nothing to what a part's own claims state of that part.
-
-*What a claim covers.*
-A claim covers what it names.
-Ordinary functional behaviour, native resource behaviour (xref:seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]), a finite timing bound and a safety-assurance scope (xref:seooc-up-rust/qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]) are four separate subjects of a claim.
-A claim to one of them, and the evidence for it, is neither a claim to another nor evidence for it.
-
-*What establishes no claim.*
-A report that a part produces at build time or at run time, such as a setup result, a route's report or a strict-mode report, establishes the checks that it names and nothing else.
-It is neither a component conformance claim nor a deployment conformance claim, and it qualifies neither a part nor a deployment.
-None of these establishes a claim either: a successful build; a tag; a tracing or coverage run; an operating system, an architecture, a compiler or a middleware; a certificate or a qualification of a dependency, which holds for that dependency in its own scope.
-
-*Another implementation.*
-An implementation of uProtocol that no requirement of this area binds is bound by none of them, wherever they are filed.
-It takes a contract of this area only by its own declaration, as a part that the items of that contract name: the declaration names that part, a named profile and the revision of the specification, and the requirements of that profile then bind the implementation as that part.
-
-*Replacement.*
-A rule of the protocol chapters, or an item of this area at a revision, stays in force for the implementations and the behaviour that it covers until an adopted replacement takes effect for them.
-A replacement is an item of this area, or a change of a protocol chapter, that names the rule that it replaces, reallocates or retires, the actors that the rule bound, and the implementations and the behaviour for which it does so, and it takes effect only for those.
-A new revision of an item replaces its earlier revision for each actor to which both revisions give a duty.
-For an actor to which only the earlier revision gives a duty, the earlier revision stays in force until a text replaces or retires that actor's duty, or gives it to another actor or to another item, by name.
-A text is adopted when it is stated in a revision of the specification that normal adoption produced.
-No status that a record keeps of a text's adoption, implementation or qualification decides that.
-An item of this area lifts a rule of the protocol chapters, a security requirement included, only where it is such a replacement.
-A rule of the protocol chapters keeps its own reach, whether or not an implementation that it covers also follows the items of this area.
-
-*Where an item meets a chapter's rule.*
-An item and a chapter's rule meet in one of three ways.
-
-* Where one implementation can meet both, both hold.
-* Where one implementation cannot meet both for a behaviour, a part that the item binds *MUST* say so in its declaration, naming the item at its revision.
-It *MUST NOT* claim conformance to the chapter's rule for that behaviour, and *MUST NOT* name both rules in one claim for it.
-* Where the two texts do not settle whether one implementation can meet both, a claim of conformance to one is no claim about the other, and the part *MUST NOT* rest a claim on an answer to that question.
---
-
-[horizontal]
-ID:: `+req~ssr-contract-transition~2+`
-ASIL:: B
-Allocated to:: each part that a requirement of this area binds; the supplier of each such part, for releasing its declaration and claims with it and for the record of where it implements each item
-Verification:: review
-* Each part's declaration: it names the part, the revision of the specification and each named profile that the part follows, and no other profile.
-* Each component conformance claim: it names the declaration and each item that it rests on, with their dependency closure, at their revisions, and it rests on a named profile where it rests on fewer than all the requirements that bind the part.
-* For each such part, its supplier's release of the declaration and of each component conformance claim with the part, and the supplier's record of where the part implements each item that binds it, with who made each entry.
-* Where one implementation cannot meet an item and a chapter's rule: the part's declaration says so with the item's revision, the part claims no conformance to the chapter's rule for that behaviour, and no claim names both rules.
-* That no claim rests on an answer that the two texts do not settle, on a report's checks beyond what the report names, or on anything that this item says establishes no claim.
-
-*Rationale.*
-A claim is read against an exact text, so it names that text and the part that it is made for.
-A part cannot speak for the deployment that composes it, and a deployment cannot add to what a part's supplier has shown, so the two kinds of claim stay apart and each has one party that answers for it.
-A report shows the checks that ran, and what no check observes stays unshown.
-The protocol chapters cover implementations that the items of this area do not name, so only a text that names a rule, and those for whom it replaces it, can lift that rule.
-A tracing run is arranged for coverage, so what binds a part does not depend on how a run is arranged.
+The key words of each kind, how an item is read, and how requirements bind and take effect: xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty], xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect] and <<req-ssr-violation-classes,How a violated assumption of use shows up>>.
 
 [[req-ssr-peer-fault-model]]
 === The requirements hold against a faulty peer
@@ -385,68 +236,13 @@ One meaning for each class, with its observer named, keeps a violation that noth
 [[claims-model]]
 === Claims and guarantees
 
-What a claim covers, and what establishes none: <<req-ssr-contract-transition,What a part declares and claims, and when a replacement takes effect>>.
+What a claim covers, and what establishes none: xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
 The element's own claims: xref:seooc-up-rust/README.adoc#claims[The SEooC's claims], xref:seooc-up-rust/qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened] and xref:seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
 
 == The items
 
-An item of this area is a software safety requirement, of type `req`, or an assumption of use, of type `aou`: the types that up-spec already uses.
-
-[[req-ssr-item-reading]]
-=== How an item is read
-
-[[spec-first]]
-[.specitem,oft-sid="req~ssr-item-reading~1",oft-title="How an item is read",oft-needs="uman",oft-tags="SafetyUpRustCore,SafetyStreamer,SafetyBinding,SafetyWire"]
---
-*The statement.*
-An item's statement is everything inside the item's block: its paragraphs, its labels in bold, its lists and its tables.
-The statements of the items of this area, and nothing else on its pages, state its duties, its permissions, its conditions and its definitions.
-
-*Outside the statement.*
-The `ID` row, the ASIL, the "Allocated to" line, the "Verification" line, the ISO 26262 references, the "Violation" text of an assumption of use and the rationale are not part of the statement.
-Neither they nor a note, an example, a figure, a table, an index or a summary outside an item's block add, change or lift a duty.
-Where one of them differs from a statement, the statement governs.
-A "Verification" line describes evidence for its statement (xref:seooc-up-rust/README.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for]): it adds no duty, and it is no condition of one.
-A duty holds as its statement says, whether or not a part meets it yet, whether or not anyone has shown how to meet it, and whether or not evidence for it exists.
-An ISO 26262 reference names a clause that an item relates to, and nothing more.
-
-*Key words.*
-A statement states a duty with the key word "MUST" or "MUST NOT" in a requirement and with "SHALL" or "SHALL NOT" in an assumption of use, and a permission with "MAY", each as BCP 14 defines it (https://www.rfc-editor.org/info/bcp14[IETF BCP 14: RFC 2119 and RFC 8174]).
-"MUST" and "SHALL" are equally strong: the two words tell a requirement, whose duty falls on a part or on its supplier, from an assumption of use, whose duty falls on the integrator.
-A statement that states a duty in other words binds just the same.
-A clause that defines a term, or that states a condition, a fact or a limit, has no key word, and holds wherever a statement relies on it.
-
-*Names.*
-A name in a statement, such as that of an operation, a setting, a state, a counter or a named result, is part of the specification, and no citation of code.
-No statement, rationale or Verification line rests on an implementation's source files, internal names, review records or current state.
-
-*References.*
-A statement refers to another item by its title, linked to the item's anchor, which holds the item's type and name without its revision.
-The reference means that item at the revision that the same revision of the specification holds.
-A statement that names an earlier revision of an item, as a replacement does, means that revision.
-An item of a protocol chapter that has no anchor or no title is named instead by its identifier, which holds its revision.
-
-*Revisions.*
-An item's revision identifies its meaning: the actors, the conditions and applicability, the duties and outcomes, the exceptions and quantifiers, and the scope in time, resources and ownership that its statement gives.
-Two texts of one item at one revision have one meaning, and a text with another meaning has another revision.
-An item's name is never changed or reused, and an item keeps its name and its revision wherever it is filed.
---
-
-[horizontal]
-ID:: `+req~ssr-item-reading~1+`
-ASIL:: B
-Allocated to:: the items of this area
-Verification:: review
-* Each page of this area: no duty, permission, condition or definition stands only outside an item's block.
-* Each statement: its key words, its names and its references, read against this item.
-* Each item whose text differs between two revisions of the specification: the same revision only where its meaning is the same.
-* That no page makes a duty wait for an implementation, for its evidence or for a recorded status.
-
-*Rationale.*
-The items say what an implementation must satisfy, and an implementation's code, tests and reviews trace to the items.
-So a reader has to know which words of a page are the contract, and no word of the contract can depend on what one implementation does.
-A claim names an item at a revision, so a revision that kept its number while its meaning changed would let the claim say something that its evidence does not show.
-The two key words for a duty follow the convention of xref:../basics/payload_encoding_registry.adoc[the payload encoding registry] ("Requirement Ownership").
+An item of the up-rust SEooC requirement family is a software safety requirement, of type `req`, or an assumption of use, of type `aou`: the types that up-spec already uses.
+How an item is read: xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read].
 
 === Identifiers
 
@@ -469,7 +265,7 @@ How a contributor writes, revises, files and tags an item: xref:../CONTRIBUTING.
 == Tags
 
 NOTE: A tag is trace metadata: a selector by which a tracing tool chooses a group of items.
-It decides neither whom an item binds nor an item's scope, status or conformance (<<req-ssr-requirements-bind,A requirement binds the actors to which it gives a duty>>).
+It decides neither whom an item binds nor an item's scope, status or conformance (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 Every item here carries a tag of this legend, and no tag of the protocol chapters.
 
 [cols="2,5",options="header"]
@@ -521,4 +317,4 @@ How a repository traces these items is kept with that repository's own trace rec
 NOTE: Items and text in this area cite ISO 26262:2018 by part and clause number only, written `part-clause`, for example `6-7.4.13`, or `part-Table n`; every such number is that of this edition.
 No text of the standard appears here, quoted or closely paraphrased, and no table that maps it.
 
-A reference is trace metadata: it names a clause that an item relates to (<<req-ssr-item-reading,How an item is read>>).
+A reference is trace metadata: it names a clause that an item relates to (xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]).

@@ -14,7 +14,7 @@ The format of the frame's metadata, which the route's selected wire states: xref
 The protocol's iceoryx2 chapter: xref:../../up-l1/iceoryx2.adoc[the iceoryx2 transport chapter].
 The release of iceoryx2 that the requirements of this page are stated for: xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-profile[The iceoryx2 binding follows one profile, stated for one release of iceoryx2].
 
-Each requirement's statement says whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
+Each requirement's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 The iceoryx2 binding's accepted panic path, and its middleware panic paths that are known failures: xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-panic-paths[iceoryx2's allowed panic paths are named, bounded and disclosed].
 
 == Words used on this page

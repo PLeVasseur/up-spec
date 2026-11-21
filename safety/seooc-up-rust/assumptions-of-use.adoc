@@ -30,7 +30,7 @@ The integrator *SHALL* validate, for the item, in ISO 26262's sense, each assump
 Until then the assumption stays assumed.
 
 *Deployment declaration and claims.*
-An integrator that claims the element's safety-assurance scope for a deployment *SHALL* make a deployment declaration as xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect] defines it.
+An integrator that claims the element's safety-assurance scope for a deployment *SHALL* make a deployment declaration as xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect] defines it.
 Where the integrator claims that the deployment meets the assumptions of use, it *SHALL* make that claim as a deployment conformance claim that names the declaration, the assumptions of use and their revisions that it rests on, and the component conformance claims and their evidence that it rests on, and *SHALL NOT* present a component conformance claim, a build result or a report as a deployment conformance claim.
 
 *The item.*
@@ -94,7 +94,7 @@ What the software does not detect, only the integrator's own measures can cover.
 
 [NOTE]
 ====
-Tags are trace metadata, and decide no actor, scope or status (<<aou-seooc-assumptions-bind,An assumption of use binds the integrator who claims the scope, and replaces no requirement>>; xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../README.adoc#tags[the safety area's tags]).
+Tags are trace metadata, and decide no actor, scope or status (<<aou-seooc-assumptions-bind,An assumption of use binds the integrator who claims the scope, and replaces no requirement>>; xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../README.adoc#tags[the safety area's tags]).
 
 * Every assumption needs `uman` and carries the tag `SafetyManual`.
 * Some also carry the gate tag `SafetyGateUpRust`.
@@ -470,7 +470,7 @@ The integrator *SHALL* decide which routes carry data that needs end-to-end prot
 * *The integrator's own mechanism.* Where that protection is the integrator's own mechanism, the integrator *SHALL* state which faults its mechanism detects, the boundary it covers and the residuals it leaves, and *SHALL* rest its analysis of the route on that statement.
 * *Above ASIL B.* The decomposition and interference duties of <<aou-seooc-capability-ceiling,Data above ASIL B relies on measures outside the element>> cover data above ASIL B that relies on such protection.
 * *Other duties stay.* Selecting end-to-end protection for a route releases the element, a binding, a wire and the Streamer from no requirement that binds them on that route, and the integrator from no other assumption of use.
-A rule is replaced for such a route only where an item says so as an explicit replacement (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
+A rule is replaced for such a route only where an item says so as an explicit replacement (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
 The RPC correlation, TTL, ownership, and refusal and error handling that hold on every route, protected or not, are stated in xref:../up-l2/interaction.adoc#req-ssr-peer-rpc-correlation[A response reaches only its own call], xref:qos.adoc#req-ssr-qos-ttl[Expired messages are not processed], xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap] and xref:errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once].
 Message IDs are not authentication (xref:../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]).
 * *What the element requires.* Whether the element requires end-to-end protection on a route is stated in xref:e2e-wire.adoc#req-ssr-e2e-not-required[The element requires end-to-end protection on no route, outside strict mode's black-channel rule].

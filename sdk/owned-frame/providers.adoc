@@ -4,7 +4,7 @@
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
 Conventions and tags: xref:README.adoc[the owned-frame SDK area's README].
-Whom each item binds: xref:README.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
+Whom each item binds: xref:../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
 
 This page holds what an SDK offers for the parts that an application selects for its owned-frame routes, and the contract between an SDK and the memory providers that supply its memory.
 Its items say which provider a request goes to, what a provider states, who owns what a provider supplies, and what a refusal leaves.
@@ -12,10 +12,10 @@ Its items say which provider a request goes to, what a provider states, who owns
 == Words used on this page
 
 These words have the meaning that the items give them.
-Where an SDK's core is not the element, a word that an item of the safety area defines for the element or for a part that works with it is read as the clause "Words of the safety area" of xref:README.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it] states.
+Where an SDK's core is not the element, a word that an item of the safety area defines for the element or for a part that works with it is read as the clause "Words of the safety area" of xref:../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it] states.
 
-* An *SDK*, its *core*, a *layer above the core* and an *owned-frame route*: xref:README.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
-* A *part* and its *supplier*: xref:../../safety/README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
+* An *SDK*, its *core*, a *layer above the core* and an *owned-frame route*: xref:../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
+* A *part* and its *supplier*: xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
 * A *binding* and its *middleware*: xref:../../safety/up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract].
 * A *wire*: xref:../../safety/up-l1/wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
 * A *platform backend*: xref:../../safety/seooc-up-rust/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules].

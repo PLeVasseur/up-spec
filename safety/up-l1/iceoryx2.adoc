@@ -16,7 +16,7 @@ It holds what is specific to one binding and its middleware, iceoryx2:
 * two assumptions of use for the integrator of a deployment that uses iceoryx2;
 * the rules of every binding, of the element and of every deployment to read for iceoryx2 (<<index>>).
 
-Each requirement's statement says whom it binds (xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]), and each assumption binds the integrator (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
+Each requirement's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]), and each assumption binds the integrator (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
 The assumptions about every transport hold for a deployment that uses iceoryx2 as well: xref:deployment.adoc[what a deployment provides for its transports].
 
 NOTE: Each "Violation" text uses the three classes of xref:../seooc-up-rust/assumptions-of-use.adoc#violation-classes[how a violation shows up], or states a limit of the contract in place of a class.
@@ -58,7 +58,7 @@ The iceoryx2 binding *MUST NOT* claim the profile for a build in which a crate o
 The record of the release that a build of the binding uses is stated in xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures].
 
 *Where the profile replaces the protocol chapter.*
-For the iceoryx2 binding, and for it alone, the profile replaces four rules of xref:../../up-l1/iceoryx2.adoc[the iceoryx2 transport chapter] (xref:../README.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]):
+For the iceoryx2 binding, and for it alone, the profile replaces four rules of xref:../../up-l1/iceoryx2.adoc[the iceoryx2 transport chapter] (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]):
 
 * `+dsn~up-transport-iceoryx2-protocol-version~1+`, the version of iceoryx2 that a transport uses, by the release of this profile;
 * `+dsn~up-transport-iceoryx2-attributes-mapping~1+`, the user header of a service, by the header of xref:iceoryx2-frame.adoc#req-ssr-binding-iceoryx2-frame-layout[On iceoryx2, a frame is one header and one byte region, in a fixed layout];

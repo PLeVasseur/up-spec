@@ -8,7 +8,7 @@ This layer, and whom its items bind: xref:README.adoc[safety at uP-L2].
 Scope and element boundary: xref:../seooc-up-rust/README.adoc[the up-rust SEooC's README].
 
 These items say what the element guarantees for an RPC call and for the identity of a message.
-Whom an item binds: xref:../README.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
+Whom an item binds: xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
 
 * How the element treats the peers of a transport is in xref:../up-l1/peers.adoc[the transport layer's part].
 * The end-to-end protection wire, which some clauses here name for a route that selects it (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-not-required[The element requires end-to-end protection on no route, outside strict mode's black-channel rule]), is specified in xref:../seooc-up-rust/e2e-wire.adoc[`e2e-wire.adoc`].
