@@ -268,7 +268,7 @@ That includes a refusal that a memory source, an allocation provider or an admit
 
 *No panic or abort.*
 Element code in initialization *MUST NOT* panic or abort.
-Each startup-provisioning helper admitted on the ASIL path *MUST NOT* panic, abort or corrupt state in its own initialization code.
+The helper-authored-code prohibition for an admitted startup-provisioning helper, including its initialization code, is stated in xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], "Assured helper admission".
 Where the element's setup or an admitted startup-provisioning helper relies on a memory source or an allocation provider, its stated contract decides what a request to it can do, whatever the shape of its interface.
 
 * The element's setup and each admitted startup-provisioning helper *MUST NOT* send a request that the contract lets panic or end the process for a condition that setup can check, unless it has first excluded that condition, such as by checking the request against the limit the contract states.
@@ -325,7 +325,7 @@ All duties of revision 5 of this item for the element remain in force for config
 [horizontal]
 ID:: `+req~ssr-mode-init-failure~6+`
 ASIL:: B
-Allocated to:: the element; each startup-provisioning helper admitted on the ASIL path, for its own initialization code, for every resource and initialized value that it acquires or creates, and for reporting each destruction it performs on refusal explicitly in its refusal outcome
+Allocated to:: the element; each startup-provisioning helper admitted on the ASIL path, for screening requests to memory sources and allocation providers, for every resource and initialized value that it acquires or creates, and for reporting each destruction it performs on refusal explicitly in its refusal outcome
 Verification:: test, review, fault-injection
 * *test*
 ** Each refusal returned as an error that names its cause, its route where there is one, and the setter to change.
@@ -337,7 +337,7 @@ Verification:: test, review, fault-injection
 ** A request that a provider's contract lets panic for a condition setup can check prevented, or the provider refused by name.
 ** A provider whose contract permits an outcome that setup cannot exclude reported with it, also where no route uses it, and each route that requires the guarantee which it leaves not established refused by name.
 * *review*
-** No panic, abort or state-corruption path in setup code or in an admitted startup-provisioning helper's initialization code.
+** No panic, abort or state-corruption path in the element's setup code; the helper-authored-code verification is stated in xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
 ** The contract of each memory source and each allocation provider that setup or an admitted startup-provisioning helper relies on.
 ** Each pre-acquisition disposition, each destruction performed on refusal, including a dropped input, against its stated disposition and, where a guarantee is required, its evidence, and no runtime reclamation of retained startup storage.
 * *fault-injection*: a refusal at each startup step, including admitted startup-provisioning helper steps, followed by a successor process, partition or firmware instance that initializes.
