@@ -20,7 +20,7 @@ In runtime mode, the element *MUST* reach the operating system from the safety c
 *Waits.*
 
 * Each platform backend *MUST NOT* let its wait lose a wake that happens after the caller observed the expected value.
-* After its wait returns spuriously, after an interruption or late, in the element's deliberate idle wait (xref:bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]), the element *MUST* recheck the expected value and the time before it waits again or returns; after such a return in every other wait, it rechecks as that item states.
+* After its wait returns spuriously, after an interruption or late, in the element's deliberate idle wait (xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]), the element *MUST* recheck the expected value and the time before it waits again or returns; after such a return in every other wait, it rechecks as that item states.
 
 *Clock reads.*
 
@@ -61,7 +61,7 @@ Verification:: gate, test, review
 
 *Rationale.*
 Runtime code reaches the operating system only through a backend, as the statement requires.
-So a backend that broke one of these rules would break the element's runtime requirements from below, such as xref:heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path] and xref:errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths].
+So a backend that broke one of these rules would break the element's runtime requirements from below, such as xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path] and xref:errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths].
 
 _Failed clock reads._
 The contract treats a read of the monotonic clock as one that can fail.

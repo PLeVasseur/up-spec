@@ -99,12 +99,12 @@ So a duty that an item gives the element, the page on which an item is filed and
 In runtime mode, binding code *MUST NOT* acquire or release heap memory on any path that a native payload operation causes, errors, cancellation, retirement and deferred release included.
 
 *Every other path.*
-In runtime mode, binding code *MUST NOT* acquire or release heap memory on any other path, except as a serialized route's declared heap class permits and setup admits (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
+In runtime mode, binding code *MUST NOT* acquire or release heap memory on any other path, except as a serialized route's declared heap class permits and setup admits (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 
 *Middleware.*
 Each binding *MUST* have any allocation inside its middleware declared as a permit on the routes that the allocation affects, and reported separately.
 A permit discloses that allocation and establishes no heap-free guarantee.
-The heap class that a binding states for a route covers the middleware work that its calls cause there (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), so a route with a permit does not have the class none.
+The heap class that a binding states for a route covers the middleware work that its calls cause there (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), so a route with a permit does not have the class none.
 
 *When the rules apply.*
 These rules bind the binding's transport from its own transition.
@@ -117,11 +117,11 @@ Allocated to:: each binding
 Verification:: heap-window (on each target and configuration that the binding's qualification record claims)
 * For each binding, over native traffic with errors, cancellation, retirement and deferred release, with middleware allocation reported apart under its permit.
 * On every other path, a serialized route's included: binding code acquiring and releasing heap memory only as a route's declared heap class permits and setup admits, and not at all where no class admits it.
-* On a serialized route, the binding's declared allocation reported, as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
+* On a serialized route, the binding's declared allocation reported, as xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
 
 *Rationale.*
 Binding code runs inside the process on every runtime path.
-So heap use there on a native path breaks runtime mode, as heap use in the element does (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+So heap use there on a native path breaks runtime mode, as heap use in the element does (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
 A serialized route may allocate where it declares it and setup admits it.
 That permission cannot reach native work or metadata a native route shares.
@@ -147,7 +147,7 @@ Allocated to:: each binding
 Verification:: heap-window (first traffic, through the binding contract suite, on each target and configuration that the binding's qualification record claims), fault-injection, review (each first lock and each lazy primitive of the binding's middleware that a runtime path of the binding can reach, at source level for the revision of the middleware that the binding is built against: taken or forced before the transition returns)
 
 *Rationale.*
-The element's own rule (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]) would not hold if a binding left a lock or a thread to set itself up on first traffic, inside runtime mode.
+The element's own rule (xref:../../basics/resources.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]) would not hold if a binding left a lock or a thread to set itself up on first traffic, inside runtime mode.
 
 A lock or a lazy primitive of the middleware that sets itself up on first traffic does the same set-up work on the binding's runtime path, so the rule reaches each one that such a path can reach.
 
@@ -166,9 +166,9 @@ The binding *MUST* ensure that the drop takes no lock that can wait behind other
 On a native route, and on any route whose heap class is none, the binding *MUST* ensure that the drop frees no heap.
 
 *Routes that admit the binding's allocation.*
-On a serialized route whose declared heap class admits the binding's allocation (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), the binding *MUST* ensure that the drop releases, exactly once, only the storage that the binding allocated for that frame under that class:
+On a serialized route whose declared heap class admits the binding's allocation (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), the binding *MUST* ensure that the drop releases, exactly once, only the storage that the binding allocated for that frame under that class:
 
-* on a route that does not require non-waiting release (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]), on the drop's own path under the binding's declared policy, where it may wait inside the allocation domain that the policy names, the one wait a drop may meet;
+* on a route that does not require non-waiting release (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]), on the drop's own path under the binding's declared policy, where it may wait inside the allocation domain that the policy names, the one wait a drop may meet;
 * on a route that requires it, at once only where it is established that this release cannot wait, and otherwise through the binding's deferred return, as for a retained owner.
 
 The binding *MUST* ensure that the drop releases no other binding resource and revokes no retained owner.
@@ -176,14 +176,14 @@ The binding *MUST* ensure that the drop releases no other binding resource and r
 *Deferred return.*
 Where the middleware's own release of a retained frame can wait, the binding *MUST* have the drop instead hand the frame, without waiting, to the binding's deferred return.
 
-A release that the deferred return performs is pending cleanup, charged until it completes and isolated as xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states.
+A release that the deferred return performs is pending cleanup, charged until it completes and isolated as xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states.
 On a native route, the binding *MUST* ensure that such a release frees no heap, in binding code and in the middleware work that it causes, and never frees the backing that the frame lives in.
 
 *What a route requires.*
 Releasing the binding's allocation is part of the route's cleanup.
-Whether setup admits that allocation on a route that requires panic-free cleanup or non-waiting release, through the allocator and every dependency that the release reaches, or refuses the route by name, is the element's to decide, as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused] states.
+Whether setup admits that allocation on a route that requires panic-free cleanup or non-waiting release, through the allocator and every dependency that the release reaches, or refuses the route by name, is the element's to decide, as xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused] states.
 That item also states that the element refuses no route for that allocation where the route requires neither.
-What the element shows of the binding's declared policy in each route's report is stated in xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Reporting".
+What the element shows of the binding's declared policy in each route's report is stated in xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Reporting".
 For the element, those two requirements replace the share that revision 9 of this item gave it: the setup that admits or refuses a route by what the route requires of the release of the binding's allocation, and that route's report of the binding's declared policy.
 
 *No panic.*
@@ -191,7 +191,7 @@ The binding's own code *MUST NOT* panic, on the drop or in the deferred return t
 
 A middleware panic path that the drop or that return can reach is allowed only as an accepted instance of <<req-ssr-binding-no-panic,No panic on any peer input>>.
 The requirement that accepts it is specific to its binding, says that the instance applies to a frame's drop, and states all five parts that the rule asks of an instance.
-On a native route no accepted instance covers a path that the drop or that return can reach, because there the drop cannot panic (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else], "Native routes").
+On a native route no accepted instance covers a path that the drop or that return can reach, because there the drop cannot panic (xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else], "Native routes").
 Any other middleware panic path that the drop or that return can reach is a known failure of the binding.
 
 An accepted instance is never a waiver, and covers no other middleware panic path, no owned value's destructor and no allocator or provider failure.
@@ -220,7 +220,7 @@ Verification:: test, heap-window, fault-injection, review
 *Rationale.*
 _What the destructor releases._
 The storage a binding allocated for a frame is owned like any other value of the route.
-So its release follows what the route requires, as an owned value's destruction does (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+So its release follows what the route requires, as an owned value's destruction does (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 
 _Why a waiting release is deferred._
 Returning a received frame is part of the application runtime path.
@@ -228,11 +228,11 @@ So a middleware lock that can wait is still a blocking operation even when its u
 
 Where the middleware's own release can wait, the binding defers it.
 A lock-free queue whose capacity covers every admitted retained owner is one hand-off to the deferred return that meets this.
-Whatever the mechanism, every clause of the statement binds it, and so does every clause of xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] that binds pending cleanup, a binding's deferred return included: the hand-off to that return does not wait, it has room for every retained owner that the route admits, ownership passes exactly once, and the owner stays charged until its return completes.
+Whatever the mechanism, every clause of the statement binds it, and so does every clause of xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] that binds pending cleanup, a binding's deferred return included: the hand-off to that return does not wait, it has room for every retained owner that the route admits, ownership passes exactly once, and the owner stays charged until its return completes.
 
 _Isolation._
 A worker of its own does not by itself isolate a deferred return.
-What pending cleanup may hold while it waits is stated in xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
+What pending cleanup may hold while it waits is stated in xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
 
 A measured lock delay is not an accepted wait.
 
@@ -475,10 +475,10 @@ On a route that it serves by pull, a binding *MUST* give up at most the route's 
 A binding *MUST NOT* let a call of its own wait without a bound, except as the next paragraph allows, or wait for a deferred return to complete.
 
 *Waits without a deadline.*
-Apart from a deliberate idle wait (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]), a binding *MAY* let its work wait without a finite logical deadline in two cases only:
+Apart from a deliberate idle wait (xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]), a binding *MAY* let its work wait without a finite logical deadline in two cases only:
 
-* a release that its deferred return performs as pending cleanup (<<req-ssr-binding-frame-drop,What a received frame's destructor may do>>), isolated as xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states;
-* on a serialized route whose declared heap class admits the binding's allocation, a wait inside the allocation domain that the binding's declared policy names, as xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] states and limits.
+* a release that its deferred return performs as pending cleanup (<<req-ssr-binding-frame-drop,What a received frame's destructor may do>>), isolated as xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states;
+* on a serialized route whose declared heap class admits the binding's allocation, a wait inside the allocation domain that the binding's declared policy names, as xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] states and limits.
 
 A binding *MUST* bound its other work, its worker loops, dispatch and wake paths included.
 A binding *MUST NOT* let anything that a binding call, an arrival report or a health report needs wait behind a pending release.
@@ -502,7 +502,7 @@ Verification:: fault-injection, test
 *Rationale.*
 A receive that gave up any number of frames per call could hold its caller for as long as a peer keeps sending.
 
-The bound on a binding's waits is logical, as every wait of its own is (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
+The bound on a binding's waits is logical, as every wait of its own is (xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
 A physical bound on when the caller resumes is a timing claim of a supported configuration.
 
 A borrowed delivery's bytes live only for that call, so carrying them beyond it would need a staged copy, which a carrier may not make.
@@ -512,7 +512,7 @@ A deferred return of a retained owner can wait behind the middleware's own lock 
 So that release is named as a wait without a deadline, no binding call or report waits behind it, and the binding's other work is bounded.
 
 A binding that allocates for a serialized route does so through an allocator, which may take a lock.
-That wait is the allocation domain's, on the terms that xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] sets.
+That wait is the allocation domain's, on the terms that xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] sets.
 With no place for it, such a binding would be refused on a route that requires nothing stronger.
 
 [[req-ssr-binding-predecessor-cleanup]]
@@ -524,14 +524,14 @@ With no place for it, such a binding would be refused on a route that requires n
 A binding *MUST* recover or remove the resources that a dead predecessor left, in its own initialization, before any route is prepared.
 Where it cannot recover or remove something that a dead predecessor left, the binding *MUST* refuse setup with an error that names what it could not recover or remove, and *MUST NOT* prepare a route over it.
 The binding *MUST NOT* refuse setup merely because something that a predecessor left is present.
-For each binding, this item replaces the clauses of revision 2 of xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-restart[A restart is an initialization] on what a dead predecessor left, and on reaching runtime mode with stale predecessor state present.
+For each binding, this item replaces the clauses of revision 2 of xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization] on what a dead predecessor left, and on reaching runtime mode with stale predecessor state present.
 
 *Not in a surviving process.*
 Once its transport is in runtime mode, a binding *MUST NOT* clean up after a dead peer: it recovers, removes and takes over nothing that the dead peer left.
-That cleanup belongs to the initialization of the process that replaces the peer (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-restart[A restart is an initialization]).
+That cleanup belongs to the initialization of the process that replaces the peer (xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]).
 
 *What stays in force.*
-What a surviving process releases of its own, and how it accounts for the peer's failure, are stated in xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input] and xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
+What a surviving process releases of its own, and how it accounts for the peer's failure, are stated in xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input] and xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
 --
 
 [horizontal]
@@ -541,7 +541,7 @@ Allocated to:: each binding
 Verification:: fault-injection (a peer killed; a restart with its leftovers present, recovered or removed, and setup not refused for their presence; a restart whose recovery fails, with setup refused by an error that names what was not recovered, and no route prepared), review (no cleanup after a dead peer on any runtime path of the binding)
 
 *Rationale.*
-Cleanup in runtime mode would put work of unknown size, and perhaps the heap, on a survivor's runtime path, while initialization may do both (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-restart[A restart is an initialization]).
+Cleanup in runtime mode would put work of unknown size, and perhaps the heap, on a survivor's runtime path, while initialization may do both (xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]).
 So this item places that recovery in the binding's construction, before any route.
 
 A binding that went on over leftovers that it could not recover would run on state that nothing checked, so it refuses setup.
@@ -715,7 +715,7 @@ Three transitions end a held loan or frame.
 The binding *MUST* ensure that each one that happens ends it exactly once:
 
 * a send consumes the loan, so that no safe call can write its storage afterwards;
-* the drop of an unsent loan's lease gives the loan back (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]);
+* the drop of an unsent loan's lease gives the loan back (xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]);
 * the drop of a frame's lease returns the frame to the middleware, through the frame's destructor or the deferred return that completes it (<<req-ssr-binding-frame-drop,What a received frame's destructor may do>>).
 
 The binding *MUST NOT* end a loan or a frame in any other way.
@@ -768,14 +768,14 @@ _A forgotten lease._
 A loan or a frame ends once, by the send, the give-back or the return.
 Forgetting a lease is safe code, and it runs no destructor (source: the standard library documentation, Rust 1.98.1, `+std::mem::forget+`, its description and its section "Safety": https://doc.rust-lang.org/1.98.1/std/mem/fn.forget.html#safety[`+std::mem::forget+`]).
 So a forgotten loan or frame never ends, its slot stays charged to its route, and its storage is never handed out again.
-The element's own leases follow the same rule (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
+The element's own leases follow the same rule (xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
 
 _The source-level argument._
 A suite shows the loans that it took.
 Whether two loans can ever overlap, or a frame's storage can go back twice, is a property of every path of the binding, and it is argued at the source.
 
 _Fixed before the transition._
-Nothing is set up in runtime mode (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
+Nothing is set up in runtime mode (xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
 A middleware that grew or moved its storage there would do set-up work on a runtime path, and could move a frame under a view.
 
 [[req-ssr-binding-shared-state]]

@@ -21,7 +21,7 @@ For some behaviours the repository holds rules from more than one contract famil
 | <<req-ssr-requirements-bind,A requirement binds the actors to which it gives a duty>>; xref:safety/seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]
 
 | The owned-frame SDK contract
-| Every requirement with identifier `+req~sdk-owned-frame-*+`, carrying `OwnedFrame*` tags, wherever in this repository it is filed (navigation: xref:sdk/owned-frame/README.adoc[`sdk/owned-frame/`])
+| Every requirement with identifier `+req~sdk-owned-frame-*+`, carrying `OwnedFrame*` tags, wherever in this repository it is filed (entry pages: xref:basics/ownership.adoc[`basics/ownership.adoc`], xref:basics/resources.adoc[`basics/resources.adoc`], xref:sdk/owned-frame/application.adoc[`sdk/owned-frame/application.adoc`])
 | <<req-sdk-owned-frame-contract,The owned-frame SDK contract binds the parts that declare it>>
 |===
 
@@ -166,7 +166,7 @@ A component conformance claim is no claim about a deployment, and a deployment c
 
 *What a claim covers.*
 A claim covers what it names.
-Ordinary functional behaviour, native resource behaviour (xref:safety/seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]), a finite timing bound and a safety-assurance scope (xref:safety/seooc-up-rust/qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]) are four separate subjects of a claim.
+Ordinary functional behaviour, native resource behaviour (xref:up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]), a finite timing bound and a safety-assurance scope (xref:safety/seooc-up-rust/qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]) are four separate subjects of a claim.
 A claim to one of them, and the evidence for it, is neither a claim to another nor evidence for it.
 
 *What establishes no claim.*
@@ -282,8 +282,8 @@ The two key words for a duty follow the convention of xref:basics/payload_encodi
 The owned-frame SDK contract is the requirements with identifier `+req~sdk-owned-frame-*+`.
 
 *Owned-frame routes.*
-An owned-frame route is a route that an application declares on a transport that has an initialization mode and a runtime mode, as xref:safety/seooc-up-rust/runtime-modes.adoc#req-ssr-mode-two-types[Two modes, as two types] states for the element's transports.
-On such a route, the storage that carries a frame, and each value decoded from a frame, has one owner at a time (xref:sdk/owned-frame/README.adoc#req-sdk-owned-frame-one-owner[Frame storage and decoded values have one owner at a time]).
+An owned-frame route is a route that an application declares on a transport that has an initialization mode and a runtime mode, as xref:basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types] states for the element's transports.
+On such a route, the storage that carries a frame, and each value decoded from a frame, has one owner at a time (xref:basics/ownership.adoc#req-sdk-owned-frame-one-owner[Frame storage and decoded values have one owner at a time]).
 The name "owned-frame" states that ownership rule.
 It names no release generation, and it does not say that a payload is copied or serialized.
 A route is native or serialized, and lent or handed off, as xref:safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name] states, and each form keeps the guarantees that its own items state.
@@ -416,7 +416,7 @@ The classic protocol chapters that state them stay their contract, each key word
 An SDK that offers the classic APIs beside owned-frame routes *MUST NOT* let the presence of owned-frame routes, of a layer above the core, of an adapter that the application has not selected for a call, of a memory provider or of a scheduler integration, in the same build or process, change the behaviour, the results or the defaults of a classic operation for the same input and the same configuration.
 
 *No stand-in.*
-The SDK *MUST NOT* serve a call of a classic API through an owned-frame route, or an operation on an owned-frame route through a classic API, except through an adapter that the application selects (xref:sdk/owned-frame/README.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name]).
+The SDK *MUST NOT* serve a call of a classic API through an owned-frame route, or an operation on an owned-frame route through a classic API, except through an adapter that the application selects (xref:up-l1/payload-paths.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name]).
 
 *Runtime mode.*
 What keeps a classic route out of runtime mode: <<req-ssr-mode-classic-excluded,Classic routes never enter runtime mode>>.

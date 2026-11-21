@@ -41,7 +41,7 @@ The element *MUST NOT* let a waiver admit:
 * a wire that declares allocation;
 * a panic.
 
-Allocation that a serialized route declares for its wire, its binding or its allocation provider (xref:../../sdk/owned-frame/providers.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing] states what an allocation provider is) is admitted by that route's heap class (xref:heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), and by no waiver; allocation inside middleware under a permit needs a waiver on every route, as <<req-ssr-waiver-required,Middleware heap needs a named waiver>> states.
+Allocation that a serialized route declares for its wire, its binding or its allocation provider (xref:../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing] states what an allocation provider is) is admitted by that route's heap class (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), and by no waiver; allocation inside middleware under a permit needs a waiver on every route, as <<req-ssr-waiver-required,Middleware heap needs a named waiver>> states.
 --
 
 [horizontal]
@@ -66,7 +66,7 @@ A serialized route's heap class admits only the allocation that the route declar
 The element *MUST* hold each waiver as a record compiled into the program, with a name and a scope, and for each waiver *MUST*:
 
 * apply it only where it can be found in the code;
-* record it at the transition, and, where deployment data selects it and the transition admits it, report it there as active, with its name and its scope, in the element's startup report (xref:heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]);
+* record it at the transition, and, where deployment data selects it and the transition admits it, report it there as active, with its name and its scope, in the element's startup report (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]);
 * keep it readable in runtime mode without heap;
 * refuse it by name at the transition, unless it names an approver other than its author.
 

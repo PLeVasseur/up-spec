@@ -127,7 +127,7 @@ A mechanism that holds only while the writer keeps a lock or another protocol is
 *Reporting and heap.*
 What the element states in each route's report of the form that the route got, a read of the shared storage or the copy route's copy, is specified in xref:../seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got].
 The element *MUST* make each view, the acquisition and the copy, their validation and that report without acquiring or releasing heap memory, in its own work and in the work that it invokes for them, the decoding that validates a serialized payload included.
-A route's declared allocation does not reach these operations (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path], "What a declaration does not reach").
+A route's declared allocation does not reach these operations (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path], "What a declaration does not reach").
 The element *MUST* refuse at setup a route that needs the copy route where the route's wire declares a heap class that admits allocation for decoding, naming the route and that class.
 
 *What the copy protects.*
@@ -163,7 +163,7 @@ ISO 26262:: 6-Annex D.2.3, 6-Table 3 1h (part-clause numbers only)
 A writer below the reader's level, or of unknown level, can change shared bytes while the reader uses them.
 So the reader works only on a copy in storage it owns, checked after the copy is made.
 
-The copy is held in storage reserved at setup, like every other runtime buffer, so it needs no heap (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+The copy is held in storage reserved at setup, like every other runtime buffer, so it needs no heap (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
 The middleware of a lending binding can map its payload memory read-only for readers.
 So the copy reads it only through loads that are valid on a read-only mapping.

@@ -1,0 +1,62 @@
+= Rust language mapping
+:toc: preamble
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
+
+[NOTE]
+====
+This page holds Rust-specific mechanism requirements alongside the language-neutral library rules of xref:../languages.adoc[uProtocol Language Library].
+Whom each `+req~ssr-*+` item binds, and how the three requirement families meet, is stated in xref:../contract-generations.adoc[Which requirements an implementation follows] (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
+Further Rust-specific items join this page in later relocation commits.
+====
+
+== Runtime handle drop discipline
+
+[[req-ssr-release-inert-drop]]
+=== Dropping a runtime handle does nothing
+
+[.specitem,oft-sid="req~ssr-release-inert-drop~1",oft-title="Dropping a runtime handle does nothing",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyStreamer"]
+--
+The element *MUST* have every runtime-mode handle type hold only `+'static+` data and indices, and *MUST NOT* let one have drop glue.
+The Streamer *MUST* have its runtime type and its gate and counter handles hold only `+'static+` data and indices, and *MUST NOT* let one of them have drop glue.
+The handle types are:
+
+* the transport runtime;
+* every activated L2 handle;
+* the carrier routes;
+* the Streamer with its gate and counter handles.
+
+The element *MUST* have this proved for each type at compile time, and the Streamer *MUST* have it proved at compile time for its runtime type and its gate and counter handles.
+--
+
+[horizontal]
+ID:: `+req~ssr-release-inert-drop~1+`
+ASIL:: B
+Allocated to:: the element; the Streamer, for its runtime type and its gate and counter handles
+Verification:: gate (the const assertion for each handle type)
+
+*Rationale.*
+A handle that held a reference count, such as an `+Arc+`, could free memory when the last one is dropped, which runtime mode forbids (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+A proof at compile time holds for every build of every handle type, where a test could only sample it.
+
+A per-message operation, such as a lease or an asynchronous operation still in flight, is not such a handle.
+Its drop follows xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] and xref:../safety/seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract].
+
+== Rust mechanism navigation
+
+NOTE: This section is non-normative navigation; the linked items govern and add no duty here.
+
+* *Type-state two-mode compile-time checks:*
+  xref:../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types];
+  xref:../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode];
+  xref:../basics/resources.adoc#req-ssr-mode-no-traffic-before-runtime[Traffic is impossible before runtime mode];
+  and the run-time backstop where Rust types cannot reach (xref:../up-l1/runtime.adoc#req-ssr-mode-backstop[Run-time refusal only where types cannot reach]).
+* *`Drop`, lease return and decoded-value destruction:*
+  xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else];
+  xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits];
+  xref:../up-l1/runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode];
+  xref:../up-l1/runtime.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode].
+* *Static and caller-provided startup storage:*
+  xref:../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided];
+  xref:../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed];
+  xref:../basics/resources.adoc#req-ssr-memory-computable[Startup storage is computable before start].

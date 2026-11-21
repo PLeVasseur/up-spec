@@ -160,7 +160,7 @@ On a serialized route whose declared heap class admits allocation, the policy en
 * a refused newest frame;
 * a waiting sender's frame whose bound ran out.
 
-That ownership is released exactly once as xref:heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] and xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
+That ownership is released exactly once as xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] and xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
 The element *MUST* ensure that this release is the only heap use an overflow causes, and that it releases no route, table or other runtime resource.
 
 *Discards the binding cannot observe.*
@@ -418,7 +418,7 @@ A sender that cannot read its clock reuses the last good time in its IDs, so the
 
 Expiry is judged at the element's checks, when a frame reaches its route and when it is taken.
 TTL decides which frames those checks accept.
-It does not bound when a descheduled reader next takes a frame, or when an application reacts to one it has taken, which is a timing claim of a supported configuration (xref:bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
+It does not bound when a descheduled reader next takes a frame, or when an application reacts to one it has taken, which is a timing claim of a supported configuration (xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
 
 A check of a TTL reads only the frame's attributes, so it comes before any look at the payload, and the first check that refuses a frame names the cause of its one count.
 

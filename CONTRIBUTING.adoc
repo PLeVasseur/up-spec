@@ -175,7 +175,7 @@ No text of the standard is quoted or closely paraphrased, and no table maps it.
 
 === The ordinary SDK area
 
-The ordinary SDK area xref:sdk/owned-frame/README.adoc[`sdk/owned-frame/`] follows the same rules for statements, allocation, verification lines, revisions, replacements, links, sources and rationales, with the differences that its README states: its items are requirements only, carry no ASIL line and use the tags `OwnedFrameSdk`, `OwnedFrameProvider` and `OwnedFrameScheduler`.
+The ordinary SDK area xref:contract-generations.adoc#owned-frame-conventions[the owned-frame SDK contract] follows the same rules for statements, allocation, verification lines, revisions, replacements, links, sources and rationales, with the differences that its contract conventions state: its items are requirements only, carry no ASIL line and use the tags `OwnedFrameSdk`, `OwnedFrameProvider` and `OwnedFrameScheduler`.
 
 
 == Contact

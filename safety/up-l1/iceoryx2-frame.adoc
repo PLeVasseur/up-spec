@@ -251,7 +251,7 @@ A view of the payload *MUST* cover exactly the payload's extent, and the binding
 A view *MUST NOT* outlive the sample that holds it, and giving the sample back ends every view of it (xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 
 *Release in runtime mode.*
-In runtime mode a service, a port and the node that holds them are resources of the binding, which stay attached for the life of the process (xref:../seooc-up-rust/release.adoc#req-ssr-release-none[Nothing is released in runtime mode]), so no loan, sample or view outlives the storage that it lies in.
+In runtime mode a service, a port and the node that holds them are resources of the binding, which stay attached for the life of the process (xref:../../up-l1/runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode]), so no loan, sample or view outlives the storage that it lies in.
 --
 
 [horizontal]

@@ -33,18 +33,18 @@ That holds whatever the peer sent or wrote before it failed (xref:../README.adoc
 The one exception to the unbounded wait is the release of what the failure ends.
 The element *MUST NOT* let that release wait for a peer, and *MUST* keep what it releases charged until it completes.
 
-* Where it is pending cleanup, a retained owner's deferred return included, it is isolated as xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states.
+* Where it is pending cleanup, a retained owner's deferred return included, it is isolated as xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states.
 The element *MUST NOT* let a survivor's operation, its arrival, deadline or expiry accounting, or its health report wait for it.
-The element *MUST NOT* let another owner's return wait for it either, except the return of an owner whose own release needs the same dependency, the one that the pending release's declared policy names (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else], "Isolation").
+The element *MUST NOT* let another owner's return wait for it either, except the return of an owner whose own release needs the same dependency, the one that the pending release's declared policy names (xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else], "Isolation").
 For the return of such an owner, this exception replaces revision 3 of this item, which let no other owner's return wait for that release.
-* On a serialized route whose declared heap class admits allocation, and which does not require non-waiting release (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]), an owned value's release runs under the route's declared policy on a path of that route, after the failure's outcome has been recorded, as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] states.
+* On a serialized route whose declared heap class admits allocation, and which does not require non-waiting release (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]), an owned value's release runs under the route's declared policy on a path of that route, after the failure's outcome has been recorded, as xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] states.
 
 *What survivors see.*
 In those processes, the element *MUST* show the failure only as silence, counted deadline misses, call errors, or a reported peer loss or restart.
 The element *MUST* have each of these due without waiting for that release, and *MUST* record each before the release of what it ended starts.
 
 *Routes that declare allocation.*
-On a serialized route whose declared heap class admits allocation, a call or frame that such an outcome ends releases what it owns exactly once as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] states.
+On a serialized route whose declared heap class admits allocation, a call or frame that such an outcome ends releases what it owns exactly once as xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] states.
 The element *MUST NOT* let the failure cause any other heap use there.
 
 *What a failure never releases.*
@@ -76,10 +76,10 @@ A peer dying or restarting is therefore normal input to a transport, and a frame
 
 _Heap use after a failure._
 A peer's failure can end a call that holds a decoded owned response, and that value still has to be destroyed, once.
-The release of what the failure ends is confined to the route's declared class (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+The release of what the failure ends is confined to the route's declared class (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
 _Where that release runs._
-An ordinary owning route uses no release service and requires none (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]), and an owned value's release there can wait behind an allocator's lock like any other.
+An ordinary owning route uses no release service and requires none (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]), and an owned value's release there can wait behind an allocator's lock like any other.
 So on a route that requires non-waiting release, an owned value's release that can wait is kept pending and apart.
 On a route that does not, it runs under the route's declared policy, after the failure's outcome is recorded and never in native or shared work.
 A retained owner's deferred return is pending cleanup on every route.

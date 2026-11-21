@@ -47,7 +47,7 @@ The route's report shows such a route as handed off (xref:../seooc-up-rust/error
 
 *Before it is sent.*
 On a serialized route, the element *MUST* hold the storage that a payload is written into through one owner alone, from the moment it gives that storage out until the payload is sent or the storage is given back.
-The element *MUST* have a send consume that owner, so that nothing writes the storage through it afterwards, and *MUST* have the drop of an unsent owner give the storage back exactly once (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
+The element *MUST* have a send consume that owner, so that nothing writes the storage through it afterwards, and *MUST* have the drop of an unsent owner give the storage back exactly once (xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
 Where safe code forgets that owner, the element *MUST* keep the storage charged to its route for the life of the process, and *MUST NOT* reuse it, return it or give it to another owner.
 That no pending operation holds a transmit loan, on a serialized route as on a native one, is stated in xref:../seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract].
 What holds for a native payload's storage before it is sent is stated in xref:native-wire.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], and what a lending binding keeps for the storage that it lends in xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held].
@@ -108,10 +108,10 @@ That holds for a loan that a wire encodes into as for one that a sender writes.
 A route is declared with its wire, the bound and the alignment of its payload, its heap class, its QoS and, where it needs it, a requirement to lend.
 The smallest payload of a route is its type's size on a native route.
 On a serialized route it is, for sending, the smallest encoding that the route's wire states (xref:serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns], "Sizing"), or zero where the wire states none, and, for receiving, zero.
-A binding's capability is what it declares of whether it lends, the payload bound and the alignment that it carries, the smallest payload that it carries where it carries no shorter one, and the counts and the QoS settings that it serves: the binding declares it as xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting] states, and its own heap class as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
+A binding's capability is what it declares of whether it lends, the payload bound and the alignment that it carries, the smallest payload that it carries where it carries no shorter one, and the counts and the QoS settings that it serves: the binding declares it as xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting] states, and its own heap class as xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
 
 *Admission.*
-The element *MUST* admit a declared route wherever both of these hold (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode]):
+The element *MUST* admit a declared route wherever both of these hold (xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode]):
 
 * the binding's declared capability serves everything that the route declares, in each direction that the route uses from the route's smallest payload in that direction to its bound;
 * every other setup check that an item states for the route passes.
@@ -127,12 +127,12 @@ The element *MUST* report that refusal with the capability that it names.
 *The reasons.*
 The element and each binding *MUST NOT* refuse a declared route for a reason that is not a declared one: a difference between what the route declares and what its binding declares, or a setup check that an item states.
 The reasons include a payload bound, a smallest payload or an alignment that the binding does not carry, a QoS setting or a count that it does not serve, lending that the route requires and the binding cannot give, a heap class or a guarantee that is not admitted, an integrity level that does not allow the form, and a native agreement that is not established.
-A setup operation that fails for another cause, such as a resource that the platform does not grant, is no refusal of the route's declaration: it is returned as the named error that xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure] states.
+A setup operation that fails for another cause, such as a resource that the platform does not grant, is no refusal of the route's declaration: it is returned as the named error that xref:../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure] states.
 
 *Names and declared allocation.*
 The element *MUST NOT* admit or refuse a route, and a binding *MUST NOT* refuse one, because of the name of a wire or of a payload encoding.
 The element *MUST NOT* admit or refuse a route because of the name of a middleware either.
-The element *MUST NOT* refuse a serialized route because its wire declares allocation that the route declares, except a route that needs the copy route, as xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Reporting and heap", states; that it refuses no such route because its decoded values own heap memory is stated in xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
+The element *MUST NOT* refuse a serialized route because its wire declares allocation that the route declares, except a route that needs the copy route, as xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Reporting and heap", states; that it refuses no such route because its decoded values own heap memory is stated in xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
 
 *A route's form.*
 A route's form is three things, each fixed at setup:
@@ -151,7 +151,7 @@ A lending binding's own refusal to lend for a route is stated in xref:bindings.a
 *Fixed for the run.*
 The element *MUST NOT* let an operation in runtime mode change a route's form, for example from native to serialized, from lent to handed off or from a view to a copy.
 A binding *MUST NOT* change in runtime mode whether it lends or hands off for a route.
-Where a route cannot have the form that it declares, the element *MUST* refuse it at setup, and *MUST NOT* serve it in another form (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-entry-no-latent-refusal[Nothing is refused at runtime for a reason setup already knew]).
+Where a route cannot have the form that it declares, the element *MUST* refuse it at setup, and *MUST NOT* serve it in another form (xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-no-latent-refusal[Nothing is refused at runtime for a reason setup already knew]).
 The agreement under which a native route's type is read is fixed with the form (xref:native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]).
 
 *Reported.*
@@ -336,12 +336,12 @@ In each refused case, the condition named is the one that fails.
 | A serialized route whose wire declares allocation, which the route declares too
 | The binding prepares it. The element admits it at the transition
 | The route's bound and QoS with the binding's, and the wire's declared class with the route's
-| Admitted. The report shows the class and who allocates (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused])
+| Admitted. The report shows the class and who allocates (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused])
 
 | A serialized route whose wire declares allocation that the route does not declare
 | The element, at the transition
 | The wire's declared class with the route's
-| Refused, with the route and the undeclared allocation named (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default])
+| Refused, with the route and the undeclared allocation named (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default])
 
 | A serialized route whose payload bound is above what the binding carries
 | The binding, in route preparation
@@ -351,7 +351,7 @@ In each refused case, the condition named is the one that fails.
 | A serialized route that receives, or whose wire states no smallest encoding, on a binding whose declared smallest payload is above zero
 | The binding, in route preparation
 | The route's smallest payload with the binding's
-| Refused, with the size named (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-entry-no-latent-refusal[Nothing is refused at runtime for a reason setup already knew])
+| Refused, with the size named (xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-no-latent-refusal[Nothing is refused at runtime for a reason setup already knew])
 
 | A route with a QoS setting or a count that the binding does not serve
 | The binding, in route preparation
@@ -371,11 +371,11 @@ In each refused case, the condition named is the one that fails.
 | A route that requires a stronger guarantee which is not established for it
 | The element, at setup
 | The guarantee with the evidence for the route
-| Refused, with the guarantee named (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused])
+| Refused, with the guarantee named (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused])
 |===
 ====
 
-What a refused route does to the transition of its transport is stated in xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode].
+What a refused route does to the transition of its transport is stated in xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode].
 
 [[paths]]
 == The two kinds of route, side by side
@@ -400,7 +400,7 @@ Each cell names the items that state the rule.
 
 | Which types
 | xref:native-wire.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout]
-| xref:serialized-wires.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]
+| xref:serialized-wires.adoc#req-ssr-wire-serialized-format[A serialized wire reads and writes one stated format]; xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]
 
 | Size
 | xref:native-wire.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout]
@@ -419,12 +419,12 @@ Each cell names the items that state the rule.
 | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]
 
 | Heap
-| xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]
-| xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]
+| xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]
+| xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]
 
 | Stronger guarantees
-| xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]
-| xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]
+| xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]
+| xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]
 
 | A bad input
 | xref:native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]; xref:integrity.adoc#req-ssr-integrity-any-bits[In-place types accept every bit pattern]
@@ -445,12 +445,12 @@ Each cell names the items that state the rule.
 Each entry names the items that state the rule, for both kinds of route.
 
 * The value at the sender: xref:native-wire.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused]; xref:serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns].
-* The storage before it is sent: xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]; <<req-ssr-payload-written-once,A payload is written once, into the storage that carries it>>.
+* The storage before it is sent: xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]; <<req-ssr-payload-written-once,A payload is written once, into the storage that carries it>>.
 * The frame once it is sent: xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport].
 * The frame at the receiver: xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
 * What the application reads: xref:native-wire.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused]; xref:serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns].
-* The end, when the lease is dropped: xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
-* No end, when safe code forgets the lease: xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "No reuse while owned".
+* The end, when the lease is dropped: xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
+* No end, when safe code forgets the lease: xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "No reuse while owned".
 * A peer that dies: xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input].
 
 [[carriage]]

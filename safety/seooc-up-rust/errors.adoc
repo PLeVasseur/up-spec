@@ -29,17 +29,17 @@ In deciding a refusal, producing its error and counting it, the element *MUST NO
 
 *Native and heap-free routes.*
 On a native route, and on any route whose heap class is none, the element *MUST NOT* acquire or release heap memory in anything that a refusal does.
-Beyond deciding the refusal, producing its error and counting it, the element *MUST* perform for such a refusal only the accounting and the ownership cleanup that the route's items require, such as giving a refused frame's slot back (xref:heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
+Beyond deciding the refusal, producing its error and counting it, the element *MUST* perform for such a refusal only the accounting and the ownership cleanup that the route's items require, such as giving a refused frame's slot back (xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
 
 *Serialized routes.*
 On a serialized route, some refusals are reached only after the operation acquired heap memory under its declared heap class.
 The element *MUST NOT* acquire a further resource in order to produce or report such a refusal.
-It *MUST* end the ownership already created, and what that ownership holds is released exactly once as xref:heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] and xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
+It *MUST* end the ownership already created, and what that ownership holds is released exactly once as xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] and xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
 That release is the route's declared heap use, under its own contract, and not part of producing the refusal.
 
 *Exhaustion of a declared allocation.*
-On a serialized route, exhaustion at an allocation point that the route's declared class names does what the route's declared failure policy states (xref:heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
-The element *MUST* return it as an error where that policy returns one, or where the route requires recoverable exhaustion (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]); elsewhere what exhaustion does is the declared failure policy's.
+On a serialized route, exhaustion at an allocation point that the route's declared class names does what the route's declared failure policy states (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
+The element *MUST* return it as an error where that policy returns one, or where the route requires recoverable exhaustion (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]); elsewhere what exhaustion does is the declared failure policy's.
 --
 
 [horizontal]
@@ -112,9 +112,9 @@ No waiver can cover a panic: a waiver covers allocation inside middleware only (
 Code that runs on a runtime path is not always element code (xref:README.adoc#req-ssr-element-boundary[The parts of the element, and element code], "Element code").
 Examples are the destructor of an owned value, an allocator's release or a dependency they reach.
 
-* The element keeps memory safe whatever that code does (xref:heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
+* The element keeps memory safe whatever that code does (xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
 * On a route that does not require panic-free cleanup, that guarantee is not admitted, and the route's report states separately whether evidence establishes it.
-* On a route that requires it, setup admits such code only where it is established that it cannot panic or abort in any context that runs it, and refuses the route by name otherwise (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+* On a route that requires it, setup admits such code only where it is established that it cannot panic or abort in any context that runs it, and refuses the route by name otherwise (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 
 A panic in element code is a defect on every route, whatever the route requires.
 

@@ -30,7 +30,7 @@ The contracts that a binding and a wire pass: xref:bindings.adoc#req-ssr-binding
 | Assumption and clause | Stated in
 
 | <<aou-seooc-peer-access,Only authorized processes reach the transport>>, "The fault model" | xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]
-| <<aou-seooc-peer-access,Only authorized processes reach the transport>>, "Two-way shared state" | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]; xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure]
+| <<aou-seooc-peer-access,Only authorized processes reach the transport>>, "Two-way shared state" | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]; xref:../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]
 | <<aou-seooc-peer-access,Only authorized processes reach the transport>>, "Zero-copy routes" | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]
 | <<aou-seooc-peer-access,Only authorized processes reach the transport>>, "Message IDs" | xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]
 | <<aou-seooc-peer-access,Only authorized processes reach the transport>>, "Strict mode" | xref:../seooc-up-rust/build.adoc#req-ssr-strict-report[Strict mode reports on every run]
@@ -54,7 +54,7 @@ The integrator *SHALL* restrict access to every transport's resources (shared-me
 
 * *The fault model.* What a faulty peer within that restriction may do, and the boundary between safety and security, are stated in xref:../README.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer].
 * *Two-way shared state.* On a binding whose ports write shared state both ways, the integrator *SHALL* run every process on one service at one integrity level, and *SHALL* give a consumer at a lower level a copy route in place of a port on that service.
-The refusal of any other port at setup, by name, and what a copy route protects are stated in xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] and xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure].
+The refusal of any other port at setup, by name, and what a copy route protects are stated in xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] and xref:../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure].
 What one such binding adds is stated with that binding.
 * *Zero-copy routes.* On a zero-copy route, the integrator *SHALL* ensure that the writer is developed to at least the reader's level, and that it never writes the storage of a frame that it has sent.
 The integrator *SHALL* ensure the same on a serialized route on which the element decodes a frame in shared memory (xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Decoding from shared memory").

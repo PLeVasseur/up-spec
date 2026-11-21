@@ -35,7 +35,7 @@ ISO 26262:: 6-C.4.6 (part-clause numbers only)
 *Rationale.*
 A value that is coerced, defaulted or skipped without an error runs the deployment on a configuration nobody wrote, and the integrator learns of it only from its effects.
 
-Refusing during initialization, by field, keeps every such mistake out of runtime mode, where setup can no longer change anything (xref:runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
+Refusing during initialization, by field, keeps every such mistake out of runtime mode, where setup can no longer change anything (xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
 
 Publishing the ranges lets the integrator produce the deployment data within them (xref:assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]), instead of finding a value out of range only when setup refuses it.
 
@@ -57,7 +57,7 @@ Verification:: test (the same refusals on both paths), review (every validation 
 *Rationale.*
 Checks that lived only in a loader would leave a program built in code unchecked, and two sets of checks could drift apart.
 
-Both paths build the same non-generic transport types (xref:runtime-modes.adoc#req-ssr-mode-two-types[Two modes, as two types]), so one setup runs the same checks for both.
+Both paths build the same non-generic transport types (xref:../../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types]), so one setup runs the same checks for both.
 
 [[req-ssr-config-no-code]]
 == Deployment data carries no code

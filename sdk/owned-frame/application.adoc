@@ -3,7 +3,7 @@
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
 
-Conventions and tags: xref:README.adoc[the owned-frame SDK area's README].
+Conventions and tags: xref:../../contract-generations.adoc#owned-frame-conventions[the owned-frame SDK contract conventions].
 
 This page holds what an SDK offers an application above its core, on owned-frame routes:
 
@@ -19,20 +19,20 @@ These words have the meaning that the items give them.
 Where an SDK's core is not the element, a word that an item of the safety area defines for the element or for a part that works with it is read as the clause "Words of the safety area" of xref:../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it] states.
 
 * An *owned-frame route*: xref:../../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
-* An *adapter*: xref:README.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name].
-* A *memory provider* and an *allocation provider*: xref:providers.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing].
+* An *adapter*: xref:../../up-l1/payload-paths.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name].
+* A *memory provider* and an *allocation provider*: xref:../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing].
 * The *Communication Layer APIs*: xref:../../up-l2/api.adoc[Communication Layer APIs].
 * The *element*: xref:../../safety/seooc-up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code].
-* A *transport*, *initialization* and *runtime mode*: xref:../../safety/seooc-up-rust/runtime-modes.adoc#req-ssr-mode-two-types[Two modes, as two types].
+* A *transport*, *initialization* and *runtime mode*: xref:../../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types].
 * A *binding*, its *middleware* and a *test double*: xref:../../safety/up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract].
 * A *wire*, and a *native* or a *serialized* route: xref:../../safety/up-l1/wires.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
 * A route's *form*: xref:../../safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name].
 * A *transmit loan*: xref:../../safety/up-l1/bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], "A transmit loan".
 * *QoS*: xref:../../safety/seooc-up-rust/qos.adoc#req-ssr-qos-declared[QoS is declared per route at setup]; an *overflow policy*: xref:../../safety/seooc-up-rust/qos.adoc#req-ssr-qos-overflow[Overflow acts as declared].
-* A *heap class*, an *allocation domain* and a route's *declared policy*: xref:../../safety/seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default].
-* *Non-waiting acquisition*, *non-waiting release* and each other stronger *guarantee*: xref:../../safety/seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
-* A route's *capacity*: xref:../../safety/seooc-up-rust/startup-memory.adoc#req-ssr-memory-computable[Startup storage is computable before start], "The capacities".
-* An *idle wait* and a *logical deadline*: xref:../../safety/seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline].
+* A *heap class*, an *allocation domain* and a route's *declared policy*: xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default].
+* *Non-waiting acquisition*, *non-waiting release* and each other stronger *guarantee*: xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
+* A route's *capacity*: xref:../../basics/resources.adoc#req-ssr-memory-computable[Startup storage is computable before start], "The capacities".
+* An *idle wait* and a *logical deadline*: xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline].
 * The element's *asynchronous interface*: xref:../../safety/seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract].
 * *Synchronous or polled* traffic: xref:../../safety/seooc-up-rust/crate-isolation.adoc#req-ssr-crate-sync-path[Traffic is synchronous or polled].
 
@@ -95,7 +95,7 @@ In the type of a role's handle and in that handle's operations, the layer *MUST 
 
 *Choices at setup.*
 A role's transport, wire, QoS and memory provider are chosen in initialization, when the role is declared.
-Where the core is the element, none of them changes in runtime mode (xref:../../safety/seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]), and how a route's QoS is declared or given its one documented default is stated in xref:../../safety/seooc-up-rust/qos.adoc#req-ssr-qos-declared[QoS is declared per route at setup].
+Where the core is the element, none of them changes in runtime mode (xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]), and how a route's QoS is declared or given its one documented default is stated in xref:../../safety/seooc-up-rust/qos.adoc#req-ssr-qos-declared[QoS is declared per route at setup].
 The layer *MUST NOT* require the application to name one of them again, or to name a scheduler, in an operation on a handle.
 
 *No placeholder.*
@@ -142,7 +142,7 @@ Where an application states one more setting, the layer *MUST NOT* require it to
 The layer *MUST* state in its documentation, with each setting, the other settings that it depends on.
 
 *No default where a declaration is required.*
-The layer *MUST NOT* supply a default for a setting that an item requires to be declared (xref:../../safety/seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
+The layer *MUST NOT* supply a default for a setting that an item requires to be declared (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 
 *Shown.*
 Where the core is the element, what a route got, the QoS in force among it, is in its report: xref:../../safety/seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got].
@@ -178,8 +178,8 @@ The layer *MUST NOT* serve an operation in a form other than the route's admitte
 On the path of an operation that it offers, the layer *MUST NOT* add:
 
 * a copy or a staging of the payload (xref:../../safety/up-l1/payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]);
-* in runtime mode on a native route, an allocation or a free of the layer's own, or one that it causes in a memory provider (xref:../../safety/seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]);
-* in runtime mode on another route, where the core is the element, an allocation or a free of the layer's own, or one that it causes in a memory provider and that the route's heap class does not admit (xref:../../safety/seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]);
+* in runtime mode on a native route, an allocation or a free of the layer's own, or one that it causes in a memory provider (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]);
+* in runtime mode on another route, where the core is the element, an allocation or a free of the layer's own, or one that it causes in a memory provider and that the route's heap class does not admit (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]);
 * a retry of an operation that may already have been submitted.
 
 What the scheduler work that an operation causes keeps on a native path of the element is stated in xref:../../safety/seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]; on another route, its scheduler integration states what that work can allocate and what heap memory it can release (<<req-sdk-owned-frame-scheduler-integration,A scheduler integration supplies wake-ups, timers and contexts through public interfaces>>).
@@ -196,7 +196,7 @@ The layer *MUST* pass a result that arrives after the operation returned pending
 The layer *MUST NOT* report an unknown or partial delivery as delivered or consumed.
 
 *Modes.*
-The layer *MUST* offer setup only in initialization, and traffic only in runtime mode (xref:../../safety/seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]; xref:../../safety/seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-traffic-before-runtime[Traffic is impossible before runtime mode]).
+The layer *MUST* offer setup only in initialization, and traffic only in runtime mode (xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]; xref:../../basics/resources.adoc#req-ssr-mode-no-traffic-before-runtime[Traffic is impossible before runtime mode]).
 Where the types of its interface cannot rule out a setup operation after the transition, or a traffic operation before it, such as at an entry point of a C interface, the layer *MUST* refuse that operation with a named result and change nothing.
 Where the SDK's core is not the element, the core *MUST* meet each duty of this clause for the setup and traffic operations that it offers.
 --
@@ -234,11 +234,11 @@ Where the language or the interface cannot keep the two modes apart by type, a r
 --
 *Message operations.*
 A message operation is an operation that the SDK offers on an owned-frame route to send, publish, notify, receive, invoke or respond.
-An idle wait, which xref:../../safety/seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] permits where the transport's documented contract supports it and while no bounded operation, timeout or deadline check is due, is not a message operation.
+An idle wait, which xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] permits where the transport's documented contract supports it and while no bounded operation, timeout or deadline check is due, is not a message operation.
 
 *Waiting.*
 In this item, a call waits where, before it returns, it waits for a peer, for middleware, for route capacity or for time, or makes a blocking operating-system call.
-A wait inside a route's declared allocation domain is no wait in this sense on a serialized route whose declared heap class admits allocation, where the route's declared policy states it, and not in an acquisition on a route that requires non-waiting acquisition or in a release on a route that requires non-waiting release; for the element, xref:../../safety/seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] states when it admits such a wait.
+A wait inside a route's declared allocation domain is no wait in this sense on a serialized route whose declared heap class admits allocation, where the route's declared policy states it, and not in an acquisition on a route that requires non-waiting acquisition or in a release on a route that requires non-waiting release; for the element, xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] states when it admits such a wait.
 A wait inside the scheduler work that a call causes, as its scheduler integration states that work (<<req-sdk-owned-frame-scheduler-integration,A scheduler integration supplies wake-ups, timers and contexts through public interfaces>>), is no wait in this sense either.
 
 *Three kinds.*
@@ -257,7 +257,7 @@ A part offers an operation as a nonblocking attempt or as a progress step where 
 Each layer above the core, each adapter and each scheduler integration *MUST NOT* offer, as a nonblocking attempt or as a progress step, a call that waits.
 
 *Bounded synchronous waits.*
-Where the SDK's core is the element, how the element's own waits take and keep a logical deadline is stated in xref:../../safety/seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline].
+Where the SDK's core is the element, how the element's own waits take and keep a logical deadline is stated in xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline].
 For each other bounded synchronous wait that it offers on an owned-frame route, the SDK, each layer above the core and each adapter *MUST* meet what the clauses "Every other wait" and "What a deadline decides" of that item require of the element for a wait of its own.
 
 *Overflow.*
@@ -313,7 +313,7 @@ For asynchronous operations on owned-frame routes, the SDK *MUST NOT* offer, for
 Where the SDK's core is the element, the asynchronous layer's contract is the one that xref:../../safety/seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract] states.
 Any other SDK that offers asynchronous operations on owned-frame routes *MUST* state, in the documentation of its asynchronous layer, a contract that names, for each asynchronous operation, what that item requires the element's contract to name.
 That SDK's asynchronous layer *MUST* keep, with that SDK in the element's place, what that item requires under "1. Progress" of a step that returns pending, its properties "2. Concurrent waiters", "3. Abandonment and commit" and "5. Deadlines", and what it requires under "4. Lifetime" of an operation that safe code forgot.
-In that item, for a route of that SDK that has no declared policy, the policy that is stated by the memory provider to which the SDK sends the operation's requests, as xref:providers.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing] states, takes the place of the route's declared policy.
+In that item, for a route of that SDK that has no declared policy, the policy that is stated by the memory provider to which the SDK sends the operation's requests, as xref:../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing] states, takes the place of the route's declared policy.
 
 *What it does not need.*
 The asynchronous layer *MUST NOT* require a particular scheduler, a host operating system's library or an allocation provider.
@@ -367,7 +367,7 @@ It turns the layer's notifications into that scheduler's wake-ups, supplies the 
 
 *Selection.*
 An SDK that offers asynchronous operations on owned-frame routes *MUST* let an application select a scheduler integration.
-How it offers that selection, so that any party can write one: xref:providers.adoc#req-sdk-owned-frame-extension-public[A part that an application selects is selected through public interfaces alone].
+How it offers that selection, so that any party can write one: xref:../../basics/configurations.adoc#req-sdk-owned-frame-extension-public[A part that an application selects is selected through public interfaces alone].
 The SDK *MUST NOT* use, in a scheduler integration that it ships, an interface that is not public and documented.
 
 *Wake-ups.*
@@ -386,7 +386,7 @@ It *MUST* state, in the documentation that is released with it, the contexts in 
 *Resources.*
 A scheduler integration *MUST* state, in the documentation that is released with it, for the scheduler work that an operation causes (its registration, its wake-ups, its timers and the end of its task), what that work can allocate, what heap memory it can release and whether it can wait or panic.
 It *MUST* state as unknown what it does not know.
-That statement establishes no guarantee (xref:../../safety/seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]; xref:../../safety/seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+That statement establishes no guarantee (xref:../../safety/seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]; xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 
 *No added service.*
 For the element, that using the asynchronous interface adds no service duty to the application is stated in xref:../../safety/seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract], under "Service".

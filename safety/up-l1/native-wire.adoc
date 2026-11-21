@@ -56,7 +56,7 @@ A native type *MUST NOT* hold:
 
 * a pointer, a reference, an address or a handle of any kind;
 * a field with an invalid bit pattern (xref:integrity.adoc#req-ssr-integrity-any-bits[In-place types accept every bit pattern]);
-* a value that runs a destructor when it ends (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]);
+* a value that runs a destructor when it ends (xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]);
 * a field whose size or place depends on the value.
 
 *Handles.*
@@ -168,7 +168,7 @@ The integrator supplies it, and chooses that identifier as the registry's rules 
 * The element *MUST* prepare a native route only for a type that the agreement names for that route, with its layout identity.
 * The element *MUST* make each check of this item itself: what an agreement declares stands in for no check of a layout or of an identity.
 * The element *MUST* send each frame of a native route with the payload encoding identifier that the agreement names for the route (xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding], "On sending").
-* The agreement is part of a native route's configuration, which is fixed at setup: that nothing changes it in runtime mode is stated in xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode].
+* The agreement is part of a native route's configuration, which is fixed at setup: that nothing changes it in runtime mode is stated in xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode].
 
 *At setup.*
 The element *MUST* refuse a native route at setup, naming the route and the type, where:
@@ -256,7 +256,7 @@ On a native route the element *MUST* have the sender initialize the value once, 
 
 * nothing is read from a loan before it is written, and a loan is sent only once the whole value has been written into it;
 * sending consumes the loan, and ends the sender's access to the storage (xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]);
-* a loan whose lease is dropped unsent is given back, exactly once (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]);
+* a loan whose lease is dropped unsent is given back, exactly once (xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]);
 * no pending operation holds a loan (xref:../seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]).
 
 *Receiving.*
@@ -286,12 +286,12 @@ How such a route is refused at setup, with the route and the missing capability 
 *Resources.*
 On every path of a native route, success, refusal, cancellation, a peer's failure and a frame's return among them, heap use, panics, work and waits are governed by:
 
-* xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path];
+* xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path];
 * xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path];
 * xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap];
 * xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths];
-* xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-work[Work per call is bounded by setup data];
-* xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline];
+* xref:../../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data];
+* xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline];
 * xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input].
 --
 
@@ -320,7 +320,7 @@ The copy would cost time in proportion to the payload, and a place to build the 
 
 _A forgotten lease._
 Forgetting a lease is safe code, and it runs no destructor (source: the standard library documentation, Rust 1.98.1, `+std::mem::forget+`, its description and its section "Safety": https://doc.rust-lang.org/1.98.1/std/mem/fn.forget.html#safety[`+std::mem::forget+`]).
-The rule for a forgotten lease is the same for every lease of the element (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
+The rule for a forgotten lease is the same for every lease of the element (xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
 
 _No substitute._
 An implementation could keep a route working by falling back to a serialized encoding or to a copy.
@@ -347,13 +347,13 @@ Each row names the rules that govern a step.
 | <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]
 
 | The route is prepared
-| <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Refusal at the transition"; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "Native routes"; xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; xref:payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]
+| <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Refusal at the transition"; xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "Native routes"; xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; xref:payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]
 
 | The levels are compared
 | xref:integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]; xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]; xref:bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level]; xref:bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state]
 
 | A value is sent
-| <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>; xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]
+| <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>; xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]
 
 | A frame arrives
 | xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]; <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]
@@ -362,10 +362,10 @@ Each row names the rules that govern a step.
 | <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>; xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]
 
 | The frame is returned
-| xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]
+| xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]
 
 | On every path
-| xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-work[Work per call is bounded by setup data]; xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]; xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]
+| xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; xref:../seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:../../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data]; xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]; xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]
 
 | The route is reported
 | xref:../seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got]; xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]
@@ -396,7 +396,7 @@ Each row names the rules that govern a step.
 
 | A wire or an allocation provider that declares allocation in a direction that the route uses, or a binding that declares allocation in its own code in such a direction
 | The transition
-| xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]
+| xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]
 
 | A writer below the reader's level, or at an unknown level
 | Setup

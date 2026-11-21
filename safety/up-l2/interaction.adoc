@@ -24,7 +24,7 @@ Whom it binds: xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-assumptio
 The element *MUST* give every RPC call a deadline: the TTL of its request, counted from when the request was created.
 An RPC request's TTL is greater than 0 (xref:../../basics/uattributes.adoc[UAttributes], `+dsn~up-attributes-request-ttl~1+`), and what the element does with a request whose TTL is 0 is stated in xref:../seooc-up-rust/qos.adoc#req-ssr-qos-ttl[Expired messages are not processed] and, for its answer at a server, in <<req-ssr-peer-rpc-undecodable-answered,An undecodable request is answered>>.
 So a call whose server has vanished or never answers completes with an error by its TTL.
-A response completes the call only where the element accepts it before that TTL has passed (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
+A response completes the call only where the element accepts it before that TTL has passed (xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
 
 *A failure that is reported to the element.*
 Where a call's failure is reported to the client's element, by the binding's count of the request's receivers (<<req-ssr-peer-rpc-no-server,A call with no server fails at once>>), by a server's `+InvalidArgument+` answer (<<req-ssr-peer-rpc-undecodable-answered,An undecodable request is answered>>) or by the Streamer's error response (xref:streamer.adoc#req-ssr-streamer-rpc-error-response[An RPC request that cannot be dispatched is answered, best effort]), the element *MUST* set the call's outcome as soon as it has that report, for an answer as soon as its wire accepts it (<<req-ssr-rpc-check-at-arrival,A response completes its call only once its wire accepts it>>), without waiting out the TTL.
@@ -36,7 +36,7 @@ The element *MUST NOT* make the completion wait for the release of what the call
 *The slot's return.*
 The element *MUST* return the call's slot to the table once the slot holds nothing whose release is pending or in progress, and not before:
 
-* A decoded response or a retained owner that the call held is released as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] and xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] state.
+* A decoded response or a retained owner that the call held is released as xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] and xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] state.
 * Until that release completes, the storage that holds it stays charged and is not reused, whether it stays with the call's slot or has passed to a release service.
 * The route's admitted capacity covers it in either place.
 --
@@ -61,7 +61,7 @@ Each call's outcome is set as soon as its wire accepts the answer, without waiti
 A vanished server cannot release its client resources, so the client needs its own expiration path and a reusable call slot.
 Waiting out the TTL of a call whose failure is already known would only delay the error.
 
-The TTL is a logical deadline (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
+The TTL is a logical deadline (xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
 A TTL of 0 means that a message never expires (xref:../../basics/uattributes.adoc[UAttributes], `+dsn~up-attributes-ttl~1+`), so a call needs a positive one to end.
 
 _The slot's return._
@@ -185,17 +185,17 @@ Verification:: test, miri, heap-window
 ** A call whose only request copy was corrupt and got no answer: still pending at its TTL, and ending then.
 ** The call's tag recorded before its request is sent, and a response that arrives before then refused.
 * *miri*: the give-back and the delivering phases, with threads.
-* *heap-window*: the recording of a call's tag, the arrival checks of a response, a refused response, a refusal answer, a call's end at its TTL, the completion of a call by an accepted response and a peer's failure that finds a response being checked, with no heap use on a native route, and on a serialized route none beyond what its declared class permits and setup admits and none in deciding, reporting or counting an outcome, as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path] states.
+* *heap-window*: the recording of a call's tag, the arrival checks of a response, a refused response, a refusal answer, a call's end at its TTL, the completion of a call by an accepted response and a peer's failure that finds a response being checked, with no heap use on a native route, and on a serialized route none beyond what its declared class permits and setup admits and none in deciding, reporting or counting an outcome, as xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path] states.
 
 *Rationale.*
 Completing a call before checking its wire would let a corrupt first copy exclude a later intact response.
 
 Refusal answers come only from a wire that protects calls (xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory]).
 
-A call that ends at its TTL ends logically (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
+A call that ends at its TTL ends logically (xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
 
 Giving a claim back returns the call to waiting for another copy.
-What the refused copy owns is released as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] states, and storage that an unfinished release still holds is not reused (xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
+What the refused copy owns is released as xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] states, and storage that an unfinished release still holds is not reused (xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
 
 [[req-ssr-peer-rpc-undecodable-answered]]
 == An undecodable request is answered
@@ -334,7 +334,7 @@ A call that failed at once has ended, and a response that arrives for it later i
 ID:: `+req~ssr-peer-rpc-no-server~2+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test (on a binding that declares the exact count: a request that reached no server, failing at once with the named error, and one that reached a server, not failing for it; on a binding that does not declare it, and with only a listener count, a discovery result or a zero count taken at another time: no call failed at once; a call that an accepted response completes before its TTL completing with it; a call that is cancelled, and one that a peer's failure ends, before its TTL ending then and not a second time at its TTL; a call still pending at its TTL ending then), heap-window (a call whose request reached no server, failing at once or ending at its TTL, with no heap use on a native route, and on a serialized route none beyond what its declared class permits and setup admits and none in deciding, reporting or counting that outcome, as xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path] states)
+Verification:: test (on a binding that declares the exact count: a request that reached no server, failing at once with the named error, and one that reached a server, not failing for it; on a binding that does not declare it, and with only a listener count, a discovery result or a zero count taken at another time: no call failed at once; a call that an accepted response completes before its TTL completing with it; a call that is cancelled, and one that a peer's failure ends, before its TTL ending then and not a second time at its TTL; a call still pending at its TTL ending then), heap-window (a call whose request reached no server, failing at once or ending at its TTL, with no heap use on a native route, and on a serialized route none beyond what its declared class permits and setup admits and none in deciding, reporting or counting that outcome, as xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path] states)
 
 *Rationale.*
 Waiting out the TTL of a request that no server received only delays an error the binding already knows, and holds the call's slot until then.

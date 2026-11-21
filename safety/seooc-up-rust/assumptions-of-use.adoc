@@ -148,16 +148,16 @@ Tags are trace metadata, and decide no actor, scope or status (<<aou-seooc-assum
 The integrator *SHALL* provide a supervisor outside every process that uses the element.
 The integrator *SHALL* have the supervisor detect that a process has exited, crashed or been killed, and restart that process or take the item, in ISO 26262's sense, to its safe state, under a restart policy that the integrator sets (rate limit, escalation).
 
-* *Recovery.* That the element offers no recovery, in the process, of a transport that has entered runtime mode, and how a process leaves runtime mode, is stated in xref:runtime-modes.adoc#req-ssr-mode-one-way[There is no way back] and xref:runtime-modes.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode].
+* *Recovery.* That the element offers no recovery, in the process, of a transport that has entered runtime mode, and how a process leaves runtime mode, is stated in xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back] and xref:../../up-l1/runtime.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode].
 Where a panic aborts a process that runs an ASIL binary, the integrator *SHALL* have the supervisor's restart policy treat that abort as a crash of the process (xref:build.adoc#req-ssr-build-panic-abort[The ASIL build aborts on panic and checks overflow]; <<aou-seooc-build-configuration,The ASIL binary is built from its claimed graph, with the ASIL profile>>).
 * *Setup errors.* After an initialization or transition error, the application *SHALL NOT* go on with the transport whose setup was refused.
 It *SHALL* either exit, so that the supervisor restarts the process, or make a fresh initialization.
-What a fresh initialization in the same process is, and when the element admits one, is stated in xref:runtime-modes.adoc#req-ssr-mode-one-way[There is no way back] and xref:startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed].
+What a fresh initialization in the same process is, and when the element admits one, is stated in xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back] and xref:../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed].
 Once a transport of the process has entered runtime mode, the application *SHALL NOT* attempt in the process a rollback, re-admission, re-enable, rebuild or replacement of that transport, or of a route or role of it; a fault in runtime mode is recovered by the supervisor's restart.
-* *Startup time.* Where the item relies on a process's startup within a time, the integrator *SHALL* have the supervisor bound that startup with a timeout of its own: the bounds of setup are logical deadlines, which cannot fire in a process that the OS does not run (xref:runtime-modes.adoc#req-ssr-mode-bounded-startup[Setup never waits without a bound]).
+* *Startup time.* Where the item relies on a process's startup within a time, the integrator *SHALL* have the supervisor bound that startup with a timeout of its own: the bounds of setup are logical deadlines, which cannot fire in a process that the OS does not run (xref:../../up-l1/runtime.adoc#req-ssr-mode-bounded-startup[Setup never waits without a bound]).
 * *Whole process or partition.* The integrator *SHALL NOT* let a thread or interrupt handler that calls the element be terminated on its own.
 Where the supervisor restarts, the integrator *SHALL* have it restart as a whole the process, or on an MCU the partition or OS application partition, that holds the element's memory.
-* *Fresh initialization.* What a restart is and does, and what it needs from the process that died, is stated in xref:runtime-modes.adoc#req-ssr-mode-restart[A restart is an initialization] and xref:runtime-modes.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode].
+* *Fresh initialization.* What a restart is and does, and what it needs from the process that died, is stated in xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization] and xref:../../up-l1/runtime.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode].
 * *Reaction time.* Where the item relies on the restart or the safe state within a time, the integrator *SHALL* bound the whole chain, from the detection of the exit through the supervisor's decision and the restart or isolation to the physical safe state, against the allocated fault tolerant time interval, and *SHALL* argue the supervisor's own clock, resources and independence from the process it supervises; a supervisor that can share the failure it detects does not establish that bound.
 * *Strict states.* In the Report, Enforce and Locked states, the integrator *SHALL* declare the restart path, a supervisor or, on an MCU, a partition restart.
 What the compliance report shows of the restart path, declared or not, is stated in xref:build.adoc#req-ssr-strict-report[Strict mode reports on every run].
@@ -169,10 +169,10 @@ What the compliance report shows of the restart path, declared or not, is stated
 * Survivors see silence.
 It is *counted* as missed deadlines on routes that declare a deadline, as RPC calls ending with an error, or as a reported peer loss where the binding reports peers (xref:../up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
 On a route with no deadline, silence is *undetectable* by the element.
-* An application cannot go on with a transport whose setup was refused: the refusal leaves no runtime-mode value (xref:runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure]).
-* A fresh initialization on a startup memory that is sealed, or that finds too little startup memory left, is *refused at setup* (xref:startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed]; xref:runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure]).
+* An application cannot go on with a transport whose setup was refused: the refusal leaves no runtime-mode value (xref:../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]).
+* A fresh initialization on a startup memory that is sealed, or that finds too little startup memory left, is *refused at setup* (xref:../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]; xref:../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]).
 * An application that neither makes a fresh initialization nor exits is *undetectable* by the element.
-* The element provides no operation that recovers, in the process, a transport that has entered runtime mode, or a route or role of it (xref:runtime-modes.adoc#req-ssr-mode-one-way[There is no way back]); an attempt that builds a setup on sealed startup memory is *refused at setup* (xref:startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed]), and any other attempt by the application to recover such a transport, route or role in the process is *undetectable* by the element.
+* The element provides no operation that recovers, in the process, a transport that has entered runtime mode, or a route or role of it (xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]); an attempt that builds a setup on sealed startup memory is *refused at setup* (xref:../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]), and any other attempt by the application to recover such a transport, route or role in the process is *undetectable* by the element.
 * A startup that the OS never runs is *undetectable* by the element; only the supervisor's own timeout shows it.
 * What a thread terminated inside the element leaves behind depends on its configuration's exclusion mechanism (xref:platform.adoc#req-ssr-atomic-width[No target needs an atomic width it lacks]).
 ** Where the element changes its metadata in exclusive steps, the domain such a step holds stays held, and the work that needs it makes no further progress; survivors and the supervisor see silence, which a deadline or a call's TTL shows only where its own service can still run.
@@ -298,7 +298,7 @@ What setup admits and refuses for a route without a deadline is stated in xref:q
 * *Priority inversion through middleware locks.* A binding's middleware can hold a lock for up to a wait's bound.
 It can also take the lock when a frame is dropped, and no bound on acquiring the lock there is stated.
 The binding's qualification record states both (xref:../up-l1/bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]).
-What a frame drop does where returning its frame needs the lock is stated in xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] and xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
+What a frame drop does where returning its frame needs the lock is stated in xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] and xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
 A drop that itself waits for the lock is a failure of its binding against xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do], never a limit that a budget accepts.
 * *Watchdog and reuse.* Where a configuration keeps the narrowed generations of the narrowed 32-bit-word representation, whose windows the example after xref:platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window] lists, the integrator *SHALL* provide a watchdog that supervises every thread that calls the element, and detects one that makes no progress inside the element for longer than its period `+T_wd+`.
 The integrator *SHALL* keep `+T_wd+` times the highest reuse rate of any one call slot below 2^28^, and of any one peer-table entry below 2^22^.
@@ -306,14 +306,14 @@ The integrator *SHALL* keep `+T_wd+` times the highest reuse rate of any one cal
 The integrator *SHALL* have the watchdog also cover the wrap windows that remain: a stalled expiry of a call, or a stalled failure of a peer's older calls, that would end a later call early, and a stalled retirement of a peer entry that would act as a spurious peer loss.
 A configuration whose package documents full-width values in their place needs no watchdog for these windows.
 * *A producer that stalls.* Where the item relies within a time on a frame queued behind a producer that stalls before linking its own frame, the integrator *SHALL* provide a supervisor that bounds that stall.
-When such a frame is delivered is stated in xref:bounded-work.adoc#req-ssr-bound-work[Work per call is bounded by setup data].
-* *Retry loops.* What a lock-free retry in the element depends on is stated in xref:bounded-work.adoc#req-ssr-bound-work[Work per call is bounded by setup data].
+When such a frame is delivered is stated in xref:../../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data].
+* *Retry loops.* What a lock-free retry in the element depends on is stated in xref:../../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data].
 Its worst-case execution time under the configuration's interrupt load and contention belongs to the configuration's timing analysis.
 * *Deadline detection.* What a route's deadline D, its binding's declared arrival latency L and the bound J are, how soon a missed deadline is counted and visible where a configuration establishes J, and that no finite detection bound is established where no configuration establishes J, is stated in xref:qos.adoc#req-ssr-qos-deadline[Deadlines are monitored]; what a binding declares and reports of arrivals is stated in xref:../up-l1/bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is].
 The integrator *SHALL* budget for L and for J separately, and *SHALL* include in the route's reaction budget the delay of the application's later read, which lies outside J.
 * *The monitor's wait bound.* Where a route's monitor uses the one-word tick representation, the integrator *SHALL* keep each wait of a thread inside the element, between reading the clock and storing an arrival or a check, below 2^28^ ticks of the shortest-scaled monitored route: under the watchdog above, `+T_wd+` below 0.27 s when a route uses the shortest admitted threshold (1.024 µs), and below 2.3 minutes at 1 ms. A full-width monitor has no such bound (xref:platform.adoc#req-ssr-atomic-windows[Every narrowed value states its window]).
 
-How the element bounds its work per call, in frames and iterations, is stated in xref:bounded-work.adoc#req-ssr-bound-work[Work per call is bounded by setup data].
+How the element bounds its work per call, in frames and iterations, is stated in xref:../../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data].
 Execution time belongs to a supported configuration's timing analysis, which the element's supplier provides with the package; a measured maximum is evidence that can refute that analysis, not a bound by itself.
 
 In the Report, Enforce and Locked states, the integrator *SHALL* declare a deadline or an explicit `+event_only()+` for each ASIL receive route other than a detector route of the E2E wire and, at every integrity level, for each RPC client's response route that selects the E2E wire.
@@ -360,17 +360,17 @@ The integrator *SHALL* provide a platform that supplies a monotonic clock and a 
 * *Wall time.* UUIDv7 message IDs and TTL are defined in wall time.
 The integrator *SHALL NOT* let uptime stand in for wall time.
 On a target without a synchronized wall clock, the integrator *SHALL* supply one through the target's time provider, under the same contract.
-What setup refuses where none is supplied is stated in xref:runtime-modes.adoc#req-ssr-mode-entry-clock[The wall clock is read before runtime mode].
+What setup refuses where none is supplied is stated in xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-clock[The wall clock is read before runtime mode].
 * *RPC requests.* The TTL bound on an RPC request (xref:../up-l2/interaction.adoc#req-ssr-peer-rpc-ends[RPC calls always end]) holds only while the client's and the server's wall clocks agree within the TTL.
 * *Strict states.* What the compliance report shows of the wall clock at setup, and of a time-sync source where one is declared, is stated in xref:build.adoc#req-ssr-strict-report[Strict mode reports on every run].
 --
 
 *Violation:*
 
-* A wall clock that cannot be read at the transition, and a time provider that fails its setup check, are *refused at setup* (xref:runtime-modes.adoc#req-ssr-mode-entry-clock[The wall clock is read before runtime mode]).
+* A wall clock that cannot be read at the transition, and a time provider that fails its setup check, are *refused at setup* (xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-clock[The wall clock is read before runtime mode]).
 * A wall clock that cannot be read in runtime mode is *counted*: a frame whose TTL is greater than 0 is refused (xref:qos.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
 * A wall clock that reads but is wrong makes frames whose TTL is greater than 0 expire early or late.
-The element sees it only where xref:runtime-modes.adoc#req-ssr-mode-entry-clock[The wall clock is read before runtime mode] has setup fail a provider known to supply uptime or a fixed value as wall time, and where xref:build.adoc#req-ssr-strict-report[Strict mode reports on every run] warns of a wall clock that reads earlier than the element's release date; otherwise it is *undetectable* by the element.
+The element sees it only where xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-clock[The wall clock is read before runtime mode] has setup fail a provider known to supply uptime or a fixed value as wall time, and where xref:build.adoc#req-ssr-strict-report[Strict mode reports on every run] warns of a wall clock that reads earlier than the element's release date; otherwise it is *undetectable* by the element.
 * A monotonic read that fails, or that reads earlier than one already held, is treated as failed: a bounded operation that depends on it ends as expired and is *counted* (xref:platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules]); a monotonic clock that reads but runs at the wrong rate is *undetectable* by the element.
 * For a generator with a 32-bit sequence, a wall clock that reads but does not move makes ID generation refuse, and count, after 2^31^ IDs within one 64 ms bucket (xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]); its effect on expiry is still *undetectable* by the element.
 * For such a generator, a wall clock set more than ±4.36 years from its reading when the route was set up, as a clock that starts at zero is by its first time sync, leaves IDs from good reads unaffected, and makes an ID needed while the clock cannot be read refused and *counted* (xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]).
@@ -385,7 +385,7 @@ ASIL:: B
 A readable wall clock can be incorrect, and an incorrect one can make both expiration and correlation misleading.
 
 A provider that reported uptime as wall time would pass every read while making each TTL decision wrong.
-So setup refuses a provider known to make that substitution (xref:runtime-modes.adoc#req-ssr-mode-entry-clock[The wall clock is read before runtime mode]).
+So setup refuses a provider known to make that substitution (xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-clock[The wall clock is read before runtime mode]).
 
 A clock call can fail after initialization succeeded.
 So its failure is handled, fail-closed.
@@ -435,29 +435,29 @@ Which permit a binding ships, and what a failed allocation under it does, are th
 [.specitem,oft-sid="aou~seooc-resource-guarantees~2",oft-title="A resource guarantee the item relies on is required by name",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
 *Owning wires.*
-Where a serialized route declares its allocation (xref:heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), the integrator need supply nothing further for the ownership of a wire that decodes into values that own what they hold, heap memory included.
-What setup admits there is stated in xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], "Ordinary ownership", and xref:heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "Routes that declare allocation".
-That declaration admits allocation on that route only: what holds on a native route is stated in xref:heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path].
+Where a serialized route declares its allocation (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), the integrator need supply nothing further for the ownership of a wire that decodes into values that own what they hold, heap memory included.
+What setup admits there is stated in xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], "Ordinary ownership", and xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "Routes that declare allocation".
+That declaration admits allocation on that route only: what holds on a native route is stated in xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path].
 
 *Requiring a guarantee.*
-Where the item, in ISO 26262's sense, relies on panic-free cleanup, non-waiting acquisition, non-waiting release or recoverable exhaustion on such a route, the integrator *SHALL* require that guarantee in the route's declaration, and *SHALL* use a supported configuration whose package establishes it for the exact type, wires, binding and allocation provider (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; what an allocation provider is, is stated in xref:../../sdk/owned-frame/providers.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing]).
+Where the item, in ISO 26262's sense, relies on panic-free cleanup, non-waiting acquisition, non-waiting release or recoverable exhaustion on such a route, the integrator *SHALL* require that guarantee in the route's declaration, and *SHALL* use a supported configuration whose package establishes it for the exact type, wires, binding and allocation provider (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; what an allocation provider is, is stated in xref:../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing]).
 
 *A guarantee that is not required.*
-What a route that does not require a guarantee is promised, and what its report shows of that guarantee, is stated in xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
+What a route that does not require a guarantee is promised, and what its report shows of that guarantee, is stated in xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
 --
 
 *Violation:*
 
-* A route that requires a stronger resource guarantee that is not established for it is *refused at setup*, by name (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+* A route that requires a stronger resource guarantee that is not established for it is *refused at setup*, by name (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 * A guarantee that the item relies on and no route requires is not admitted, even where evidence establishes it.
-That is *undetectable* by the element, whose report shows the guarantee as not required and not admitted (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+That is *undetectable* by the element, whose report shows the guarantee as not required and not admitted (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 
 [horizontal]
 ID:: `+aou~seooc-resource-guarantees~2+`
 ASIL:: B
 
 *Rationale.*
-The element admits owning wires under ordinary ownership and gives a stronger resource guarantee only where a route requires it (xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+The element admits owning wires under ordinary ownership and gives a stronger resource guarantee only where a route requires it (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 An item that relies on such a guarantee therefore has to ask for it.
 
 [[aou-seooc-e2e-protection]]
@@ -471,7 +471,7 @@ The integrator *SHALL* decide which routes carry data that needs end-to-end prot
 * *Above ASIL B.* The decomposition and interference duties of <<aou-seooc-capability-ceiling,Data above ASIL B relies on measures outside the element>> cover data above ASIL B that relies on such protection.
 * *Other duties stay.* Selecting end-to-end protection for a route releases the element, a binding, a wire and the Streamer from no requirement that binds them on that route, and the integrator from no other assumption of use.
 A rule is replaced for such a route only where an item says so as an explicit replacement (xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
-The RPC correlation, TTL, ownership, and refusal and error handling that hold on every route, protected or not, are stated in xref:../up-l2/interaction.adoc#req-ssr-peer-rpc-correlation[A response reaches only its own call], xref:qos.adoc#req-ssr-qos-ttl[Expired messages are not processed], xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap] and xref:errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once].
+The RPC correlation, TTL, ownership, and refusal and error handling that hold on every route, protected or not, are stated in xref:../up-l2/interaction.adoc#req-ssr-peer-rpc-correlation[A response reaches only its own call], xref:qos.adoc#req-ssr-qos-ttl[Expired messages are not processed], xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap] and xref:errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once].
 Message IDs are not authentication (xref:../up-l1/deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]).
 * *What the element requires.* Whether the element requires end-to-end protection on a route is stated in xref:e2e-wire.adoc#req-ssr-e2e-not-required[The element requires end-to-end protection on no route, outside strict mode's black-channel rule].
 * *Strict states.* In the Report, Enforce and Locked states, for each ASIL route over a transport that the integrator classifies as a black channel, the integrator *SHALL* name its own protection in the route's declaration, or select the E2E wire for the route.
@@ -719,7 +719,7 @@ The data covers:
 
 The integrator *SHALL* protect the data against unintended change between release and use, and deliver the Streamer's deployment data with an integrity code over its content (xref:../up-l2/streamer.adoc#req-ssr-streamer-config-integrity[The deployment data is checked before it is applied]).
 
-The integrator *SHALL* declare, in the deployment data applied at startup, every peer on whose participation the deployment relies (xref:runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]): adding an RPC client on a lending transport means restarting the server with new deployment data.
+The integrator *SHALL* declare, in the deployment data applied at startup, every peer on whose participation the deployment relies (xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]): adding an RPC client on a lending transport means restarting the server with new deployment data.
 What the element does with a frame from a peer that is not declared, and what the compliance report says of a route that admits such peers, is stated in xref:../up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones] and xref:build.adoc#req-ssr-strict-report[Strict mode reports on every run].
 
 The integrator *SHALL* agree a native route only between binaries that use the element, and *SHALL NOT* use a native type of size zero or an untagged union across a boundary to an ABI that is not Rust's (xref:../up-l1/native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout], "Only between binaries that use the element").
@@ -757,16 +757,16 @@ A deployment on that binding produces, verifies and protects it like the rest of
 --
 The integrator *SHALL* declare the worst-case semantic load of the item, in ISO 26262's sense, for each route: its traffic, payload and token sizes, retention, peers and calls in flight.
 
-* *What the element computes.* What the element computes from those declarations, what each figure measures, and how setup checks the figures, is stated in xref:startup-memory.adoc#req-ssr-memory-computable[Startup storage is computable before start] and xref:runtime-modes.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode].
+* *What the element computes.* What the element computes from those declarations, what each figure measures, and how setup checks the figures, is stated in xref:../../basics/resources.adoc#req-ssr-memory-computable[Startup storage is computable before start] and xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode].
 The integrator need not derive the element's internal sizes, and the supported configuration's package states the sizes that depend on its scheduler, allocator or stacks.
-* *Exhaustion.* What exhaustion is in runtime mode, and what fixed capacity promises while a release is still pending, is stated in xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap] and xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
+* *Exhaustion.* What exhaustion is in runtime mode, and what fixed capacity promises while a release is still pending, is stated in xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap] and xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
 The integrator *SHALL* determine whether the item tolerates a refusal on exhaustion, and *SHALL* argue it for the item.
 * *Strict states.* What the compliance report lists of the startup memory that each setup computes, and of every route's capacities, is stated in xref:build.adoc#req-ssr-strict-report[Strict mode reports on every run].
 --
 
 *Violation:*
 
-* Capacity that cannot be reserved is *refused at setup* (xref:runtime-modes.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode]).
+* Capacity that cannot be reserved is *refused at setup* (xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode]).
 * Exhaustion in runtime mode is *counted* or returned as an error (xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]).
 * Exhaustion that the item cannot tolerate is *undetectable* by the element, and so is a declared load below the item's real one.
 
@@ -779,7 +779,7 @@ ISO 26262:: 6-7.4.13 (part-clause numbers only)
 Every capacity is fixed at setup, and in runtime mode a full one returns an error instead of growing (xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]).
 So only the integrator, who knows the item's load, can say what it must carry.
 
-The element knows its own layout, so it computes the sizes that the declared load needs (xref:startup-memory.adoc#req-ssr-memory-computable[Startup storage is computable before start]).
+The element knows its own layout, so it computes the sizes that the declared load needs (xref:../../basics/resources.adoc#req-ssr-memory-computable[Startup storage is computable before start]).
 
 [[aou-seooc-startup-storage]]
 == Startup storage that the integrator provides is exclusive and lives as long as the process
@@ -788,7 +788,7 @@ The element knows its own layout, so it computes the sizes that the declared loa
 --
 Where the integrator provides the element with static or caller-provided memory for its startup storage, the integrator *SHALL* hand each region to the element exclusively, and *SHALL* keep the region valid, and unused by anything else, for the life of the process.
 
-What the element checks of each region, and how it places from it and owns it, is stated in xref:startup-memory.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided].
+What the element checks of each region, and how it places from it and owns it, is stated in xref:../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided].
 --
 
 *Violation:*
@@ -800,7 +800,7 @@ ID:: `+aou~seooc-startup-storage~1+`
 ASIL:: B
 
 *Rationale.*
-The element can check that a placement lies within its region, is aligned and sized for its object, and is held by no live object of its own (xref:startup-memory.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]).
+The element can check that a placement lies within its region, is aligned and sized for its object, and is held by no live object of its own (xref:../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]).
 It cannot see whether another owner uses the same memory, or how long that memory lives.
 
 [[aou-seooc-application-reacts]]
@@ -810,7 +810,7 @@ It cannot see whether another owner uses the same memory, or how long that memor
 --
 The application *SHALL* handle every error the element returns, and read the counters it relies on, within its own fault reaction time.
 
-* *What the element reports.* What the element reports of the refusals and losses it can see, and what it declares of a loss it cannot see, is stated in xref:errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once], xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap] and xref:runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure].
+* *What the element reports.* What the element reports of the refusals and losses it can see, and what it declares of a loss it cannot see, is stated in xref:errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once], xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap] and xref:../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure].
 For losses the element cannot see, and for silence, the application *SHALL* use available deadline and end-to-end observations only within their declared detection limits; neither promises to detect every hidden loss.
 * *Shared routes, and routes without a deadline.* Another peer can keep a shared route's aggregate deadline refreshed while one peer is starved, so required peer-specific progress detection follows <<aou-seooc-peer-rates,Peer rates on shared routes are the integrator's>>. A route without a deadline, including an explicit `+event_only()+` route, supplies no deadline-based silence or delay detection.
 * *The item's reaction.* The element does not decide the reaction of the item, in ISO 26262's sense.
@@ -874,7 +874,7 @@ What the Enforce and Locked states refuse without it, and what the compliance re
 
 *Violation:*
 
-* A breach of the platform's rules is *undetectable* by the element, except where xref:platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules], xref:platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source] and xref:runtime-modes.adoc#req-ssr-mode-entry-clock[The wall clock is read before runtime mode] have the element check: a clock read that reports its failure, a monotonic reading earlier than one already held, an entropy read that fails or a source that the setup check finds short of its stated contract, and the time provider's setup check.
+* A breach of the platform's rules is *undetectable* by the element, except where xref:platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules], xref:platform.adoc#req-ssr-platform-entropy[Initialization entropy comes from a declared source] and xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-clock[The wall clock is read before runtime mode] have the element check: a clock read that reports its failure, a monotonic reading earlier than one already held, an entropy read that fails or a source that the setup check finds short of its stated contract, and the time provider's setup check.
 * Entropy that repeats across starts more often than its stated contract allows is *undetectable* by the element.
 On a route that selects the E2E wire, two incarnations can then be equal at a restart: the wire judges the new incarnation's frames by their counters, as frames of the old one (xref:e2e-wire.adoc#req-ssr-e2e-detects[The E2E wire detects each fault]; xref:e2e-wire.adoc#req-ssr-e2e-replay-window[A sliding window judges a reference's counters]), and each refusal is *counted* by its kind (xref:e2e-wire.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once]).
 Message IDs can also repeat across restarts (xref:../up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]).
@@ -932,22 +932,22 @@ The Streamer's own order is stated in xref:../up-l2/streamer.adoc#req-ssr-stream
 
 An application *SHALL NOT* keep alive a setup that never enters runtime mode: it *SHALL* enter each setup that it builds, or end it before `+enter_runtime_all+` returns, by releasing it during initialization or by exiting so that the supervisor restarts the process (<<aou-seooc-supervisor-restart,A supervisor outside the process restarts it>>).
 
-What `+enter_runtime_all+` reports of a setup that is still alive and has not entered runtime mode is stated in xref:startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed].
+What `+enter_runtime_all+` reports of a setup that is still alive and has not entered runtime mode is stated in xref:../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed].
 What the Enforce and Locked states refuse for such a setup is stated in xref:build.adoc#req-ssr-strict-rules[The rules that strict mode checks], and what the Streamer's startup report names of a startup refused for it, in xref:../up-l2/streamer.adoc#req-ssr-streamer-startup-report[The startup report says what will run].
 --
 
 *Violation:*
 
-* A setup built afterwards on that memory is *refused at setup* (xref:startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
-* A setup still alive and not entered when `+enter_runtime_all+` returns is reported then (xref:startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed]), and is *refused at setup* in the Enforce and Locked states, and reported as a finding in the Report state (xref:build.adoc#req-ssr-strict-rules[The rules that strict mode checks]); without `+enter_runtime_all+` it is *undetectable* by the element.
+* A setup built afterwards on that memory is *refused at setup* (xref:../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
+* A setup still alive and not entered when `+enter_runtime_all+` returns is reported then (xref:../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]), and is *refused at setup* in the Enforce and Locked states, and reported as a finding in the Report state (xref:build.adoc#req-ssr-strict-rules[The rules that strict mode checks]); without `+enter_runtime_all+` it is *undetectable* by the element.
 
 [horizontal]
 ID:: `+aou~seooc-build-order~4+`
 ASIL:: B
 
 *Rationale.*
-Once a transport is in runtime mode, nothing more can be set up through it (xref:runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
-A startup memory is sealed when the last live setup that uses it enters runtime mode, and in any case when `+enter_runtime_all+` returns (xref:startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
+Once a transport is in runtime mode, nothing more can be set up through it (xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
+A startup memory is sealed when the last live setup that uses it enters runtime mode, and in any case when `+enter_runtime_all+` returns (xref:../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
 
 A setup that never enters runtime mode keeps its claim.
 So, unless `+enter_runtime_all+` returns, the memory is never sealed, and nothing that rests on the seal holds.

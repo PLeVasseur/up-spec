@@ -1,0 +1,198 @@
+= uP-L1 payload paths
+:toc: preamble
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
+
+[NOTE]
+====
+This page holds payload-path items from two distinct contract families, whose binding and reading rules are stated in xref:../contract-generations.adoc[Which requirements an implementation follows]:
+
+* `+req~ssr-*+` items belong to the up-rust SEooC requirement family (`Safety*` tags, with `ASIL::` where stated) and bind the actors named in each item's statement (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
+* `+req~sdk-owned-frame-*+` items belong to the owned-frame SDK contract (`OwnedFrame*` tags, with no ASIL) and bind only parts whose declaration names the owned-frame SDK contract for the offerings they make (xref:../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it]).
+
+Shared ownership, heap classes and stronger resource guarantees are stated in xref:../basics/ownership.adoc[frame and value ownership] and xref:../basics/resources.adoc[shared resource lifecycle and storage].
+The remaining payload-path items currently in xref:../safety/up-l1/payload-paths.adoc[uP-L1 payload-path rules] join this page in a later relocation commit.
+====
+
+== Native and serialized runtime heap boundaries
+
+[[req-ssr-heap-none]]
+=== No heap in runtime mode on a native path
+
+[.specitem,oft-sid="req~ssr-heap-none~4",oft-title="No heap in runtime mode on a native path",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyWire"]
+--
+*Native paths.*
+In runtime mode, no part acquires or releases heap memory on a path that a native payload operation causes, except for the middleware allocation covered by "Named middleware allocation" below, and each part answers for its own work on such a path:
+
+* element code *MUST NOT* acquire or release heap memory on it;
+* each wire that the native route uses declares a heap class of none in each direction that the route uses, and answers for that claim in all its work there, as xref:../safety/up-l1/wires.adoc#req-ssr-wire-heap-claim-tested[A heap-free claim is true, and encoding is repeatable] states;
+* each binding's code keeps the same rule, as xref:../safety/up-l1/bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] states;
+* the element applies the native-route refusal of xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], and, for allocation inside a binding's middleware under a named permit, the transition check of xref:../safety/seooc-up-rust/waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
+
+What an allocation provider is, is stated in xref:../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing].
+The rule follows the cause, whichever part's code does the work: it reaches the work that the operation causes on another thread or at a later time as well.
+
+*Named middleware allocation.*
+Allocation inside a binding's middleware is an exception to this item's general native-path prohibition only for the operations and bound of a named permit that a matching named waiver admits, within the scope of xref:../safety/seooc-up-rust/waivers.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
+This exception does not apply to a native lease drop, frame return or other native release operation, retirement and deferred release included (xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../safety/up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+It replaces no other requirement on an operation.
+What the binding declares and what a permit establishes are stated in xref:../safety/up-l1/bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path], under "Middleware".
+
+*Every other path.*
+In runtime mode, element code *MUST NOT* acquire or release heap memory on any other path, except as a serialized route's declared heap class permits and setup admits (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
+
+*What the native rule covers.*
+The native rule covers:
+
+* traffic;
+* refusals and error returns;
+* cancellation;
+* lease drops, retirement and deferred release;
+* waits and wake-ups;
+* deadline service;
+* a peer dying and a peer restarting;
+* the wire, binding and control work that these cause, in whichever part's code it runs.
+
+The element and each wire *MUST* keep the native rule in work that a native route shares with a serialized one.
+
+*What counts as heap use.*
+
+* A free counts as heap use.
+* General allocator activity inside a region obtained at startup counts as heap use.
+* Returning a fixed pool slot is not heap use.
+
+*Serialized routes.*
+A route is native or serialized, as its wire decides (xref:../safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]).
+On a serialized route whose declared class admits allocation, the element *MUST* confine heap use to two kinds:
+
+* an acquisition at an allocation point that the class names, made only after the operation's refusals that can come first (xref:../safety/seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]);
+* the release, exactly once, of what such an acquisition produced, when the ownership it created ends, by whichever transition ends it (xref:runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
+
+The element *MUST NOT* acquire or release anything in deciding, reporting or counting any outcome.
+The element *MUST NOT* let such a release release a route, role, table, startup region or other runtime resource, or revoke an owner.
+
+*What a declaration does not reach.*
+A declaration makes a route's allocation visible.
+It admits the route's ordinary ownership, and it establishes nothing more:
+
+* It excuses no lazy first-use initialization (xref:../basics/resources.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]).
+* It does not reach a native operation, the work one causes or the work a native route shares.
+* It does not reach an operation that its own item requires to use no heap on every route, such as the generation of a message ID (xref:../safety/up-l2/interaction.adoc#req-ssr-ids-unique[Message IDs are unique]) or the acquisition, copy and validation of an integrity copy route (xref:../safety/up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
+* It relaxes no duty of element code, which keeps xref:../safety/seooc-up-rust/errors.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data] and xref:runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] on every route.
+* What it establishes of the stronger guarantees, and what a route's report shows of them, is stated in xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
+
+*When the rules apply.*
+These rules bind each transport from its own transition.
+--
+
+[horizontal]
+ID:: `+req~ssr-heap-none~4+`
+ASIL:: B
+Allocated to:: the element; each wire, in work that a native route shares with a serialized one
+Verification:: heap-window, review, gate
+* *heap-window*
+** Over native traffic, sending and receiving, with refusals and error returns, cancellation, lease drops and a frame's return, retirement and deferred release, waits and wake-ups, deadline service, and the wire, binding and control work that these cause; middleware allocation admitted by a matching waiver reported apart by permit and operation, with no heap acquisition or release in a native lease drop, frame return or other native release operation, retirement and deferred release included.
+** Over native traffic while a peer dies and while a peer restarts, with middleware allocation admitted by a matching waiver reported apart by permit and operation, and native release work still acquiring and releasing no heap.
+** Over work that a native route shares with a serialized one, while the serialized route allocates under its declared class.
+** On a serialized route, its declared allocation and the release of what it admitted, including each release that a release service performs, are reported.
+** On a serialized route, no heap use in deciding, reporting or counting any outcome, a refusal, a discard and a peer's failure among them.
+* *review*: no general allocator activity in element code on any runtime path, inside a region obtained at startup included, beyond what a serialized route's declared class permits and setup admits.
+* *gate*: the crate builds without `+alloc+`.
+ISO 26262:: 6-Table 6 1b (part-clause numbers only)
+
+*Rationale.*
+Taking or returning heap memory while traffic flows could crash the process or corrupt the memory that runtime traffic relies on.
+Runtime mode works instead in startup memory, placed during initialization and not released in runtime mode.
+
+The rule follows what a native operation causes, because heap use in a wire's work, in a binding's code or in shared control work harms the same process as heap use in element code.
+
+Ending an owned value is the only release a serialized route makes.
+Every transition that can end one uses that one rule: a release, a refusal, an overflow, a cancellation, an expiry or a peer's failure.
+So no transition needs heap of its own (xref:../safety/seooc-up-rust/errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; xref:../safety/seooc-up-rust/qos.adoc#req-ssr-qos-overflow[Overflow acts as declared]; xref:../safety/up-l1/peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
+
+An allocator working inside a pre-obtained region still allocates and frees, so the backing region's origin does not make it admissible on a native path.
+
+_What a declaration is._
+A declaration is a truthful statement of the route's heap use.
+Owning a value is ordinary for a serialized wire.
+So a declaring route is admitted without evidence that its cleanup cannot panic or wait.
+Requiring that would refuse ordinary communication for want of evidence of a guarantee that the route does not require.
+What a route needs beyond its declaration it requires by name, and it is then admitted on evidence or refused (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+
+== Crossings between classic APIs and owned-frame routes
+
+[[req-sdk-owned-frame-adapter]]
+=== An adapter keeps a message whole across a crossing, or refuses it by name
+
+[.specitem,oft-sid="req~sdk-owned-frame-adapter~1",oft-title="An adapter keeps a message whole across a crossing, or refuses it by name",oft-needs="impl,utest,uman",oft-tags="OwnedFrameSdk"]
+--
+*An adapter, a crossing.*
+An adapter is a part that carries a message between a classic API and an owned-frame route.
+A crossing is one such carriage, in one direction.
+
+*What it states.*
+An adapter *MUST* state, in the documentation that is released with it, each crossing that it supports: its direction, the routes and messages that it accepts, each copy and each allocation that it makes, and who owns each value afterwards.
+
+*Exact.*
+In each crossing that it supports, an adapter *MUST* keep all five of these properties:
+
+* _Identity._
+The value of each attribute of the message, whether a payload is present, and a present payload's bytes and encoding identifier arrive as they were given.
+No attribute value is changed, defaulted or dropped, and the payload is neither decoded, re-encoded, converted nor truncated.
+* _Ownership._
+Each value has one owner at a time.
+On success, what the adapter took passes to the new owner that the adapter states for the crossing, or the adapter ends it exactly once.
+* _Lifetime._
+Nothing that one side receives refers to storage of the other side beyond its owner's hold.
+* _Allocation._
+The crossing makes only the copies and allocations that the adapter states.
+It changes neither the form, the heap class nor a guarantee of the owned-frame route (xref:../safety/up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]; xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
+* _Errors._
+The caller gets, for each outcome, a result that states that outcome.
+A refusal stays a refusal with its cause, and a loss or a partial delivery is not reported as delivery (xref:../safety/seooc-up-rust/errors.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+
+*Or refused.*
+An adapter *MUST* refuse each of these crossings, with a result that names the adapter's refusal and its reason:
+
+* a crossing that it does not support;
+* a crossing to or from a native route;
+* a crossing that would need a payload decoded, re-encoded or converted;
+* a crossing that it cannot make while keeping all five properties.
+
+The adapter *MUST* leave a message whose crossing it refuses owned by the side that gave it.
+The adapter *MUST NOT* complete a crossing in a weaker form.
+
+*Local handles.*
+A loan, a lease, a retained frame or another handle that owns or borrows storage of an owned-frame route is a local ownership interface.
+An adapter *MUST NOT* pass one to a classic API as a message or inside one.
+An adapter *MUST NOT* build a classic message that borrows such storage.
+A crossing from a frame of an owned-frame route to a classic message is a stated copy into storage that the classic message owns, or it is refused.
+
+*Waiting.*
+Which operations an adapter may offer as a nonblocking attempt or as a progress step: xref:../sdk/owned-frame/application.adoc#req-sdk-owned-frame-operation-kinds[Each message operation is a nonblocking attempt, a bounded wait or asynchronous, and none hides a wait].
+--
+
+[horizontal]
+ID:: `+req~sdk-owned-frame-adapter~1+`
+Allocated to:: each adapter
+Verification:: test, compile-fail, review
+* *test*
+** Identity: for each crossing that the adapter states, in each direction, the value of each attribute, the payload bytes, the encoding identifier and whether a payload is present arrive as given, a present empty payload and an absent payload included.
+** Ownership: each value owned by one owner at a time; on success, each value that the adapter takes passed to the new owner that it states for the crossing or ended once, counted by a test double.
+** Lifetime: nothing that one side receives refers to the other side's storage once its owner's hold ends.
+** Allocation: the copies and allocations of each crossing, counted, against those that the adapter states, with the route's form, heap class and guarantees unchanged.
+** Errors: a refusal, a loss and a partial delivery on one side, each reaching the caller as that outcome, with its cause.
+** A crossing that the adapter does not support, a crossing to and one from a native route, crossings that would need the payload decoded, re-encoded or converted, and one that the adapter cannot make while keeping all five properties: each refused with a result that names the adapter's refusal and its reason, the message still owned by the side that gave it, and no crossing completed in a weaker form.
+* *compile-fail*: a loan, a lease and a retained frame, each where a classic message is required.
+* *review*
+** The documentation released with the adapter, against each crossing that it supports.
+** Each path from a frame of an owned-frame route to a classic message: a stated copy into storage that the classic message owns, or a refusal, and no classic message that borrows storage of an owned-frame route.
+
+*Rationale.*
+An application that moves a message between a classic API and an owned-frame route needs the same message on the other side, owned once, and valid for as long as it is held.
+A classic message and a frame of an owned-frame route carry the attributes in different forms, so what has to arrive unchanged is each attribute's value.
+A crossing that changed an attribute, re-encoded a payload or reported a loss as a delivery would make the two APIs disagree about one message, unseen by either side.
+A classic message carries no agreement on a native layout, so a native payload in one could be read where no such agreement holds (xref:../safety/up-l1/native-wire.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]).
+A loan or a lease owns storage of a route only while its holder keeps it, and a classic message owns what it holds.
+So a handle inside a classic message would outlive the storage that it refers to.
+A refusal by name tells the application which crossing to change, where a weaker crossing would hide the difference.

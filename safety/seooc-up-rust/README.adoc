@@ -107,7 +107,7 @@ What ordinary use is, and what holds for it, is stated in xref:assumptions-of-us
 A supported configuration package is a versioned package that states a configuration's platform backend, its synchronization and execution model, startup checks, sizing, supported contexts, build settings, dependency scope, evidence and limitations.
 A supported configuration is one for which the element's supplier provides such a package.
 The package is released with the element, and a configuration that has none is not a supported configuration.
-In each supported configuration package that it provides, the element's supplier *MUST* state each size on which the configuration's sizing relies and that the element's own computation does not give, such as the storage of a scheduler's tasks and timers, an allocator's overhead and each thread's stack, and *MUST* name each such size that the package does not establish (xref:startup-memory.adoc#req-ssr-memory-computable[Startup storage is computable before start]).
+In each supported configuration package that it provides, the element's supplier *MUST* state each size on which the configuration's sizing relies and that the element's own computation does not give, such as the storage of a scheduler's tasks and timers, an allocator's overhead and each thread's stack, and *MUST* name each such size that the package does not establish (xref:../../basics/resources.adoc#req-ssr-memory-computable[Startup storage is computable before start]).
 A platform profile is a class of target, an operating system or a bare-metal environment with an architecture, that a supported configuration package names.
 
 *The deployment profile.*
@@ -152,7 +152,7 @@ The entries below point at the items that govern some of it.
 
 How the classic contract of the protocol chapters and the items of this area meet: xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
 What keeps a classic route out of runtime mode: xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode].
-How the classic APIs stand beside owned-frame routes, and what an adapter between them keeps or refuses: xref:../../contract-generations.adoc#req-sdk-owned-frame-classic-apis[The classic APIs keep their contract beside owned-frame routes]; xref:../../sdk/owned-frame/README.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name].
+How the classic APIs stand beside owned-frame routes, and what an adapter between them keeps or refuses: xref:../../contract-generations.adoc#req-sdk-owned-frame-classic-apis[The classic APIs keep their contract beside owned-frame routes]; xref:../../up-l1/payload-paths.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name].
 
 === Asynchronous layers
 
@@ -190,13 +190,13 @@ Which bindings and wires an integrator uses: xref:../up-l1/deployment.adoc#aou-s
 == Claims
 
 Kinds of claim, and what a claim covers: xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
-The items that state what a route offers, requires and reports: xref:qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]; xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path].
+The items that state what a route offers, requires and reports: xref:qos.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]; xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path].
 
 === Ordinary ownership and stronger resource guarantees
 
 NOTE: Most wire formats decode into values that own what they hold.
 
-What a route declares, what it may require, and what is admitted or refused: xref:heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default] and xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
+What a route declares, what it may require, and what is admitted or refused: xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default] and xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
 
 === Supported configuration packages
 
@@ -214,16 +214,16 @@ It is not a safety case, an assessment or a certificate.
 
 A transport has two modes, initialization and runtime, and one transition between them.
 
-* *The modes and the transition*: xref:runtime-modes.adoc#req-ssr-mode-two-types[Two modes, as two types]; xref:runtime-modes.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]; xref:runtime-modes.adoc#req-ssr-mode-one-way[There is no way back]; xref:runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure].
-What a process in runtime mode is, and the three things for which the term is used, are stated in xref:runtime-modes.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation].
-The operations that make the transition are named in xref:runtime-modes.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation], clause "One operation".
-* *What initialization prepares*: xref:runtime-modes.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode]; xref:startup-memory.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]; xref:startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed]; xref:heap.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]; xref:../up-l1/bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization].
-* *What runtime mode allows*: xref:heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:release.adoc#req-ssr-release-none[Nothing is released in runtime mode]; xref:release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap].
+* *The modes and the transition*: xref:../../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types]; xref:../../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]; xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]; xref:../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure].
+What a process in runtime mode is, and the three things for which the term is used, are stated in xref:../../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation].
+The operations that make the transition are named in xref:../../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation], clause "One operation".
+* *What initialization prepares*: xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode]; xref:../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]; xref:../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]; xref:../../basics/resources.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]; xref:../up-l1/bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization].
+* *What runtime mode allows*: xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../../up-l1/runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:errors.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap].
 
 === One-way runtime and external restart
 
-* *How a process leaves runtime mode, and what restarts it*: xref:runtime-modes.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode]; xref:runtime-modes.adoc#req-ssr-mode-restart[A restart is an initialization]; xref:assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it].
-* *No degraded mode*: that there is none, and what the element does not do after an event on one route, are stated in xref:runtime-modes.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode], clause "No degraded mode".
+* *How a process leaves runtime mode, and what restarts it*: xref:../../up-l1/runtime.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode]; xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]; xref:assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it].
+* *No degraded mode*: that there is none, and what the element does not do after an event on one route, are stated in xref:../../up-l1/runtime.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode], clause "No degraded mode".
 For the Streamer: xref:../up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route] and xref:../up-l2/streamer.adoc#req-ssr-streamer-mode-report[The Streamer reports degraded].
 
 == Interfaces at the boundary
@@ -353,12 +353,12 @@ The test then runs on a 32-bit target, with the current stable compiler and with
 
 | This page | 3 | `SafetyUpRustCore`, `SafetyStreamer`, `SafetyBinding`, `SafetyWire`
 | xref:assumptions-of-use.adoc[Assumptions of use] | 19 | `SafetyManual`
-| xref:runtime-modes.adoc[Modes and the transition] | 14 | `SafetyUpRustCore`, `SafetyStreamer`, `SafetyBinding`
-| xref:heap.adoc[Heap] | 5 | `SafetyUpRustCore`, `SafetyBinding`, `SafetyWire`
+| xref:../../up-l1/runtime.adoc[Modes and the transition] | 14 | `SafetyUpRustCore`, `SafetyStreamer`, `SafetyBinding`
+| xref:../../basics/resources.adoc[Heap and startup memory] | 5 | `SafetyUpRustCore`, `SafetyBinding`, `SafetyWire`
 | xref:errors.adoc[Refusal, errors and reporting] | 5 | `SafetyUpRustCore`
-| xref:bounded-work.adoc[Bounded work and waiting] | 3 | `SafetyUpRustCore`
-| xref:release.adoc[Release and drop] | 3 | `SafetyUpRustCore`, `SafetyStreamer`, `SafetyBinding`
-| xref:startup-memory.adoc[Startup memory] | 3 | `SafetyUpRustCore`, `SafetyStreamer`
+| xref:../../up-l1/runtime.adoc[Bounded work and waiting] | 3 | `SafetyUpRustCore`
+| xref:../../up-l1/runtime.adoc[Release and drop] | 3 | `SafetyUpRustCore`, `SafetyStreamer`, `SafetyBinding`
+| xref:../../basics/resources.adoc[Startup memory] | 3 | `SafetyUpRustCore`, `SafetyStreamer`
 | xref:qos.adoc[QoS, TTL and deadlines] | 7 | `SafetyUpRustCore`, `SafetyBinding`
 | xref:waivers.adoc[Waivers] | 3 | `SafetyUpRustCore`
 | xref:crate-isolation.adoc[Crate isolation] | 4 | `SafetyUpRustCore`, `SafetyStreamer`

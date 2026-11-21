@@ -73,10 +73,10 @@ and the requirements of other pages that give the Streamer or the Streamer binar
 * xref:../seooc-up-rust/build.adoc#req-ssr-build-specified-functions-only[The ASIL build contains only specified functions];
 * xref:../seooc-up-rust/crate-isolation.adoc#req-ssr-crate-streamer-isolated[The ASIL Streamer is its own untaintable crate];
 * xref:../seooc-up-rust/e2e-wire.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop];
-* xref:../seooc-up-rust/release.adoc#req-ssr-release-inert-drop[Dropping a runtime handle does nothing];
-* xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-one-way[There is no way back];
+* xref:../../languages/rust.adoc#req-ssr-release-inert-drop[Dropping a runtime handle does nothing];
+* xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back];
 * xref:../../contract-generations.adoc#req-ssr-mode-classic-excluded[Classic routes never enter runtime mode];
-* xref:../seooc-up-rust/startup-memory.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided];
+* xref:../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided];
 
 and the requirements that bind every part that a requirement of this area binds:
 
@@ -138,7 +138,7 @@ Verification:: compile-fail (add or delete after activation; change a route's fi
 ISO 26262:: 6-7.4.3, 6-6.4.2 g (part-clause numbers only)
 
 *Rationale.*
-A route added or changed while traffic flows would run without the setup checks that admitted the others, through a configuration nobody validated (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
+A route added or changed while traffic flows would run without the setup checks that admitted the others, through a configuration nobody validated (xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
 
 A live subscription source would change the routes in effect from outside, at run time.
 
@@ -199,12 +199,12 @@ ISO 26262:: 6-Table 6 1b (part-clause numbers only)
 
 *Rationale.*
 The Streamer forwards every frame between its transports.
-So heap use on its path would break runtime mode for every route it carries (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+So heap use on its path would break runtime mode for every route it carries (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
 An ASIL route through the Streamer is only as sound as the Streamer, so it cannot be left as a QM carrier.
 
 A serialized leg's declared allocation belongs to that leg's wire or binding and is reported per route.
-It never reaches the Streamer's own forwarding paths, or a native leg (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+It never reaches the Streamer's own forwarding paths, or a native leg (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
 [[req-ssr-streamer-no-panic]]
 == The Streamer does not panic in runtime mode
@@ -619,7 +619,7 @@ The Streamer *MUST* build every transport and every role it will use before it c
 The Streamer *MUST* refuse its startup as a whole, and *MUST NOT* activate any route, in each of these cases:
 
 * the Streamer refuses its deployment data (<<req-ssr-streamer-config-integrity,The deployment data is checked before it is applied>>; <<req-ssr-streamer-config-validated,The Streamer validates its deployment data in full>>), a route of it, its operator interface (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>), a monitor (<<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>) or a live subscription source (<<req-ssr-streamer-route-lock,Routes and subscriptions are locked at activation>>), the Streamer binary reports a worker that it could not create (<<req-ssr-streamer-workers,Workers are fixed at initialization>>), or the build of a transport or of a role fails: the Streamer then *MUST NOT* call `+enter_runtime_all+`;
-* `+enter_runtime_all+` returns a failure: a transport that entered runtime mode before the failure stays in runtime mode (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]), and the Streamer *MUST NOT* forward a frame on it.
+* `+enter_runtime_all+` returns a failure: a transport that entered runtime mode before the failure stays in runtime mode (xref:../../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]), and the Streamer *MUST NOT* forward a frame on it.
 
 What the Streamer reports then is stated in <<req-ssr-streamer-startup-report,The startup report says what will run>>.
 
@@ -634,7 +634,7 @@ Allocated to:: the Streamer
 Verification:: test (every transport and every role the Streamer will use is built before it calls `+enter_runtime_all+`; refused deployment data, a refused route, a refused operator interface, a refused monitor, a refused live subscription source, a worker that could not be created, and a transport or a role whose build fails: no call of `+enter_runtime_all+` and no route activated; `+enter_runtime_all+` returning a failure after an earlier transport entered: no route activated and no frame forwarded), review (the Streamer's startup path builds no transport or role after that call)
 
 *Rationale.*
-Once `+enter_runtime_all+` has returned, the startup memory is sealed, and a setup built on it is refused (xref:../seooc-up-rust/startup-memory.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
+Once `+enter_runtime_all+` has returned, the startup memory is sealed, and a setup built on it is refused (xref:../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]).
 An application's own order is stated in xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-build-order[Applications build every transport and role before the last transition].
 
 A Streamer that started without a route that its deployment data declares would lack that route's function, with no gate to show it.
@@ -672,7 +672,7 @@ Allocated to:: the Streamer
 Verification:: test (the report's records against the admitted routes: each field that the statement lists for a route, each route's encoding-filter report, each active waiver, each strict-mode finding recorded in the Report state, and the declared reaction bound or the statement that none is established; the number of workers, and each worker with its priority and affinity; the digest equal to one computed over the copy of the data from which the Streamer and the Streamer binary applied it; a refused startup reported with the route, the leg and the limit, for a refusal on an ingress leg and for one on an egress leg, a route refused for a source filter that is not exact and one refused for a classic endpoint each reported with the route and that rule, an operator interface and a monitor refused in the Enforce state each reported with its finding, a refused live subscription source, and a worker that could not be created; deployment data with no integrity code, and deployment data with an invalid field that belongs to no route, each reported as the refusal with its cause named; a failed build reported with the build that failed; a failure of `+enter_runtime_all+` after an earlier transport entered, reported with the transition that failed; in each of these cases no report of what will run), heap-window (producing the report)
 
 *Rationale.*
-The report lists the admitted routes and their resources after the transition, in runtime mode, so producing it uses no heap (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+The report lists the admitted routes and their resources after the transition, in runtime mode, so producing it uses no heap (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
 [[req-ssr-streamer-config-integrity]]
 == The deployment data is checked before it is applied
@@ -808,7 +808,7 @@ Allocated to:: the Streamer binary, for creating the workers, for reporting a wo
 Verification:: test (the workers created during initialization, with the number, priority and affinity that the deployment data states; each route assigned to one worker; a worker that the Streamer binary cannot create with the priority or the affinity that the deployment data states: reported, and the startup refused with no route activated; no worker created, stopped or joined in runtime mode), review (the forwarding loop has no path that returns in runtime mode)
 
 *Rationale.*
-Creating or joining a thread in runtime mode would bring the heap and an unbounded wait into the data path (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
+Creating or joining a thread in runtime mode would bring the heap and an unbounded wait into the data path (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
 
 A fixed assignment of routes to workers, made at setup, lets each route's latency be analysed before start.
 
@@ -831,7 +831,7 @@ The Streamer *MUST* count a later disable or trip of a route whose gate is not e
 
 *Until a restart.*
 A disable or a trip holds until the Streamer's process ends.
-A route is enabled again only in a new process, after a restart of the process or of its OS application partition from outside it and a fresh initialization (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-one-way[There is no way back]; xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-restart[A restart is an initialization]).
+A route is enabled again only in a new process, after a restart of the process or of its OS application partition from outside it and a fresh initialization (xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]; xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]).
 
 *What this replaces.*
 Under the bounded-runtime Streamer profile (<<req-ssr-streamer-scope,What the Streamer is, and the bounded-runtime Streamer profile>>), this requirement and the items that rest on it (<<req-ssr-streamer-operator-control,Operator changes go through a declared interface>>; <<req-ssr-streamer-monitors,Worker and transport monitors trip routes>>; <<aou-seooc-operator-access,Only authorized operators reach the Streamer's operator interface>>; <<aou-seooc-monitor-thresholds,Monitor thresholds allow for peers' restarts>>) replace, for the Streamer and for the integrator who operates it, every earlier rule of this area by which an operator's re-enable returned a disabled or tripped route to service, or cleared a monitor's trip, in the running process.
@@ -870,11 +870,11 @@ Verification:: test, review, heap-window
 The Streamer's safe state is fail-silent per route, through its route gates (xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's], "Fail-silent routes").
 So a gate silences one route while every other route carries on (<<req-ssr-streamer-containment,A fault stays on its route>>).
 
-A gate changes forwarding state only, and fixed storage lets it change without heap and with the route's storage left in place (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:../seooc-up-rust/release.adoc#req-ssr-release-none[Nothing is released in runtime mode]).
+A gate changes forwarding state only, and fixed storage lets it change without heap and with the route's storage left in place (xref:../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:../../up-l1/runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode]).
 
 _One way._
-Runtime mode has no way back, and a gate follows the same rule (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-one-way[There is no way back]).
-A route re-enabled in place would carry traffic again without the checks of a start, while a new process runs every one of them (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-restart[A restart is an initialization]).
+Runtime mode has no way back, and a gate follows the same rule (xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]).
+A route re-enabled in place would carry traffic again without the checks of a start, while a new process runs every one of them (xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]).
 
 A request on a route whose gate is not enabled is answered `+Unavailable+` where the reverse route can carry it.
 So a client without the E2E wire can learn of the outage from that answer, without waiting out its TTL (<<req-ssr-streamer-rpc-error-response,An RPC request that cannot be dispatched is answered, best effort>>).
@@ -1077,7 +1077,7 @@ A refusal of the TTL check is counted as xref:../seooc-up-rust/qos.adoc#req-ssr-
 A malformed frame carries no message: the Streamer refuses it and counts it as a fault on its route (<<req-ssr-streamer-containment,A fault stays on its route>>).
 
 *Bounded retry.*
-The Streamer *MUST NOT* wait for an egress: a carrier egress has no QoS wait (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
+The Streamer *MUST NOT* wait for an egress: a carrier egress has no QoS wait (xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
 The Streamer's only retry *MUST* be the resending of a parked frame, within the route's retained budget and until the frame expires (xref:../seooc-up-rust/qos.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
 The Streamer *MUST NOT* resend a parked frame, or forward any other frame, on a route whose gate is not enabled, and *MUST* count each frame that such a route held parked as dropped.
 
@@ -1151,7 +1151,7 @@ Verification:: test (each cause with its code: a request on a route whose gate i
 *Rationale.*
 The Streamer can report a known forwarding failure promptly without forwarding through a route whose gate is not enabled.
 The response is a courtesy to the client and never the guarantee: a send that blocked, retried or allocated to answer a failure would put the failing route's cost on the reverse route.
-The request's TTL is the bound of a call that is still pending then, and that bound is logical (xref:../seooc-up-rust/bounded-work.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]): it decides the call's outcome, while when a descheduled client sees it depends on the client running.
+The request's TTL is the bound of a call that is still pending then, and that bound is logical (xref:../../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]): it decides the call's outcome, while when a descheduled client sees it depends on the client running.
 
 [[aou-seooc-operator-access]]
 == Only authorized operators reach the Streamer's operator interface
@@ -1209,7 +1209,7 @@ ID:: `+aou~seooc-monitor-thresholds~4+`
 ASIL:: B
 
 *Rationale.*
-A peer recovers from a fault by restarting, since the element has no recovery inside a process (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-one-way[There is no way back]; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
+A peer recovers from a fault by restarting, since the element has no recovery inside a process (xref:../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]).
 A monitor's trip holds until the Streamer's own process is restarted (<<req-ssr-streamer-route-gate,Each route has a heap-free gate>>).
 So a threshold below a peer's worst-case restart turns that peer's normal restart into an outage of the route that only a restart of the Streamer ends, and only the analysis of the item itself, in ISO 26262's sense, can say whether that outage is acceptable.
 

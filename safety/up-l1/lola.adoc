@@ -140,12 +140,12 @@ For each declared route the binding *MUST* compare what the route declares with 
 
 * Where its capability serves all of it, the binding *MUST* prepare the route as it is declared.
 What the element then admits is stated in xref:payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name].
-* The heap class that the binding states for the route, and the element's comparison of it with what the route declares, are stated in xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default].
+* The heap class that the binding states for the route, and the element's comparison of it with what the route declares, are stated in xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default].
 * The binding *MUST* declare the class none for a route only where accepted evidence in its qualification record covers both the binding's and LoLa's runtime paths that the route uses, and shows that neither acquires or releases heap memory on them (xref:bindings.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]).
 That evidence covers the first locks and the lazy primitives of LoLa that those paths can reach.
 Without that evidence the binding *MUST* declare allocation inside LoLa under a named permit.
 The waiver that then admits the route is stated in xref:../seooc-up-rust/waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
-A permit changes neither xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] nor the allocation that a serialized route declares and that setup admits, and it establishes no stronger guarantee (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+A permit changes neither xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] nor the allocation that a serialized route declares and that setup admits, and it establishes no stronger guarantee (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 * Where the route needs a capability that the binding or LoLa does not have, the binding *MUST* refuse the route in route preparation, naming the route and that capability.
 
 *LoLa's first locks and lazy state.*
@@ -166,11 +166,11 @@ The element's own setup checks, and their reasons, are stated in xref:payload-pa
 
 *A setup operation that fails.*
 An operation that route preparation needs from LoLa or from the operating system can fail for a cause that is no capability of the route.
-The binding *MUST* report such a failure as a failure of setup, naming the route and the operation that failed, and *MUST NOT* report it as a capability that the route lacks (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure]; xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-bounded-startup[Setup never waits without a bound]).
+The binding *MUST* report such a failure as a failure of setup, naming the route and the operation that failed, and *MUST NOT* report it as a capability that the route lacks (xref:../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]; xref:../../up-l1/runtime.adoc#req-ssr-mode-bounded-startup[Setup never waits without a bound]).
 
 *Excluded reasons.*
 The binding *MUST NOT* admit, refuse or change a route because of the name of its wire or of its payload encoding.
-It *MUST NOT* refuse a serialized route because its wire declares allocation, or because its decoded values own heap memory (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+It *MUST NOT* refuse a serialized route because its wire declares allocation, or because its decoded values own heap memory (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 
 *Native routes.*
 
@@ -178,7 +178,7 @@ It *MUST NOT* refuse a serialized route because its wire declares allocation, or
 * The binding *MUST NOT* report or count a copied or serialized route as a native one.
 
 *A serialized route's allocation.*
-The binding *MUST NOT* let what a serialized route allocates reach a native route on the same transport, or work that the two share (xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
+The binding *MUST NOT* let what a serialized route allocates reach a native route on the same transport, or work that the two share (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 
 *What each route got.*
 What each route's report states is stated in xref:../seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got], and how a refusal is reported in xref:payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name] and xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader].
@@ -237,7 +237,7 @@ It *MUST NOT* present one of the three counts as another.
 *Established at setup.*
 Before its transition returns, the binding *MUST* establish that the storage which LoLa provides for a route holds what the route declares, as an amount that the binding guarantees to be available to the route.
 An upper limit does not meet what a route declares.
-Where that storage does not hold it, or where the binding cannot establish it, the binding *MUST* refuse the route in route preparation, naming the route, the count and the values it found (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-entry-no-latent-refusal[Nothing is refused at runtime for a reason setup already knew]).
+Where that storage does not hold it, or where the binding cannot establish it, the binding *MUST* refuse the route in route preparation, naming the route, the count and the values it found (xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-no-latent-refusal[Nothing is refused at runtime for a reason setup already knew]).
 
 *A count that an assumption of LoLa limits.*
 A limit that an assumption of use of LoLa sets on a count, such as the number of loans that a producer holds at once for one event, is declared and kept as <<req-ssr-binding-lola-assumptions,The LoLa binding keeps each of LoLa's assumptions of use, or names who does>> states.
@@ -266,8 +266,8 @@ Verification:: test, review
 * *review*: how the binding establishes LoLa's storage for a route, and where each declared count is taken from, at source level.
 
 *Rationale.*
-A route that runs out of storage in runtime mode cannot get more there, so the storage is settled before the transition (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
-The element computes its own storage from deployment data (xref:../seooc-up-rust/startup-memory.adoc#req-ssr-memory-computable[Startup storage is computable before start]).
+A route that runs out of storage in runtime mode cannot get more there, so the storage is settled before the transition (xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
+The element computes its own storage from deployment data (xref:../../basics/resources.adoc#req-ssr-memory-computable[Startup storage is computable before start]).
 The storage that LoLa provides is LoLa's, and only the binding can compare it with what a route needs.
 
 _Each count as what it is._
@@ -372,7 +372,7 @@ The binding *MUST* keep the rule for every sequence of safe calls, in any order 
 It *MUST NOT* rely on an application returning its frames first.
 
 *In runtime mode.*
-A subscription is a binding resource, which stays attached in runtime mode (xref:../seooc-up-rust/release.adoc#req-ssr-release-none[Nothing is released in runtime mode]).
+A subscription is a binding resource, which stays attached in runtime mode (xref:../../up-l1/runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode]).
 --
 
 [horizontal]
@@ -458,7 +458,7 @@ None of the assumptions listed on this page names such a point.
 So, unless another published document of LoLa names one, the life of the process is the bound, and it is always long enough.
 
 _Exit._
-The element offers no shutdown, and a process in runtime mode leaves by exit, crash or kill (xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode]).
+The element offers no shutdown, and a process in runtime mode leaves by exit, crash or kill (xref:../../up-l1/runtime.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode]).
 An exit runs exit handlers and the destructors of objects with static storage duration, and destroys no object on any thread's stack, while other threads can still run (source: the {cpp} standard's working draft N4861, {cpp}20, [basic.start.term] and [support.start.term]; the standard library documentation, Rust 1.98.1, https://doc.rust-lang.org/1.98.1/std/process/fn.exit.html[`+std::process::exit+`], its description).
 A thread of LoLa that then called into state the binding had already destroyed would corrupt the process while it still shares memory with its peers.
 So what such a thread can reach outlives it, whatever the order of destruction.
@@ -601,16 +601,16 @@ It states nothing itself.
 | When | Items
 
 | Initialization: the binding is constructed
-| xref:bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization]; xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-restart[A restart is an initialization]
+| xref:bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization]; xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]
 
 | Initialization: a route is prepared
-| xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; <<req-ssr-binding-lola-capacity,On LoLa, a route's counts are declared and its storage is established at setup>>; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise]; xref:bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state]; xref:bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level]; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>; xref:lola-envelope.adoc#req-ssr-binding-lola-envelope-layout[On LoLa, a frame is one envelope in one sample, in a fixed order]; xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode]
+| xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; <<req-ssr-binding-lola-capacity,On LoLa, a route's counts are declared and its storage is established at setup>>; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise]; xref:bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state]; xref:bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level]; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>; xref:lola-envelope.adoc#req-ssr-binding-lola-envelope-layout[On LoLa, a frame is one envelope in one sample, in a fixed order]; xref:../../up-l1/runtime.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode]
 
 | Initialization: before the transition returns
-| xref:bindings.adoc#req-ssr-binding-lazy-forced[Lazy state is forced, and threads are idle, before running]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], "Fixed before the transition"; xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]; <<req-ssr-binding-lola-capacity,On LoLa, a route's counts are declared and its storage is established at setup>>, "Established at setup"; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>, "LoLa's first locks and lazy state"
+| xref:bindings.adoc#req-ssr-binding-lazy-forced[Lazy state is forced, and threads are idle, before running]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], "Fixed before the transition"; xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]; <<req-ssr-binding-lola-capacity,On LoLa, a route's counts are declared and its storage is established at setup>>, "Established at setup"; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>, "LoLa's first locks and lazy state"
 
 | The transition
-| xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]; xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-init-failure[Initialization failure]
+| xref:../../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]; xref:../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]
 
 | Runtime: a frame is sent
 | xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:lola-envelope.adoc#req-ssr-binding-lola-envelope-lifetime[On LoLa, a loan exposes only its payload, and a receive view lives within its sample]
@@ -619,16 +619,16 @@ It states nothing itself.
 | xref:bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]; xref:bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is]; xref:../seooc-up-rust/qos.adoc#req-ssr-qos-deadline[Deadlines are monitored]; xref:lola-envelope.adoc#req-ssr-binding-lola-envelope-checks[On LoLa, a sample that is not a well-formed envelope is refused before any of it is used]; xref:lola-envelope.adoc#req-ssr-binding-lola-envelope-metadata[On LoLa, the metadata is the selected wire's, and is checked before delivery]
 
 | Runtime: a frame is returned
-| xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]
+| xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]
 
 | Runtime: a peer dies or restarts
 | xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]; xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input]; xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise]; <<req-ssr-binding-lola-foreign-boundary,Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path>>
 
 | The process exits
-| xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode]; <<req-ssr-binding-lola-callbacks,What the LoLa binding gives LoLa stays valid for as long as LoLa can use it>>, "Through exit"; <<aou-seooc-lola-assumptions-kept,A deployment on LoLa keeps the assumptions of LoLa that the binding names for the integrator>>, "Exits"; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]
+| xref:../../up-l1/runtime.adoc#req-ssr-mode-no-shutdown[No shutdown in runtime mode]; <<req-ssr-binding-lola-callbacks,What the LoLa binding gives LoLa stays valid for as long as LoLa can use it>>, "Through exit"; <<aou-seooc-lola-assumptions-kept,A deployment on LoLa keeps the assumptions of LoLa that the binding names for the integrator>>, "Exits"; xref:../seooc-up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]
 
 | A successor starts
-| xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-restart[A restart is an initialization]; xref:bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization]
+| xref:../../up-l1/runtime.adoc#req-ssr-mode-restart[A restart is an initialization]; xref:bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization]
 |===
 
 [[ownership]]
@@ -639,7 +639,7 @@ It states nothing itself.
 | What | Items
 
 | A transmit loan
-| <<req-ssr-binding-lola-terms,What LoLa, the LoLa binding, a loan and a sample are>>; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]; xref:lola-envelope.adoc#req-ssr-binding-lola-envelope-lifetime[On LoLa, a loan exposes only its payload, and a receive view lives within its sample]
+| <<req-ssr-binding-lola-terms,What LoLa, the LoLa binding, a loan and a sample are>>; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../seooc-up-rust/build.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]; xref:lola-envelope.adoc#req-ssr-binding-lola-envelope-lifetime[On LoLa, a loan exposes only its payload, and a receive view lives within its sample]
 
 | A sent sample
 | xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:deployment.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], "Zero-copy routes"
@@ -651,10 +651,10 @@ It states nothing itself.
 | xref:serialized-wires.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]
 
 | A decoded value
-| xref:../seooc-up-rust/heap.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]
+| xref:../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]
 
 | A return that is pending
-| xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../seooc-up-rust/release.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]
+| xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]
 
 | A callable that the binding gave LoLa
 | <<req-ssr-binding-lola-callbacks,What the LoLa binding gives LoLa stays valid for as long as LoLa can use it>>
@@ -671,13 +671,13 @@ It states nothing itself.
 | <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>; xref:../seooc-up-rust/errors.adoc#req-ssr-error-route-report[Each route reports what it got]
 
 | Heap class of a native route
-| xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>, "Preparation"; xref:../seooc-up-rust/waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]
+| xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>, "Preparation"; xref:../seooc-up-rust/waivers.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]
 
 | Heap class of a serialized route
-| xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../seooc-up-rust/heap.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>
+| xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>
 
 | A stronger guarantee of a serialized route
-| xref:../seooc-up-rust/heap.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]
+| xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]
 
 | Panic paths
 | xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input]; <<req-ssr-binding-lola-foreign-boundary,Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path>>, "Termination"
@@ -742,7 +742,7 @@ It states nothing itself.
 | xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise]; xref:peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected]
 
 | What a route needs from LoLa is not there at setup
-| xref:../seooc-up-rust/runtime-modes.adoc#req-ssr-mode-bounded-startup[Setup never waits without a bound]; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>, "A setup operation that fails"
+| xref:../../up-l1/runtime.adoc#req-ssr-mode-bounded-startup[Setup never waits without a bound]; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>, "A setup operation that fails"
 
 | A result that the binding cannot classify
 | <<req-ssr-binding-lola-foreign-boundary,Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path>>, "Errors"
