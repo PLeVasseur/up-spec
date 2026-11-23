@@ -187,14 +187,15 @@ For the native protection composition the record also fixes what the CRC reads a
 [[req-ssr-e2e-detects]]
 == The E2E wire detects each fault
 
-[.specitem,oft-sid="req~ssr-e2e-detects~7",oft-title="The E2E wire detects each fault",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
+[.specitem,oft-sid="req~ssr-e2e-detects~8",oft-title="The E2E wire detects each fault",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
 --
 *Header, CRC and data ID first.*
 Decoding through the E2E wire *MUST* first check each frame's header, its CRC and its data ID.
 
 * The E2E wire *MUST* refuse as corrupt a frame whose length field does not match its size, or whose CRC does not match.
 * A frame whose data ID was not declared is refused as <<req-ssr-e2e-data-id,One data ID per sender and route>> states.
-* Either refusal *MUST NOT* change any state.
+* A frame whose data ID was declared and differs from the expected data ID that the element gives the wire for it (<<req-ssr-e2e-data-id,One data ID per sender and route>>, "The expected data ID") *MUST* be refused as an identity mismatch.
+* None of these refusals changes any state: the E2E wire *MUST NOT* change any state for one of them, and for an identity mismatch it *MUST NOT* take the slot's try-lock, so that such a frame is never contended, starts or extends no run, and moves no window, reference or incarnation.
 
 *Method fields.*
 The E2E wire *MUST* check a request's method fields before its counter, *MUST* refuse as corrupt a request that fails them, and *MUST NOT* change any state for it.
@@ -202,7 +203,13 @@ What a request carries in them is stated in <<req-ssr-e2e-rpc-echo,An E2E respon
 
 *Corrupt comes first.*
 The E2E wire *MUST* refuse as corrupt each frame that it finds corrupt, whatever data ID the frame names.
-It refuses a frame as an undeclared data ID only where it does not find the frame corrupt.
+It refuses a frame as an undeclared data ID only where it does not find the frame corrupt, and as an identity mismatch only where it neither finds the frame corrupt nor refuses it as an undeclared data ID.
+So the first of these that applies names the refusal: corrupt; undeclared data ID; identity mismatch; then the counter, the window and the incarnation rules, or at a client the remaining conditions of <<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>.
+
+*Under the native protection composition.*
+On a route that selects the native protection composition (<<req-ssr-e2e-wraps-any-wire,The E2E wire wraps any wire and leaves its bytes alone>>, "The native protection composition"), the corruption-class checks are: the header's length field against the outer extent; the CRC, over the header fields and, where the shape selector gives the value branch, the value's meaningful spans; the reserved bytes; a request's method fields; and that the verified result, status and first reserved byte form a row of the table of <<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>, "Shapes of a protected native response", for the shape that the selector gives.
+The E2E wire *MUST* refuse as corrupt a frame that fails one of them, and *MUST* evaluate the selector itself, on the same bytes that the element acquired; it is given no branch.
+An accepting verdict names the verified shape: a Value, a Control or a Failed response.
 
 *The counter.*
 On every route but a response route, the E2E wire, as the receiver, then judges the counter, for each declared sender:
@@ -216,6 +223,7 @@ A response is judged by <<req-ssr-e2e-rpc-echo,An E2E response answers exactly i
 *After the checks.*
 
 * A frame that passes these checks and then fails the inner wire's decode *MUST* have advanced the reference.
+Under the native protection composition, no inner decode and no native check follow these checks (xref:../integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]).
 * Each refusal *MUST* name what failed, without heap and without panicking.
 * Which refused requests are answered, and how, is stated in <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>> and xref:../../up-l2/api.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
 
@@ -225,7 +233,7 @@ How the element requires a detector route's deadline at setup, and monitors it a
 --
 
 [horizontal]
-ID:: `+req~ssr-e2e-detects~7+`
+ID:: `+req~ssr-e2e-detects~8+`
 ASIL:: B
 Allocated to:: the E2E wire
 Verification:: test, fault-injection, heap-window, review
@@ -237,6 +245,10 @@ Verification:: test, fault-injection, heap-window, review
 ** Each header check refuses, and changes no state.
 ** A frame that passes and then fails the inner decode advances the reference, and a later copy of it is refused as a repeat.
 ** With the receiver's last counter at exactly `+resync_frames+`, a restart is not refused as a repeat.
+** On a request route, a frame whose admitted metadata names declared sender B and whose intact header carries declared sender A's data ID: refused as an identity mismatch, with the states and the figures of A and B unchanged, and a later genuine frame of A with the same counter admitted; the same frame as a candidate for a replay of A: refused as an identity mismatch, with A's window untouched.
+** The same frame with corrupt method fields, and with a corrupt CRC: refused as corrupt, not as an identity mismatch, and changing no state.
+** A frame from declared source B whose header carries an undeclared data ID: refused as an undeclared data ID, as before.
+** Under the native protection composition, where E and H differ: a frame of extent E with a refusal's result, and one of extent H with a Value's result, each refused as corrupt; a frame of extent E whose header's length field gives H, refused as corrupt.
 * *fault-injection*: a byte corrupted between hops; a torn copy on copy route.
 * *review*: the E2E wire keeps no timeout of its own.
 ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
@@ -245,7 +257,12 @@ ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 Checking framing and integrity before changing receiver state keeps a corrupt header from becoming a valid sequence observation.
 An undetected corruption remains a residual.
 
-A wire that is given no route context cannot time a silence, so the route's deadline monitor does.
+A wire that is given no route context but the expected data ID cannot time a silence, so the route's deadline monitor does.
+
+_The expected data ID._
+A frame's metadata can name one sender while its intact header carries another declared sender's data ID.
+Comparing the header's data ID with the one that the frame's attributed source derives ties the protection to that source.
+Membership still comes first, so every published outcome for an undeclared data ID stays, and the new refusal changes no state, so it cannot move another sender's window.
 
 [[req-ssr-e2e-resync]]
 == A restart resynchronizes, stale frames are refused, and no arrival order locks a sender out
@@ -409,7 +426,7 @@ A separate floor preserves the evidence needed for final refusal answers.
 [[req-ssr-e2e-rpc-echo]]
 == An E2E response answers exactly its call
 
-[.specitem,oft-sid="req~ssr-e2e-rpc-echo~3",oft-title="An E2E response answers exactly its call",oft-needs="impl,utest",oft-tags="SafetyE2eWire,SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-e2e-rpc-echo~4",oft-title="An E2E response answers exactly its call",oft-needs="impl,utest",oft-tags="SafetyE2eWire,SafetyUpRustCore"]
 --
 On an RPC route, the E2E wire *MUST* use the method header of <<req-ssr-e2e-header-format,The E2E header has one documented format>>.
 
@@ -427,13 +444,15 @@ At a client, the E2E wire *MUST* accept a response that meets all of these condi
 * its length, reserved bytes and CRC are intact;
 * its type is response and its result agrees with its status;
 * its data ID is a server the client declares;
+* its data ID is the expected data ID that the element derives for it, from its admitted source and the call's method (<<req-ssr-e2e-data-id,One data ID per sender and route>>);
 * its Source ID is the client's own data ID;
 * its incarnation is the client's own;
 * its counter is the call's own, compared per call and not as a sequence over responses;
 * its status is the response's commstatus.
 
 *Refusal at a client.*
-The E2E wire *MUST* name the cause of each such refusal: corrupt, undeclared data ID, misaddressed, stale, wrong call or status mismatch.
+The E2E wire *MUST* name the cause of each such refusal: corrupt, undeclared data ID, identity mismatch, misaddressed, stale, wrong call or status mismatch.
+A response refused as an identity mismatch completes nothing, and its call stays open (xref:../../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
 A copy that another server answers is refused as an undeclared data ID when the client declares one server for the method.
 
 *Several declared servers.*
@@ -443,14 +462,65 @@ The element's own checks of a response still apply (xref:../../up-l2/api.adoc#re
 *A response with no E2E header.*
 How the element refuses, names and counts a response with no E2E header on an RPC client's response route that selects the E2E wire is stated in <<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>>.
 
+*Shapes of a protected native response.*
+On an RPC route that selects the native protection composition (<<req-ssr-e2e-wraps-any-wire,The E2E wire wraps any wire and leaves its bytes alone>>, "The native protection composition"), a response has one of three shapes.
+All three are frames of the method's one response wire, all carry the composition's encoding identifier, and each is checked by the E2E wire before it has any effect:
+
+[cols="2,4,2,2,3,3,3,4",options="header"]
+|===
+| Shape | When | Outer extent | Value | Result | Status | First reserved byte | CRC input
+
+| Value
+| Success
+| E
+| At I
+| `+normal+`
+| `+Ok+`
+| 0
+| The header fields, then the value's meaningful spans
+
+| Control
+| A refusal answer of the E2E wire (<<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>)
+| H
+| None
+| 2, final, or 3, advisory
+| `+Aborted+`
+| The refusal's kind
+| The header fields
+
+| Failed
+| Every other response whose commstatus is not `+Ok+`, an application's own `+Aborted+` and the element's `+InvalidArgument+` answers included
+| H
+| None
+| The result that the header's record gives such a response
+| That commstatus
+| 0
+| The header fields
+|===
+
+* *Every other combination is corrupt*: a result of 2 or 3 with a status other than `+Aborted+`; a Failed response's result with `+Ok+`; a first reserved byte other than 0 outside a Control; a kind that the header's record does not define; and a Value's result and status on the header-only branch, or another shape's on the value branch.
+* *The result of a Failed response* is the value that the header's record (<<req-ssr-e2e-header-format,The E2E header has one documented format>>) gives a response whose status is not `+Ok+` and that is not a refusal answer; the composition adds no result value.
+Where that value is `+normal+`, the status alone tells a Value from a Failed response, and nothing else changes.
+An application's `+Aborted+` is a Failed response and a refusal answer is a Control, so a client tells them apart by the result.
+* *No value is made up.* A response that carries no value is a Control or a Failed response, and no wire is added for it.
+* *A failed response carries no detail payload.* On such a route, the element *MUST* send a failed response as a Failed shape, with no UStatus payload, and at a client *MUST* complete the call with the response's commstatus, decode no UStatus from the protected header, and build no value.
+For the element, as service provider and as service consumer on an RPC route that selects the native protection composition, and for the payload of a failed response there only, this item replaces two recommendations of xref:../../basics/error_model.adoc[uProtocol Error Model (UStatus)]: that of `+dsn~service-error-model-error-response~1+`, that a service provider populate the response's payload with a UStatus, and that of `+dsn~service-error-model-failed-rpc~1+`, that a service consumer try to extract a UStatus from it.
+The duties of both rules stay: a failed execution sets a commstatus other than `+Ok+`, and a consumer treats such a response as a failed call.
+Other compositions keep their detail behaviour.
+* *Detail inside the value is a Value.* A service that wants typed outcome detail on this composition carries it as fields of the value and answers `+Ok+`: that is a Value, and not a Failed response; a service that needs a response other than `+Ok+` with detail selects a serialized inner wire.
+* *A value of size zero.* Where N is 0 and I is H, a Value and a header-only response have the same extent, and the shape selector gives the branch: a verified `+normal+` with `+Ok+` is a present value of size zero, a Control or a Failed response is no value, and an absent outer payload has no E2E header (<<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>>).
+* *Requests and topics* have the Value shape only; a method with no request value uses a type of size zero.
+* *Writing a header-only response.* On a binding whose loan can be shortened, the element *MUST* shorten the payload of a Control or a Failed response to H, and the binding zeroes the bytes given up (xref:../iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-wipe[On iceoryx2, the token of a loan that is not sent is wiped, and a sent frame is left as it was written]); on a binding whose loan cannot change size, the element *MUST* ask for the loan at length H (xref:../lola.adoc#req-ssr-binding-lola-envelope-lifetime[On LoLa, a loan exposes only its payload, and a receive view lives within its sample]).
+* *Echo and state are unchanged.* Every answer echoes its request's tag; the wire classes final and advisory; and the element sends the class unchanged, tries a refusal answer once and counts one that it cannot send (<<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>).
+
 *One response wire per method.*
 On an RPC route that selects the E2E wire, the element *MUST* provide one response wire per method.
 --
 
 [horizontal]
-ID:: `+req~ssr-e2e-rpc-echo~3+`
+ID:: `+req~ssr-e2e-rpc-echo~4+`
 ASIL:: B
-Allocated to:: the E2E wire; the element, for one response wire per method
+Allocated to:: the E2E wire; the element, for one response wire per method, and, on an RPC route that selects the native protection composition, for sending a failed response as a Failed shape with no detail payload, for completing a call with a Failed response's commstatus with no UStatus decoded, and for writing a header-only response at length H
 Verification:: test, heap-window
 * *test*
 ** Each acceptance condition: a response that meets all of them accepted, and one that fails each refused, its cause named.
@@ -459,23 +529,102 @@ Verification:: test, heap-window
 ** A copy that another server answers.
 ** An answer from another declared server to a misaddressed copy, accepted where the client declares several servers for the method.
 ** One response wire per method, which the element provides: on a route that selects the E2E wire, a response that names another payload encoding reaching no wire and refused, as <<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>> states.
+** A response that the element's call correlation has admitted, with admitted source S1 and a header that carries declared server S2's data ID: refused as an identity mismatch at the client, its call kept open.
+** A response from another declared server whose metadata and data ID agree, on a call that the element's correlation does not tie to one server: accepted, the published limitation; on a call tied to one peer, the element's correlation refuses it first.
+** Under the native protection composition: a success with a 16-byte value, a Value of extent E; a final refusal, a Control of extent H; an advisory refusal, a Control, then the real response, a Value; a response whose commstatus is not `+Ok+`, a Failed response of extent H with no value read.
+** An application's handler failing with `+Aborted+`: a Failed response with the record's result for it and a first reserved byte of 0; a refusal answer of the wire: a Control with result 2 or 3 and a kind; the two told apart by the result.
+** A Failed response under the composition: sent with no UStatus payload, and completed at the client with its commstatus, with no UStatus decoded from the header.
+** A type of size zero with I equal to H: a success, a refusal answer and a failed response, all of extent H; the success taken on the value branch and accepted as a present value of size zero, the other two taken on the header-only branch, with no layout check and no value.
+** A Control or a Failed response written on a binding whose loan can be shortened, shortened to H, and on one whose loan cannot change size, asked for at length H.
 
 *Rationale.*
 A response sequence alone does not identify the outstanding call.
 Echoing the protected request identity ties the answer to that call.
 The protection rests on one response wire per method: a response under a second wire's encoding would reach that wire and escape the E2E wire's check.
 
+_Three shapes._
+A refusal answer, an `+InvalidArgument+` answer and a failed response carry no application value, and one extent for every response would force an author to make one up, refuse a shorter answer or add a second response wire.
+Three shapes of the one response wire, with one closed table, keep every answer protected and every value checked.
+The two error-model rules that the composition specializes are recommendations, so the specialization takes away no duty.
+
 [[req-ssr-e2e-data-id]]
 == One data ID per sender and route
 
-[.specitem,oft-sid="req~ssr-e2e-data-id~5",oft-title="One data ID per sender and route",oft-needs="impl,utest",oft-tags="SafetyE2eWire,SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-e2e-data-id~6",oft-title="One data ID per sender and route",oft-needs="impl,utest",oft-tags="SafetyE2eWire,SafetyUpRustCore"]
 --
 *Derivation.*
 The E2E wire *MUST* ensure that each sender on a route has its own data ID, derived the same way on both sides from deployment data, by one documented function of the sender's URI, the route's resource ID, the message type, and the route's fixed sink where it has one: a notification's destination, a request's method.
+The route's locality context is a further argument of that function (the clause "One canonical form").
+For each kind of message, the four inputs are these, and the receiver takes them as the last column states; of them, only the source comes from the frame:
+
+[cols="2,3,2,2,2,4",options="header"]
+|===
+| Kind | Sender's URI | Resource ID | Type | Fixed sink | Where the receiver takes them
+
+| A published message
+| The publisher: the message's source
+| The topic's
+| Publish
+| None
+| The source from the frame's admitted metadata; the resource and the type from the receive route
+
+| A notification
+| The notifier: the message's source
+| The notification's
+| Notification
+| The destination: the message's sink
+| The source from the frame's admitted metadata; the resource, the type and the sink from the receive route, whose sink is the receiver's own declared address
+
+| An RPC request
+| The client: the request's source, its reply-to address
+| The method's
+| RPC request
+| The method: the request's sink
+| The source from the frame's admitted metadata; the resource, the type and the sink from the server's route
+
+| An RPC response
+| The server: the response's source, the invoked method
+| The method's
+| RPC response
+| None
+| The source from the frame's admitted metadata; the resource and the type from the call's method
+|===
+
+A response's data ID identifies the server and the method.
+The caller's reply-to address, which is a response's sink, is no input: a client *MUST NOT* add it as its route's fixed sink, because the server derives one data ID for all its callers.
+The Source ID field keeps its use: a request carries the client's data ID there, and a response echoes it (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>).
+
+*One canonical form.*
+The element *MUST* state, in a derivation record documented with the crate beside the header's record (<<req-ssr-e2e-header-format,The E2E header has one documented format>>), the canonical form of each input, and the derivation *MUST* follow it on both sides:
+
+* *A declared locality context.* An empty authority name means local, and the deployment data of each route that selects the E2E wire declare the route's _locality context_: the one authority name that an empty authority stands for on that route, or that it stands for none.
+The declaration is part of the sender's and of the receiver's deployment data, alike, and the derivation function *MUST* take it as an explicit argument.
+Before derivation, an empty authority in the sender's URI, and in the fixed sink where the kind has one, is replaced by the context's name; where the context declares none, it stays empty on both sides.
+* *A setup check where a part can know.* The element *MUST* refuse at setup, by name, a route that selects the E2E wire where the authority name that the element is configured with differs from the locality context that the route declares while an input of the element's role on that route has an empty authority; an element configured with no authority name relies on the declared context.
+* *No empty authority across contexts.* On a route whose sender and receiver lie in different locality contexts, the inputs carry explicit authority names, in the frames' metadata and in both sides' deployment data, and a receiver *MUST NOT* complete a received empty authority with its own name.
+* *One spelling.* The derivation *MUST* compare authority names as exact strings, in the canonical form that the derivation record states for each admitted kind of authority: a registered name, which the UUri rules already restrict to lower case (xref:../../basics/uri.adoc[UUri]), an IPv4 address, and an IP literal with its hexadecimal digits in lower case.
+
+All of this is setup data, and no name is looked up at runtime.
+A frame whose source does not fit its route's declaration is refused at the first check that finds it: by the source filters of the element's admission of its metadata, where the receive names an authority that an empty source does not match, and otherwise as an undeclared data ID or an identity mismatch; it is never accepted under another authority.
+
+*The expected data ID.*
+For each frame that it gives the E2E wire, the element *MUST* derive one _expected data ID_ with that function, from the inputs that the table gives for the frame's kind, and *MUST* give the wire that one fixed-width value beside the frame's bytes, and nothing else of the route (<<req-ssr-e2e-receiver-state,E2E receiving state is one fixed slot per declared data ID>>, "Route context").
+The wire compares two data-ID values for equality, and evaluates no URI.
+A wildcard has no data ID, so a source that holds one never matches.
+This holds on every route that selects the E2E wire: serialized inner wires and the native protection composition, topics, notifications, requests and responses.
 
 *Acceptance.*
 As a receiver, the E2E wire *MUST* accept only the data IDs declared for its route's senders (an RPC server's declared clients; a topic's publisher), and *MUST* refuse a frame with any other as an undeclared data ID, unless it refuses the frame as corrupt (<<req-ssr-e2e-detects,The E2E wire detects each fault>>).
-How the element counts that refusal, and answers a request so refused, is stated in <<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>> and <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>.
+It *MUST* also refuse a frame whose data ID is declared and differs from the frame's expected data ID, as an identity mismatch, unless it refuses the frame as corrupt.
+How the element counts those refusals, and answers a request so refused, is stated in <<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>> and <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>.
+
+*The sending side, at setup.*
+
+* The element *MUST* derive a sending role's data ID itself, from that role's configured source, resource, type and fixed sink.
+* Where an interface accepts a data ID, or an E2E value built elsewhere, the element *MUST* derive the data ID again at construction, and refuse a difference by name, before runtime mode and in every state of strict mode.
+* Which roles cannot select the E2E wire, because an input of their tuple is not fixed at setup, is stated in <<req-ssr-e2e-sender-state,E2E sending state is one counter per E2E value>>.
+
+These checks catch a mismatch where a part can know it, and a receiver never accepts a mismatched frame because setup might have caught it.
 
 *Construction.*
 
@@ -488,9 +637,9 @@ What a response carries, and how a client judges it, is stated in <<req-ssr-e2e-
 --
 
 [horizontal]
-ID:: `+req~ssr-e2e-data-id~5+`
+ID:: `+req~ssr-e2e-data-id~6+`
 ASIL:: B
-Allocated to:: the E2E wire; the element, for the derivation that it provides as a function
+Allocated to:: the E2E wire; the element, for the derivation that it provides as a function, for its derivation record, for deriving each frame's expected data ID and giving it to the wire, for deriving a sending role's data ID and refusing a supplied one that differs, for the setup refusal of a part whose configured authority name differs from its route's locality context, and for completing no received empty authority with its own name
 Verification:: test
 * Two clients of one method.
 * An undeclared sender.
@@ -499,15 +648,31 @@ Verification:: test
 * A notification for another destination, refused.
 * The function's test vectors.
 * A wildcard in the declared list, refused at construction.
+* The function's vectors for each kind of message, with a response's sink and a published message's optional sink entering no derivation.
+* A legitimate response whose client's reply-to address differs from the server's view of any sink: accepted.
+* A frame from declared source B whose intact header carries declared sender A's data ID: refused as an identity mismatch.
+* Both sides' deployment data declaring locality context `+x+`, the sender configured with authority name `+x+`, its frames carrying an empty authority in their source: both sides replace the empty name by `+x+` before derivation, and the data IDs are equal.
+* The sender's deployment data declaring locality context `+x+`, the receiver's `+y+` or none: refused at setup by name where one part holds both declarations; otherwise every such frame refused and counted, as an undeclared data ID or an identity mismatch, and none accepted.
+* A route that crosses locality contexts, declared with explicit authorities, and a frame whose source has an empty authority: refused by the source filters where the receive names the authority, otherwise by the data-ID checks, and the empty authority never completed with the receiver's name.
+* A sending role given an E2E value whose data ID differs from the one that its configured tuple derives: refused at construction by name.
 
 *Rationale.*
 A route-only identity would merge different senders, and omitting the destination would admit a misaddressed frame.
 So each data ID is derived from its sender and, where the route has one, from the route's fixed sink.
 
+_A response's inputs._
+A server answers many clients with one data ID, so no caller's address enters the response's derivation on either side.
+
+_One canonical form._
+An empty authority means local, and local to what must be the same on both sides, so each route declares it, and the two sides' declarations must agree; across contexts only explicit names are carried.
+
+_The expected data ID._
+The element knows the frame's admitted source and its route, and the wire knows neither, so the element derives the expected data ID and gives the wire that one value, and the wire compares two numbers.
+
 [[req-ssr-e2e-sender-state]]
 == E2E sending state is one counter per E2E value
 
-[.specitem,oft-sid="req~ssr-e2e-sender-state~3",oft-title="E2E sending state is one counter per E2E value",oft-needs="impl,utest",oft-tags="SafetyE2eWire,SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-e2e-sender-state~4",oft-title="E2E sending state is one counter per E2E value",oft-needs="impl,utest",oft-tags="SafetyE2eWire,SafetyUpRustCore"]
 --
 *The E2E value.*
 The E2E wire *MUST* keep its sending state in the E2E value: one counter and one incarnation per E2E value.
@@ -533,12 +698,18 @@ The E2E wire *MUST* keep its sending state in the E2E value: one counter and one
 
 *RPC servers.*
 An RPC server's E2E value *MUST NOT* read a start value or entropy: its responses echo their requests' counters and incarnations (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>).
+
+*A tuple fixed at setup.*
+Each input of a sending role's derivation tuple, as <<req-ssr-e2e-data-id,One data ID per sender and route>> gives it for the role's kind of message, is fixed at setup for the route.
+A role for which an input of that tuple would be chosen for each message *MUST NOT* select the E2E wire for that route, and the element *MUST* refuse such a route at setup, by name.
+The fixed sink is such an input for a notification and an RPC request only: a response's sink, which is the caller's reply-to address, and the optional sink of a published message are not, and neither causes the refusal.
+A notifier that addresses several destinations has one route, and one E2E value, for each of them.
 --
 
 [horizontal]
-ID:: `+req~ssr-e2e-sender-state~3+`
+ID:: `+req~ssr-e2e-sender-state~4+`
 ASIL:: B
-Allocated to:: the E2E wire; the element, for giving each E2E value to one role only
+Allocated to:: the E2E wire; the element, for giving each E2E value to one role only, and for refusing at setup a route whose sending role's derivation tuple is not fixed
 Verification:: compile-fail, test, heap-window
 * *compile-fail*: an `+E2e+` value as a transport default; one E2E value given to two roles, where the element's builders rule it out at compile time.
 * *test*
@@ -552,16 +723,19 @@ Verification:: compile-fail, test, heap-window
 ** One E2E value given to two roles, refused at setup, where the element's builders do not rule it out at compile time.
 ** Each E2E value's counter starting at 0.
 ** An RPC server's E2E value constructed while the clock reads none and the entropy fails.
+** A notifier whose destination is chosen for each message, on a route that selects the E2E wire: refused at setup by name; one route and one E2E value for each destination, admitted.
+** An RPC server that answers several clients with one data ID, and a publisher whose messages carry an optional sink: neither refused.
 
 *Rationale.*
 Sharing one sequence between independent senders would manufacture apparent loss and reordering.
 Refusing overlapping encodes preserves the counter state.
 The element's builders hand out the E2E values, so the element answers for giving each to one role, and an integrator's own wire keeps the same rule under its assumption of use (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
+A data ID that changed with each message could not be declared at a receiver, so a sending role's whole tuple is fixed at setup.
 
 [[req-ssr-e2e-receiver-state]]
 == E2E receiving state is one fixed slot per declared data ID
 
-[.specitem,oft-sid="req~ssr-e2e-receiver-state~3",oft-title="E2E receiving state is one fixed slot per declared data ID",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
+[.specitem,oft-sid="req~ssr-e2e-receiver-state~4",oft-title="E2E receiving state is one fixed slot per declared data ID",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
 --
 *One slot per data ID.*
 The E2E wire *MUST* keep its receiving state in one fixed-size slot per declared data ID, in storage the caller provides at construction.
@@ -575,36 +749,42 @@ A frame that finds its slot held *MUST* be refused and counted as contended, and
 The figures are read without the slot's lock, as <<req-ssr-e2e-figures,The E2E wire's figures cover the stretch from encode to decode>> states.
 
 *Route context.*
-The E2E wire *MUST NOT* take route context: it judges a frame by the frame's bytes and by its own state, and a response at a client also by the call's tag (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>).
+The E2E wire *MUST NOT* take route context other than the expected data ID (<<req-ssr-e2e-data-id,One data ID per sender and route>>, "The expected data ID"): it judges a frame by the frame's bytes and their length, by that value, by its own state, and a response at a client also by the call's tag (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>).
+The constants of the native protection composition for which it was constructed, the header's length and the inner type's size, alignment and meaningful spans, are no route context, and the E2E wire *MUST* evaluate the composition's shape selector itself, from them and from the frame's bytes (<<req-ssr-e2e-wraps-any-wire,The E2E wire wraps any wire and leaves its bytes alone>>, "The native protection composition").
 
 *RPC clients.*
 For an RPC client, the E2E wire *MUST NOT* keep a receiving slot: it checks a response against the call's tag (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>).
 --
 
 [horizontal]
-ID:: `+req~ssr-e2e-receiver-state~3+`
+ID:: `+req~ssr-e2e-receiver-state~4+`
 ASIL:: B
 Allocated to:: the E2E wire
 Verification:: test, miri, heap-window, review
 * *test*
 ** A contended frame is refused and counted, never waited on.
+** A frame whose declared header data ID differs from the expected data ID that it is given: refused as an identity mismatch without the slot's try-lock, with the slot's state unchanged, and never refused as contended.
 ** Frames of one route decoded concurrently, including from a push-binding test double that delivers them from two threads: a frame that finds its slot held refused and counted as contended, every other judged as <<req-ssr-e2e-detects,The E2E wire detects each fault>> states, and the slot's state never corrupted.
 * *miri*: the try-lock under threads.
-* *review*: one fixed-size slot per declared data ID, each in storage that the caller provides at construction, no route context reaching the wire, and an RPC client keeping no receiving slot.
+* *review*: one fixed-size slot per declared data ID, each in storage that the caller provides at construction, no route context reaching the wire other than the expected data ID, the shape selector evaluated by the wire itself, and an RPC client keeping no receiving slot.
 
 *Rationale.*
 Receiver state is larger than a single atomic word.
 So it requires exclusive updates while its published figures remain readable without waiting for the state lock.
 
+_One value of route context._
+The expected data ID is one fixed-width value, so the wire gains no routing service and keeps one decode, one lock scope and its rules for concurrent decodes.
+A split into a verify step and a commit step would either hold the slot's lock across element code or let another frame commit between the two, so the wire takes the one value instead.
+
 [[req-ssr-e2e-refusal-counted]]
 == End-to-end refusals are named, and counted once
 
-[.specitem,oft-sid="req~ssr-e2e-refusal-counted~3",oft-title="End-to-end refusals are named, and counted once",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-e2e-refusal-counted~4",oft-title="End-to-end refusals are named, and counted once",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Named.*
 The element *MUST* report each end-to-end refusal as one fixed-size wire error variant that names what failed.
 
-* For a refusal by the E2E wire, the name is the wire's own: corrupt, undeclared data ID, repeat, late, below the floor, out of window, stale, retired, older, contended, misaddressed, wrong call or status mismatch.
+* For a refusal by the E2E wire, the name is the wire's own: corrupt, undeclared data ID, identity mismatch, repeat, late, below the floor, out of window, stale, retired, older, contended, misaddressed, wrong call or status mismatch.
 * For a response, a request or a frame on a topic's or a notification's receive route with no E2E header, the name is `+unprotected+`.
 
 *Counted once.*
@@ -615,6 +795,9 @@ The element *MUST* count each refusal by the E2E wire once, in one route counter
 * when a response arrives.
 
 How the element keeps that count at a server, under each refusal's name, is stated in <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>.
+
+*A native refusal under the composition.*
+On a route that selects the native protection composition, a frame whose outer extent the route does not admit, or that fails the element's checks on the value branch, is no refusal by the E2E wire: the element refuses it before the wire reads it, under the native shape or agreement cause, and counts it once in the route's counter, not in the E2E counter and not as `+unprotected+` (xref:../integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]).
 
 *A response with no E2E header.*
 On an RPC client's response route that selects the E2E wire, a response that carries no payload of the E2E wire's encoding, a response with no payload included, has no E2E header.
@@ -642,16 +825,16 @@ For such a frame, these rules replace that item's refusal, result and count for 
 --
 
 [horizontal]
-ID:: `+req~ssr-e2e-refusal-counted~3+`
+ID:: `+req~ssr-e2e-refusal-counted~4+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, heap-window
 * *test*
-** Each kind of refusal by the E2E wire, on a subscriber's receive route and on a client's response decode, counted once in the E2E counter, with `+refused+` unchanged.
+** Each kind of refusal by the E2E wire, an identity mismatch included, on a subscriber's receive route and on a client's response decode, counted once in the E2E counter, with `+refused+` unchanged.
 ** On a client's response route that selects the E2E wire, a response with no payload and one whose payload names another encoding, also one of length zero: each given to no wire, refused, and counted once as `+unprotected+` in its own counter, not in the E2E counter and under no other cause.
 ** On a server's request route that selects the E2E wire, a request with no payload to an operation that requires a value, one with no payload to an operation whose declared contract permits a message with no payload, one whose payload names an encoding that no wire of the route declares, and one whose payload names the inner wire's encoding, also one of length zero: each given to no wire, not delivered, refused, and counted once as `+unprotected+` in its own counter, not in the E2E counter and under no other cause, with no `+missing_payload+` result.
 ** On each of a topic's and a notification's receive routes that selects the E2E wire, a frame with no payload to an operation that requires a value, one with no payload to an operation whose declared contract permits a message with no payload, one whose payload names an encoding that no wire of the route declares, one whose payload names the inner wire's encoding, and one whose payload names the encoding of another wire of the route, also one of length zero, none refused by an earlier check: each given to no wire, not delivered, refused, and counted once as `+unprotected+` in its own counter, not in the E2E counter and under no other cause, with no `+missing_payload+` result and no absence reported.
-** On those routes, a present-empty payload bearing the E2E wire's encoding identifier and admitted by the preceding checks reaches that wire and is refused by its header check, counted in the E2E counter and not as `+unprotected+`.
+** On those routes, a present-empty payload bearing the E2E wire's encoding identifier and admitted by the preceding checks reaches that wire and is refused by its header check, counted in the E2E counter and not as `+unprotected+`; on a route that selects the native protection composition, such a payload, an outer extent of zero, is not admitted by the element's checks of the composition: it is refused under the native shape cause, counted once in the route's counter, and not given to the wire.
 ** The same unprotected frames refused by an earlier TTL check: only that check's count, with no wire called and no `+unprotected+` count.
 ** A frame that reached the route's queue and is then refused as `+unprotected+` remains an arrival for the deadline monitor, as xref:../bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines it.
 ** A refused request's frame released at once.
@@ -659,17 +842,19 @@ Verification:: test, heap-window
 *Rationale.*
 A response rejected before completion needs a visible cause, and a response with no E2E header is not corrupt protected traffic, so it has a counter of its own.
 A request or a frame on a topic's or a notification's receive route with no E2E header has passed no end-to-end check, whatever its operation accepts, so delivering it would bypass the protection that its route selects.
+Under the native protection composition, an outer extent that the route does not admit never reaches the wire, so it has one owner, the element, and one count.
 
 [[req-ssr-e2e-refusal-answered]]
 == A refused request is answered, final or advisory
 
-[.specitem,oft-sid="req~ssr-e2e-refusal-answered~2",oft-title="A refused request is answered, final or advisory",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyE2eWire"]
+[.specitem,oft-sid="req~ssr-e2e-refusal-answered~3",oft-title="A refused request is answered, final or advisory",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyE2eWire"]
 --
 *The wire classes each refused request.*
 For each request that it refuses, the E2E wire, as the receiver at a server, *MUST* state the first of these that applies:
 
 * that the request is corrupt: its length, CRC, reserved bytes or method fields fail, so it has nothing trustworthy to echo;
 * that its data ID was not declared;
+* that its data ID was declared and differs from the request's expected data ID, an identity mismatch (<<req-ssr-e2e-data-id,One data ID per sender and route>>);
 * for every other refusal, its kind (stale, repeat, out of window, below the floor, contended, retired or older) and its class, final or advisory.
 
 So a request that is corrupt is classed corrupt whatever data ID it names (<<req-ssr-e2e-detects,The E2E wire detects each fault>>), and gets no `+InvalidArgument+` answer.
@@ -687,8 +872,10 @@ For a refusal that has a kind and a class, the E2E wire *MUST* encode the refusa
 * the status `+Aborted+`;
 * the refusal's kind, in the first reserved byte.
 
+On a route that selects the native protection composition, the refusal answer is a Control (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>, "Shapes of a protected native response"): its outer extent is H, the header alone, and it carries no value.
+
 *The element answers.*
-At a server, the element *MUST* give every request that the E2E wire refuses exactly one answer, except a corrupt one, to which it *MUST* give none:
+At a server, the element *MUST* give every request that the E2E wire refuses exactly one answer, except a corrupt one and one refused as an identity mismatch, to which it *MUST* give none:
 
 * to a request whose data ID was not declared, `+InvalidArgument+`, sent as xref:../../up-l2/api.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered] states;
 * to every other refused request, the wire's refusal answer, in every state of strict mode.
@@ -698,7 +885,7 @@ The element *MUST* send the class that the wire gave, and *MUST NOT* change it.
 The element *MUST* try a refusal answer once, whatever the response route's overflow policy, and *MUST* drop and count an answer that the route cannot take.
 
 *Counting at the server.*
-At a server, the element *MUST* count each request that the E2E wire refuses, under the refusal's name: corrupt, undeclared data ID, or its kind.
+At a server, the element *MUST* count each request that the E2E wire refuses, under the refusal's name: corrupt, undeclared data ID, identity mismatch, or its kind.
 That count is the refusal's one count in the E2E counter (<<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>>), and no second count of the request.
 The count of an unsent wire refusal answer is stated under "Sending a refusal answer"; the count of an unsent `+InvalidArgument+` answer is stated in xref:../../up-l2/api.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
 
@@ -712,7 +899,7 @@ On a route that selects the E2E wire, the element *MUST* provide room in a clien
 --
 
 [horizontal]
-ID:: `+req~ssr-e2e-refusal-answered~2+`
+ID:: `+req~ssr-e2e-refusal-answered~3+`
 ASIL:: B
 Allocated to:: the E2E wire, for classing each refused request and for encoding the refusal answer; the element, for answering, sending and counting at a server, for applying an answer at a client, and for the client's response queue
 Verification:: test, heap-window
@@ -721,13 +908,15 @@ Verification:: test, heap-window
 ** Each listed final case classed final, and a refusal of each kind outside those cases classed advisory.
 ** The element sending the wire's class unchanged.
 ** A corrupt request left unanswered, also where it is the only copy and where it names an undeclared data ID.
+** A request refused as an identity mismatch: left unanswered, and counted once in the E2E counter under that name.
+** On a route that selects the native protection composition, a final and an advisory refusal answer, each a Control of extent H, with the result, `+Aborted+` and the kind inside the method header and its CRC.
 ** An undeclared data ID answered `+InvalidArgument+`, and counted.
 ** A request classed final: answered by the wire's final refusal answer, its call then completed at once as rejected with `+Aborted+`, naming the kind.
 ** An advisory answer given back, the call staying open.
 ** A call that got two advisory answers of different kinds, and no response that completes it: still pending at its TTL, ending then and naming the kind of the last advisory answer that it got.
 ** A duplicated request that arrives before the real response: answered advisory, and its call completed by the real response.
 ** A refusal answer that the route cannot take, tried once, dropped and counted, whatever the route's overflow policy.
-** The server's counts: each request that the E2E wire refuses, corrupt and undeclared data ID included, counted once in the E2E counter under the refusal's name, and not a second time.
+** The server's counts: each request that the E2E wire refuses, corrupt, undeclared data ID and identity mismatch included, counted once in the E2E counter under the refusal's name, and not a second time.
 ** Where the strict older-incarnation refusal applies, a client locked out by a false declaration told on every call, and counted at the server.
 ** A client's response queue on a route that selects the E2E wire holding one more frame per call in flight.
 
@@ -736,10 +925,14 @@ A final refusal is safe only when this server instance cannot also deliver the r
 Otherwise an advisory answer preserves the possibility of its real response.
 The wire holds the history that proves non-delivery, so the wire classes the answer and the element sends what the wire classed.
 
+_No answer to an identity mismatch._
+An answer's address would come from the request's metadata while its tag would echo the other sender's data ID, so the client that the answer reached would refuse it as misaddressed, and the metadata attests no address for the other sender.
+The refusal is counted at the server under its name, so it is not silent; the sentence of <<req-ssr-e2e-resync,A restart resynchronizes, stale frames are refused, and no arrival order locks a sender out>> that a lockout is never silent concerns a false declaration of increasing starts, and requires no answer to every invalid identity.
+
 [[req-ssr-e2e-figures]]
 == The E2E wire's figures cover the stretch from encode to decode
 
-[.specitem,oft-sid="req~ssr-e2e-figures~3",oft-title="The E2E wire's figures cover the stretch from encode to decode",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
+[.specitem,oft-sid="req~ssr-e2e-figures~4",oft-title="The E2E wire's figures cover the stretch from encode to decode",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
 --
 *The figures.*
 The E2E wire *MUST* keep, for each declared sender and in its own fixed storage, figures that the application reads without taking the slot's lock, one atomic each, each saturating at 2^32^ − 1: lost, late and pending frames, gaps, restarts, resyncs, and refusals by kind.
@@ -770,10 +963,11 @@ The E2E wire *MUST* keep, for each declared sender and in its own fixed storage,
 * The figures do not count the lost tail of an incarnation, or frames sent before the receiver started.
 * A frame that the receiving route drops or expires after decode is counted by that route and *MUST NOT* be counted in the figures.
 * A frame counted lost that then arrives, more than 63 counters late, *MUST* also be counted as refused.
+* A frame refused as an identity mismatch *MUST NOT* change the figures of any sender: its attribution to either sender is what the frame failed to establish.
 --
 
 [horizontal]
-ID:: `+req~ssr-e2e-figures~3+`
+ID:: `+req~ssr-e2e-figures~4+`
 ASIL:: B
 Allocated to:: the E2E wire
 Verification:: test, heap-window
@@ -798,6 +992,7 @@ Verification:: test, heap-window
 ** Each figure saturating.
 ** A frame that the receiving route's drop-oldest policy evicts after decode, counted by that route under its cause and not in the figures.
 ** A frame that the receiving route expires after decode, counted by that route under its cause and not in the figures.
+** A frame refused as an identity mismatch: the figures of the sender that its metadata names and of the sender whose data ID it carries both unchanged.
 
 *Rationale.*
 A frame missing from a sender's counters is a certain loss only once the window has passed it or the reference has changed, and its gap stays pending until then.
