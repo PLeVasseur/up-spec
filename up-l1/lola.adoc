@@ -689,17 +689,17 @@ The payload length gives only the length.
 
 *Where the binding takes it.*
 The LoLa binding reads none of these facts from the metadata (<<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>>).
-When it sends a frame, it takes whether the frame has a payload, the payload's encoding and the payload's length from the element's request for the loan.
+When it sends a frame, it takes whether the frame has a payload, and the payload's length, from the element's request for the loan, and it carries the frame's metadata, which names the payload's encoding, unchanged.
 When it receives a frame, it takes whether the frame has a payload from the element's hand-back.
 
 *An absent payload.*
 The LoLa binding *MUST* write a payload length of zero for a frame that the element's request for the loan states has no payload, and *MUST* report a received frame that the element's hand-back states has no payload as a frame with no payload, never as a payload of length zero.
 
 *A present empty payload.*
-The binding *MUST* keep the payload encoding of a frame whose payload the element's request for the loan states is present and empty, and write a payload length of zero for it, and *MUST* report a received frame that the element's hand-back states has a present payload of length zero as a present payload of length zero.
+The binding *MUST* carry unchanged the metadata of a frame whose payload the element's request for the loan states is present and empty, so that the payload encoding that the metadata names is kept, and write a payload length of zero for it, and *MUST* report a received frame that the element's hand-back states has a present payload of length zero as a present payload of length zero.
 
 *Bytes with no encoding.*
-The binding *MUST* refuse, before it sends, payload bytes for a frame that the element's request for the loan states has no payload encoding.
+The binding *MUST* refuse, before it sends, payload bytes for a frame that the element's request for the loan states has no payload, and so no payload encoding.
 
 *Replacement.*
 This revision replaces revision 1 of this item for the LoLa binding: the binding takes the facts above from the element's request for the loan and from its hand-back, where revision 1 of this item had it read them from the frame's metadata.
@@ -712,7 +712,7 @@ ASIL:: B
 Allocated to:: the LoLa binding
 Verification:: test, review
 * *test*: a frame with no payload, a frame with a present empty payload and a frame with a payload, each sent from the element's request for the loan and received, and reported as the element's hand-back states it, with the binding parsing no metadata bytes: a payload length of zero for an absent payload; a payload length of zero, with the encoding kept, for a present empty one; payload bytes with no encoding, refused before sending.
-* *review*: at source level, that the binding takes presence, the encoding and the length from the element's request for the loan, and presence from its hand-back, and parses no metadata.
+* *review*: at source level, that the binding takes presence and the length from the element's request for the loan, and presence from its hand-back, carries the metadata unchanged, and parses no metadata.
 
 *Rationale.*
 A wire is given only a payload of its own encoding (xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), so the difference between no payload and an empty one has to survive the envelope.
