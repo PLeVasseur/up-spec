@@ -288,7 +288,7 @@ What the refused copy owns is released as xref:../up-l1/runtime.adoc#req-ssr-hea
 [[req-ssr-peer-rpc-undecodable-answered]]
 === An undecodable request is answered
 
-[.specitem,oft-sid="req~ssr-peer-rpc-undecodable-answered~7",oft-title="An undecodable request is answered",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-peer-rpc-undecodable-answered~8",oft-title="An undecodable request is answered",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *The answer.*
 Where the element's RPC server role receives a request whose header the element can parse, the element *MUST* answer the request once, as a response to its reply address, with commstatus `+InvalidArgument+`, producing the answer without heap, where the check of "The order of the checks" that refuses the request refuses it for one of these causes:
@@ -301,18 +301,18 @@ Where the element's RPC server role receives a request whose header the element 
 When a request whose header the element can parse reaches the route of its RPC server role, the element *MUST* make these checks of it in this order, and *MUST NOT* make a later one of them for a request that an earlier one refuses:
 
 . its TTL: a TTL of 0, its expiry, and a clock that cannot be read (xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed], which also states that a request that it refuses gets no check of its payload and no other count);
-. its payload, before any wire: on a route that does not select the E2E wire, its encoding and its presence (xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]); on a route that selects it, whether it carries an E2E header (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once]);
+. its payload, before any wire: on a route that does not select the E2E wire, its encoding and its presence (xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]); on a route that selects it, whether it carries an E2E header (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once]), and then, on a route that selects the native protection composition, the element's protected-native preflight: stable, legal access to the request's outer extent, and that extent against the extents that the route admits, and, where a view of a value may follow, the writer's layout identity and ABI and the actual address of the inner value (xref:../up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]; xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]);
 . on a route that selects the E2E wire, that wire's check (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory]);
 . the decode of its payload, where it has one, with, on a native route, the check of its agreed layout (xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]).
 
 A request with no payload whose operation's declared contract permits that absence passes the second check on a route that does not select the E2E wire, and no wire decodes anything for it.
 
-The element *MUST* make these checks only for a request that the checks which other items state for it have admitted, which come first, in this order: its binding's checks of its envelope and of its metadata's form (xref:../up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]; xref:../up-l1/lola.adoc#req-ssr-binding-lola-envelope-checks[On LoLa, a sample that is not a well-formed envelope is refused before any of it is used]); the element's check of its metadata's identity and its filters (xref:../up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-metadata[On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check]; xref:../up-l1/lola.adoc#req-ssr-binding-lola-envelope-metadata[On LoLa, the metadata is the selected wire's, and is checked before delivery]); and the classification of its peer (xref:../up-l1/peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected]; xref:../up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones]).
+The element *MUST* make these checks only for a request that the checks which other items state for it have admitted, which come first, in this order: its binding's checks of its envelope (xref:../up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]; xref:../up-l1/lola.adoc#req-ssr-binding-lola-envelope-checks[On LoLa, a sample that is not a well-formed envelope is refused before any of it is used]); the element's admission of its metadata, which checks its form, its fields, the payload that it states against the payload length that the envelope gives, its identity and its filters (xref:../up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-metadata[On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check]; xref:../up-l1/lola.adoc#req-ssr-binding-lola-envelope-metadata[On LoLa, the metadata is the selected wire's, and is checked before delivery]); and the classification of its peer (xref:../up-l1/peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected]; xref:../up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones]).
 The element *MUST NOT* make one of those after an earlier one has refused the request.
 A request that one of them refuses gets none of these checks and no answer under this item, and its refusal is returned or counted once as the item of that check states.
 
 *The one count.*
-The element *MUST* count each request that one of these checks refuses exactly once on its route, under the cause that the refusing check names, also where a typed operation returns that refusal's result to its caller: a refusal by the first check as xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states, a request with no E2E header as xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once] states, and a refusal by the E2E wire as xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory] states.
+The element *MUST* count each request that one of these checks refuses exactly once on its route, under the cause that the refusing check names, also where a typed operation returns that refusal's result to its caller: a refusal by the first check as xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states, a request with no E2E header as xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once] states, a refusal by the protected-native preflight under the cause of the native check that refuses it (xref:../up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]; xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]) and not in the E2E counter, and a refusal by the E2E wire as xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory] states.
 Each received copy of a request is a request of its own here, and an answer to a request is no second count of it.
 
 *No second answer.*
@@ -328,7 +328,7 @@ Its refusal is as xref:../basics/error_model.adoc#req-ssr-refuse-no-panic[No pan
 Where the element refuses it, the element *MUST* count it exactly once on its route, also where a typed operation returns that refusal's result to its caller.
 Where the request's binding refuses it in a check of its own, its refusal is returned or counted once as that binding's item states.
 * The element *MUST NOT* answer a request that the first check refuses for its expiry or because the clock cannot be read, on any route.
-* On a route that selects the E2E wire, the element *MUST NOT* answer a request that it refuses before the E2E wire reads it, by the first or the second check: among them a request whose TTL is 0, one with no payload, and one whose payload is of an encoding other than the E2E wire's.
+* On a route that selects the E2E wire, the element *MUST NOT* answer a request that it refuses before the E2E wire reads it, by the first or the second check, the protected-native preflight included: among them a request whose TTL is 0, one with no payload, one whose payload is of an encoding other than the E2E wire's, and one that the protected-native preflight refuses.
 The E2E wire has not read such a request, so the request has no tag for an answer to echo (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call]).
 * The element *MUST* count once an `+InvalidArgument+` answer of this item that it cannot send, as an event of its own and not as a second count of its request; where the route's overflow policy discards the answer, that count is the discard's (xref:../up-l1/runtime.adoc#req-ssr-qos-overflow[Overflow acts as declared]).
 * In each of these cases the client's call gets no answer to that request.
@@ -350,7 +350,7 @@ The element *MUST* release every refused request's frame at once.
 --
 
 [horizontal]
-ID:: `+req~ssr-peer-rpc-undecodable-answered~7+`
+ID:: `+req~ssr-peer-rpc-undecodable-answered~8+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, heap-window
@@ -365,7 +365,9 @@ Each is given to no wire, counted once as `+unprotected+` and under no other cau
 ** On a route that does not select the E2E wire, a request that its TTL check admits and that has no payload, to an operation that requires a value, at a server that returns `+missing_payload+` to its caller and at one whose requests are delivered by push: counted once in each case, and answered `+InvalidArgument+`.
 ** At a server that returns results to a caller: a request refused for a missing payload on a route that does not select the E2E wire, to an operation that requires a value, after its earlier checks admitted it; a request refused as `+unprotected+`, one refused by its TTL check, and one that a check of its metadata or its peer refuses: in each case the caller given no means to answer it, and the client given at most one answer.
 ** A request that a check of its envelope, its metadata or its peer refuses, also with a TTL of 0 or a payload that would fail a later check: given none of this item's checks, not answered, and returned or counted once as that check's item states; a request whose metadata names another wire and that comes from an undeclared peer: refused by the metadata check alone.
-** On a native route, a request whose agreed layout is not established for it: refused by the fourth check, counted once, and answered `+InvalidArgument+`.
+** A request whose metadata names no payload encoding while its envelope gives a payload length of 1, admitted by its binding's checks: refused by the element's admission of its metadata as `+payload_presence_extent_mismatch+`, counted once, given none of this item's checks, and not answered.
+** On a native route that does not select the E2E wire, a request whose agreed layout is not established for it: refused by the fourth check, counted once, and answered `+InvalidArgument+`.
+** On a route that selects the native protection composition, a request that the protected-native preflight refuses, once for its outer extent and once for its writer's layout: no check by the E2E wire, so no CRC read and no E2E state changed; counted once under the native check's cause and not in the E2E counter; not answered.
 ** Two copies of one undecodable request: each answered once and counted once.
 ** Such an answer on a response route that is full: sent under the route's overflow policy, with a wait within its bound where the route declares a bounded wait; an answer that the overflow policy discards, counted once, as that discard.
 ** A request whose header cannot be parsed: not answered; where the element refuses it, counted once on its route, also at a server that returns results to a caller; where its binding's own check refused it, returned or counted once as that binding's item states; its call, still pending at its TTL, ending then.
@@ -381,6 +383,7 @@ A known decoding failure can be reported immediately.
 
 _The order of the checks._
 The TTL check reads only the header, so an invalid or expired request is refused before its payload is looked at (xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]); the payload is admitted before any wire reads it, and the E2E wire runs before the decode.
+On a route that selects the native protection composition, the native checks that a view would need come before the E2E wire, so that no native refusal follows a change of the wire's state.
 So the one check that refuses a request names the cause of its one count, and decides its answer.
 
 _End-to-end refusals._
