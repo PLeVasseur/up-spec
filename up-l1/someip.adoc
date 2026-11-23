@@ -297,7 +297,7 @@ This item replaces, in the form that xref:../contract-generations.adoc#req-ssr-c
 | The service translation of this chapter: this item, the tables, correlation and refusal rules of the items that follow it, and the call contracts of <<someip-call-allocation>> for each operation that the translator exposes
 
 | What does not change
-| `+req~utransport-send-preserve-data~1+` and every other UTransport item, for every UTransport implementation: each transmission of a uProtocol message from a sender to receivers, the legs to and from a translator included, and the exact adapter between a classic API and an owned-frame route (xref:payload-paths.adoc#req-sdk-owned-frame-adapter[an owned-frame adapter]). No kind of UTransport implementation is exempt from `+req~utransport-send-preserve-data~1+`.
+| `+req~utransport-send-preserve-data~1+` and every other UTransport item, for every UTransport implementation: each transmission of a uProtocol message from a sender to receivers, the legs to and from a translator included, and the exact adapter between a classic API and an owned-frame route (xref:payload-paths.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name]). No kind of UTransport implementation is exempt from `+req~utransport-send-preserve-data~1+`.
 |===
 
 The published text of this chapter that the service translation replaces, as the same rule requires each to be named:
@@ -762,8 +762,9 @@ The type, the return code and the payload are decided together, and the payload 
 * The service contract declares for each slot its presence, _always a payload_ or _never a payload_, and, where it is _always_, its one encoding ID: the registered or private-use identifier that the contract assigns to the encoding (xref:../basics/payload_encoding_registry.adoc[payload-encoding registry]), or `0` where the contract defines the concrete encoding without assigning it one.
 An error slot is _always_.
 The slots of one method are independent: a getter's request slot is _never_ and its success slot _always_, and an error slot may have another encoding ID than the success slot.
-* The translator *MUST* refuse at setup, by name, a slot that would need both states, because the wire has no discriminator for it, and a slot whose encoding it cannot establish from the contract.
+* The translator *MUST* refuse at setup, by name, a slot that would need both states, because the wire has no discriminator for it.
 This is asked of one slot and never across slots: the type and the return code already tell success from failure.
+* The translator *MUST* refuse a payload or a body of an _always_ slot whose encoding it cannot establish from the contract, as one that the slot does not admit.
 * For each method the contract declares one _failure representation_: _code only_, which is the default, or _modelled error_, with its error slot.
 * *Precedence.* The joint tables select the branch, and with it one slot or none.
 The presence, encoding and byte rows of <<common-umessage-attributes>> apply to the selected slot and to nothing else.
@@ -1140,7 +1141,7 @@ The form stays `RESPONSE` whichever type a stack would choose for the same cause
 When a stock client's request gets no uProtocol answer within the supplied TTL, the default is silence: the stock client's own response timeout ends its call, and that indication is local to the client.
 `E_TIMEOUT` is never sent.
 A contract may declare an expiry code for a method: an interface-specific code or `E_NOT_OK`, and never `0x00`, a code that the profile keeps off the wire, or a reserved one.
-The declaration is complete with that code, because the reply is a generated reply in the form above, with its fields copied from the entry; no body source exists for a modelled error at expiry, so none can be declared, and the translator *MUST* refuse at setup, by name, a contract that declares an expiry body or any other expiry code.
+The declaration is complete with that code, because the reply is a generated reply in the form above, with its fields copied from the entry; no body source exists for a modelled error at expiry, so none can be declared, and the translator *MUST* refuse at setup, by name, a contract that declares an expiry body.
 A uProtocol answer that arrives after the release is refused with `UCode.NotFound` and counted (row RV11 of <<someip-entry>>).
 
 *Segmentation on the way out.*
