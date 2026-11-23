@@ -751,19 +751,22 @@ One version, written and checked, lets a later header be told apart instead of b
 [[req-ssr-binding-iceoryx2-frame-checks]]
 ==== On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used
 
-[.specitem,oft-sid="req~ssr-binding-iceoryx2-frame-checks~2",oft-title="On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used",oft-needs="impl,utest",oft-tags="SafetyIceoryx2"]
+[.specitem,oft-sid="req~ssr-binding-iceoryx2-frame-checks~3",oft-title="On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used",oft-needs="impl,utest",oft-tags="SafetyIceoryx2"]
 --
 *What is refused, and in which order.*
-The iceoryx2 binding *MUST* check a received sample in this order, and refuse it at the first check that it fails:
+A received sample is checked in this order, and refused at the first check that it fails.
+The iceoryx2 binding *MUST* make the first seven of these checks; the eighth is the element's (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>):
 
 . its header's version is not `00`;
 . one of its reserved bytes is not `00`;
 . one of the four numbers of its header is greater than the largest size that the binding can address;
-. its alignment is zero, or not a power of two;
+. its alignment is zero, not a power of two, or less than the receiving route's declared payload alignment;
 . its payload's offset is before the end of its metadata, which ends at the metadata length that its header gives;
-. its byte region is longer than the receiving route's largest frame, or its payload's offset plus its payload's length overflows or ends past the end of its byte region;
+. its metadata length is greater than the receiving route's declared limit for metadata, its payload length is greater than the receiving route's declared limit for a payload, its byte region is longer than the receiving route's largest frame, or its payload's offset plus its payload's length overflows or ends past the end of its byte region;
 . its payload's first byte is not at an address, where the binding maps the sample, that is a multiple of the alignment that its header gives;
-. its metadata does not decode in the metadata format of the route's selected wire, which the element has that wire decode (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>).
+. its metadata does not decode in the metadata format of the route's selected wire, which the element has that wire decode.
+
+A sample whose byte region is within the receiving route's largest frame is still refused at the sixth check where its metadata length or its payload length is greater than the route's limit for it.
 
 *The byte region's length, and a route's largest frame.*
 A route's _largest frame_ is the length of the byte region that the route's longest frame needs: its declared limit for metadata, plus its declared limit for a payload, plus one less than its declared payload alignment.
@@ -774,24 +777,31 @@ The binding *MUST* make the first seven checks with arithmetic that cannot overf
 These checks stand beside the binding's duty to keep a held frame at an address with the route's alignment (xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]).
 
 *What a refusal becomes.*
-The binding *MUST* drop a refused sample and give it back to iceoryx2 at once.
-It *MUST* count the refusal under its cause: a refused layout for the first seven checks, and refused metadata for the last.
-It *MUST* then take the next sample, within the work that the receive call is allowed (xref:bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]).
+The binding *MUST* drop a sample that one of the first seven checks refuses, or whose frame the element refuses in its admission of the metadata (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>), and give it back to iceoryx2 at once.
+It *MUST* count a refusal by one of the first seven checks once, as a refused layout, and *MUST NOT* count a sample whose frame the element refuses: the element counts that refusal once, as <<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>> states.
+It *MUST* then take the next sample, within the work that the receive call is allowed (xref:bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]); each refused sample is one unit of that work, whichever part refused it.
 It *MUST NOT* let any part of a sample that one of the first seven checks refuses reach the element, a wire or an application.
-Once the first seven checks have passed, the binding hands on only the metadata's extent, for the element to have the route's selected wire decode it (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>); that hand-over admits no frame.
-It *MUST NOT* let any part of a sample that the eighth check refuses reach a wire's decoding of the payload or an application.
-For a sample that the eighth check refuses, this replaces the iceoryx2 binding's duty in revision 1 of this item to let no part of it reach the element or a wire: only its metadata's extent reaches them, for decoding.
+Once the first seven checks have passed, the binding hands on only the metadata's extent and the payload length that the header gives, for the element's admission of the metadata (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>); that hand-over admits no frame.
+It *MUST NOT* let any part of a sample whose frame the element refuses reach a wire's decoding of the payload or an application.
+For a sample that the eighth check refuses, this replaces the iceoryx2 binding's duty in revision 1 of this item to let no part of it reach the element or a wire: only its metadata's extent, and the payload length that its header gives, reach the element, for its admission.
+This revision gives the element the count of a sample that the eighth check refuses, which revision 2 of this item gave the iceoryx2 binding; the transfer takes effect, and a composition of an element and an iceoryx2 binding that stand on different sides of it is refused, as <<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>> states in "Element and binding generations".
 That a refusal causes no panic is stated in xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input].
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-iceoryx2-frame-checks~2+`
+ID:: `+req~ssr-binding-iceoryx2-frame-checks~3+`
 ASIL:: B
 Allocated to:: the iceoryx2 binding
 Verification:: test, fault-injection, review
-* *test*: one sample for each case above, each refused and counted under its own cause, with a well-formed sample next to each, admitted; a sample that fails two checks, refused at the first and counted under its cause; a sample that passes the first seven checks and whose metadata does not decode: only its metadata handed on for decoding, the sample refused and counted once as refused metadata, and none of it decoded as a payload or delivered.
-* *fault-injection*: samples written by a faulty peer with each number of the header set to its largest value, with a version or a reserved byte that is not `00`, with metadata that does not decode, and with a length in iceoryx2's own header of the sample that is longer than the receiving route's largest frame: each refused and counted, with no panic, and the next well-formed sample received.
-* *review*: at source level, that the first seven checks are made before any range is formed from the header, and that no byte of the byte region is read before they pass.
+* *test*
+** One sample for each case above, each refused under its own cause, with a well-formed sample next to each, admitted: for each of the first seven checks, refused by the binding and counted once as a refused layout; for the eighth, refused by the element and counted once as refused metadata, and not counted by the binding.
+** A sample that fails two checks: refused at the first and counted under its cause.
+** A sample that passes the first seven checks and whose metadata does not decode: only its metadata's extent and its payload length handed on, the sample refused and counted once by the element, and none of it decoded as a payload or delivered.
+** A header whose metadata length is 80 on a route whose limit for metadata is 64, in a byte region of 80 that is within the route's largest frame: refused at the sixth check; a header whose payload length is greater than the route's limit for a payload, in a byte region within the route's largest frame: refused at the sixth check.
+** A header whose alignment is 1, on a route that declares a payload alignment of 8: refused at the fourth check.
+** On a pull route, a sample that the binding or the element refuses, then a valid one: one refusal, one give-back, and the valid sample received within the work that the call is allowed.
+* *fault-injection*: samples written by a faulty peer with each number of the header set to its largest value, with a version or a reserved byte that is not `00`, with metadata that does not decode, and with a length in iceoryx2's own header of the sample that is longer than the receiving route's largest frame: each refused and counted once by the part that refuses it, with no panic, and the next well-formed sample received.
+* *review*: at source level, that the first seven checks are made before any range is formed from the header, that no byte of the byte region is read before they pass, and that the binding counts no sample whose frame the element refused.
 
 *Rationale.*
 A peer writes the whole sample, header included (xref:peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]), so every length in it is input that is checked against a bound that the binding holds before it is trusted as a bound.
@@ -800,10 +810,14 @@ The byte region's length is input from the peer as well: iceoryx2 writes it into
 The receive path uses that count as the length of a raw slice pointer without checking it against a bound, and access to the sample's payload then makes a slice reference from that pointer without a further check (source: the code of iceoryx2, release 0.9.3, https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/sample.rs#L93-L124[`+iceoryx2/src/sample.rs+`, lines 93 to 124], where a received sample's payload is accessed; https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2/src/raw_sample.rs#L66-L71[`+iceoryx2/src/raw_sample.rs+`, lines 66 to 71], where the stored pointer becomes a reference).
 So the receiving route's largest frame, which the route declares, is what bounds it.
 
+_Two limits and an alignment._
+The bound on the byte region admits a frame of the route's largest size, so a frame can stay within it while its metadata or its payload exceeds the limit that the route declares for it; each length is therefore compared with its own limit as well.
+The route's readers need the payload at the route's declared alignment, so a header that gives a smaller one is refused.
+
 [[req-ssr-binding-iceoryx2-frame-presence]]
 ==== On iceoryx2, an absent payload and a present empty payload stay apart
 
-[.specitem,oft-sid="req~ssr-binding-iceoryx2-frame-presence~1",oft-title="On iceoryx2, an absent payload and a present empty payload stay apart",oft-needs="impl,utest",oft-tags="SafetyIceoryx2"]
+[.specitem,oft-sid="req~ssr-binding-iceoryx2-frame-presence~2",oft-title="On iceoryx2, an absent payload and a present empty payload stay apart",oft-needs="impl,utest",oft-tags="SafetyIceoryx2"]
 --
 *Presence.*
 Whether a frame has a payload is what its metadata says, in the metadata format of the route's selected wire (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]): a frame whose metadata has a payload encoding has a payload, and a frame without one has none.
@@ -811,28 +825,30 @@ The header's payload length gives only the length.
 
 *An absent payload.*
 The iceoryx2 binding *MUST* write a payload length of zero for a frame that the element sends without a payload, and *MUST NOT* give the element a payload extent to write for it.
-The binding *MUST* report a received frame that passes the checks of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>> and has no payload encoding as a frame with no payload, never as a payload of length zero.
-That holds whatever payload length the frame's header gives: the binding *MUST NOT* deliver bytes for a frame with no payload encoding.
+The binding *MUST* report a received frame that the element admits, and that has no payload encoding, as a frame with no payload, never as a payload of length zero, and *MUST NOT* deliver bytes for it.
+A received frame that has no payload encoding while its header gives a payload length other than zero is refused by the element before it is reported (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>).
+This revision retires, for such a frame, the iceoryx2 binding's duty in revision 1 of this item to report it as a frame with no payload; it takes effect in the composition that <<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>> names in "Element and binding generations".
 
 *A present empty payload.*
 The binding *MUST* write a payload length of zero for a frame whose payload is present and empty, and *MUST* report it as a present payload of length zero.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-iceoryx2-frame-presence~1+`
+ID:: `+req~ssr-binding-iceoryx2-frame-presence~2+`
 ASIL:: B
 Allocated to:: the iceoryx2 binding
 Verification:: test
-* *test*: a frame with no payload, a frame with a present empty payload and a frame with a payload, each sent, received and reported as what it is; a loan for a frame with no payload, which gives no payload extent to write.
+* *test*: a frame with no payload, a frame with a present empty payload and a frame with a payload, each sent, received and reported as what it is; a loan for a frame with no payload, which gives no payload extent to write; a received frame with no payload encoding whose header gives a payload length of 1: refused by the element, and neither reported nor delivered by the binding.
 
 *Rationale.*
 A wire is given only a payload of its own encoding (xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), so the difference between no payload and an empty one has to survive the frame.
 The header has no mark of its own for it, so the metadata, which the element writes and checks, is the one place that says it.
+A frame whose metadata says that it has no payload while its header gives a payload length is malformed, so it is refused rather than read one way or the other.
 
 [[req-ssr-binding-iceoryx2-frame-metadata]]
 ==== On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check
 
-[.specitem,oft-sid="req~ssr-binding-iceoryx2-frame-metadata~2",oft-title="On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check",oft-needs="impl,utest",oft-tags="SafetyIceoryx2,SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-binding-iceoryx2-frame-metadata~3",oft-title="On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check",oft-needs="impl,utest",oft-tags="SafetyIceoryx2,SafetyUpRustCore"]
 --
 *Whose bytes.*
 The metadata is the frame's metadata, which the element writes in the metadata format of the route's selected wire (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
@@ -847,32 +863,59 @@ Of the fields that the selected wire states for that format (xref:wires/README.a
 * whether the frame has a payload: <<req-ssr-binding-iceoryx2-frame-presence,On iceoryx2, an absent payload and a present empty payload stay apart>>;
 * the token: <<req-ssr-binding-iceoryx2-frame-wipe,On iceoryx2, the token of a loan that is not sent is wiped, and a sent frame is left as it was written>>.
 
-*Decoding.*
-The iceoryx2 binding *MUST* hand a frame's metadata on to be decoded only after the first seven checks of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>>, and the element *MUST* have the route's selected wire decode it.
-The binding refuses a frame whose metadata does not decode, under the eighth check of that item.
+*The hand-over.*
+After the first seven checks of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>> have passed, the iceoryx2 binding *MUST* hand the element the frame's metadata extent and the payload length that its header gives, and no byte of its payload, and *MUST* leave every comparison of the metadata's identity to the element.
+The hand-over is not a delivery to an application, and that its metadata decodes does not make a frame the route's.
+Within the same receive step, the element *MUST* admit or refuse the frame as the clause "The element's admission" states, and *MUST* hand its verdict back to the binding, with, for a frame that it admits, whether the frame has a payload and the frame's source.
+
+*The element's admission.*
+Before a frame reaches its route, the element *MUST* make these checks of it, in this order and once, and *MUST* refuse it at the first check that it fails:
+
+. the route's selected wire decodes the frame's metadata in the format that the wire states (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]); a frame whose metadata does not decode is refused metadata, the eighth check of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>>;
+. the metadata holds each field that the format requires, each in its range, and names a payload encoding exactly where it says that the frame has a payload;
+. the metadata names a payload encoding, or the payload length that the header gives is zero; a frame whose metadata names no payload encoding while that length is not zero is refused as `+payload_presence_extent_mismatch+`;
+. the wire, the payload family and the metadata layout that the metadata names are those that the route admits;
+. the metadata matches the source and sink filters of a receive of the route.
+
+The element *MUST NOT* evaluate a receive's filters for a frame that an earlier check refused, and *MUST NOT* deliver a frame to a receive whose filters its metadata does not match.
+For each frame that it refuses, the element *MUST* return the refusal or count it once, on the route, under the cause that the refusing check names, as xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states.
+A frame with a present payload of length zero, encoding identifier `0` included, passes the second and the third checks; what its empty input means is decided later, by the wire of its encoding (xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
+The element *MUST* make these checks before any of the frame reaches a wire's decoding of the payload or an application (xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), and *MUST NOT* make them again for the frame when it is taken (xref:bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
+This revision gives the element two duties that the iceoryx2 binding had: the count of a frame whose metadata does not decode, which revision 2 of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>> gave the binding; and, for a frame that has no payload encoding while its header gives a payload length other than zero, a refusal and its count in place of the report of a frame with no payload that revision 1 of <<req-ssr-binding-iceoryx2-frame-presence,On iceoryx2, an absent payload and a present empty payload stay apart>> gave the binding.
 
 *What the binding takes from it.*
-From the decoded metadata the binding *MUST* take nothing but whether the frame has a payload (<<req-ssr-binding-iceoryx2-frame-presence,On iceoryx2, an absent payload and a present empty payload stay apart>>) and the frame's source.
+From the element's hand-back the binding *MUST* take nothing but whether the frame has a payload (<<req-ssr-binding-iceoryx2-frame-presence,On iceoryx2, an absent payload and a present empty payload stay apart>>) and the frame's source.
 It *MUST* take the frame's peer identity from that source; what makes an identity stable, and how its incarnation rises, is stated in xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise].
 
-*The identity check.*
-The binding *MUST* hand each frame that passes its checks to the element with its metadata, and *MUST* leave every comparison of the metadata's identity to the element.
-The hand-over is not a delivery to an application, and that its metadata decodes does not make a frame the route's.
-The element *MUST* compare the wire, the payload family and the metadata layout that the metadata names with those that the route admits, and check the frame's fields and its filters, before any of the frame reaches a wire's decoding of the payload or an application (xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
+*Element and binding generations.*
+The duties that this revision, revision 3 of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>> and revision 2 of <<req-ssr-binding-iceoryx2-frame-presence,On iceoryx2, an absent payload and a present empty payload stay apart>> move between the iceoryx2 binding and the element take effect in a composition whose element and iceoryx2 binding both declare a revision of the specification that holds these revisions or later ones (xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "The declaration").
+The element and the iceoryx2 binding *MUST* each make a composition with a part of the other kind whose declared revision of the specification holds earlier revisions of these items either fail to build or be refused before runtime mode, naming that part.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-iceoryx2-frame-metadata~2+`
+ID:: `+req~ssr-binding-iceoryx2-frame-metadata~3+`
 ASIL:: B
-Allocated to:: the iceoryx2 binding; the element, for having the route's selected wire decode a frame's metadata, and for its check of the identity, the fields and the filters of a frame's metadata
+Allocated to:: the iceoryx2 binding; the element, for its admission of a frame's metadata as the clause "The element's admission" states (having the route's selected wire decode it, and the checks of its fields, of its presence against the payload length that the header gives, of its identity and of a receive's filters, in that order, once and before any of the frame reaches a wire's decoding of the payload or an application), for delivering no frame to a receive whose filters its metadata does not match, for refusing, and returning or counting once, a frame that one of those checks refuses, for handing its verdict, the frame's presence and its source back to the binding, and for its part in refusing a composition across the transfer
 Verification:: test, fault-injection, review
-* *test*: metadata carried byte for byte from sender to receiver; a frame whose metadata names another wire, another payload family or another metadata layout, with metadata that decodes: handed to the element, and refused there before its payload is decoded.
-* *fault-injection*: metadata that does not decode, in a frame that passes every other check, sent by a faulty peer: refused and counted by the binding.
-* *review*: at source level, that the binding hands the metadata on to be decoded only after the first seven checks, takes nothing from it but presence and the source, decides nothing from the identity that it names, and takes the frame's peer identity from the source; and that the element has the route's selected wire decode the metadata before its check of the frame's identity, fields and filters.
+* *test*
+** Metadata carried byte for byte from sender to receiver.
+** A frame whose metadata does not decode, and one whose prefix names another metadata layout: refused once by the element as refused metadata, with no presence taken from it, and not counted by the binding.
+** A frame whose metadata names no payload encoding while its header gives a payload length of 1, with a header that passes the first seven checks of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>>: refused once by the element as `+payload_presence_extent_mismatch+`, given back to iceoryx2 once, with no TTL count, payload processing, forwarding or answer; the same frame also expired, and the same frame whose metadata also names a wire that the route does not admit: the same refusal and count.
+** A frame with a present payload of length zero and encoding identifier `0`: admitted.
+** A frame whose metadata names another wire, another payload family or another metadata layout, with metadata that decodes: handed to the element, and refused there before its payload is decoded.
+** A frame whose metadata matches the filters of one receive of the route and not of another: delivered to the first only.
+** A frame whose metadata names no payload encoding while its header gives a payload length of 1, on a route with a deadline: on a pull route, recorded as an arrival when it is read, then refused; where the binding serves a route by push, refused at delivery and recorded as no arrival; counted once in either case.
+** An RPC request whose metadata decodes: the frame's source taken from the element's hand-back, and the response's ServiceName built from it.
+** A frame admitted to its route and taken later: its metadata not admitted again.
+** Each composition of an element and an iceoryx2 binding that stand on different sides of the transfer, in both directions: refused before runtime mode, naming the part, or not buildable.
+* *fault-injection*: metadata that does not decode, in a frame that passes every other check, sent by a faulty peer: refused and counted once by the element, and not counted by the binding.
+* *review*: at source level, that the binding hands the metadata on only after the first seven checks, takes nothing from the element's hand-back but presence and the source, decides nothing from the identity that the metadata names, and takes the frame's peer identity from the source; that the element makes its admission once, in the stated order, before the frame reaches its route; and the mechanism by which each part makes a composition across the transfer fail to build or be refused before runtime mode.
 
 *Rationale.*
 The metadata says what the frame is: the route's selected wire states its format and decodes it, and the element is the one that knows which wires the route admits.
 The binding takes only what it needs to hand the frame over, so that no second reading of the identity stands beside the element's.
+The element has the selected wire decode the metadata, so it also refuses and counts a frame whose metadata does not decode, and no such frame is counted twice.
+Presence is compared with the header's payload length before the identity and the filters, so that a malformed frame is refused once, whatever else its metadata names.
 
 [[req-ssr-binding-iceoryx2-frame-lifetime]]
 ==== On iceoryx2, a loan exposes only its metadata and its payload, and a receive view lives within its sample
