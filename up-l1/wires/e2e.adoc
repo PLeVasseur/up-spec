@@ -97,11 +97,11 @@ On a route that selects it:
 The route stays a native route: its native agreement names that identifier, the inner value has no second identifier on the wire, and the value's type, complete layout and ABI are agreed and compared as on any native route (xref:native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]).
 * *The header.* The composition *MUST* use the two header formats of <<req-ssr-e2e-header-format,The E2E header has one documented format>> unchanged, 32 bytes on a topic and 48 on an RPC route, and the header's length field *MUST* give the whole protected extent of the frame.
 * *Extents.* With H the header's length, and A and N the inner type's alignment and size, the inner offset I is H rounded up to a multiple of A, and the value extent E is I + N, each computed with checked arithmetic.
-The frame's physical header *MUST* declare the outer extent as its payload length, P.
+The element *MUST* give the outer extent as the payload length of each frame that it sends, so that the frame's physical header declares it; P is the payload length that a frame's physical header declares.
 N stays the type's size wherever a native type's size is declared or reported (xref:native.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout], "Size").
 * *Alignment.* The route *MUST* declare A as its payload alignment, so that its binding places the outer payload at a multiple of A in every mapping; for a value, the element also checks the inner value's actual address (xref:../integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]).
 * *The gap.* The bytes from H to I exist only where A does not divide H.
-The sender *MUST* initialize them (xref:native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], "Sending"); the CRC excludes them, and they carry no meaning.
+The element *MUST* initialize them in each frame that it sends (xref:native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], "Sending"); the CRC excludes them, and they carry no meaning.
 * *A value of size zero.* Where N is 0, E is I: the outer payload is present, and its extent is never zero.
 A view of a value of size zero still needs an address that is not null and is a multiple of A.
 * *The admitted set.* The outer extents that a route admits are E on a topic's or a request's route, and E and H on a response route.
@@ -119,7 +119,7 @@ For a 16-byte record with a `+u8+` at 0 and a `+u64+` at 8, the spans are the by
 [horizontal]
 ID:: `+req~ssr-e2e-wraps-any-wire~6+`
 ASIL:: B
-Allocated to:: the E2E wire; the element, for refusing at setup a route that selects the native protection composition for a type whose complete coverage it cannot establish
+Allocated to:: the E2E wire; the element, for giving the outer extent as the payload length of each frame that it sends under the native protection composition and initializing that frame's gap, and for refusing at setup a route that selects the native protection composition for a type whose complete coverage it cannot establish
 Verification:: test, heap-window
 * *test*
 ** The sequenced wire contract suite on the E2E wire, over a serialized wire and over a test wire.
@@ -640,7 +640,7 @@ What a response carries, and how a client judges it, is stated in <<req-ssr-e2e-
 [horizontal]
 ID:: `+req~ssr-e2e-data-id~6+`
 ASIL:: B
-Allocated to:: the E2E wire; the element, for the derivation that it provides as a function, for its derivation record, for deriving each frame's expected data ID and giving it to the wire, for deriving a sending role's data ID and refusing a supplied one that differs, for the setup refusal of a part whose configured authority name differs from its route's locality context, and for completing no received empty authority with its own name
+Allocated to:: the E2E wire; the element, for the derivation that it provides as a function, for its derivation record, for deriving each frame's expected data ID and giving it to the wire, for deriving a sending role's data ID and refusing a supplied one that differs, for refusing at setup, by name, a route on which the authority name that it is configured with differs from the locality context that the route declares while an input of its role has an empty authority, and a route whose sender's and receiver's declarations of its locality context, both of which it holds, differ, and for completing no received empty authority with its own name
 Verification:: test
 * Two clients of one method.
 * An undeclared sender.
