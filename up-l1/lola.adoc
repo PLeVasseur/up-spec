@@ -631,7 +631,7 @@ So an offset that aligns the payload in the sender's mapping aligns it in a rece
 [[req-ssr-binding-lola-envelope-checks]]
 === On LoLa, a sample that is not a well-formed envelope is refused before any of it is used
 
-[.specitem,oft-sid="req~ssr-binding-lola-envelope-checks~2",oft-title="On LoLa, a sample that is not a well-formed envelope is refused before any of it is used",oft-needs="impl,utest",oft-tags="SafetyLola"]
+[.specitem,oft-sid="req~ssr-binding-lola-envelope-checks~3",oft-title="On LoLa, a sample that is not a well-formed envelope is refused before any of it is used",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
 *What is refused.*
 The LoLa binding *MUST* refuse a received sample:
@@ -644,61 +644,76 @@ The LoLa binding *MUST* refuse a received sample:
 * whose payload length is greater than the receiving route's declared limit for a payload;
 * whose source hint is empty, or whose source hint or sink hint is not a routing hint that the binding can read as <<req-ssr-binding-lola-envelope-routing-hint,On LoLa, the routing hint is untrusted, and the metadata decides>> states;
 * whose payload offset is before the end of the metadata;
-* whose payload does not start at an address that is a multiple of the receiving route's declared payload alignment, where the binding maps the sample;
-* from whose metadata the binding cannot read whether the frame has a payload, or whose metadata says that the frame has no payload while its payload length is not zero (<<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>>).
+* whose payload does not start at an address that is a multiple of the receiving route's declared payload alignment, where the binding maps the sample.
 
 *Before any of it is used.*
 The binding *MUST* check every length and the offset with arithmetic that cannot overflow, before it forms any range from them.
-It *MUST* make the last check of the list only after every other check has passed.
-The binding *MUST NOT* let any part of a refused sample reach the element's checks, a wire or an application.
+The binding *MUST NOT* let any part of a sample that it refuses reach the element's checks, a wire or an application.
 
 *What a refusal becomes.*
 For each sample that it refuses, the binding *MUST* either return the refusal as the error of the call that met the sample, or count it exactly once on the receiving route.
 The binding *MUST* name the cause in that error or that counter: a refused envelope (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 The binding *MUST* return each refused sample to LoLa as it returns a frame whose lease is dropped, so that a refused sample does not stay charged to the route (xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 A refused sample is peer input, and xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input] holds for it.
+
+*What the element checks.*
+Whether a frame has a payload, and whether that agrees with the payload length that its header gives, is checked by the element, in its admission of the frame's metadata, after the checks of this item have passed (<<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>>, "The element's admission").
+This revision gives the element the refusal that revision 2 of this item gave the LoLa binding: of a sample from whose metadata the binding could not read whether the frame has a payload, and of one whose metadata said that the frame has no payload while its payload length was not zero.
+The transfer takes effect, and a composition of an element and a LoLa binding that stand on different sides of it is refused, as <<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>> states in "Element and binding generations".
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-lola-envelope-checks~2+`
+ID:: `+req~ssr-binding-lola-envelope-checks~3+`
 ASIL:: B
 Allocated to:: the LoLa binding
 Verification:: test, fault-injection, review
-* *test*: one sample for each case above: refused, with no part of it handed on, returned or counted once under the cause of a refused envelope, and given back to LoLa; and a well-formed sample next to each, handed to the element.
+* *test*: one sample for each case above: refused, with no part of it handed on, returned or counted once under the cause of a refused envelope, and given back to LoLa; and a well-formed sample next to each, handed to the element; and a sample whose header passes every check above while its metadata names no payload encoding with a payload length of 1, and one whose metadata does not decode: handed to the element, and neither refused nor counted by the binding.
 * *fault-injection*: truncated samples, and samples with each field of the header set to its largest value, sent on a route by a faulty peer: each refused, and returned or counted once, with no panic, and with the route's count of retained samples unchanged afterwards.
-* *review*: at source level, that every length and the offset is checked with arithmetic that cannot overflow before any range is formed from it, and that the binding reads whether the frame has a payload only after every other check has passed.
+* *review*: at source level, that every length and the offset is checked with arithmetic that cannot overflow before any range is formed from it, and that the binding reads nothing of the metadata.
 
 *Rationale.*
 A peer writes the whole sample, header included (xref:peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]), so every field is input that has to be checked before it is trusted as a bound.
+The binding checks the layout that only it knows; what the metadata says is read once, by the element through the selected wire, so that no second reading of it stands beside the wire's.
 
 [[req-ssr-binding-lola-envelope-presence]]
 === On LoLa, an absent payload and a present empty payload stay apart
 
-[.specitem,oft-sid="req~ssr-binding-lola-envelope-presence~1",oft-title="On LoLa, an absent payload and a present empty payload stay apart",oft-needs="impl,utest",oft-tags="SafetyLola"]
+[.specitem,oft-sid="req~ssr-binding-lola-envelope-presence~2",oft-title="On LoLa, an absent payload and a present empty payload stay apart",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
 *Presence.*
 Whether a frame has a payload is what its metadata says: a frame with a payload encoding has a payload, and a frame without one has none.
 The payload length gives only the length.
 
+*Where the binding takes it.*
+The LoLa binding reads none of these facts from the metadata (<<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>>).
+When it sends a frame, it takes whether the frame has a payload, the payload's encoding and the payload's length from the element's request for the loan.
+When it receives a frame, it takes whether the frame has a payload from the element's hand-back.
+
 *An absent payload.*
-The LoLa binding *MUST* write a payload length of zero for a frame without a payload, and *MUST* report it as a frame with no payload, never as a payload of length zero.
+The LoLa binding *MUST* write a payload length of zero for a frame that the element's request for the loan states has no payload, and *MUST* report a received frame that the element's hand-back states has no payload as a frame with no payload, never as a payload of length zero.
 
 *A present empty payload.*
-The binding *MUST* keep the payload encoding of a frame whose payload is present and empty and write a payload length of zero for it, and *MUST* report it as a present payload of length zero.
+The binding *MUST* keep the payload encoding of a frame whose payload the element's request for the loan states is present and empty, and write a payload length of zero for it, and *MUST* report a received frame that the element's hand-back states has a present payload of length zero as a present payload of length zero.
 
 *Bytes with no encoding.*
-The binding *MUST* refuse, before it sends, payload bytes for a frame whose metadata has no payload encoding.
+The binding *MUST* refuse, before it sends, payload bytes for a frame that the element's request for the loan states has no payload encoding.
+
+*Replacement.*
+This revision replaces revision 1 of this item for the LoLa binding: the binding takes the facts above from the element's request for the loan and from its hand-back, where revision 1 of this item had it read them from the frame's metadata.
+It takes effect in the composition that <<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>> names in "Element and binding generations".
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-lola-envelope-presence~1+`
+ID:: `+req~ssr-binding-lola-envelope-presence~2+`
 ASIL:: B
 Allocated to:: the LoLa binding
-Verification:: test
-* *test*: a frame with no payload, a frame with a present empty payload and a frame with a payload, each sent and received, reported as what it is; payload bytes with no encoding, refused before sending.
+Verification:: test, review
+* *test*: a frame with no payload, a frame with a present empty payload and a frame with a payload, each sent from the element's request for the loan and received, and reported as the element's hand-back states it, with the binding parsing no metadata bytes: a payload length of zero for an absent payload; a payload length of zero, with the encoding kept, for a present empty one; payload bytes with no encoding, refused before sending.
+* *review*: at source level, that the binding takes presence, the encoding and the length from the element's request for the loan, and presence from its hand-back, and parses no metadata.
 
 *Rationale.*
 A wire is given only a payload of its own encoding (xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), so the difference between no payload and an empty one has to survive the envelope.
+The element states these facts when it asks for a loan and when it hands a received frame back, so the binding needs no reader of the metadata format of its own.
 
 [[req-ssr-binding-lola-envelope-routing-hint]]
 === On LoLa, the routing hint is untrusted, and the metadata decides
@@ -744,6 +759,7 @@ Verification:: test, fault-injection, review
 ** A sample whose hint names the receiving route while its metadata names another source: not delivered to that route.
 ** A sample whose hint names another route while its metadata matches the receive: delivered by the metadata, kept for a later receive, or refused by the element and returned or counted once; never delivered to a receive whose filters its metadata does not match, and never lost uncounted.
 ** A sample that the binding retains on its hint and then discards: its loss counted once, on the route whose queue or listener held it, under the cause of a discarded retained sample.
+** A sample that a hint brings to a receive whose filters its metadata does not match, and whose metadata names no payload encoding while its header gives a payload length of 1: refused once by the element as `+payload_presence_extent_mismatch+`, counted on the route whose receive step held it, with the filters not evaluated, no second count, one return to LoLa, and not kept for a later receive.
 * *fault-injection*: hints that are not URI text, and hints that name a source the route does not declare, sent by a faulty peer: refused or kept as above, with no delivery on the hint alone and no loss uncounted.
 * *review*: at source level, every use that the binding makes of a hint: none but the checks of the envelope, the choice of a queue or a listener and the keeping of a sample, and no comparison of a hint's bytes with another text to decide what the hint names.
 
@@ -757,40 +773,69 @@ One spelling for what the binding writes keeps two writers' hints for one source
 [[req-ssr-binding-lola-envelope-metadata]]
 === On LoLa, the metadata is the selected wire's, and is checked before delivery
 
-[.specitem,oft-sid="req~ssr-binding-lola-envelope-metadata~2",oft-title="On LoLa, the metadata is the selected wire's, and is checked before delivery",oft-needs="impl,utest",oft-tags="SafetyLola,SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-binding-lola-envelope-metadata~3",oft-title="On LoLa, the metadata is the selected wire's, and is checked before delivery",oft-needs="impl,utest",oft-tags="SafetyLola,SafetyUpRustCore"]
 --
 *Whose bytes.*
 The metadata is the metadata of the frame, in the metadata format of the wire that the route selects (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
 The envelope gives its place and its length, and the LoLa binding *MUST* carry it unchanged.
 
 *What the binding reads.*
-From the metadata the binding *MUST* read nothing but whether the frame has a payload, as the selected wire's metadata format states it (<<req-ssr-binding-lola-envelope-presence,On LoLa, an absent payload and a present empty payload stay apart>>), and, from a received sample, only after every other check of <<req-ssr-binding-lola-envelope-checks,On LoLa, a sample that is not a well-formed envelope is refused before any of it is used>> has passed.
+The LoLa binding *MUST* read nothing from the metadata.
+When it sends a frame, it *MUST* take whether the frame has a payload, and the payload's length, from the element's request for the loan; when it receives a frame, it *MUST* take whether the frame has a payload from the element's hand-back (<<req-ssr-binding-lola-envelope-presence,On LoLa, an absent payload and a present empty payload stay apart>>).
 The binding *MUST NOT* decide anything from the wire, the payload family, the layout, the source or the sink that the metadata names.
+This revision retires, for sending and for receiving, the reading of whether a frame has a payload that revision 2 of this item let the LoLa binding make from the metadata.
 
 *The hand-over.*
-The binding *MUST* hand a frame that passes its checks to the element only together with its metadata.
+Once a received sample has passed the checks of <<req-ssr-binding-lola-envelope-checks,On LoLa, a sample that is not a well-formed envelope is refused before any of it is used>>, the LoLa binding *MUST* hand the element the frame's metadata extent and the payload length that its header gives, and no byte of its payload.
+Within the same receive step, the element *MUST* admit or refuse the frame as the clause "The element's admission" states, and *MUST* hand its verdict back to the binding, with whether the frame has a payload for a frame that it admits.
+The binding *MUST* return each sample whose frame the element refuses to LoLa once, as it returns a frame whose lease is dropped (xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]), and *MUST NOT* count it: its one count is the element's.
 The hand-over is not a delivery to an application.
 
-*Decoded and checked before delivery.*
-The element *MUST* have the selected wire decode a frame's metadata, *MUST* compare the wire, the payload family and, on a native route, the layout that the metadata names with those that the route admits, and *MUST* match the receive's source and sink filters against the metadata, before any of the frame reaches a wire's decoding of the payload or an application (xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
-The element *MUST NOT* deliver a frame to a receive whose filters the frame's metadata does not match.
-The element *MUST* refuse a frame whose metadata does not decode, whose identity is not the route's, or whose metadata matches the filters of none of the route's receives, and *MUST* return or count that refusal once, as xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states.
+*The element's admission.*
+Before a frame reaches its route, the element *MUST* make these checks of it, in this order and once, and *MUST* refuse it at the first check that it fails:
+
+. the selected wire decodes the frame's metadata in the format that the wire states (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]); a frame whose metadata does not decode is refused metadata;
+. the metadata holds each field that the format requires, each in its range, and names a payload encoding exactly where it says that the frame has a payload;
+. the metadata names a payload encoding, or the payload length that the header gives is zero; a frame whose metadata names no payload encoding while that length is not zero is refused as `+payload_presence_extent_mismatch+`;
+. the wire, the payload family and the metadata layout that the metadata names are those that the route admits, on every route;
+. the metadata matches the source and sink filters of a receive of the route.
+
+The element *MUST NOT* evaluate a receive's filters for a frame that an earlier check refused, and *MUST NOT* deliver a frame to a receive whose filters its metadata does not match.
+For each frame that it refuses, the element *MUST* return the refusal or count it once, on the route whose receive step held the sample, under the cause that the refusing check names, as xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states.
+A frame that the third check refuses is counted as `+payload_presence_extent_mismatch+` and under no other cause, also where a routing hint brought it to that receive step: it is not counted as matching no receive, and it is not kept for a later one (<<req-ssr-binding-lola-envelope-routing-hint,On LoLa, the routing hint is untrusted, and the metadata decides>>).
+A frame with a present payload of length zero, encoding identifier `0` included, passes the second and the third checks; what its empty input means is decided later, by the wire of its encoding (xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
+The element *MUST* make these checks before any of the frame reaches a wire's decoding of the payload or an application (xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), and *MUST NOT* make them again for the frame when it is taken (xref:bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
 These duties of the element replace two duties of the LoLa binding: in revision 1 of this item, that a frame whose metadata does not decode, or whose identity is not the route's, reach neither a wire's decoding of the payload nor an application; and in revision 1 of <<req-ssr-binding-lola-envelope-routing-hint,On LoLa, the routing hint is untrusted, and the metadata decides>>, that a frame reach a receive only once its metadata has been decoded and the receive's source and sink filters have been matched against it.
+
+*Element and binding generations.*
+The duties that this revision, revision 3 of <<req-ssr-binding-lola-envelope-checks,On LoLa, a sample that is not a well-formed envelope is refused before any of it is used>> and revision 2 of <<req-ssr-binding-lola-envelope-presence,On LoLa, an absent payload and a present empty payload stay apart>> move between the LoLa binding and the element take effect in a composition whose element and LoLa binding both declare a revision of the specification that holds these revisions or later ones (xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "The declaration").
+The element and the LoLa binding *MUST* each make a composition with a part of the other kind whose declared revision of the specification holds earlier revisions of these items either fail to build or be refused before runtime mode, naming that part.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-lola-envelope-metadata~2+`
+ID:: `+req~ssr-binding-lola-envelope-metadata~3+`
 ASIL:: B
-Allocated to:: the LoLa binding; the element, for having the selected wire decode a frame's metadata, for its check of the frame's identity and of the receive's filters before any of the frame reaches a wire's decoding of the payload or an application, for delivering no frame to a receive whose filters its metadata does not match, and for refusing, and returning or counting, a frame whose metadata does not decode, whose identity is not the route's or whose metadata matches the filters of none of the route's receives
+Allocated to:: the LoLa binding; the element, for its admission of a frame's metadata as the clause "The element's admission" states (having the selected wire decode it, and the checks of its fields, of its presence against the payload length that the header gives, of its identity and of a receive's filters, in that order, once and before any of the frame reaches a wire's decoding of the payload or an application), for delivering no frame to a receive whose filters its metadata does not match, for refusing, and returning or counting once, a frame that one of those checks refuses, for handing its verdict and the frame's presence back to the binding, and for its part in refusing a composition across the transfer
 Verification:: test, fault-injection, review
-* *test*: metadata carried byte for byte from sender to receiver; a frame whose metadata names another wire, another payload family or, on a native route, another layout, with metadata that decodes: handed to the element, refused there before its payload is decoded, and returned or counted once; a frame whose metadata matches the filters of one receive of the route and not of another: delivered to the first only; a frame whose metadata matches the filters of none of the route's receives: delivered to none, refused, and returned or counted once.
-* *fault-injection*: metadata that does not decode, in an envelope that passes every other check, sent by a faulty peer: refused, and returned or counted once, with no part of the frame reaching a wire's decoding of the payload or an application.
-* *review*: at source level, that the binding reads nothing from the metadata but whether the frame has a payload, and decides nothing from what the metadata names.
+* *test*
+** Metadata carried byte for byte from sender to receiver.
+** A frame whose metadata does not decode, and one whose prefix names another metadata layout: refused once by the element as refused metadata, with no presence taken from it, and not counted by the binding.
+** A frame whose metadata names no payload encoding while its header gives a payload length of 1, with a header that passes every check of <<req-ssr-binding-lola-envelope-checks,On LoLa, a sample that is not a well-formed envelope is refused before any of it is used>>: refused once by the element as `+payload_presence_extent_mismatch+`, returned to LoLa once, with no TTL count, payload processing, forwarding or answer; the same frame also expired, and the same frame whose metadata also names a wire that the route does not admit: the same refusal and count.
+** A frame with a present payload of length zero and encoding identifier `0`: admitted.
+** A frame whose metadata names another wire, another payload family or another metadata layout, with metadata that decodes, on a native and on a serialized route: refused by the element before its payload is decoded, and returned or counted once.
+** A frame whose metadata matches the filters of one receive of the route and not of another: delivered to the first only; a frame whose metadata matches the filters of none of the route's receives: delivered to none, refused, and returned or counted once.
+** A frame whose metadata names no payload encoding while its header gives a payload length of 1, on a route with a deadline: where the binding serves the route by push, refused at delivery and recorded as no arrival; where it serves it by pull, recorded as an arrival when it is read and then refused; counted once in either case.
+** A frame admitted to its route and taken later: its metadata not admitted again.
+** Each composition of an element and a LoLa binding that stand on different sides of the transfer, in both directions: refused before runtime mode, naming the part, or not buildable.
+* *fault-injection*: metadata that does not decode, in an envelope that passes every other check, sent by a faulty peer: refused, and returned or counted once by the element, with no part of the frame reaching a wire's decoding of the payload or an application.
+* *review*: at source level, that the binding reads nothing from the metadata and decides nothing from what the metadata names; that the element makes its admission once, in the stated order, before the frame reaches its route; and the mechanism by which each part makes a composition across the transfer fail to build or be refused before runtime mode.
 
 *Rationale.*
 The metadata says what the frame is, and the selected wire is the one that can read it.
-The binding places it and reads from it only whether the frame has a payload, so that no second reading of what the frame is stands beside the wire's.
+The binding places it and reads nothing from it, so that no second reading of what the frame is stands beside the wire's.
 The element holds what the route admits and the receive's filters, so the check of a frame's identity and filters is the element's.
+Presence is compared with the header's payload length before the filters, so that a malformed frame is refused once, where it is found, whichever receive a routing hint brought it to.
+Both parts of one process have to agree on which of them checks, so a composition across the transfer is stopped before it runs.
 
 [[req-ssr-binding-lola-envelope-lifetime]]
 === On LoLa, a loan exposes only its payload, and a receive view lives within its sample
