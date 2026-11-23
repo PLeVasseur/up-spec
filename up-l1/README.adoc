@@ -602,8 +602,10 @@ uProtocol defines bindings to the following communication protocols:
 
 * xref:zenoh.adoc[*Eclipse Zenoh*]
 * xref:mqtt_5.adoc[*MQTT 5*]
-* xref:someip.adoc[*SOME/IP*]
 * xref:iceoryx2.adoc[*Eclipse iceoryx2*]
+
+uProtocol also defines a xref:someip.adoc#someip-service-translation[service translation to stock SOME/IP services].
+A component that performs it is a service translator for that conversion, and not a UTransport implementation.
 
 == Transport-Layer Chapters for the up-rust SEooC and Owned-Frame Contracts
 
