@@ -251,7 +251,7 @@ Each assignment *MUST* provide:
 * a registered media type when one accurately identifies the encoding, or
   `None registered` otherwise.
 
-Assignments 4 and 5 are excepted from the normative reference, and from it only: they are existing assignments, the registry gives them no formal reference, and their reference cells in xref:#assignments[Registry Assignments] stay blank.
+Assignments 4 and 5 are excepted from the normative reference, and from it only: they are existing assignments, the registry gives them no formal reference, and their cells in the Specification column of xref:#assignments[Registry Assignments] stay blank.
 The rule above holds unchanged for every other assignment, and for every new one.
 The exception supplies no replacement definition of either encoding, and it gives neither of them a claim of completeness or interoperability.
 
