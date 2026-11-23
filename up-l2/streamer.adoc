@@ -218,7 +218,7 @@ A leg that could attach to several services would have no one memory to lend and
 [[req-ssr-streamer-byte-identity]]
 == Carriage keeps the bytes
 
-[.specitem,oft-sid="req~ssr-streamer-byte-identity~3",oft-title="Carriage keeps the bytes",oft-needs="impl,utest",oft-tags="SafetyStreamer,SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-streamer-byte-identity~4",oft-title="Carriage keeps the bytes",oft-needs="impl,utest",oft-tags="SafetyStreamer,SafetyUpRustCore"]
 --
 *Who carries.*
 This requirement binds each carrier (<<req-ssr-carrier-route,A carrier route takes each frame at its ingress and sends it at its egress>>): the element, in what its carrier primitives do on a carrier route, and the Streamer, in what it does on each of its routes.
@@ -245,13 +245,28 @@ A carrier *MUST NOT* stage already-serialized input:
 * it *MUST* give a byte-only egress the ingress bytes directly;
 * it *MUST* copy the bytes for a lending egress once, into that egress's loan, and nowhere else.
 
+*A native frame at a lending egress.*
+A carrier that forwards a frame whose header names a native representation into a lending egress produces the egress's sample, and xref:../up-l1/bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it] binds it as that sample's producer: the egress payload's extent is its element extent.
+
+* The carrier *MUST* fill that extent with its one payload copy of the frame's outer extent: the value's bytes, or, on a route that selects the native protection composition, the whole protected extent (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition").
+* Where the frame is held, its writer at or above the egress's level, the frame's bytes are stable while it is held, and the carrier *MUST* read them in place (xref:../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "When a view is allowed").
+An untyped copy keeps each byte's initialization and initializes nothing, so the carrier's fact for the egress payload's extent is the source's: it holds where the ingress binding's delivered-initialized extent covers the extent that is copied.
+* Where the frame crosses upward, or its writer's level is unknown, the carrier *MUST* copy it through a source-access mechanism, as xref:../up-l1/integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused] states, and *MUST NOT* read anything of the shared source again: what is validated, admitted and sent is the acquired copy.
+The carrier's fact for the egress payload's extent then rests on that mechanism's own contract, that each byte that it writes into the destination is initialized, and the carrier *MUST* name that contract, at setup, as the basis of its fact.
+* At setup, for each such route, the carrier *MUST* compare the egress binding's required-initialized extent for the payload's extent with the fact of the case that applies, and *MUST* refuse the route, naming it, where that fact does not cover the requirement.
+* The carrier *MUST NOT* zero, normalize or re-encode a payload byte to meet the egress's requirement, and *MUST NOT* make a second copy.
+
+The egress binding establishes its complement as on any send.
+
+*Metadata at egress.*
+Where the egress envelope differs from the ingress envelope, a carrier *MUST* re-encode the metadata only.
 *Metadata at egress.*
 Where the egress envelope differs from the ingress envelope, a carrier *MUST* re-encode the metadata only.
 Where the egress route selects a wire to decode frame metadata, a carrier *MUST* use that wire's stated metadata format for any metadata that it re-encodes for that egress (xref:../up-l1/wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
 --
 
 [horizontal]
-ID:: `+req~ssr-streamer-byte-identity~3+`
+ID:: `+req~ssr-streamer-byte-identity~4+`
 ASIL:: B
 Allocated to:: the element, for what its carrier primitives do on a carrier route; the Streamer, for what it does on its routes
 Verification:: test
@@ -265,6 +280,10 @@ Verification:: test
 ** Between different ingress and egress envelopes, with different selected metadata formats: the re-encoded metadata checked against the egress route's selected wire's stated format by an independent reader of that format; the payload's identifier, presence and bytes unchanged, including a serialized payload whose encoding no wire of the route reads; a control that re-encodes in the ingress format to produce metadata outside the egress format fails this check.
 ** The same frames carried the same way after a wire that reads their encoding is added to the route.
 ** A control: a carrier that refuses a frame because no wire of the route names its identifier fails.
+** A held native frame forwarded from an ingress whose delivered-initialized extent covers the outer extent into an egress of the iceoryx2 profile: the route admitted at setup; one copy of the outer extent into the egress's loan; the egress binding's complement written; the frame published.
+** A held native frame from an ingress that declares no delivered-initialized extent, or one that does not cover the outer extent, into an egress that requires it: the route refused at setup by name, with no payload byte normalized or re-encoded and nothing inferred from the egress's requirement.
+** An upward crossing whose shared source changes while the copy is made, and afterwards: one copy through the source-access mechanism, whose contract is named at setup as the basis of the carrier's fact; the acquired copy validated, admitted and sent; the later source bytes never read.
+** A control: a carrier that zeroes or normalizes a native frame's padding to meet an egress's requirement, or copies it twice, fails.
 
 *Rationale.*
 up-spec makes a component that only carries or forwards a message keep its identifier and payload bytes unchanged, with no decoder needed (xref:../basics/payload_encoding_registry.adoc#acceptance[the payload encoding registry, "Carrying a Payload versus Reading It"]).
@@ -290,6 +309,11 @@ A different egress envelope writes the metadata again, and an envelope that coul
 _A native representation._
 A reader borrows a native representation in place, so a frame that names one has no serialized payload and is not carried as serialized bytes.
 <<req-ssr-streamer-qos-per-leg,Both legs are checked, at setup and per frame>> says when a leg carries it.
+
+_A native frame at a lending egress._
+A carrier that forwards a native frame into a lending egress is one more producer of the egress's sample.
+An untyped copy keeps each byte as it found it, so a held frame gives the egress what its ingress delivered, and a crossing's copy gives what the source-access mechanism's contract states.
+Setup compares that fact with what the egress requires, because the carrier may neither change the bytes nor copy them twice.
 
 Unchanged bytes let a check made at the endpoints, such as end-to-end protection, cover every hop (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-survives-hops[Protection survives every allowed hop]).
 A copy staged on the way would add work and a buffer for nothing.
