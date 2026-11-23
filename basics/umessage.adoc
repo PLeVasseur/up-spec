@@ -30,10 +30,6 @@ NOTE: A UMessage consists of xref:uattributes.adoc[UAttributes] holding the mess
 What makes a payload present is stated with the `payloadEncodingId` attribute in
 xref:uattributes.adoc#common-attributes[Common Message Attributes].
 
-Payload presence is determined by whether the optional `payload` field is
-explicitly set, not by the number of bytes it contains. An explicitly set
-zero-length byte sequence is therefore a present payload.
-
 .UMessage Data Model
 [#umessage-data-model]
 [mermaid]
