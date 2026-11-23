@@ -781,6 +781,9 @@ The binding *MUST* drop a sample that one of the first seven checks refuses, or 
 It *MUST* count a refusal by one of the first seven checks once, as a refused layout, and *MUST NOT* count a sample whose frame the element refuses: the element counts that refusal once, as <<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>> states.
 It *MUST* then take the next sample, within the work that the receive call is allowed (xref:bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]); each refused sample is one unit of that work, whichever part refused it.
 It *MUST NOT* let any part of a sample that one of the first seven checks refuses reach the element, a wire or an application.
+On a receive route that takes the copy route, one thing is excepted from that rule: the element's acquisition of the sample's header and metadata into storage of its own, before the first seven checks, as xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Admission on the copy route", states.
+That acquisition is a bounded raw copy within the frame's extent, and nothing of it is decoded, admitted, delivered or forwarded before the first seven checks have passed on the acquired header.
+A refusal by one of those checks keeps its cause and its one count, and ends the sample's admission before its metadata is decoded.
 Once the first seven checks have passed, the binding hands on only the metadata's extent and the payload length that the header gives, for the element's admission of the metadata (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>); that hand-over admits no frame.
 It *MUST NOT* let any part of a sample whose frame the element refuses reach a wire's decoding of the payload or an application.
 For a sample that the eighth check refuses, this replaces the iceoryx2 binding's duty in revision 1 of this item to let no part of it reach the element or a wire: only its metadata's extent, and the payload length that its header gives, reach the element, for its admission.
@@ -800,6 +803,7 @@ Verification:: test, fault-injection, review
 ** A header whose metadata length is 80 on a route whose limit for metadata is 64, in a byte region of 80 that is within the route's largest frame: refused at the sixth check; a header whose payload length is greater than the route's limit for a payload, in a byte region within the route's largest frame: refused at the sixth check.
 ** A header whose alignment is 1, on a route that declares a payload alignment of 8: refused at the fourth check.
 ** On a pull route, a sample that the binding or the element refuses, then a valid one: one refusal, one give-back, and the valid sample received within the work that the call is allowed.
+** On a route that takes the copy route, a sample whose acquired header fails one of the first seven checks: refused under that check's cause and counted once by the binding as a refused layout, its acquired metadata not decoded, and nothing of it admitted, delivered or forwarded.
 * *fault-injection*: samples written by a faulty peer with each number of the header set to its largest value, with a version or a reserved byte that is not `00`, with metadata that does not decode, and with a length in iceoryx2's own header of the sample that is longer than the receiving route's largest frame: each refused and counted once by the part that refuses it, with no panic, and the next well-formed sample received.
 * *review*: at source level, that the first seven checks are made before any range is formed from the header, that no byte of the byte region is read before they pass, and that the binding counts no sample whose frame the element refused.
 
@@ -813,6 +817,10 @@ So the receiving route's largest frame, which the route declares, is what bounds
 _Two limits and an alignment._
 The bound on the byte region admits a frame of the route's largest size, so a frame can stay within it while its metadata or its payload exceeds the limit that the route declares for it; each length is therefore compared with its own limit as well.
 The route's readers need the payload at the route's declared alignment, so a header that gives a smaller one is refused.
+
+_The copy route._
+Where a writer is below the reader's level, the element acquires the header and the metadata before the binding's checks, so that every check reads one stable copy.
+The acquisition is a raw copy that hands on no frame, so a refused sample still keeps the binding's cause and count, and its metadata is never decoded.
 
 [[req-ssr-binding-iceoryx2-frame-presence]]
 ==== On iceoryx2, an absent payload and a present empty payload stay apart
@@ -1035,6 +1043,7 @@ This section links those to read for iceoryx2.
 | xref:bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization]
 | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Refusals at setup"
 | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "The copy route"
+| xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Admission on the copy route"
 | xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once], "Pull bindings"
 | xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports], "What the element reports"
 |===

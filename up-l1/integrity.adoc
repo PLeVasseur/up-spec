@@ -112,8 +112,8 @@ On a receive route that crosses upward, or whose writer's level is unknown, the 
 
 * acquire the frame's header and metadata into storage of its own, reserved at setup, within the frame's extent as the binding gives it;
 * take the payload's place and length from that acquired copy and, before it reads the payload, establish with checked arithmetic that the payload lies within that frame extent, and check that its length is within the bound that the route declares and the storage reserved for the reader;
-* copy only the payload extent into storage that the reader owns, reserved at setup, and read nothing of the shared memory for the frame beyond its header, its metadata and that payload extent;
-* validate the acquired header and metadata, and the copied payload there: by shape and identity for a native type, by decoding for a serialized payload;
+* once the acquired header and metadata have passed the admission that the clause "Admission on the copy route" states, copy only the payload extent into storage that the reader owns, reserved at setup, and read nothing of the shared memory for the frame beyond its header, its metadata and that payload extent;
+* validate the acquired header and metadata, by that admission, and the copied payload there: by shape and identity for a native type, by decoding for a serialized payload;
 * hand out only the validated copy, and show a reader no value of a frame before that validation has passed;
 * read the shared bytes as racing bytes, never assuming that they stay unchanged while it reads, and only through reads that are valid on a read-only mapping.
 
@@ -124,8 +124,8 @@ A mechanism that holds only while the writer keeps a lock or another protocol is
 On such a route, every value that the admission of a frame takes from the frame's header or metadata comes from the element's acquired copy, in this order:
 
 . the route's lending binding *MUST* give the frame's enclosing extent as its middleware gives it, compared with the receiving route's largest frame where the binding's items define one (xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]), before anything is formed from that extent;
-. the element acquires the frame's header and metadata within that extent, as the clause "The copy route" states;
-. the binding *MUST* make its physical checks of the frame on the acquired header (xref:lola.adoc#req-ssr-binding-lola-envelope-checks[On LoLa, a sample that is not a well-formed envelope is refused before any of it is used]; xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]), and a refusal keeps the binding's cause and its one count;
+. the element acquires the frame's header and metadata within that extent, as the clause "The copy route" states: a bounded raw copy into storage of its own, which hands on no frame, so that nothing of it is decoded, admitted, delivered or forwarded before the checks of the next step have passed;
+. the binding *MUST* make its physical checks of the frame on the acquired header (xref:lola.adoc#req-ssr-binding-lola-envelope-checks[On LoLa, a sample that is not a well-formed envelope is refused before any of it is used]; xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]), and a refusal keeps the binding's cause and its one count and ends the frame's admission: the element *MUST NOT* decode the acquired metadata of a frame that one of those checks refuses, copy its payload or make a later step of this clause for it;
 . the element *MUST* make its admission of the frame's metadata on the acquired metadata (xref:lola.adoc#req-ssr-binding-lola-envelope-metadata[On LoLa, the metadata is the selected wire's, and is checked before delivery]; xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-metadata[On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check]), and the payload length that it compares with the payload that the metadata states is the acquired header's;
 . the element takes the payload's place and length for the copy from the acquired header, as the clause "The copy route" states.
 
@@ -165,7 +165,7 @@ Verification:: fault-injection, test, miri, heap-window, review
 ** A serialized route with every condition of the clause "Decoding from shared memory" established: decoded from the frame; the same route crossing upward, with a valid copy route: decoded from the validated copy; the same route without established tenure or synchronization: not decoded in shared memory.
 ** A frame on the copy route that fails its validation: no value of it is shown to a reader.
 ** On the copy route, a shared header whose payload length changes after the acquisition: the length that the admission compares with the metadata and that the copy uses is the acquired one, and the changed bytes are not read.
-** On the copy route, an acquired header that fails one of the binding's physical checks: refused under the binding's cause, counted once, and its metadata not decoded.
+** On the copy route, an acquired header that fails one of the binding's physical checks: refused under the binding's cause, counted once, its metadata not decoded and its payload not copied, and nothing of it admitted, delivered or forwarded.
 ** A route that needs the copy route, on a wire that declares allocation for decoding: refused at setup, naming the route and the class.
 ** On a receive route of a lending binding, the form that the route got, a read of the shared storage or the copy route's copy, as its report shows it (xref:bindings.adoc#req-ssr-error-route-report[Each route reports what it got]).
 * *miri*, under Stacked Borrows, under Tree Borrows and with strict provenance: the copy route's mechanism against a racing writer thread, where Miri can model the mechanism; and, as negative controls, a plain-read copy and an atomic read racing a plain write, each of which Miri reports as a data race.
@@ -180,6 +180,7 @@ So the reader works only on a copy in storage it owns, checked after the copy is
 
 _Admission on the copy route._
 A writer below the reader's level can change the shared header at any moment, so every value that the admission uses, those of the binding's checks included, comes from the one acquired copy, and no later read of the shared sample can contradict it.
+The acquisition is only a raw copy: until the binding's checks have passed on it, nothing of it is decoded or handed on, so a binding's rule that no part of a refused sample reaches the element still holds, with that one exception named (xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]).
 
 The copy is held in storage reserved at setup, like every other runtime buffer, so it needs no heap (xref:payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
