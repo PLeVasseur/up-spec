@@ -107,6 +107,8 @@ This partition applies to payload-encoding identifiers only.
 
 This revision defines no wildcard matching behavior. A carrying component
 preserves `0xFFFF` as an opaque reserved identifier, not a match-all value.
+Moving an existing private use of `0xFFFF` to another agreed identifier is a
+deployment-level migration, not a relabeling performed by intermediaries.
 
 NOTE: This is an independent uProtocol registry. Its identifiers do not reuse the
 numeric values of the IANA CoAP Content-Formats registry, and identifiers
