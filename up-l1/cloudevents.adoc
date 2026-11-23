@@ -50,7 +50,7 @@ The https://cloudevents.io/[CloudEvents] project has defined a set of *Formats* 
 The accompanying CloudEvents *protocol bindings* describe how events can be sent via well-known transport protocols like https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/http-protocol-binding.md[HTTP], https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/mqtt-protocol-binding.md[MQTT] etc.
 ====
 
-[.specitem,oft-sid="dsn~cloudevents-umessage-mapping~3",oft-needs="impl,utest",oft-title="Mapping of UMessages to CloudEvents"]
+[.specitem,oft-sid="dsn~cloudevents-umessage-mapping~4",oft-needs="impl,utest",oft-title="Mapping of UMessages to CloudEvents"]
 == uMessage Mapping
 
 uProtocol uses xref:../basics/umessage.adoc[UMessages] to exchange information between uEntities.
@@ -124,6 +124,10 @@ link:../up-core-api/uprotocol/v1/uattributes.proto[UPriority enum].
 |Integer
 a|The amount of time (in milliseconds) after which this message MUST no longer be delivered/processed.
 
+* This mapping admits only the values `0` to `2147483647` (source: the CloudEvents specification, version 1.0.2, section Type System, type `Integer`). A sender *MUST* fail the conversion of a larger value with `UCode.OutOfRange`, and *MUST NOT* clamp, wrap or reinterpret it.
+* A receiver *MUST* reject a negative value before it converts the value to `UInt32`.
+* The UAttributes `ttl` stays a `UInt32`. This mapping does not carry a larger value; a deployment that needs one cannot select this mapping.
+
 
 |`token`
 |`token`
@@ -133,7 +137,11 @@ a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)]
 |`permission_level`
 |`plevel`
 |Integer
-|The service consumer's permission level as defined in xref:../basics/permissions.adoc#_code_based_access_permissions_caps[Code-Based uEntity Access Permissions (CAPs)]
+a|The service consumer's permission level as defined in xref:../basics/permissions.adoc#_code_based_access_permissions_caps[Code-Based uEntity Access Permissions (CAPs)]
+
+* This mapping admits only the values `0` to `2147483647` (source: the CloudEvents specification, version 1.0.2, section Type System, type `Integer`). A sender *MUST* fail the conversion of a larger value with `UCode.OutOfRange`, and *MUST NOT* clamp, wrap or reinterpret it.
+* A receiver *MUST* reject a negative value before it converts the value to `UInt32`.
+* The UAttributes `permission_level` stays a `UInt32`. This mapping does not carry a larger value; a deployment that needs one cannot select this mapping.
 
 
 |`reqid`
@@ -173,6 +181,10 @@ xref:../basics/payload_encoding_registry.adoc[payload-encoding registry].
   identifier-range rules.
 
 |===
+
+*Revision 4 of this mapping.*
+For each uProtocol Transport Library that uses this mapping, revision 4 of `dsn~cloudevents-umessage-mapping` replaces the full `UInt32` range that revision 3 implied for `ttl` and `permission_level` by the rows above: the mapping admits `0` to `2147483647` for both, a sender fails a larger value with `UCode.OutOfRange`, and a receiver rejects a negative one.
+Both attributes stay `UInt32` in the UAttributes, and the rest of revision 3 stays as it was.
 
 [#ce-formats]
 === uPayload Mapping
