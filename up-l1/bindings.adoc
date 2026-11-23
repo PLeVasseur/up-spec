@@ -287,7 +287,7 @@ The other is the threshold's allowance for the record of the next arrival.
 [[req-ssr-qos-ttl]]
 === Expired messages are not processed
 
-[.specitem,oft-sid="req~ssr-qos-ttl~6",oft-title="Expired messages are not processed",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
+[.specitem,oft-sid="req~ssr-qos-ttl~7",oft-title="Expired messages are not processed",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
 --
 *TTL.*
 A message's TTL is its `+ttl+` attribute, a whole number of milliseconds, counted from the time that its message ID records (xref:../basics/uattributes.adoc#common-attributes[UAttributes, "Common Message Attributes"]).
@@ -327,15 +327,20 @@ If the wall clock cannot be read at the check of a frame whose TTL is greater th
 The element *MUST* check expiry when a frame reaches its route, before its wire decodes it, as well as when it is taken.
 So an expired frame is never decoded and changes no wire state.
 
-When a frame reaches its route, and again when it is taken, the element *MUST* make the checks of this item that apply then, of its expiry, of an RPC request's TTL of 0 and of an unreadable clock, before any check of the encoding or the presence of the frame's payload that it makes at that point (xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
-For a frame that one of them refuses, the element *MUST NOT* then check the encoding or the presence of its payload, give it a `+missing_payload+` result or count it under another cause: its one count is that check's, and that item's refusal, result and count for its payload do not apply to it.
+When a frame reaches its route, and again when it is taken, the element *MUST* make the checks of this item that apply then, of its expiry, of an RPC request's TTL of 0 and of an unreadable clock, before any check that it makes of the frame's payload at that point: of its encoding, of whether it carries an E2E header, or of whether a typed operation that requires a value has one (xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]; xref:wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once]).
+For a frame that one of them refuses, the element *MUST NOT* then make any of those checks of its payload, give it a `+missing_payload+` result or count it under another cause: its one count is that check's, and that item's refusal, result and count for its payload do not apply to it.
+
+*The admission of the metadata comes first, once.*
+A comparison of the payload that a frame's metadata states with the payload length that the frame's layout declares belongs to the admission of the frame's metadata, which precedes the frame's reaching its route; it is not the check of whether a typed operation that requires a value has one.
+That admission is made once for each frame, before the frame reaches its route, and not again when it is taken (xref:lola.adoc#req-ssr-binding-lola-envelope-metadata[On LoLa, the metadata is the selected wire's, and is checked before delivery]; xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-metadata[On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check]).
+So a frame that the admission refuses gets none of the checks of this item, and a frame that waits in its route's queue can still expire before it is taken: it is then refused under this item, and not for its metadata.
 
 *External lifetimes.*
 A binding whose middleware carries a lifetime of its own for a message *MUST* state in its declaration how it maps a TTL to that lifetime and back, a zero and an absent value included, *MUST NOT* turn an external value that means immediate expiry into a TTL of 0, and *MUST NOT* turn a TTL of 0 into an external value that means immediate expiry.
 --
 
 [horizontal]
-ID:: `+req~ssr-qos-ttl~6+`
+ID:: `+req~ssr-qos-ttl~7+`
 ASIL:: B
 Allocated to:: the element; each binding, for its mapping of a TTL to and from a lifetime of its middleware's own
 Verification:: test, review
@@ -347,8 +352,9 @@ Verification:: test, review
 ** A frame whose TTL is greater than 0 and whose ID was made while the sender's wall clock could not be read, at the bound of its early refusal, also from a generator that keeps the last good time only to 64 ms.
 ** A frame whose TTL is 0, held far beyond every bound above, with an old time in its message ID and with the wall clock unreadable: not refused and not counted as expired, when it reaches its route, when it is taken and before a carrier forwards it.
 ** An RPC request whose TTL is 0: refused at the client before it is sent, with an error that names the TTL; at a server, refused when it reaches its route, never decoded and with no end-to-end state changed, not delivered, and counted once under its own cause and not as expired.
-** An expired frame and a frame whose TTL is greater than 0 checked while the clock cannot be read, each when it reaches its route, and an RPC request whose TTL is 0 when it reaches a server's route, each with a payload of an encoding that no wire of the route declares and each with no payload: refused before the encoding or the presence of its payload is checked, and counted once under that check's cause, with no mismatch, `+missing_payload+` or `+unprotected+` result or count, on a route that does not select the E2E wire and on one that does.
-** The same for an expired frame and a frame whose TTL is greater than 0 checked while the clock cannot be read, each when it is taken, with a payload of an encoding that no wire of the route declares where the element checks the encoding of a payload only when a frame is taken, and with no payload where it checks the presence of a payload only then.
+** An expired frame and a frame whose TTL is greater than 0 checked while the clock cannot be read, each when it reaches its route, and an RPC request whose TTL is 0 when it reaches a server's route, each with a payload of an encoding that no wire of the route declares and each with no payload, its metadata naming no payload encoding and its layout a payload length of zero: refused before any of those checks of its payload is made, and counted once under that check's cause, with no mismatch, `+missing_payload+` or `+unprotected+` result or count, on a route that does not select the E2E wire and on one that does.
+** The same frames with no payload encoding and a payload length of 1 in their layout, the expired one included: refused at the admission of their metadata as `+payload_presence_extent_mismatch+`, counted once under that cause, and given none of this item's checks or counts.
+** The same for an expired frame and a frame whose TTL is greater than 0 checked while the clock cannot be read, each when it is taken after its metadata was admitted when it reached its route, with a payload of an encoding that no wire of the route declares where the element checks the encoding of a payload only when a frame is taken, and with no payload where it checks only then whether an operation that requires a value has one: refused under this item, with its metadata not admitted again and no `+missing_payload+` result or count.
 ** For a binding whose middleware has a lifetime of its own: the mapping that its declaration states, with an absent value, a zero and a positive value in both directions; an external value that means immediate expiry never becoming a TTL of 0; and a TTL of 0 never becoming an external value that means immediate expiry.
 * *review*: the expiry-check paths never refuse or count a frame whose TTL is 0 as expired, and never refuse it because the wall clock cannot be read.
 
@@ -365,6 +371,7 @@ TTL decides which frames those checks accept.
 It does not bound when a descheduled reader next takes a frame, or when an application reacts to one it has taken, which is a timing claim of a supported configuration (xref:runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
 
 A check of a TTL reads only the frame's attributes, so it comes before any look at the payload, and the first check that refuses a frame names the cause of its one count.
+The admission of a frame's metadata decides whether the frame is well formed and whose it is, so it comes first, once, before the frame reaches its route; the TTL checks then run on an admitted frame, at both of their points.
 
 A TTL of 0 is the protocol's value for a message that does not expire, and an RPC call needs a deadline, so a request cannot use it.
 Refusing such a request as invalid calls no message with a TTL of 0 expired.

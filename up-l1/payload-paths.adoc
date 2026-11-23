@@ -394,14 +394,15 @@ So the form is fixed at setup and reported.
 [[req-ssr-wire-encoding-checked]]
 === A wire is given only a payload of its own encoding
 
-[.specitem,oft-sid="req~ssr-wire-encoding-checked~2",oft-title="A wire is given only a payload of its own encoding",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-wire-encoding-checked~3",oft-title="A wire is given only a payload of its own encoding",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Before a wire reads.*
 The element *MUST* give a received payload only to a wire of the route whose declared payload encoding identifier equals the frame's.
 That holds alike on a route with a serialized wire and on a route with the native wire.
 The element *MUST* make that comparison before it gives the payload to any wire of the route to decode or to verify, the end-to-end protection wire included.
 A wire that decodes the frame's metadata (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]) does not read the payload by doing so.
-A frame that a check made before this comparison refuses, such as the TTL check of xref:bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed], gets neither this comparison nor a check of the presence of its payload, and its one count is that check's (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+A frame that a check made before this comparison refuses, such as the TTL check of xref:bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed], gets neither this comparison nor the check of whether a typed operation that requires a value has one (clause "Present, empty and absent"), and its one count is that check's (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+A comparison of the payload that a frame's metadata states with the payload length that the frame's layout declares belongs to the admission of the frame's metadata, which precedes the frame's reaching its route; it is not the check of whether a typed operation that requires a value has one.
 
 * Where no wire of the route declares the frame's identifier, the element *MUST* refuse the frame and count it once, under a cause that names the mismatch (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 * The element *MUST NOT* take a payload's encoding from its bytes, and *MUST NOT* try one wire after another.
@@ -444,7 +445,7 @@ It does not apply where a payload is only carried (xref:../up-l2/streamer.adoc#r
 --
 
 [horizontal]
-ID:: `+req~ssr-wire-encoding-checked~2+`
+ID:: `+req~ssr-wire-encoding-checked~3+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, fault-injection, review
@@ -454,6 +455,7 @@ Verification:: test, fault-injection, review
 ** A frame whose identifier is `0`, other than a tied response whose commstatus is not `+Ok+`, after the preceding admission checks: refused on a route whose wire declares another identifier, and given to the wire on a route whose wire declares `0`.
 ** A present payload of length zero, after the preceding admission checks: the wire is called with the empty input.
 ** A message with no payload: no wire is given a payload to decode, and no value is delivered.
+** A frame whose metadata names no payload encoding while its layout declares a payload length of 1: refused at the admission of its metadata, and given neither this item's comparison nor its check of a missing payload.
 ** On a receive route that does not select the end-to-end protection wire, a typed operation that requires a value, given a message with no payload that no earlier check refused, other than a response tied to an RPC call: refused with `+missing_payload+`, returned to its caller where the operation returns a result, and otherwise counted once under that cause.
 ** On a receive route that does not select the end-to-end protection wire, an operation whose declared contract permits a message with no payload, given such a message that no earlier check refused, other than a tied response whose commstatus is not `+Ok+`, and, for a response, after it was tied to its call and admitted by its TTL check: the absence reported as that contract states.
 ** On a response route that does not select the end-to-end protection wire, a response tied to its call, with commstatus `+Ok+` and admitted by its TTL check, with no payload, to a call whose operation requires a value, and one whose payload names an encoding that no wire of the route declares: each given to no wire, counted once under its own cause, completing nothing and leaving the call open, and a later acceptable copy completing the call.
