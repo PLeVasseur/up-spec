@@ -47,14 +47,15 @@ Requiring it in the element would make protection a condition even of routes tha
 [[req-ssr-e2e-wraps-any-wire]]
 == The E2E wire wraps any wire and leaves its bytes alone
 
-[.specitem,oft-sid="req~ssr-e2e-wraps-any-wire~5",oft-title="The E2E wire wraps any wire and leaves its bytes alone",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
+[.specitem,oft-sid="req~ssr-e2e-wraps-any-wire~6",oft-title="The E2E wire wraps any wire and leaves its bytes alone",oft-needs="impl,utest",oft-tags="SafetyE2eWire,SafetyUpRustCore"]
 --
 The E2E wire, `+E2e<W>+`, *MUST* wrap any ordinary wire `+W+` that meets its wire contract on its own, for the same message type.
+Where `+W+` is the native wire, the E2E wire wraps it only as the native protection composition, as the clause "The native protection composition" states.
 
 *The header.*
 The E2E wire *MUST* add a header, 32 bytes on a topic and 48 on an RPC route, in the formats of <<req-ssr-e2e-header-format,The E2E header has one documented format>>.
 In this E2E protection contract, a topic is a route of published messages or of notifications.
-The header *MUST* carry a data ID, a counter, its sender's incarnation, the frame's length, and a CRC over every other header field and the inner payload.
+The header *MUST* carry a data ID, a counter, its sender's incarnation, the frame's length, and a CRC over every other header field and the inner payload; under the native protection composition, the CRC covers the inner value's meaningful spans in place of the inner payload.
 A method header also carries the fields that <<req-ssr-e2e-header-format,The E2E header has one documented format>> adds.
 
 *The inner wire.*
@@ -64,6 +65,7 @@ The E2E wire *MUST* leave the inner wire's encoded bytes unchanged.
 
 * The E2E wire *MUST* state its own wire identity, and its own payload encoding from the private-use range.
 * Its maximum encoded length *MUST* include the header, and it *MUST* be exact when the inner wire is.
+Under the native protection composition it is E, and exact: on a response route a Value's actual extent is E, and a Control's or a Failed response's is H.
 * The E2E wire *MUST NOT* add heap use of its own, and *MUST* state the inner wire's heap claim for each direction.
 
 *Two wires, two contracts.*
@@ -84,12 +86,40 @@ The value that an accepted frame decodes to still depends on the input alone, an
 * *The order of its writes.* A serialized wire writes its encoding once, in order.
 The E2E wire *MAY* instead write its header after the inner payload, which its CRC covers.
 The inner payload is still written once, in order, directly into the storage that carries the frame: this permission allows no second encoding of it and no copy of it.
+
+Under the native protection composition, the E2E wire meets none of the duties that this clause takes from those two items: for that composition only, the in-place and view duties of the clause "The native protection composition" replace them.
+
+*The native protection composition.*
+The native protection composition is the E2E wire wrapping the native wire.
+On a route that selects it:
+
+* *Identity.* Its frames *MUST* carry the composition's own payload encoding identifier, which the E2E wire *MUST* state from the private-use range, and which is the E2E wire's encoding on that route.
+The route stays a native route: its native agreement names that identifier, the inner value has no second identifier on the wire, and the value's type, complete layout and ABI are agreed and compared as on any native route (xref:native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]).
+* *The header.* The composition *MUST* use the two header formats of <<req-ssr-e2e-header-format,The E2E header has one documented format>> unchanged, 32 bytes on a topic and 48 on an RPC route, and the header's length field *MUST* give the whole protected extent of the frame.
+* *Extents.* With H the header's length, and A and N the inner type's alignment and size, the inner offset I is H rounded up to a multiple of A, and the value extent E is I + N, each computed with checked arithmetic.
+The frame's physical header *MUST* declare the outer extent as its payload length, P.
+N stays the type's size wherever a native type's size is declared or reported (xref:native.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout], "Size").
+* *Alignment.* The route *MUST* declare A as its payload alignment, so that its binding places the outer payload at a multiple of A in every mapping; for a value, the element also checks the inner value's actual address (xref:../integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]).
+* *The gap.* The bytes from H to I exist only where A does not divide H.
+The sender *MUST* initialize them (xref:native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], "Sending"); the CRC excludes them, and they carry no meaning.
+* *A value of size zero.* Where N is 0, E is I: the outer payload is present, and its extent is never zero.
+A view of a value of size zero still needs an address that is not null and is a multiple of A.
+* *The admitted set.* The outer extents that a route admits are E on a topic's or a request's route, and E and H on a response route.
+* *The shape selector.* The shape selector *MUST* give the value branch where P is E and E is not H, and the header-only branch where P is H and H is not E.
+Where P, E and H are equal, on a response route, it reads the result and the status fields inside the H bytes, and gives the value branch where they read as a Value's pair (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>, "Shapes of a protected native response"), and otherwise the header-only branch.
+On a topic's or a request's route the only shape is a value.
+The selector is a documented function of P, of those two fields where P, E and H are equal, and of the composition's constants E, H, N and A, and of nothing else; its result decides only which checks run before the CRC.
+* *Coverage.* The CRC *MUST* cover the header fields other than the CRC, then the inner value's meaningful spans: ranges of the type that its supplier controls, ordered, not overlapping and always initialized, tied to the complete type, layout, ABI and protection identity, which together cover every meaningful field, recursively.
+Native padding and the gap are no CRC input, and no safe callback and no span list that a frame carries supplies the spans.
+For a 16-byte record with a `+u8+` at 0 and a `+u64+` at 8, the spans are the bytes from 0 to 1 and from 8 to 16.
+* *Refused at setup.* The element *MUST* refuse at setup, naming the route and the type, a route that selects the composition for a type, a union among them, for which it cannot establish complete coverage; the type stays a native type for every route that does not select the composition.
+* *In place.* The value is initialized once in its final storage at I (xref:native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused]) and read through a checked, read-only view inside the frame's retained ownership (xref:../integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]); the composition makes no encoding, no decoding and no copy of the value.
 --
 
 [horizontal]
-ID:: `+req~ssr-e2e-wraps-any-wire~5+`
+ID:: `+req~ssr-e2e-wraps-any-wire~6+`
 ASIL:: B
-Allocated to:: the E2E wire
+Allocated to:: the E2E wire; the element, for refusing at setup a route that selects the native protection composition for a type whose complete coverage it cannot establish
 Verification:: test, heap-window
 * *test*
 ** The sequenced wire contract suite on the E2E wire, over a serialized wire and over a test wire.
@@ -99,14 +129,24 @@ Verification:: test, heap-window
 ** Each inner wire of these cases passing the ordinary wire contract suite on its own.
 ** The duties of the two serialized-wire items that the E2E wire keeps, on the E2E wire itself: its largest encoding and an exact size against the bytes written; where it states a smallest encoding, no encoding that it writes shorter; a value too large for the route's bound refused, with nothing sent and the value unchanged; a value left unchanged by each encode; a value that the inner wire cannot represent, an error with nothing sent; an accepted frame decoded into a slot that held each of several earlier values, with the same value each time and each earlier value ended exactly once; a refused frame, and a frame whose inner decode fails, each leaving a valid value in the slot and nothing half-owned; a decoded value used after its frame was returned.
 ** The header written after the inner payload: that payload written once, at the place in the frame's storage where it is carried, with no second encoding and no copy of it.
+** Under the native protection composition, I and E for each of these, as header length, alignment and size: 32, 8 and 16, giving 32 and 48; 48, 8 and 16, giving 48 and 64; 32 or 48, 64 and 64, giving 64 and 128, with a gap from 32 or from 48 to 64; 48, 64 and 0, giving 64 and 64, with a gap from 48 to 64; and 48, 1 and 0, giving 48 and 48, with no gap.
+** The shape selector on each admitted extent and, where E and H are equal, on a Value's pair and on every other pair, with the same branch given by every evaluation of it on the same bytes.
+** The CRC of a 16-byte record with a `+u8+` at 0 and a `+u64+` at 8, over the header fields and the spans from 0 to 1 and from 8 to 16: unchanged by a change of padding or of the gap only.
+** A union with no always-initialized spans: a route that selects the composition for it refused at setup by name, and the same type admitted as an ordinary native type on a route that does not select it.
+** The composition's maximum encoded length, E, stated as exact.
 
 *Rationale.*
 Wrapping preserves the inner wire as a separate choice, and the wrapper can claim only the heap behavior and size guarantees that the combined encoding supports.
 
+_The native protection composition._
+A native route gives an owner-bound view and takes no staged copy, so the serialized duties of an owned decode do not fit it.
+The composition keeps the capability: the value is initialized once in its final storage and checked in place, and its padding, which has no meaning, is left out of the CRC.
+A type whose coverage cannot be established is refused for this composition only, and stays an ordinary native type.
+
 [[req-ssr-e2e-header-format]]
 == The E2E header has one documented format
 
-[.specitem,oft-sid="req~ssr-e2e-header-format~3",oft-title="The E2E header has one documented format",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
+[.specitem,oft-sid="req~ssr-e2e-header-format~4",oft-title="The E2E header has one documented format",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
 --
 The E2E wire's headers *MUST* have two fixed formats, each with a 64-bit CRC, documented with the crate:
 
@@ -120,17 +160,28 @@ The record *MUST* cover:
 * the CRC's polynomial, initial value, reflection and final XOR;
 * known-answer vectors for each header and the CRC;
 * the CRC's Hamming distance at the largest frame the wire admits, from which an integrator works out each route's residual error rate.
+
+For the native protection composition (<<req-ssr-e2e-wraps-any-wire,The E2E wire wraps any wire and leaves its bytes alone>>, "The native protection composition"), the record *MUST* also cover:
+
+* the CRC's input order: the header fields other than the CRC, in their documented order, then the inner value's meaningful spans in ascending order;
+* how the meaningful spans of each type are stated, and that they leave out the type's padding and the gap;
+* the table of the shapes of a protected native response, with the result, the status and the first reserved byte of each, and the value of each result, the result of a Failed response included (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>, "Shapes of a protected native response");
+* the largest extent that the composition supports;
+* known-answer vectors for the composition, among them a padded type, a type of size zero and an over-aligned type;
+* the basis of its residual-error figure: the CRC's Hamming distance at the largest covered input that the composition admits;
+* the protection's limits: that the CRC is no authentication, and which fields of the message header the check of a frame's data ID leaves unprotected (<<req-ssr-e2e-data-id,One data ID per sender and route>>).
 --
 
 [horizontal]
-ID:: `+req~ssr-e2e-header-format~3+`
+ID:: `+req~ssr-e2e-header-format~4+`
 ASIL:: B
 Allocated to:: the E2E wire
-Verification:: test (the known-answer vectors, encoded and decoded), review (the stated Hamming distance, against the CRC's published properties)
+Verification:: test (the known-answer vectors, encoded and decoded, those of the native protection composition for a padded type, a type of size zero and an over-aligned type among them), review (the stated Hamming distance, against the CRC's published properties; the record's table of shapes and its result values, against <<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>)
 
 *Rationale.*
 A fixed, documented header permits independent implementations to check the same protected bytes.
 Undetected header corruption remains part of the residual error analysis.
+For the native protection composition the record also fixes what the CRC reads and in which order, and the values that tell a Value, a Control and a Failed response apart, so that an independent implementation checks the same bytes and the same shapes.
 
 
 [[req-ssr-e2e-detects]]
@@ -762,27 +813,34 @@ NOTE: Which figures an application reads to react within the fault tolerant time
 [[req-ssr-e2e-survives-hops]]
 == Protection survives every allowed hop
 
-[.specitem,oft-sid="req~ssr-e2e-survives-hops~2",oft-title="Protection survives every allowed hop",oft-needs="impl,utest",oft-tags="SafetyStreamer,SafetyE2eWire"]
+[.specitem,oft-sid="req~ssr-e2e-survives-hops~3",oft-title="Protection survives every allowed hop",oft-needs="impl,utest",oft-tags="SafetyStreamer,SafetyE2eWire"]
 --
 *Carriage.*
 The Streamer *MUST* ensure that a frame protected by the E2E wire passes that wire's check at the receiving endpoint after any allowed Streamer hop, also between legs whose envelopes differ or whose bindings adapt different middleware.
 It does so by carrying the frame's payload bytes and its payload encoding identifier unchanged (xref:../../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
+Carriage is not narrowed: the Streamer keeps every payload byte unchanged, whether the CRC covers it or not, and a byte's exclusion from the CRC gives no permission to rewrite it.
 
 *Detection.*
-Between them, the Streamer and the E2E wire *MUST* ensure that a byte of such a frame that is corrupted between hops is detected at the receiving endpoint.
+Between them, the Streamer and the E2E wire *MUST* ensure that a byte of such a frame that is corrupted between hops is detected at the receiving endpoint; under the native protection composition, that promise covers the bytes that the clause "Detection under the native protection composition" names.
 
 * The E2E wire *MUST* refuse the frame as corrupt there, as <<req-ssr-e2e-detects,The E2E wire detects each fault>> states.
 * The Streamer *MUST NOT* alter, replace or recompute any byte that the E2E wire's CRC covers, so that the corruption reaches that check.
 The Streamer runs no end-to-end check of its own.
+
+*Detection under the native protection composition.*
+For a frame of the native protection composition (<<req-ssr-e2e-wraps-any-wire,The E2E wire wraps any wire and leaves its bytes alone>>, "The native protection composition"), the promise covers every byte of the frame but those that the CRC excludes: a corruption of such a byte between hops is detected at the receiving endpoint, within the residual-error analysis of the selected profile.
+A change confined to the bytes that the CRC excludes, the value's padding and the gap, changes no value, because those bytes carry no meaning, and no verdict, and it is outside that promise.
+For a serialized inner wire every payload byte is covered, and the promise is unchanged.
 --
 
 [horizontal]
-ID:: `+req~ssr-e2e-survives-hops~2+`
+ID:: `+req~ssr-e2e-survives-hops~3+`
 ASIL:: B
 Allocated to:: the Streamer; the E2E wire, for its check at the receiving endpoint
-Verification:: test (frames carried through a test double of the Streamer's forwarding, between legs whose envelopes differ, and between legs whose bindings adapt different middleware, each passing its check at the receiving endpoint; the same through the ASIL Streamer, after each allowed hop), fault-injection (a byte corrupted between hops, detected at the receiving endpoint, the frame refused as corrupt)
+Verification:: test (frames carried through a test double of the Streamer's forwarding, between legs whose envelopes differ, and between legs whose bindings adapt different middleware, each passing its check at the receiving endpoint; the same through the ASIL Streamer, after each allowed hop), fault-injection (a byte corrupted between hops, detected at the receiving endpoint, the frame refused as corrupt; under the native protection composition, a bit of a covered field flipped between hops, refused as corrupt at the endpoint, and a bit of padding or of the gap only flipped, which gives the same value and the same verdict, the carrier having forwarded the bytes unchanged)
 
 *Rationale.*
 A carrier forwards a frame's identifiers and payload bytes unchanged (xref:../../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]).
 So a check over those bytes at the receiving endpoint covers every hop before it.
 The Streamer holds no part of the protection, so it can neither restore it nor vouch for it, and detection is the receiving wire's.
+Under the native protection composition, padding and the gap carry no meaning, so a change confined to them changes no value; leaving them out of the CRC narrows what detection promises, and carriage still keeps them unchanged.
