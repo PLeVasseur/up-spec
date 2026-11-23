@@ -498,7 +498,8 @@ All three are frames of the method's one response wire, all carry the compositio
 | The header fields
 |===
 
-* *Every other combination is corrupt*: a result of 2 or 3 with a status other than `+Aborted+`; a Failed response's result with `+Ok+`; a first reserved byte other than 0 outside a Control; a kind that the header's record does not define; and a Value's result and status on the header-only branch, or another shape's on the value branch.
+* *Every other combination is corrupt*: a result, a status and a first reserved byte that form no row of this table for the branch that the shape selector gives.
+Among them: a result of 2 or 3 with a status other than `+Aborted+`; a Failed response's result, where it differs from `+normal+`, with `+Ok+`; a first reserved byte other than 0 outside a Control; a kind that the header's record does not define; and a Value's result and status on the header-only branch, or another shape's on the value branch.
 * *The result of a Failed response* is the value that the header's record (<<req-ssr-e2e-header-format,The E2E header has one documented format>>) gives a response whose status is not `+Ok+` and that is not a refusal answer; the composition adds no result value.
 Where that value is `+normal+`, the status alone tells a Value from a Failed response, and nothing else changes.
 An application's `+Aborted+` is a Failed response and a refusal answer is a Control, so a client tells them apart by the result.
