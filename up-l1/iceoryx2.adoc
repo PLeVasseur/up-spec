@@ -928,7 +928,7 @@ Presence is compared with the header's payload length before the identity and th
 [[req-ssr-binding-iceoryx2-frame-lifetime]]
 ==== On iceoryx2, a loan exposes only its metadata and its payload, and a receive view lives within its sample
 
-[.specitem,oft-sid="req~ssr-binding-iceoryx2-frame-lifetime~2",oft-title="On iceoryx2, a loan exposes only its metadata and its payload, and a receive view lives within its sample",oft-needs="impl,utest",oft-tags="SafetyIceoryx2"]
+[.specitem,oft-sid="req~ssr-binding-iceoryx2-frame-lifetime~3",oft-title="On iceoryx2, a loan exposes only its metadata and its payload, and a receive view lives within its sample",oft-needs="impl,utest",oft-tags="SafetyIceoryx2"]
 --
 *A loan.*
 A loan is a sample that the iceoryx2 binding holds from a publisher, to be written, from the moment iceoryx2 lends it to the moment the binding publishes it or gives it back.
@@ -942,7 +942,19 @@ The binding *MUST* then write the payload's new length into the header (<<req-ss
 
 *Publishing.*
 The binding *MUST* accept the element's record of the metadata that it wrote only where that record covers exactly the metadata's extent, with the token inside it where there is one (<<req-ssr-binding-iceoryx2-frame-wipe,On iceoryx2, the token of a loan that is not sent is wiped, and a sent frame is left as it was written>>).
-It *MUST* publish a loan only on the route that it was lent for, and only once that record is made.
+It *MUST* publish a loan only on the route that it was lent for, and only once that record is made and both facts of xref:bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it] hold for each byte of the loan's byte region: the element's, for the metadata's and the payload's extents, and its own, for every other byte.
+
+*Initialized extents.*
+The byte region of a loan is its L elements, L being the element count of the byte-sequence loan.
+The binding *MUST* declare all L elements as the required-initialized extent of its publish path, whatever payload length the header gives, and all L elements of a received sample as the delivered-initialized extent of its receive path, on the basis of iceoryx2's receive contract for the profile's service type (xref:bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]).
+Writing a shorter payload length into the header, or giving a shorter extent to write, does not shorten L.
+The header, its reserved bytes included, is the binding's, which writes each of its fields (<<req-ssr-binding-iceoryx2-frame-layout,On iceoryx2, a frame is one header and one byte region, in a fixed layout>>), and the bytes of the byte region are of these classes:
+
+* the metadata's extent: the element's, whose record covers exactly that extent;
+* the gap: the binding's, written `00` (<<req-ssr-binding-iceoryx2-frame-layout,On iceoryx2, a frame is one header and one byte region, in a fixed layout>>);
+* the payload's extent: the element's, each of its bytes, those that carry no meaning included;
+* the bytes that a shortened payload gives up: the binding's, zeroed (<<req-ssr-binding-iceoryx2-frame-wipe,On iceoryx2, the token of a loan that is not sent is wiped, and a sent frame is left as it was written>>);
+* the tail: the binding's, written `00` (<<req-ssr-binding-iceoryx2-frame-layout,On iceoryx2, a frame is one header and one byte region, in a fixed layout>>).
 
 *Receive.*
 A receive route's _retained budget_ is the number of received frames that the route can hold at once, as its declaration states; on a route of the Streamer it is the retained budget of the route's declared budget (xref:../up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route]).
@@ -955,19 +967,25 @@ In runtime mode a service, a port and the node that holds them are resources of 
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-iceoryx2-frame-lifetime~2+`
+ID:: `+req~ssr-binding-iceoryx2-frame-lifetime~3+`
 ASIL:: B
 Allocated to:: the iceoryx2 binding
 Verification:: test, compile-fail, review
 * *test*
 ** On transmit, the extents that a loan gives, compared with the offsets and lengths that the header gives; a loan published on another route, or before its metadata is recorded: refused; a record of the metadata that does not cover exactly the metadata's extent, or whose token lies outside it: not accepted, and the loan not published.
 ** On receive, the views' starts and lengths, compared with the same; a route that holds its whole retained budget: no further sample taken from iceoryx2.
+** A native type with padding, on a route of this profile without protection: no loan published until all L elements are initialized, the metadata's and the payload's extents by the element, padding included, and the gap, the bytes given up and the tail by the binding.
+** A protected native response whose loan has a payload extent of E, then a Control or a Failed response: the element shortens the payload to H; the binding zeroes the E − H bytes given up and writes the payload length H into the header; L unchanged; all L elements initialized at publication.
 * *compile-fail*: a view used after its sample is given back.
-* *review*: at source level, every way that the binding hands out an extent or a view, what ends it, and that no service, port or node is released in runtime mode.
+* *review*: at source level, every way that the binding hands out an extent or a view, what ends it, and that no service, port or node is released in runtime mode; and the initialized extents that the binding declares for its publish and its receive paths, against iceoryx2's contract for the profile's service type.
 
 *Rationale.*
 A writer that could write the header could change where a reader finds the frame, and a view that outlived its sample would read storage that iceoryx2 may lend for another frame.
 Charging a sample from before it is taken to after it is given back keeps what a route holds within its budget at every moment.
+
+_All L elements._
+The profile's services carry a byte sequence, and its L elements are the sample's payload for iceoryx2, whatever payload length the header gives.
+So the publish path needs each of them initialized and a reader is given each of them; the element initializes what it is given, padding included, and the binding the rest.
 
 [[req-ssr-binding-iceoryx2-frame-wipe]]
 ==== On iceoryx2, the token of a loan that is not sent is wiped, and a sent frame is left as it was written

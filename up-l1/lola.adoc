@@ -843,11 +843,24 @@ Both parts of one process have to agree on which of them checks, so a compositio
 [[req-ssr-binding-lola-envelope-lifetime]]
 === On LoLa, a loan exposes only its payload, and a receive view lives within its sample
 
-[.specitem,oft-sid="req~ssr-binding-lola-envelope-lifetime~1",oft-title="On LoLa, a loan exposes only its payload, and a receive view lives within its sample",oft-needs="impl,utest",oft-tags="SafetyLola"]
+[.specitem,oft-sid="req~ssr-binding-lola-envelope-lifetime~2",oft-title="On LoLa, a loan exposes only its payload, and a receive view lives within its sample",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
 *Transmit.*
 The LoLa binding *MUST* fix the metadata and the payload's offset when it creates a loan, and write the header, the hints, the metadata and the padding itself.
 What the binding gives a sender to write *MUST* be the payload's extent alone, and the binding *MUST NOT* let that extent move or change its size while the loan is held.
+
+*Initialized extents.*
+The LoLa binding *MUST* declare, for each path that its configuration selects, the path's required-initialized extent and, for each receive path, its delivered-initialized extent with its basis, or that the path has none (xref:bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]).
+It *MUST* establish each declaration from LoLa's public interface, the event type that it uses and the path itself, and *MUST NOT* infer one from the middleware's name.
+A path that is handed the whole object range of a sample, such as an enabled send-tracing path, is declared with that range, unless the binding's configuration excludes the path.
+Where the binding declares a required-initialized extent for a path, the bytes of that extent are of these classes:
+
+* the header, the hints, the metadata and the padding: the binding's, which writes them;
+* the payload's extent: the element's;
+* the bytes after the payload's end, to the end of the declared extent: the binding's.
+
+The binding *MUST* then perform an operation of that path only once both facts hold.
+Where the binding declares no required-initialized extent for its selected paths, this clause adds no duty.
 
 *Receive.*
 The binding *MUST* make each view that it gives of a received payload cover exactly the payload's extent.
@@ -855,16 +868,22 @@ The binding *MUST NOT* let a view outlive the sample that holds it, and releasin
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-lola-envelope-lifetime~1+`
+ID:: `+req~ssr-binding-lola-envelope-lifetime~2+`
 ASIL:: B
 Allocated to:: the LoLa binding
 Verification:: test, compile-fail, review
 * *test*: on transmit, the writable extent of a loan, compared with the payload's offset and length that the header gives; on receive, the view's start and length, compared with the same.
+* *test*, where the binding declares the whole sample as its send path's required-initialized extent: a frame shorter than the sample, sent only once the binding has initialized the bytes after the payload's end and the element its payload's extent.
+* *test*: a configuration with a send-tracing path that is handed the whole object range: that range declared for the path, or the path excluded by the configuration.
 * *compile-fail*, or *test* where the use compiles: a view used after its sample is released: it does not compile, or it is refused.
-* *review*: at source level, every way that the binding hands out a view or a writable extent, and what ends it.
+* *review*: at source level, every way that the binding hands out a view or a writable extent, and what ends it; and each initialized extent that the binding declares, against LoLa's public interface, the event type that the binding uses and each path that its configuration selects.
 
 *Rationale.*
 A sender that could write the header or the metadata could change what a reader sees as the frame, and a view that outlived its sample would read storage that LoLa may give to another frame.
+
+_Initialized extents._
+Whether a LoLa path needs, or delivers, initialized bytes depends on LoLa's interface, the event type and the path, so the binding declares it for what it selects, and the partition binds only where it declares an extent.
+A path that is handed the whole object range consumes all of it, so it is declared or excluded, and never left undeclared.
 
 [[index]]
 == What the general rules ask on LoLa
