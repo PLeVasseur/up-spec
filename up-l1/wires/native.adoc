@@ -176,7 +176,8 @@ A binary outside that domain is reached through a serialized wire (xref:serializ
 *Agreed by the deployment.*
 A _native agreement_ is the deployment data that names, for each native route, the route's type with its layout identity, the ABI for which it states that layout, and the payload encoding identifier that the frames of the route carry.
 On a route that selects the native protection composition, that identifier is the composition's own, and the inner value has no second identifier (xref:e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition").
-The integrator supplies it, and chooses that identifier as the registry's rules for originating one allow (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]; xref:README.adoc#encoding-identifier[the encoding identifier is the registry's]).
+The integrator supplies it (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]).
+On a route that does not select the native protection composition, the integrator chooses the identifier as the registry's rules for originating one allow (xref:README.adoc#encoding-identifier[the encoding identifier is the registry's]); on a route that selects it, the agreement names the composition's identifier, which the E2E wire states.
 
 * The element *MUST* prepare a native route only for a type that the agreement names for that route, with its layout identity.
 * The element *MUST* make each check of this item itself: what an agreement declares stands in for no check of a layout or of an identity.

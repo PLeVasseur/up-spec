@@ -246,7 +246,7 @@ A carrier *MUST NOT* stage already-serialized input:
 * it *MUST* copy the bytes for a lending egress once, into that egress's loan, and nowhere else.
 
 *A native frame at a lending egress.*
-A carrier that forwards a frame whose header names a native representation into a lending egress produces the egress's sample, and xref:../up-l1/bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it] binds it as that sample's producer: the egress payload's extent is its element extent.
+A carrier that forwards a frame whose header names a native representation into a lending egress produces the egress's sample, and the egress payload's extent is its element extent in the sense of xref:../up-l1/bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]; what the carrier owes for that extent is stated here.
 
 * The carrier *MUST* fill that extent with its one payload copy of the frame's outer extent: the value's bytes, or, on a route that selects the native protection composition, the whole protected extent (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition").
 * Where the frame is held, its writer at or above the egress's level, the frame's bytes are stable while it is held, and the carrier *MUST* read them in place (xref:../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "When a view is allowed").

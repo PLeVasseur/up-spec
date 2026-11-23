@@ -862,7 +862,7 @@ Where the binding declares a required-initialized extent for a path, the bytes o
 * the bytes after the payload's end, to the end of the declared extent: the binding's.
 
 The binding *MUST* then perform an operation of that path only once both facts hold.
-Where the binding declares no required-initialized extent for its selected paths, this clause adds no duty.
+Where the binding declares no required-initialized extent for its selected paths, this clause adds no initialization duty.
 
 *Receive.*
 The binding *MUST* make each view that it gives of a received payload cover exactly the payload's extent.
