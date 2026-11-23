@@ -241,7 +241,7 @@ Acceptance is the event at which a deliverable message stops being the correlati
 | The translator has committed the message for the invocation of every listener that is registered and matches at that moment. The commitment is one decision: it covers every such listener, or none, and it does not wait for a callback.
 | _No recipient_: no registered listener matches at that moment. _No capacity_: the mechanism's declared bound leaves no room to commit the message for every matching listener.
 | Never: the decision is local.
-| Row 16: each of those listeners is invoked at least once. Row 23 holds beside it: no listener is invoked after its unregistration has completed successfully. The translator keeps both by ordering them: the unregistration of a listener to which a committed invocation is still owed completes successfully only when that invocation has been made. Nothing here waives an owed invocation, makes acceptance wait for a callback to return, or changes or reopens an entry. When an invocation happens, in which order, and whether a callback is slow or fails, changes no entry and is reported to nobody. A listener returns no acknowledgement.
+| Row 16: each of those listeners is invoked at least once. Row 23 holds beside it: no listener is invoked after its unregistration has completed successfully. The translator keeps both by ordering them: the unregistration of a listener to which a committed invocation is still owed completes successfully only when that invocation has been made. How it does so is its own matter, and this chapter requires no blocking wait for it. Nothing here waives an owed invocation, makes acceptance wait for a callback to return, or changes or reopens an entry. When an invocation happens, in which order, and whether a callback is slow or fails, changes no entry and is reported to nobody. A listener returns no acknowledgement, and none is added.
 
 | Pull (rows 6 to 8)
 | The message is stored where a later matching `receive` returns it under rows 7 and 8.
@@ -654,7 +654,7 @@ Where the stack assigns them, the translator's declared configuration *MUST* det
 The released documentation names the supplier's assignment domain and rule, and the reuse boundary that the configuration supports.
 A configuration that cannot do both is refused at setup, or is not offered as conforming.
 A counter that several scopes share is the plain example: no scope gets its own sequence from it, so it meets these rules only where it serves one scope.
-No hook, interface or patch is prescribed.
+No hook, interface or patch is prescribed, and whether a given stack can be configured so is a matter for implementation conformance.
 
 *Key rules.*
 The profile lets a client reuse a RequestID as soon as the response has arrived or is no longer expected, and its UDP binding gives no guaranteed delivery.
@@ -687,7 +687,7 @@ The translator *MUST* keep these rules:
 |===
 . _What always holds._ An answer whose key matches no matchable entry (<<someip-entry>>, "Matchable entries") is _unmatched_. An answer whose key matches a matchable entry, but whose Message ID or Interface Version differs from the entry's, is _mismatched_, and the entry stays as it was. Both are ignored and counted, under every boundary (rows FW6 and FW12 of <<someip-entry>>).
 . _The residual under `cycle`._ An answer to a released request that arrives after its key has been assigned again, by the cycle's return or after a restart, and whose Message ID and Interface Version equal the later request's, is taken as the later request's answer. This is the one deliberate exception to ignoring responses to an expired request, and it applies only where a deployment has declared `cycle`.
-. _The size of a scope._ One Client ID leaves 65,535 Session IDs that are not zero. Under `association` a scope therefore has at most 65,535 uses for the life of its association, and fewer where the translator applies uniqueness and exclusion across a wider set than one scope, which it may do and need not. Once the sequence has come round to keys that were released on that association, they stay excluded for as long as it lives, and every further request of that scope is refused with `UCode.ResourceExhausted` by session rule 3. The translator may continue on a new association, which is a new scope, where the premise holds for it. Nothing here commands a connection to be closed at that count, and nothing makes a reconnection automatic. Uniqueness over a wider set than one scope stays permitted, and its cost under session rule 3 is this: where the sets of two scopes overlap, a scope whose next candidate is held or excluded on account of the other is refused with `UCode.ResourceExhausted` for as long as that lasts, and no other value is tried; under `association` that can be the life of the association. The cost depends on the whole identity that the wider set compares, so it is not the same for every such set: equal Session ID values alone do not make the sets of two scopes overlap.
+. _The size of a scope._ One Client ID leaves 65,535 Session IDs that are not zero. Under `association` a scope therefore has at most 65,535 uses for the life of its association, and fewer where the translator applies uniqueness and exclusion across a wider set than one scope, which it may do and need not. Once the sequence has come round to keys that were released on that association, they stay excluded for as long as it lives, and every further request of that scope is refused with `UCode.ResourceExhausted` by session rule 3. The translator may continue on a new association, which is a new scope, where the premise holds for it. Nothing here commands a connection to be closed at that count, and nothing makes a reconnection automatic. Uniqueness over a wider set than one scope stays permitted, and its cost under session rule 3 is this: where the sets of two scopes overlap, a scope whose next candidate is held or excluded on account of the other is refused with `UCode.ResourceExhausted` for as long as that lasts, and no other value is tried; under `association` that can be the life of the association. The cost depends on the whole identity that the wider set compares, so it is not the same for every such set: equal Session ID values alone do not make the sets of two scopes overlap. What the replacement of a shared connection does to the events and other services that use it is not decided here, and is a matter for reconciling each implementation with this chapter.
 . _Restart, and the loss of correlation state._ A restart shortens no exclusion.
 +
 [cols="2,9",options="header"]
@@ -734,7 +734,7 @@ After the withdrawal or the release, a `REQUEST` with that key is a new request,
 The residual is stated, not removed.
 The translator cannot tell a retry or a network duplicate from a new call that reuses the RequestID, which the profile lets a client do as soon as it stops expecting an answer.
 Where a stock client's own response timeout is shorter than the TTL that the contract supplies, the client may send a new request under a key whose entry is still live: that request is refused as above, and the answer to the earlier request, which goes out under the same RequestID, may be taken by the client as the answer to its newer one.
-The translator promises a stock client neither at-most-once execution nor a way to tell its requests' generations apart, and a deployment that needs the two timeouts to agree chooses the supplied TTL to fit.
+The translator promises a stock client neither at-most-once execution nor a way to tell its requests' generations apart, and a deployment that needs the two timeouts to agree chooses the supplied TTL to fit. No supersession of the first entry and no store of past requests is added.
 --
 
 ==== Message Type
@@ -859,7 +859,7 @@ The rows above give it one outcome: the commstatus, and a present, empty payload
 The translator carries zero bytes and supplies presence and the encoding ID; it decodes nothing and constructs no field of an error.
 The wire cannot say more: an error that a stack generated without any detail, and a modelled error whose encoding is empty, are the same bytes.
 The declared slot is the rule of interpretation, and it does not recover what the sender meant: what zero bytes mean is for the consumer's codec to say, and a consumer whose codec cannot decode them handles that as it handles any error payload that it cannot decode, the commstatus having already told it that the call failed.
-A `RESPONSE` with a code other than `0x00` on the same method stays the branch with no payload.
+A `RESPONSE` with a code other than `0x00` on the same method stays the branch with no payload. No fall-back to absence, no new discriminator and no promise that the inbound side mirrors the outbound fallback is added.
 --
 
 ==== Sink & Source Mapping
@@ -1122,7 +1122,7 @@ The translator *MUST* give every generated reply the one form of <<someip-genera
 The translator *MUST* offer a generated reply to SOME/IP delivery once, and *MUST NOT* offer it again.
 An accepted offer is not counted.
 An offer that fails, as a refusal before exposure or indeterminately (<<someip-hand-over>>), is counted once as _generated reply offer failed_; after an indeterminate failure the reply may be on the wire, and the count does not say otherwise.
-The form stays `RESPONSE` whichever type a stack would choose for the same cause.
+The form stays `RESPONSE` whichever type a stack would choose for the same cause; a stack that generates such replies itself, below the translator's code and in another type, is a matter for reconciling that implementation with this chapter, and no reason to change the form.
 
 *The optional expiry reply.*
 When a stock client's request gets no uProtocol answer within the supplied TTL, the default is silence: the stock client's own response timeout ends its call, and that indication is local to the client.
