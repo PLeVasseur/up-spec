@@ -733,7 +733,7 @@ Reusable supplier or composition-package evidence can establish component and bu
 [[aou-seooc-deployment-data]]
 == Deployment data is in range, verified and protected
 
-[.specitem,oft-sid="aou~seooc-deployment-data~9",oft-title="Deployment data is in range, verified and protected",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-deployment-data~10",oft-title="Deployment data is in range, verified and protected",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
 The integrator *SHALL* produce the deployment data within the admissible ranges that the element and the Streamer publish (xref:../../../basics/configurations.adoc#req-ssr-config-validated[Deployment data is validated in full]; xref:../../../up-l2/streamer.adoc#req-ssr-streamer-config-validated[The Streamer validates its deployment data in full]), and verify it for the item, in ISO 26262's sense.
 The data covers:
@@ -743,7 +743,7 @@ The data covers:
 * RPC client lists and expected peers;
 * capacities;
 * what the assumption of one binding adds to the deployment data for its transport (xref:../../../up-l1/README.adoc#one-binding[what is specific to one binding]);
-* for each route that uses the E2E wire, its senders (xref:../../../up-l1/wires/e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route]), its `+resync_frames+`, and, for each sender, its start value's source and whether its starts are declared increasing;
+* for each route that uses the E2E wire, its senders (xref:../../../up-l1/wires/e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route]), its `+resync_frames+`, its locality context (xref:../../../up-l1/wires/e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route], "One canonical form"), and, for each sender, its start value's source and whether its starts are declared increasing;
 * the selection of compiled-in waivers;
 * for each route whose wire states the XCDR2 little-endian appendable profile, the writer types that each receiving end admits besides its reader type (xref:../../../up-l1/wires/xcdrv2.adoc#req-ssr-xcdr2-evolution[A type grows only by fields added at its end, and a receiving end reads only the types that it admits]);
 * the agreement of native types, for each native route, with the payload encoding identifier that the registry's rules for originating one allow (xref:../../../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]);
@@ -775,7 +775,7 @@ What the compliance report lists of what was declared in the data, and of what w
 * A native route agreed with a binary that does not use the element is *refused at setup* where the element cannot establish that binary's layout identity (xref:../../../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]); where that binary presents the agreed layout identity and an equal ABI fingerprint, it is *undetectable* by the element.
 
 [horizontal]
-ID:: `+aou~seooc-deployment-data~9+`
+ID:: `+aou~seooc-deployment-data~10+`
 ASIL:: B
 ISO 26262:: 6-Annex C, 6-C.4.6, 6-Table C.1 (part-clause numbers only)
 
@@ -1094,7 +1094,7 @@ What such a binding reports and declares is stated in xref:../../../up-l1/bindin
 * *Cores without coherent atomics.* What the integrator uses for a route between cores whose atomics are not shown to be coherent with each other is stated in <<aou-seooc-target-environment,The target environment is verified>> ("Several cores").
 
 *Composition-package accountability and assembled evidence.*
-For each composed configuration of bindings, wires, allocation providers and admitted helpers or adapters that it uses on the ASIL path, the integrator *SHALL* validate the deployment against the composition-package releaser's compatibility statement and assembled supplier evidence: exact component versions, cross-component lifecycle and dependency closure, declared guarantees, exact covered execution contexts, deviations and unresolved conditions (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]).
+For each composed configuration of bindings, wires, allocation providers and admitted helpers or adapters that it uses on the ASIL path, the integrator *SHALL* validate the deployment against the composition-package releaser's compatibility statement and assembled supplier evidence: exact component versions, each composed part with the revision of the specification that its declaration names, cross-component lifecycle and dependency closure, declared guarantees, exact covered execution contexts, deviations and unresolved conditions (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]).
 For an element-supported configuration package, the element's supplier retains release responsibility for that package; for a separate extension composition, the extension composer explicitly assumes composition-supplier responsibility for its extension, and the integrator *SHALL NOT* treat an explicit extension as element-supplier-supported or treat an unoffered combination as supported.
 A bundle of individually reviewed parts is not by itself proof of their combination.
 A certified operating system, middleware or dependency contributes only within its exact covered scope and qualifies neither helpers, adapters, bindings, wires nor the assembled image (xref:../../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).

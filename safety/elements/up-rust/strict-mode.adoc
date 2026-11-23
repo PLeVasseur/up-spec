@@ -380,7 +380,7 @@ Strict mode *MUST* also include in the report:
 
 * for each route, its TTL, against the reaction budget the integrator declares for it (xref:assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]);
 * the end-to-end protection named for each route (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
-* for each E2E route, its senders, data IDs, `+resync_frames+`, start declarations with their duty, and thread duties (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
+* for each E2E route, its senders, data IDs, `+resync_frames+`, locality context, start declarations with their duty, and thread duties (xref:assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]);
 * for each route, the counters the application reads and what each means, the E2E figures included (xref:assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]);
 * every route's capacities (xref:assumptions-of-use.adoc#aou-seooc-capacity-sizing[Capacities are sized for the worst case]);
 * for each serialized route admitting owned values, its declared non-native, non-shared ending path and any admitted serialized owned-value runtime adapter acting within its wire or allocation-provider role (xref:../../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]);
