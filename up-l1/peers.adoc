@@ -185,7 +185,7 @@ For the element and for each such binding, this revision replaces two sentences 
 *Peers that do not use the element.*
 This item gives a duty to the element and to a binding in each process that uses them, and to no other peer.
 For a peer that uses neither, this revision retires the recording of a fingerprint and the refusal of a peer that records none, which revision 1 gave every peer and a native peer.
-Such a peer's participation is the deployment's condition: the peers of a route are the deployment's to declare (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]), and the element still refuses a frame whose writer's ABI or layout is not established, as xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout] states.
+Such a peer's participation is the deployment's condition: the peers of a route are the deployment's to declare (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]), and the element still refuses a frame whose writer's ABI or layout is not established, on the conditions that xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout] states.
 
 *Scope.*
 A serialized route needs no fingerprint, and this item does not affect it.

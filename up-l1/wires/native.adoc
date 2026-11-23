@@ -192,9 +192,12 @@ The element *MUST* refuse a native route at setup, naming the route and the type
 
 *Before a view.*
 The element *MUST* give a reader a view of a frame only where it has established, before any reader can see the frame, that the frame comes from a writer whose layout identity for the route is the reader's, and whose ABI is the reader's (xref:../integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]).
+A view can follow every frame of a native route except a frame that the shape selector of the native protection composition puts on its header-only branch, which carries no value and of which no view exists (xref:e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition").
 
-* Where that is not established for a frame, the element *MUST* refuse the frame and count it.
+* Where that is not established for a frame of which a view can follow, the element *MUST* refuse the frame and count it.
 * Where the element cannot establish it for a route at all, the element *MUST* refuse the route at setup, by name.
+
+The check of a frame on the header-only branch is the one that xref:../integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission] states in "On a route that selects the native protection composition", and it makes no comparison of the writer's layout identity or ABI; the agreement of the route at setup, and each check of a frame of which a view can follow, stay as this item states them.
 
 *A complete comparison.*
 A comparison establishes it only where it tells every two different layout identities apart.
@@ -202,7 +205,7 @@ A comparison establishes it only where it tells every two different layout ident
 * To establish it, the element *MUST* compare the complete layout identities, or a value computed from each for which the element states, with its argument, that two different layout identities do not share it.
 * A value that is too short for such an argument establishes nothing.
 The element *MAY* use one to select which agreed layout a frame is compared with.
-It *MUST* still refuse a frame for which the complete comparison fails, or was not made.
+It *MUST* still refuse a frame of which a view can follow and for which the complete comparison fails, or was not made.
 * An equal size and an equal alignment establish nothing.
 * An equal payload encoding identifier and an equal ABI fingerprint establish nothing about a layout.
 
@@ -231,7 +234,7 @@ Allocated to:: the element
 Verification:: test, fault-injection, review
 * *test*
 ** At setup: a type that the deployment has not agreed; a type whose layout as built differs from the agreed one in each part in turn, which are its name, its size, its alignment, and one field's place, size and scalar type; and an agreement for another ABI. Each is refused by name.
-** A writer whose layout identity differs from the reader's in each of those parts in turn: no frame of it reaches a reader, and each is refused and counted, or the writer's side is refused.
+** A writer whose layout identity differs from the reader's in each of those parts in turn: no frame of it of which a view can follow reaches a reader, and each such frame is refused and counted, or the writer's side is refused; on a response route that selects the native protection composition, a refusal answer of such a writer, which the shape selector puts on the header-only branch: not refused under this item, and no view formed.
 ** Two layouts of equal size and equal alignment and different fields: a frame of the one never reaches a reader of the other.
 ** Where the element uses a short value to select a layout: two different layouts that are built to share that value, with the frame still refused.
 ** A frame with the route's layout identity and another payload encoding identifier: refused (xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
