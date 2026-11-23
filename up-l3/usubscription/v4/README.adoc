@@ -299,9 +299,9 @@ sequenceDiagram
 actor C as Subscriber
 participant T as uSubscription Service
 
-C->>T : subscribe("//vehicle/A1B/1/9A10")
+C->>T : subscribe("//vehicle/A1B/1/1/9A10")
 activate T
-    T--)C : ("//vehicle/A1B/1/9A10", SubscriptionStatus.SUBSCRIBED)
+    T--)C : ("//vehicle/A1B/1/1/9A10", SubscriptionStatus.SUBSCRIBED)
 deactivate T
 ----
 ====
@@ -320,12 +320,12 @@ participant T as uSubscription Service
 participant N as Notification Channel
 
 
-C->>T : subscribe("//vehicle/A1B/1/9A10", 2026-06-15T23:25:00)
+C->>T : subscribe("//vehicle/A1B/1/1/9A10", 2026-06-15T23:25:00)
 activate T
-    T--)C : ("//vehicle/A1B/1/9A10", SubscriptionStatus.SUBSCRIBED)
+    T--)C : ("//vehicle/A1B/1/1/9A10", SubscriptionStatus.SUBSCRIBED)
 deactivate T
 T-->T : await expiration
-T-)C : ("//vehicle/A1B/1/9A10", "/80/2", SubscriptionStatus.UNSUBSCRIBED)
+T-)C : ("//vehicle/A1B/1/1/9A10", "/80/2", SubscriptionStatus.UNSUBSCRIBED)
 ----
 ====
 
@@ -419,7 +419,7 @@ sequenceDiagram
 actor C as Subscriber
 participant T as uSubscription Service
 
-C->>T : unsubscribe("//vehicle/A1B/1/9A10")
+C->>T : unsubscribe("//vehicle/A1B/1/1/9A10")
 activate T
     T--)C :
 deactivate T
@@ -514,7 +514,7 @@ sequenceDiagram
 
 actor C as Client<br/>[/80/2]
 participant T as uSubscription Service
-Note right of T: Clients [/80/2] and [/90/1] subscribed<br/> to topic [//vehicle/A1B/1/9A10]
+Note right of T: Clients [/80/2] and [/90/1] subscribed<br/> to topic [//vehicle/A1B/1/1/9A10]
 
 C->>T : fetchSubscriptions()
 activate T
@@ -535,7 +535,7 @@ sequenceDiagram
 
 actor C as Client<br/>[/80/2]
 participant T as uSubscription Service
-Note right of T: Clients [/80/2] and [/90/1] subscribed<br/> to topic [//vehicle/A1B/1/9A10]
+Note right of T: Clients [/80/2] and [/90/1] subscribed<br/> to topic [//vehicle/A1B/1/1/9A10]
 
 C->>T : fetchSubscriptions(subscriberFilter: "/80/2")
 activate T
@@ -556,9 +556,9 @@ sequenceDiagram
 
 actor C as Client<br/>[/80/2]
 participant T as uSubscription Service
-Note right of T: Client [/80/2] subscribed to topics<br/>[//vehicle/A1B/1/9A10] and [//vehicle/B2C/2/0B21],<br/>client [/90/1]subscribed to topic [//vehicle/A1B/1/9A11]
+Note right of T: Client [/80/2] subscribed to topics<br/>[//vehicle/A1B/1/1/9A10] and [//vehicle/B2C/1/2/0B21],<br/>client [/90/1]subscribed to topic [//vehicle/A1B/1/1/9A11]
 
-C->>T : fetchSubscriptions(topicFilter: "//vehicle/A1B/FF/FFFF")
+C->>T : fetchSubscriptions(topicFilter: "//vehicle/A1B/1/FF/FFFF")
 activate T
     Note over T: all SubscriptionInfo relating to<br/>topics from service //vehicle/A1B/
     T--)C : Subscription[2]
@@ -758,16 +758,16 @@ sequenceDiagram
 
 actor C as Client [/80/2]
 participant T as uSubscription Service
-Note right of T: Client [/90/1] subscribed to topic [//vehicle/A1B/1/9A10]
+Note right of T: Client [/90/1] subscribed to topic [//vehicle/A1B/1/1/9A10]
 participant N as Subscription Change<br/>Message Topic
 
 C->>T : registerForNotifications()
 activate T
     T--)C :
 deactivate T
-T-->T : "//vehicle/A1B/1/9A10" becomes UNSUBSCRIBED
-T-)C : ("//vehicle/A1B/1/9A10", "/90/1", SubscriptionStatus.UNSUBSCRIBED)
-T-)N : ("//vehicle/A1B/1/9A10", "/90/1", SubscriptionStatus.UNSUBSCRIBED)
+T-->T : "//vehicle/A1B/1/1/9A10" becomes UNSUBSCRIBED
+T-)C : ("//vehicle/A1B/1/1/9A10", "/90/1", SubscriptionStatus.UNSUBSCRIBED)
+T-)N : ("//vehicle/A1B/1/1/9A10", "/90/1", SubscriptionStatus.UNSUBSCRIBED)
 ----
 ====
 
@@ -812,19 +812,19 @@ sequenceDiagram
 
 actor C as Client [/80/2]
 participant T as uSubscription Service
-Note right of T: Client [/90/1] subscribed to topic [//vehicle/A1B/1/9A10]<br/>Client [/80/2] has previously registered for change notifications of topic [//vehicle/A1B/1/9A10]
+Note right of T: Client [/90/1] subscribed to topic [//vehicle/A1B/1/1/9A10]<br/>Client [/80/2] has previously registered for change notifications of topic [//vehicle/A1B/1/1/9A10]
 participant N as Subscription Change<br/>Message Topic
 
-T-->T : "//vehicle/A1B/1/9A10" becomes UNSUBSCRIBED
-T-)C : ("//vehicle/A1B/1/9A10", "/90/1", SubscriptionStatus.UNSUBSCRIBED)
-T-)N : ("//vehicle/A1B/1/9A10", "/90/1", SubscriptionStatus.UNSUBSCRIBED)
+T-->T : "//vehicle/A1B/1/1/9A10" becomes UNSUBSCRIBED
+T-)C : ("//vehicle/A1B/1/1/9A10", "/90/1", SubscriptionStatus.UNSUBSCRIBED)
+T-)N : ("//vehicle/A1B/1/1/9A10", "/90/1", SubscriptionStatus.UNSUBSCRIBED)
 
 C->>T : unregisterForNotifications()
 activate T
     T--)C :
 deactivate T
-T-->T : "//vehicle/A1B/1/9A10" becomes SUBSCRIBED
-T-)N : ("//vehicle/A1B/1/9A10", "/90/1", SubscriptionStatus.SUBSCRIBED)
+T-->T : "//vehicle/A1B/1/1/9A10" becomes SUBSCRIBED
+T-)N : ("//vehicle/A1B/1/1/9A10", "/90/1", SubscriptionStatus.SUBSCRIBED)
 ----
 ====
 
@@ -883,14 +883,14 @@ sequenceDiagram
     box White device2
         participant R as remote uSubscription
     end
-    Note right of C: Client [/80/1] subscribed to topic [//vehicle/A1B/1/9A10]
+    Note right of C: Client [/80/1] subscribed to topic [//vehicle/A1B/1/1/9A10]
 
     opt Reset() called by uSusbcription service
         R->>L: Reset()
         activate L
             L-->L : clear all subscription state
             L-->L : clear all custom notification state
-            L-)C : notify("//vehicle/A1B/1/9A10", "/80/2", SubscriptionStatus.UNSUBSCRIBED)
+            L-)C : notify("//vehicle/A1B/1/1/9A10", "/80/2", SubscriptionStatus.UNSUBSCRIBED)
             L--)R :
         deactivate L
     end
@@ -1042,7 +1042,7 @@ ifdef::env-github[[source,mermaid]]
 ----
 sequenceDiagram
 box White Authority A
-    actor PUB as uEntity A<br/>:Publisher<br/>[//A/80/2/0]
+    actor PUB as uEntity A<br/>:Publisher<br/>[//A/80/1/2/0]
     participant ZPUB as uEntity A<br/>:ZenohTransport
     participant SSA as uSubscription<br/>[//A/0/4]
     participant ZSSA as uSubscription<br/>:ZenohTransport
@@ -1054,54 +1054,54 @@ box White Authority B
     participant SSB as uSubscription<br/>[//B/0/4]
     participant MSSB as uSubscription<br/>:MQTT5Transport
     participant MSUB as uEntity B<br/>:MQTT5Transport
-    actor SUB as uEntity B<br/>:Subscriber<br/>[//B/90/2/0]
+    actor SUB as uEntity B<br/>:Subscriber<br/>[//B/90/1/2/0]
 end
 
 Note left of ZSSA: All :ZenohTransports are part of one<br/> Zenoh-connected transport network.
 Note left of MSUB: All :MQTT5Transports are part of one<br/> MQTT5-connected transport network.
 Note left of SUB: To improve readability, RPC-style interactions<br/>are not detailed out on transport-level.
 
-    STA->>ZSTA: registerListener(sourceFilter: "//A/0/4/8000")
+    STA->>ZSTA: registerListener(sourceFilter: "//A/0/1/4/8000")
 
 %% Client initiates uSubscription process 
 rect rgba(0, 0, 0, 0.1)
 activate SUB
-    SUB->>MSUB: registerListener(sourceFilter: "//A/80/2/9A10")
-    SUB->>SSB: subscribe(topic: "//A/80/2/9A10")
+    SUB->>MSUB: registerListener(sourceFilter: "//A/80/1/2/9A10")
+    SUB->>SSB: subscribe(topic: "//A/80/1/2/9A10")
 
 %% Because client is local and subscribed topic is to remote Authority, perform remote subscription
 activate SSB
 %% Return updated subscription state to Client
-    SSB->>MSSB: send(type: Publish, source: "//B/0/4/8000",<br/>{topic: "//A/80/2/9A10",<br/>subscriber: "//B/90/2/0",<br/>status: SUBSCRIBE_PENDING})
-    SSB--)SUB: (topic: "//A/80/2/9A10",<br/>subscriber: "//B/90/2/0",<br/>status: SUBSCRIBE_PENDING)
+    SSB->>MSSB: send(type: Publish, source: "//B/0/1/4/8000",<br/>{topic: "//A/80/1/2/9A10",<br/>subscriber: "//B/90/1/2/0",<br/>status: SUBSCRIBE_PENDING})
+    SSB--)SUB: (topic: "//A/80/1/2/9A10",<br/>subscriber: "//B/90/1/2/0",<br/>status: SUBSCRIBE_PENDING)
 deactivate SUB
 
-    SSB->>SSA: subscribe(topic: "//A/80/2/9A10")
+    SSB->>SSA: subscribe(topic: "//A/80/1/2/9A10")
 activate SSA
-    SSA->>ZSSA: send(type: Publish, source: "//A/0/4/8000",<br/>{topic: "//A/80/2/9A10",<br/>subscriber: "//B/0/4",<br/>status: SUBSCRIBED})
-    ZSSA-)ZSTA: onReceive({topic: "//A/80/2/9A10",<br/>subscriber: "//B/0/4",<br/>status: SUBSCRIBED})
-    ZSTA-)STA: onReceive({topic: "//A/80/2/9A10",<br/>subscriber: "//B/0/4",<br/>status: SUBSCRIBED})
+    SSA->>ZSSA: send(type: Publish, source: "//A/0/1/4/8000",<br/>{topic: "//A/80/1/2/9A10",<br/>subscriber: "//B/0/4",<br/>status: SUBSCRIBED})
+    ZSSA-)ZSTA: onReceive({topic: "//A/80/1/2/9A10",<br/>subscriber: "//B/0/4",<br/>status: SUBSCRIBED})
+    ZSTA-)STA: onReceive({topic: "//A/80/1/2/9A10",<br/>subscriber: "//B/0/4",<br/>status: SUBSCRIBED})
 activate STA
 Note over STA: "uEntity from leg B wants a topic from leg A!"
-    STA->>ZSTA: registerListener(sourceFilter: "//A/80/2/9A10")
+    STA->>ZSTA: registerListener(sourceFilter: "//A/80/1/2/9A10")
 deactivate STA
 
-    SSA--)SSB: (topic: "//A/80/2/9A10",<br/>subscriber: "//B/0/4",<br/>status: SUBSCRIBED)
+    SSA--)SSB: (topic: "//A/80/1/2/9A10",<br/>subscriber: "//B/0/4",<br/>status: SUBSCRIBED)
 deactivate SSA
 
-    SSB->>MSSB: send(type: Publish, source: "//B/0/4/8000",<br/>{topic: "//A/80/2/9A10",<br/>subscriber: "//B/90/2/0",<br/>status: SUBSCRIBED})
-    SSB->>SUB: send(type: Notify, source: "//B/0/4/8000",<br/>{topic: "//A/80/2/9A10",<br/>subscriber: "//B/90/2/0",<br/>status: SUBSCRIBED})
+    SSB->>MSSB: send(type: Publish, source: "//B/0/1/4/8000",<br/>{topic: "//A/80/1/2/9A10",<br/>subscriber: "//B/90/1/2/0",<br/>status: SUBSCRIBED})
+    SSB->>SUB: send(type: Notify, source: "//B/0/1/4/8000",<br/>{topic: "//A/80/1/2/9A10",<br/>subscriber: "//B/90/1/2/0",<br/>status: SUBSCRIBED})
 deactivate SSB
 end %% rect
 
 %% Route actual topic messages
 rect rgba(0, 0, 0, 0.025)
-    PUB->>ZPUB: send({type: Publish, source: "//A/80/2/9A10"},<br/>PAYLOAD)
+    PUB->>ZPUB: send({type: Publish, source: "//A/80/1/2/9A10"},<br/>PAYLOAD)
     ZPUB-)ZSTA: onReceive(MESSAGE)
     ZSTA-)STA: onReceive(MESSAGE)
 
 activate STA
-    STA->>MSTA: send({type: Publish, source: "//A/80/2/9A10"},<br/>MESSAGE.payload)
+    STA->>MSTA: send({type: Publish, source: "//A/80/1/2/9A10"},<br/>MESSAGE.payload)
 deactivate STA
 
     MSTA-)MSUB: onReceive(MESSAGE)
@@ -1121,7 +1121,7 @@ ifdef::env-github[[source,mermaid]]
 ----
 sequenceDiagram
 box White Authority A
-    actor SUB as uEntity A<br/>:Subscriber<br/>[//A/80/2/0]
+    actor SUB as uEntity A<br/>:Subscriber<br/>[//A/80/1/2/0]
     participant ZSUB as uEntity A<br/>:ZenohTransport
     participant SSA as uSubscription<br/>[//A/0/4]
     participant ZSSA as uSubscription<br/>:ZenohTransport
@@ -1133,58 +1133,58 @@ box White Authority B
     participant SSB as uSubscription<br/>[//B/0/4]
     participant MSSB as uSubscription<br/>:MQTT5Transport
     participant MPUB as uEntity B<br/>:MQTT5Transport
-    actor PUB as uEntity B<br/>:Publisher<br/>[//B/90/2/0]
+    actor PUB as uEntity B<br/>:Publisher<br/>[//B/90/1/2/0]
 end
 
 Note left of ZSSA: All :ZenohTransports are part of one<br/> Zenoh-connected transport network.
 Note left of MPUB: All :MQTT5Transports are part of one<br/> MQTT5-connected transport network.
 Note right of SUB: To improve readability, RPC-style interactions<br/>are not detailed out on transport-level.
 
-    STA->>ZSTA: registerListener(sourceFilter: "//A/0/4/8000")
+    STA->>ZSTA: registerListener(sourceFilter: "//A/0/1/4/8000")
 
 %% Client initiates uSubscription process 
 rect rgba(0, 0, 0, 0.1)
 activate SUB
-    SUB->>ZSUB: registerListener(sourceFilter: "//B/90/2/9A10")
-    SUB->>SSA: subscribe(topic: "//B/90/2/9A10")
+    SUB->>ZSUB: registerListener(sourceFilter: "//B/90/1/2/9A10")
+    SUB->>SSA: subscribe(topic: "//B/90/1/2/9A10")
 activate SSA
 %% Return updated subscription state to Client
-    SSA--)SUB: (topic: "//B/90/2/9A10",<br/>subscriber: "//A/80/2/0",<br/>status: SUBSCRIBE_PENDING)
+    SSA--)SUB: (topic: "//B/90/1/2/9A10",<br/>subscriber: "//A/80/1/2/0",<br/>status: SUBSCRIBE_PENDING)
 deactivate SUB
 
 %% Notify all listeners
-    SSA->>ZSSA: send(type: Publish, source: "//A/0/4/8000",<br/>{topic: "//B/90/2/9A10",<br/>subscriber: "//A/80/2/0",<br/>status: SUBSCRIBE_PENDING})
-    ZSSA-)ZSTA: onReceive({topic: "//B/90/2/9A10",<br/>subscriber: "//A/80/2/0",<br/>status: SUBSCRIBE_PENDING})
-    ZSTA-)STA: onReceive({topic: "//B/90/2/9A10",<br/>subscriber: "//A/80/2/0",<br/>status: SUBSCRIBE_PENDING})
+    SSA->>ZSSA: send(type: Publish, source: "//A/0/1/4/8000",<br/>{topic: "//B/90/1/2/9A10",<br/>subscriber: "//A/80/1/2/0",<br/>status: SUBSCRIBE_PENDING})
+    ZSSA-)ZSTA: onReceive({topic: "//B/90/1/2/9A10",<br/>subscriber: "//A/80/1/2/0",<br/>status: SUBSCRIBE_PENDING})
+    ZSTA-)STA: onReceive({topic: "//B/90/1/2/9A10",<br/>subscriber: "//A/80/1/2/0",<br/>status: SUBSCRIBE_PENDING})
         
 activate STA
 Note over STA: "uEntity from leg A wants a topic from leg B!"
-    STA->>MSTA: registerListener(sourceFilter: "//B/90/2/9A10")
+    STA->>MSTA: registerListener(sourceFilter: "//B/90/1/2/9A10")
 deactivate STA
 
 %% Because subscribed topic is to remote Authority, perform remote subscription
-    SSA->>SSB: subscribe(topic: "//B/90/2/9A10")
+    SSA->>SSB: subscribe(topic: "//B/90/1/2/9A10")
 activate SSB
-    SSB->>MSSB: send(type: Publish, source: "//B/0/4/8000",<br/>{topic: "//B/90/2/9A10",<br/>subscriber: "//A/0/4/0",<br/>status: SUBSCRIBED})
-    SSB--)SSA: (topic: "//B/90/2/9A10",<br/>subscriber: "//A/0/4/0",<br/>status: SUBSCRIBED)
+    SSB->>MSSB: send(type: Publish, source: "//B/0/1/4/8000",<br/>{topic: "//B/90/1/2/9A10",<br/>subscriber: "//A/0/1/4/0",<br/>status: SUBSCRIBED})
+    SSB--)SSA: (topic: "//B/90/1/2/9A10",<br/>subscriber: "//A/0/1/4/0",<br/>status: SUBSCRIBED)
 deactivate SSB
 
 %% Notify all listeners
-    SSA->>SUB: send(type: Notify, source: "//A/0/4/8000",<br/>{topic: "//B/90/2/9A10",<br/>subscriber: "//A/80/2/0",<br/>status: SUBSCRIBED})
-    SSA->>ZSSA: send(type: Publish, source: "//A/0/4/8000",<br/>{topic: "//B/90/2/9A10",<br/>subscriber: "//A/80/2/0",<br/>status: SUBSCRIBED})
-    ZSSA-)ZSTA: onReceive({topic: "//B/90/2/9A10",<br/>subscriber: "//A/80/2/0",<br/>status: SUBSCRIBED})
-    ZSTA-)STA: onReceive({topic: "//B/90/2/9A10",<br/>subscriber: "//A/80/2/0",<br/>status: SUBSCRIBED})
+    SSA->>SUB: send(type: Notify, source: "//A/0/1/4/8000",<br/>{topic: "//B/90/1/2/9A10",<br/>subscriber: "//A/80/1/2/0",<br/>status: SUBSCRIBED})
+    SSA->>ZSSA: send(type: Publish, source: "//A/0/1/4/8000",<br/>{topic: "//B/90/1/2/9A10",<br/>subscriber: "//A/80/1/2/0",<br/>status: SUBSCRIBED})
+    ZSSA-)ZSTA: onReceive({topic: "//B/90/1/2/9A10",<br/>subscriber: "//A/80/1/2/0",<br/>status: SUBSCRIBED})
+    ZSTA-)STA: onReceive({topic: "//B/90/1/2/9A10",<br/>subscriber: "//A/80/1/2/0",<br/>status: SUBSCRIBED})
 deactivate SSA
 end %% rect
 
 %% Route actual topic messages
 rect rgba(0, 0, 0, 0.025)
-    PUB->>MPUB: send({type: Publish, source: "//B/90/2/9A10"},<br/>PAYLOAD)
+    PUB->>MPUB: send({type: Publish, source: "//B/90/1/2/9A10"},<br/>PAYLOAD)
     MPUB-)MSTA: onReceive(MESSAGE)
     MSTA-)STA: onReceive(MESSAGE)
 
 activate STA
-    STA->>ZSTA: send({type: Publish, source: "//B/90/2/9A10"},<br/>MESSAGE.payload)
+    STA->>ZSTA: send({type: Publish, source: "//B/90/1/2/9A10"},<br/>MESSAGE.payload)
 deactivate STA
 
     ZSTA-)ZSUB: onReceive(MESSAGE)
