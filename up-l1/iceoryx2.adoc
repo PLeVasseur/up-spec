@@ -879,10 +879,10 @@ Within the same receive step, the element *MUST* admit or refuse the frame as th
 *The element's admission.*
 Before a frame reaches its route, the element *MUST* make these checks of it, in this order and once, and *MUST* refuse it at the first check that it fails:
 
-. the route's selected wire decodes the frame's metadata in the format that the wire states (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]); a frame whose metadata does not decode is refused metadata, the eighth check of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>>;
+. the route's selected wire decodes the frame's metadata in the format that the wire states, at the one version of it fixed at setup (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]); a frame whose metadata does not decode in it is refused metadata, the eighth check of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>>, and so is a frame whose prefix names a metadata layout that the format does not define;
 . the metadata holds each field that the format requires, each in its range, and names a payload encoding exactly where it says that the frame has a payload;
 . the metadata names a payload encoding, or the payload length that the header gives is zero; a frame whose metadata names no payload encoding while that length is not zero is refused as `+payload_presence_extent_mismatch+`;
-. the wire, the payload family and the metadata layout that the metadata names are those that the route admits;
+. the wire, the payload family and the metadata layout, one that the format defines, that the decoded metadata names are those that the route admits;
 . the metadata matches the source and sink filters of a receive of the route.
 
 The element *MUST NOT* evaluate a receive's filters for a frame that an earlier check refused, and *MUST NOT* deliver a frame to a receive whose filters its metadata does not match.
@@ -907,10 +907,10 @@ Allocated to:: the iceoryx2 binding; the element, for its admission of a frame's
 Verification:: test, fault-injection, review
 * *test*
 ** Metadata carried byte for byte from sender to receiver.
-** A frame whose metadata does not decode, and one whose prefix names another metadata layout: refused once by the element as refused metadata, with no presence taken from it, and not counted by the binding.
+** A frame whose metadata does not decode, and one whose prefix names a metadata layout that the selected wire's format does not define: refused once by the element at the first check, as refused metadata, with no presence taken from it, and not counted by the binding.
 ** A frame whose metadata names no payload encoding while its header gives a payload length of 1, with a header that passes the first seven checks of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>>: refused once by the element as `+payload_presence_extent_mismatch+`, given back to iceoryx2 once, with no TTL count, payload processing, forwarding or answer; the same frame also expired, and the same frame whose metadata also names a wire that the route does not admit: the same refusal and count.
 ** A frame with a present payload of length zero and encoding identifier `0`: admitted.
-** A frame whose metadata names another wire, another payload family or another metadata layout, with metadata that decodes: handed to the element, and refused there before its payload is decoded.
+** A frame whose metadata names another wire, another payload family or another metadata layout that the selected wire's format defines, with metadata that decodes: handed to the element, and refused there at the fourth check, before its payload is decoded.
 ** A frame whose metadata matches the filters of one receive of the route and not of another: delivered to the first only.
 ** A frame whose metadata names no payload encoding while its header gives a payload length of 1, on a route with a deadline: on a pull route, recorded as an arrival when it is read, then refused; where the binding serves a route by push, refused at delivery and recorded as no arrival; counted once in either case.
 ** An RPC request whose metadata decodes: the frame's source taken from the element's hand-back, and the response's ServiceName built from it.
