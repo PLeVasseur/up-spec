@@ -346,8 +346,9 @@ stateDiagram-v2
 [.specitem,oft-sid="dsn~usubscription-state-machine~1",oft-needs="impl,utest"]
 ****
 uSubscription service *MUST* implement subscription state transisitions of client-topic subscription relationships according to the above xref:usubscription-state-machine[state diagram].
-`SUBSCRIBE_PENDING` and `UNSUBSCRIBE_PENDING` states only apply to link:#usubscription-local-remote-subscriptions[remote topic subscriptions].
 ****
+
+NOTE: `SUBSCRIBE_PENDING` and `UNSUBSCRIBE_PENDING` states only apply to link:#usubscription-local-remote-subscriptions[remote topic subscriptions], more details provided below.
 
 .Subscription State Details
 [width="100%",cols="17%,20%,19%,26%,18%",options="header",]
