@@ -296,22 +296,22 @@ What a release was verified with changes with each release, so it belongs in a r
 [[req-ssr-unsafe-wire-untrusted]]
 == No wire can break the element's memory safety
 
-[.specitem,oft-sid="req~ssr-unsafe-wire-untrusted~2",oft-title="No wire can break the element's memory safety",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyGateUpRust"]
+[.specitem,oft-sid="req~ssr-unsafe-wire-untrusted~3",oft-title="No wire can break the element's memory safety",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyGateUpRust"]
 --
 The element *MUST NOT* let its memory safety depend on a wire's code being right.
 
 Where memory safety depends on a byte count, a length or a claim, the element *MUST NOT* take it from wire code on trust:
 
 * it *MUST* check the writer after encoding and refuse one that was replaced;
-* it *MUST* refuse a frame for which the wire reports more bytes than it wrote, and *MUST NOT* send or read a byte that the wire did not write;
+* it *MUST* refuse a frame for which the wire reports more bytes than it wrote, and *MUST NOT* send or read a byte that the wire did not write; on a native route, protected or not, a byte that code which the element controls initializes as xref:native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused] states, such as the value's padding or the alignment gap of the native protection composition, counts as written for this rule;
 * it *MUST* give decoding only a valid mutable reference to an initialized value.
 --
 
 [horizontal]
-ID:: `+req~ssr-unsafe-wire-untrusted~2+`
+ID:: `+req~ssr-unsafe-wire-untrusted~3+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test (a replaced writer is refused; a wire that reports more bytes than it wrote has its frame refused, with no byte beyond those that it wrote sent or read), miri
+Verification:: test (a replaced writer is refused; a wire that reports more bytes than it wrote has its frame refused, with no byte beyond those that it wrote sent or read; on a native route, a value with padding, and under the native protection composition a frame with an alignment gap, each sent with the bytes that code which the element controls initialized, while a wire that reports more bytes than it wrote is still refused), miri
 
 *Rationale.*
 A wire can be written in safe code alone, against a safe interface.
@@ -320,6 +320,10 @@ So its code can be wrong without any `+unsafe+`, and the element cannot rely on 
 Encoding goes through a checked writer that keeps the count of the bytes written itself.
 So a safe wire cannot claim more initialized bytes than it wrote.
 A frame sent at a length above that count would carry bytes that nothing wrote, so the element refuses it.
+
+_Bytes that the element initializes._
+On a native route, a value's padding and the alignment gap of the native protection composition are no wire's output: code that the element controls initializes them, so they count as written, while every length and every claim of a wire is still checked.
+For a serialized writer nothing changes.
 
 [[one-wire]]
 == What depends on the payload a wire carries

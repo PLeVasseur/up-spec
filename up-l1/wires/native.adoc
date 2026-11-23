@@ -255,12 +255,13 @@ This item requires the outcome, and <<guidance>> describes one way to reach it.
 [[req-ssr-native-in-place]]
 == A native payload is written and read where it is carried, or its route is refused
 
-[.specitem,oft-sid="req~ssr-native-in-place~2",oft-title="A native payload is written and read where it is carried, or its route is refused",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-native-in-place~3",oft-title="A native payload is written and read where it is carried, or its route is refused",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Sending.*
 On a native route the element *MUST* have the sender initialize the value once, directly in the storage that carries it (xref:../payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]), and *MUST* ensure that:
 
 * nothing is read from a loan before it is written, and a loan is sent only once the whole value has been written into it;
+* each byte of each extent of the sample that the binding gives it to write is initialized before the binding performs an operation that needs it (xref:../bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]): the value's fields by its one in-place write, the bytes that a wire writes by that wire, and every other byte, the value's padding among them, by code that the element controls;
 * sending consumes the loan, and ends the sender's access to the storage (xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]);
 * a loan whose lease is dropped unsent is given back, exactly once (xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]);
 * no pending operation holds a loan (xref:../../up-l2/execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]).
@@ -302,19 +303,20 @@ On every path of a native route, success, refusal, cancellation, a peer's failur
 --
 
 [horizontal]
-ID:: `+req~ssr-native-in-place~2+`
+ID:: `+req~ssr-native-in-place~3+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, compile-fail, miri, review
 * *test*
 ** A native route on a lending test double and on each real lending binding: the value is read at the address at which it arrived.
 ** A loan that was not written whole, which cannot be sent, and a write after a send, which does not compile.
+** A native type with padding, on a lending test double whose publish path requires each byte of the payload's extent initialized: sent only once its padding has been initialized by code that the element controls, after the value's one in-place write, with no write after the send.
 ** A loan whose lease is dropped unsent, and a frame whose lease is dropped: each goes back once, counted by the test double.
 ** A loan and a frame whose leases safe code forgot: each is still charged at the end of the run, and its storage is never returned, and never lent or delivered again.
 ** A native route on a binding that cannot serve it: not admitted, and refused at setup, with no serialized or copied route in its place.
 * *compile-fail*: a write through a view, and a view used after the lease of its frame is dropped.
 * *miri*: the view, on a lending test double, with a forgotten lease.
-* *review*: no path from a native route into an encoder, a decoder or a staging buffer, and no property of this item that holds only if a destructor runs.
+* *review*: no path from a native route into an encoder, a decoder or a staging buffer, and no property of this item that holds only if a destructor runs; and, at source level, the code that initializes each byte of an extent that the element is given, other than the value's fields.
 
 *Rationale.*
 A native route exists so that a value crosses between processes with no allocation, no code that could fail on its contents, and no copy other than one that setup chose and reported.
@@ -323,6 +325,11 @@ A deployment that chooses one relies on exactly that.
 _Written where it is carried._
 A value that was built elsewhere and then copied into the loan would still arrive.
 The copy would cost time in proportion to the payload, and a place to build the value first.
+
+_Each byte of its extents._
+A typed write of a value can leave its padding uninitialized, and a binding cannot tell padding from a field.
+So the element initializes each byte of the extents that it is given, and the binding the rest (xref:../bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]).
+Padding still carries no meaning (<<req-ssr-native-type,A native payload type holds its whole value in one fixed layout>>, "Padding").
 
 _A forgotten lease._
 Forgetting a lease is safe code, and it runs no destructor (source: the standard library documentation, Rust 1.98.1, `+std::mem::forget+`, its description and its section "Safety": https://doc.rust-lang.org/1.98.1/std/mem/fn.forget.html#safety[`+std::mem::forget+`]).
@@ -359,7 +366,7 @@ Each row names the rules that govern a step.
 | xref:../integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]; xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]; xref:../bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level]; xref:../bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state]
 
 | A value is sent
-| <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>; xref:../payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../../up-l2/execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]
+| <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>; xref:../payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]; xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../../up-l2/execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]
 
 | A frame arrives
 | xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]; <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:../integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]
@@ -399,6 +406,10 @@ Each row names the rules that govern a step.
 | A binding that cannot lend or hand over storage of the type's size and alignment
 | Route preparation
 | xref:../bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]; <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>
+
+| A type for which the element cannot initialize each byte of the extents that a binding gives it, or a path for which a binding cannot initialize its complement
+| Setup, or route preparation
+| xref:../bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]
 
 | A wire or an allocation provider that declares allocation in a direction that the route uses, or a binding that declares allocation in its own code in such a direction
 | The transition

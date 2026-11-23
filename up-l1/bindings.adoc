@@ -735,7 +735,7 @@ A binding that cannot identify peers cannot report a peer's loss or restart, so 
 [[req-ssr-binding-qos-capability]]
 === A binding honors or refuses each declared setting
 
-[.specitem,oft-sid="req~ssr-binding-qos-capability~2",oft-title="A binding honors or refuses each declared setting",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+[.specitem,oft-sid="req~ssr-binding-qos-capability~3",oft-title="A binding honors or refuses each declared setting",oft-needs="impl,utest",oft-tags="SafetyBinding"]
 --
 A binding *MUST* declare its capability (xref:payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]), its QoS capability among it, truthfully, honor every route setting it admits, and in route preparation refuse any setting it cannot serve: QoS, peer-table size, payload bound, alignment, smallest payload, a count, a requirement to lend or truncation.
 
@@ -747,10 +747,13 @@ A binding *MUST NOT* declare or report an upper limit, or a computed capacity, a
 
 *Arrival reports.*
 Whether a binding can report the arrivals of a pull route, and the arrival latency that it declares for one, are part of its QoS capability (<<req-ssr-binding-arrival-reports,A binding reports each arrival within the latency that it declares, and each event as what it is>>).
+
+*Initialized extents.*
+A binding's capability *MUST* state, for each path that consumes a sample of a route that it serves, the path's required-initialized extent, and for each receive path its delivered-initialized extent with its basis, or that the path has none (<<req-ssr-binding-initialized-extent,A sample's bytes are initialized before a path needs them, each by the part that owns it>>).
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-qos-capability~2+`
+ID:: `+req~ssr-binding-qos-capability~3+`
 ASIL:: B
 Allocated to:: each binding
 Verification:: test, review
@@ -758,11 +761,13 @@ Verification:: test, review
 ** The QoS contract suite and the binding contract suite on each binding, observing what an application receives from the documented read call alone.
 ** A handoff binding that does not apply the route's policy in its own queue must fail it.
 ** A declared upper limit that the binding cannot always make available, declared and reported as a limit and never as guaranteed availability.
-* *review*: each count, size and bound that the binding declares, against what its declaration says that it measures.
+** A binding's capability for a route: each consuming path's required-initialized extent and each receive path's delivered-initialized extent, with its basis, or none, stated apart.
+* *review*: each count, size and bound that the binding declares, against what its declaration says that it measures; and each initialized extent that it declares, with its basis.
 
 *Rationale.*
 The element admits a route on what its binding declares.
 A figure that is read as more than it measures admits a route that the binding cannot serve: an upper limit says how much a route can ever use, and nothing about what is free when the route asks.
+The two initialized extents are a precondition and a guarantee, so the capability states them apart, and setup reads neither as the other.
 
 [[req-ssr-binding-arrival-reports]]
 === A binding reports each arrival within the latency that it declares, and each event as what it is
@@ -1015,6 +1020,7 @@ For as long as a loan is held, the binding *MUST* keep its storage:
 
 The binding *MAY* lend the storage of a fresh loan uninitialized, and promises no value of its bytes.
 The element *MUST NOT* read a fresh loan's storage as a typed value, or make a reference to it as a value, before a value is initialized there (xref:wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused]; xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]).
+Which bytes of a sample are initialized before a path that consumes it, and by which part, is stated in <<req-ssr-binding-initialized-extent,A sample's bytes are initialized before a path needs them, each by the part that owns it>>.
 
 *A received frame.*
 For as long as a frame is held, the binding *MUST* keep its storage:
@@ -1092,6 +1098,91 @@ Whether two loans can ever overlap, or a frame's storage can go back twice, is a
 _Fixed before the transition._
 Nothing is set up in runtime mode (xref:../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
 A middleware that grew or moved its storage there would do set-up work on a runtime path, and could move a frame under a view.
+
+[[req-ssr-binding-initialized-extent]]
+=== A sample's bytes are initialized before a path needs them, each by the part that owns it
+
+[.specitem,oft-sid="req~ssr-binding-initialized-extent~1",oft-title="A sample's bytes are initialized before a path needs them, each by the part that owns it",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyUpRustCore"]
+--
+*Scope.*
+This item binds each binding, lending or not, on each route that it serves, and the element for each extent of a sample that a binding gives it to write.
+A carrier that forwards a native frame into a lending egress is one more producer of the egress's sample: what it owes for the extent that it fills is stated in xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes].
+
+*Two declared facts.*
+Each binding *MUST* declare two facts as part of its capability (<<req-ssr-binding-qos-capability,A binding honors or refuses each declared setting>>), each truthfully and for the service type and the configuration that it selects for the route:
+
+* for each path that consumes a sample of the route, the path's _required-initialized extent_: the bytes of the sample that must be initialized before the earliest operation of that path that needs them, which is a precondition on whoever produces the sample;
+* for each receive path of the route, the path's _delivered-initialized extent_: the bytes of a received sample that are initialized for their holder when the binding hands the sample over, with the basis that the binding names for it, such as its middleware's documented receive contract for the selected service type or an operation of the binding's own, which is a guarantee of the receiving binding.
+
+The paths that consume a sample are its send or publish operation, a hand-off copy, a crossing into code outside the element and the binding, and each enabled tracing or inspection path.
+A path that hands the whole range of a sample's object to another component consumes that whole range, unless the binding's configuration excludes the path.
+For a path that has no such extent, the declaration *MUST* say that it has none.
+The binding *MUST NOT* infer either fact from the other: that a path needs bytes initialized does not show that a receive path delivers them, and a required-initialized extent at a sending binding is not a delivered-initialized extent at a receiving one.
+
+*Two classes of byte.*
+Each byte of a required-initialized extent is of exactly one of two classes:
+
+* an _element extent_: a range that the binding gives the element to write;
+* the _binding's complement_: every other byte, such as a header and its reserved bytes, a hint, metadata that the binding writes, padding or a gap between parts, a tail, and the bytes that a shortened payload gives up.
+
+There is no third class: a byte that no part writes is of the binding's complement.
+
+*Each part's bytes.*
+
+* The element *MUST* establish that each byte of each element extent that it is given is initialized: a value's fields by its one in-place write, the bytes that a wire writes by that wire, and every other byte by code that the element controls (xref:wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], "Sending").
+* The binding *MUST* establish that each byte of its complement is initialized.
+* Each part *MUST* record its own fact, and *MUST NOT* vouch for a byte of the other part's.
+
+*At the hand-off.*
+The binding *MUST* perform an operation of a path that needs initialized storage only once the element's fact and its own both hold for that path's required-initialized extent.
+They hold at that moment, once every write to the storage has been made: a byte that an earlier write left initialized needs no second write.
+Nothing is written to the storage after that operation.
+
+*Refused at setup.*
+
+* The element *MUST* refuse a route at setup, naming the route, where it cannot establish its part for the route's type on the route's binding.
+* A binding *MUST* refuse a route in route preparation, naming the route and the path, where it cannot establish its complement for a path that the route selects.
+* The element and the binding *MUST NOT* serve such a route by a copy, a serialized encoding or a weaker path instead (xref:wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], "No substitute").
+
+*No precondition on an application.*
+The element *MUST* give an application only safe interfaces, generated or checked, through which to initialize a value, so that no safe caller takes on a precondition of memory safety that nothing checks.
+
+*What this item does not change.*
+A fresh loan is still lent as <<req-ssr-binding-lent-storage,Lent storage is exclusive, disjoint and stable for as long as it is held>> states, and creating it requires no byte to be initialized.
+That padding and a gap carry no meaning is stated in xref:wires/native.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout], "Padding", and in xref:wires/e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition".
+That rule of meaning neither forbids carrying those bytes as part of an opaque extent nor makes a receiver write to storage that it receives.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-initialized-extent~1+`
+ASIL:: B
+Allocated to:: each binding; the element, for establishing each byte of each element extent that it is given, for recording its fact, for refusing at setup a route for which it cannot establish its part, for serving no such route in another form, and for the interfaces through which an application initializes a value
+Verification:: test, review
+* *test*
+** On a lending test double whose publish path requires each byte of a sample initialized: a native type with padding, published only once each byte of its element extents is initialized by the element, padding included, and each byte of the complement by the double, with no byte written after the publish.
+** A binding double that declares no required-initialized extent for its selected paths: no duty added, and the same type published as before.
+** A type for which the element cannot establish its part on a binding: the route refused at setup by name, with no copied or serialized route in its place.
+** A binding double that cannot establish its complement for a selected path: the route refused in route preparation, naming the route and the path.
+** A fresh loan: lent uninitialized, with no typed read before a value is written there.
+** A binding double that declares a required-initialized extent for its publish path and none for its receive path: two separate declarations, its receive path declared with no delivered-initialized extent.
+** Two frames of a type with padding that differ only in their padding: the same value to every reader.
+* *review*: each binding's declaration of each path's required-initialized and delivered-initialized extents, with its basis, against its middleware's contract for the selected service type and configuration; and, at source level, the code by which the element establishes each byte of an element extent.
+
+*Rationale.*
+The element knows a native value's padding but does not call the middleware, and a binding calls the middleware but does not know the type.
+A typed write of a value can leave its padding uninitialized, and a middleware can need each byte of a sample initialized before it takes the sample.
+So each part establishes the bytes that it can reach, the operation that needs both waits for both facts, and neither part vouches for the other's.
+
+_Two facts._
+What a path needs is a precondition on the sample's producer, and what a receive path delivers is a guarantee of its binding.
+Neither follows from the other, so each is declared on its own, and a path with none says so.
+
+_No substitute._
+A route that cannot be served this way is refused at setup, as any native route that cannot be prepared is: a copy or an encoding in its place would change its cost and its failure behaviour where no review looked.
+
+_What it does not require._
+The rule is an outcome at the hand-off.
+It prescribes no mechanism, asks for no second pass over bytes that an earlier write left initialized, and leaves a fresh loan uninitialized until a value is written there.
 
 [[req-ssr-binding-shared-state]]
 === A lending binding says which way its ports write shared state
