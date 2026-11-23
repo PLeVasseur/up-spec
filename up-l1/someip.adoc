@@ -57,7 +57,7 @@ A stock SOME/IP message has no field for a message's UUID, priority, TTL, token,
 What the translator promises instead is the directional table of <<common-umessage-attributes>>: for every field and payload state, in each direction, the value is carried, supplied from named context, lost with a stated loss, or refused.
 
 * The translator's supplier *MUST* state, in the translator's released documentation, that the translator is a service translator under this chapter, and *MUST* name the tables of this chapter in it.
-The translator *MUST* meet every row and every refusal of the items of this chapter.
+The translator *MUST* meet every row and every refusal of the items of this chapter, `+dsn~up-transport-someip-uri-mapping~1+` (<<uri-mapping>>) and `+dsn~up-transport-someip-subscription-mapping~1+` (<<eventgroup-entry-mapping>>) among them.
 * The translator's supplier *MUST NOT* claim `+req~utransport-send-preserve-data~1+` for the conversion.
 That requirement is neither amended nor waived: it binds each UTransport implementation unchanged, the transports that bring a message to the translator and take a reconstructed message away from it included, and it has no subject across the conversion, which is not a transmission.
 * A component that drops or defaults an attribute that the tables of this chapter do not state as lost does not conform by being called a translator: it meets neither `+req~utransport-send-preserve-data~1+` nor this chapter.
@@ -339,7 +339,7 @@ The published text of this chapter that the service translation replaces, as the
 | The two status rules of <<commstatus-error-mapping>> and <<commstatus-inbound>>
 
 | Both subscription response rows of <<eventgroup-entry-mapping>>, complete
-| Two rows that map each response to the v4 `SubscribeResponse` with its topic and its status
+| Two rows of `+dsn~up-transport-someip-subscription-mapping~1+` that map each response to the v4 `SubscribeResponse` with its topic and its status
 
 | The message name and the condition of the subscription request row
 | `SubscribeRequest` and its `expiration` member; the predicate and the permission are unchanged
@@ -430,6 +430,10 @@ How each code is sent and read is stated in <<commstatus-error-mapping>> and <<c
 
 xref:../basics/uri.adoc[`UUri`] is translated to SOME/IP attributes per <<uri-mapping>> table below.
 
+[.specitem,oft-sid="dsn~up-transport-someip-uri-mapping~1",oft-needs="impl,utest",oft-covers="req~up-transport-someip-service-translation~1",oft-tags="SomeIpTranslator"]
+--
+The translator *MUST* map each part of a UUri to and from the SOME/IP field that <<uri-mapping>> names for it, with each identifier value as <<someip-identifiers>> states it; a rule of that table or of its notes that has its own key word keeps it, and the translator is the actor of each rule of the table and of its notes that names no other actor.
+
 .UUri Mapping
 [[uri-mapping]]
 [cols="10%m,30%m,60%a",width="100%",options="header,autowidth"]
@@ -465,6 +469,8 @@ NOTES::
 * `InstanceID` is not present in *SOME/IP Header*, but is needed for _Service Discovery_ and events and *MUST* be provided for SOME/IP libraries (e.g. `vsomeip`).
 * Additional mappings *MAY* be required by the underlying SOME/IP library, e.g. Service Major/Minor version. Such values *MAY* be pre-configured
 
+--
+
 [[someip-identifiers]]
 === Identifiers
 
@@ -487,7 +493,7 @@ The core uProtocol ranges (xref:../basics/uri.adoc[UUri]; xref:../basics/uattrib
 | The client's `ue_type_id` | `0x0000` to `0xFFFE` | Client ID | Events carry `0x0000` (<<uuid-mapping>>) | Chosen by the client identity agreement, never by masking; the event rule reserves no Client ID for requests
 |===
 
-* *Direct mapping is the default.* The translator *MUST* map each identifier value for value, as <<uri-mapping>> states, unless a declared identifier table maps it.
+* *Direct mapping is the default.* The translator *MUST* map each identifier value for value, as `+dsn~up-transport-someip-uri-mapping~1+` states (<<uri-mapping>>), unless a declared identifier table maps it.
 The mapping polices what the wire can represent, not how a deployment allocates identifiers.
 * *Two special Service IDs.* The profile also allocates the Service ID `0x0101` to the Enhanced Testability Service and reserves `0x433F` for a camera interface.
 Those are allocations for a purpose, not values that the wire cannot carry, and the translator does not refuse them.
@@ -556,7 +562,7 @@ _Carried_ means that the receiver gets the sender's value; _supplied_ names the 
 
 | Service-side entity: the source of a Publish and of a Notification, the sink of a request, the source of a response
 | Type, resource and major version _carried_ in Service ID, Method or Event ID and Interface Version, through the identifier table where one is declared (<<someip-identifiers>>). Authority and instance are not in the header: they *MUST* equal those that endpoint and discovery configuration bind to the service instance, and otherwise the message is _refused_ with `UCode.OutOfRange`, because the declared context has no image for another authority or instance. That a bound instance is not offered at that moment is a peer's state, and not this refusal.
-| The same fields back; authority and instance _supplied_ from endpoint and discovery configuration, as <<uri-mapping>> states
+| The same fields back; authority and instance _supplied_ from endpoint and discovery configuration, as `+dsn~up-transport-someip-uri-mapping~1+` states (<<uri-mapping>>)
 
 | Client-side entity of a request
 | Not carried as a URI. The Client ID is _supplied_ by the client identity agreement (<<someip-client-identity>>); with no entry, _refused_. The whole source stays in the cache.
@@ -1012,7 +1018,7 @@ The translator *MUST* take each of them out at the framing and demultiplexing bo
 
 | A SOME/IP-SD message
 | By the SD Message ID: Service ID `0xFFFF` with Method ID `0x8100`. That makes a unit a candidate for the SD path and nothing more.
-| The stack's SOME/IP-SD handling takes it and applies the profile's checks for SD: the SOME/IP header first, then the SD length, the arrays of entries and options, and each entry. Eventgroup entries that this path admits reach the subscription mapping of <<eventgroup-entry-mapping>>. A candidate that the path does not admit is handled as the profile's SD error handling states: it reaches no mapping, and it does not come back into the pipeline as an application event.
+| The stack's SOME/IP-SD handling takes it and applies the profile's checks for SD: the SOME/IP header first, then the SD length, the arrays of entries and options, and each entry. Eventgroup entries that this path admits reach the subscription mapping, `+dsn~up-transport-someip-subscription-mapping~1+` (<<eventgroup-entry-mapping>>). A candidate that the path does not admit is handled as the profile's SD error handling states: it reaches no mapping, and it does not come back into the pipeline as an application event.
 | _Declined subscription_, for an admitted `SubscribeEventGroupNack`. This chapter adds no count for the SD path's own refusals and does not declare them uncounted: how the stack's service discovery observes them is for its documentation to say.
 
 | A TCP magic cookie
@@ -1642,6 +1648,10 @@ and unsubscribe flows.
 
 ==== Common Fields
 
+[.specitem,oft-sid="dsn~up-transport-someip-subscription-mapping~1",oft-needs="impl,utest",oft-covers="req~up-transport-someip-service-translation~1",oft-tags="SomeIpTranslator"]
+--
+The translator *MUST* map between each eventgroup entry type of SOME/IP-SD and the uSubscription message that <<eventgroup-entry-mapping>> pairs with it, with the common fields that <<common-field-mappings>> maps; a rule of these tables or of their notes that has its own key word keeps it, and the translator is the actor of each rule of the tables and of their notes that names no other actor.
+
 <<common-field-mappings>> table below illustrates the common *SOME/IP-SD* EventGroup Entry fields that are present in all *SOME/IP-SD* Eventgroup entry types (`SubscribeEventgroup`, `SubscribeEventGroupAck`, `SubscribeEventgroupNack`, `StopSubscribeEventGroup`).
 
 These fields are then mapped to uProtocol `UUri` attributes used in uProtocol `UMessage` for performing subscription operations.
@@ -1703,3 +1713,4 @@ h| Eventgroup Entry Type h| uSubscription Message h| Additional Details
 NOTE: This is handled by the underlying SOME/IP library.
 
 |===
+--
