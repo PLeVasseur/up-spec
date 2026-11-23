@@ -407,6 +407,8 @@ When the last client subscribed to a remote topic calls the `Unsubscribe()` oper
 For every uSubscription v4 service implementation, this item retires `req~usubscription-remote-unsubscribe-notifications~1`, which required uSubscription service to stop publishing subscription change messages for a remote topic to the xref:subscription-change-message-topic[subscription change message topic] once the last client subscribed to that topic had called `Unsubscribe()` on it.
 --
 
+NOTE: Publication on the subscription change message topic and the Notifications that `req~usubscription-unsubscribe-notifications~1` stops for the departing client are separate. That item concerns only the subscription that the client leaves; a client that leaves one subscription can still hold others.
+
 .Unsubscribe operation
 ====
 [mermaid]
