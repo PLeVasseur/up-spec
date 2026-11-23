@@ -493,7 +493,7 @@ NOTE: A message's wire, such as the native wire or Protobuf, and a route's trans
 * A payload that is only carried, with no wire: xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes].
 * What a lending binding owes is xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], whatever the wire.
 * What a handoff binding owes for its one copy is <<req-ssr-payload-written-once,A payload is written once, into the storage that carries it>>, whatever the wire.
-* What the LoLa binding adds is on xref:lola.adoc[the LoLa page] and xref:lola-envelope.adoc[the LoLa physical envelope], and what the iceoryx2 binding adds is on xref:iceoryx2.adoc[the iceoryx2 page] and xref:iceoryx2-frame.adoc[the iceoryx2 physical frame].
+* What the LoLa binding adds is on xref:lola.adoc[the LoLa page] and xref:lola.adoc#lola-sample-layout[the LoLa physical envelope], and what the iceoryx2 binding adds is on xref:iceoryx2.adoc[the iceoryx2 page] and xref:iceoryx2.adoc#iceoryx2-sample-layout[the iceoryx2 physical frame].
 * The evidence for each combination of a wire and a binding: xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts].
 
 [[admission]]

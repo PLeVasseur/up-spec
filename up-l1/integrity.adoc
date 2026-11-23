@@ -169,7 +169,7 @@ The copy is held in storage reserved at setup, like every other runtime buffer, 
 
 The middleware of a lending binding can map its payload memory read-only for readers.
 So the copy reads it only through loads that are valid on a read-only mapping.
-Where one middleware does so is described with its binding (xref:iceoryx2-frame.adoc#req-ssr-binding-iceoryx2-frame-wipe[On iceoryx2, the token of a loan that is not sent is wiped, and a sent frame is left as it was written]).
+Where one middleware does so is described with its binding (xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-wipe[On iceoryx2, the token of a loan that is not sent is wiped, and a sent frame is left as it was written]).
 Not every load is valid there: even an atomic load can be undefined on read-only memory, apart from small relaxed loads on the targets that the documentation lists (source: https://doc.rust-lang.org/1.98.1/core/sync/atomic/index.html#atomic-accesses-to-read-only-memory[the core library documentation, Rust 1.98.1, module `+core::sync::atomic+`, section Atomic accesses to read-only memory]).
 
 Two accesses to the same bytes are a data race where one of them writes, nothing orders them and at least one of them is not atomic, and a data race is undefined behaviour (source: https://doc.rust-lang.org/1.98.1/core/sync/atomic/index.html#memory-model-for-atomic-accesses[the core library documentation, Rust 1.98.1, module `+core::sync::atomic+`, section Memory model for atomic accesses]; https://doc.rust-lang.org/1.98.1/reference/behavior-considered-undefined.html#r-undefined.race[the Rust Reference, Rust 1.98.1, chapter Behavior considered undefined, rule undefined.race]).

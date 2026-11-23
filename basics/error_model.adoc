@@ -226,7 +226,7 @@ Element code's arithmetic on runtime paths *MUST* be checked, saturating or wrap
 
 *Malformed frames.*
 The element *MUST* refuse a frame whose header or envelope it cannot parse, a frame that lacks them included, and *MUST* return or count that refusal as xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states.
-Where a binding parses a frame's physical envelope, the binding's own items state the refusal of a sample that does not parse (xref:../up-l1/lola-envelope.adoc#req-ssr-binding-lola-envelope-checks[On LoLa, a sample that is not a well-formed envelope is refused before any of it is used]; xref:../up-l1/iceoryx2-frame.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]).
+Where a binding parses a frame's physical envelope, the binding's own items state the refusal of a sample that does not parse (xref:../up-l1/lola.adoc#req-ssr-binding-lola-envelope-checks[On LoLa, a sample that is not a well-formed envelope is refused before any of it is used]; xref:../up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]).
 --
 
 [horizontal]

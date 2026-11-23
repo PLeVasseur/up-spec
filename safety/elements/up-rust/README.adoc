@@ -230,7 +230,7 @@ For the Streamer: xref:../../../up-l2/streamer.adoc#req-ssr-streamer-containment
 
 | Required from bindings
 | The lending or handoff contract, and the bindings' duties
-| The items whose statements give a binding a duty, most of them in xref:../../../up-l1/bindings.adoc[uP-L1 Transport Bindings], xref:../../../up-l1/iceoryx2.adoc[iceoryx2], xref:../../../up-l1/iceoryx2-frame.adoc[The iceoryx2 physical frame], xref:../../../up-l1/lola.adoc[LoLa] and xref:../../../up-l1/lola-envelope.adoc[The LoLa physical envelope], alongside xref:../../assurance.adoc[Safety Assurance Governance, Verification and Evidence] and xref:../../../languages/rust.adoc[Rust language mapping]; xref:assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]
+| The items whose statements give a binding a duty, most of them in xref:../../../up-l1/bindings.adoc[uP-L1 Transport Bindings], xref:../../../up-l1/iceoryx2.adoc[iceoryx2], xref:../../../up-l1/iceoryx2.adoc#iceoryx2-sample-layout[The iceoryx2 physical frame], xref:../../../up-l1/lola.adoc[LoLa] and xref:../../../up-l1/lola.adoc#lola-sample-layout[The LoLa physical envelope], alongside xref:../../assurance.adoc[Safety Assurance Governance, Verification and Evidence] and xref:../../../languages/rust.adoc[Rust language mapping]; xref:assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]
 
 | Required from wires
 | The wire contract, and the wires' duties
