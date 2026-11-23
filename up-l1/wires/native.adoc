@@ -436,7 +436,7 @@ Each row names the rules that govern a step.
 | Runtime
 | xref:../../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]
 
-| A frame whose writer's layout identity is not established to be the reader's, a layout of the same size and the same alignment included
+| A frame of which a view can follow, whose writer's layout identity is not established to be the reader's, a layout of the same size and the same alignment included
 | Admission
 | <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:../integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]
 
