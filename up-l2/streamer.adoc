@@ -260,8 +260,6 @@ The egress binding establishes its complement as on any send.
 
 *Metadata at egress.*
 Where the egress envelope differs from the ingress envelope, a carrier *MUST* re-encode the metadata only.
-*Metadata at egress.*
-Where the egress envelope differs from the ingress envelope, a carrier *MUST* re-encode the metadata only.
 Where the egress route selects a wire to decode frame metadata, a carrier *MUST* use that wire's stated metadata format for any metadata that it re-encodes for that egress (xref:../up-l1/wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
 --
 
