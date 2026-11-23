@@ -79,6 +79,12 @@ That is attribution by declared mapping context, and an identifier table or a cl
 Authenticating the stock peers, and limiting which of them reach the translator's endpoints, is the deployment's duty under its SOME/IP configuration.
 A `token` or a `permission_level` is refused or lost as <<common-umessage-attributes>> states, and is never treated as checked.
 
+*Routes onto the translator's fixed service.*
+Where a component forwards uProtocol messages to the translator on a declared route, the route ends at the fixed service that the translator translates, whose contract fixes the slots of its methods and events, and the translator is the uProtocol endpoint of each message on it ("Standing").
+The translator *MUST* refuse at setup, by name, such a route whose declaration states that it carries, unchanged, an encoding identifier or an attribute that the translator cannot preserve: an encoding identifier that no slot of the service admits, or an attribute that the directional table of <<common-umessage-attributes>> does not state as _carried_ in the direction in which the route carries it.
+An unrestricted opaque route, which declares no limit on the encoding identifiers that it carries and carries every attribute unchanged, is such a route.
+A route that the translator admits does not change how each message on it is judged: a payload whose encoding identifier is not the selected slot's is refused, with no relabelling, as <<common-umessage-attributes>> and row 4 of <<someip-results>> state.
+
 *The call items.*
 Through each operation that it exposes, the translator owes the duty of each call item of xref:README.adoc[Transport & Session Layer (uP-L1)] as <<someip-call-allocation>> states it, read with these boundary terms:
 
