@@ -161,7 +161,7 @@ So the same rule holds for it.
 [[req-ssr-wire-metadata-format]]
 == A wire states the format of its frame metadata, and decodes it
 
-[.specitem,oft-sid="req~ssr-wire-metadata-format~1",oft-title="A wire states the format of its frame metadata, and decodes it",oft-needs="impl,utest,uman",oft-tags="SafetyWire,SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-wire-metadata-format~2",oft-title="A wire states the format of its frame metadata, and decodes it",oft-needs="impl,utest,uman",oft-tags="SafetyWire,SafetyUpRustCore"]
 --
 *The selected wire.*
 The wire that a route selects to decode the metadata of its frames is one of the wires that the route declares.
@@ -181,21 +181,29 @@ Where a requirement that is specific to one binding fixes one of these facts for
 
 *Writing.*
 On a route that selects a wire to decode its frame metadata, the element *MUST* encode the metadata of each frame that it originates in that wire's stated metadata format.
-Metadata re-encoding when a frame is forwarded is stated in xref:../../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes], "Metadata at egress".
+What a carrier does with a forwarded frame's metadata, reuse, conversion or refusal, is stated in xref:../../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes], "Metadata at egress".
 
 *Decoding.*
 The wire *MUST* decode metadata in that format only.
 It *MUST* report to the element, for the metadata of each frame, whether that metadata decodes in the format, and it *MUST NOT* give the element a field that the metadata does not hold, by a default or by a lenient reading of its own.
+
+*Grammar before fields.*
+The exact grammar of a frame's metadata is the wire's stated format at its fixed version, with the generation of each field type that the format names, such as a UUri's (xref:../../basics/uri.adoc[UUri]).
+The wire *MUST* establish that grammar before it decodes any field whose meaning depends on it, from fixed setup context or from a selector that it reads without that grammar.
+It *MUST NOT* choose a grammar by trying decoders and keeping one that succeeds, and *MUST NOT* choose one from a package name, a payload encoding identifier or an envelope's version: a decoding that succeeds selects no grammar, and a range check is no detector of one.
+The element *MUST NOT* have a frame's metadata decoded under another grammar where the selected wire reports that the metadata does not decode.
+This revision adds this clause, and replaces no duty of revision 1 of this item.
 --
 
 [horizontal]
-ID:: `+req~ssr-wire-metadata-format~1+`
+ID:: `+req~ssr-wire-metadata-format~2+`
 ASIL:: B
-Allocated to:: each wire that a route selects to decode the metadata of its frames; the element, for encoding the metadata of each frame that it originates on a route that selects a wire to decode frame metadata
+Allocated to:: each wire that a route selects to decode the metadata of its frames; the element, for encoding the metadata of each frame that it originates on a route that selects a wire to decode frame metadata, and for having no frame's metadata decoded under another grammar where the selected wire reports that it does not decode
 Verification:: review, test, fault-injection
 * *review*: the stated format, against the wire's code and against the fields on which the items of each binding that carries the wire's frames rely.
 * *test*: metadata written from the stated format, for each field and for a frame with and without a payload, decoded by the wire and compared field by field; metadata that does not decode in the format, reported as not decoding; metadata that lacks a field, with no value supplied for it.
 * *test*: metadata of frames originated by the element, checked against the selected wire's stated format and the frame's fields by a reader written from that format independently of the element's writer and the selected wire's decoder: each field, an absent payload, a present empty payload and a present nonempty payload; on a route declaring two wires with different metadata formats, the format of the one selected for metadata; a control whose writer uses the other wire's format to produce metadata outside the selected wire's format fails this check.
+* *test*: metadata bytes that decode under two grammars with different meanings: decoded only under the grammar that setup fixes or that a selector read without that grammar names; a control that tries the other decoder after a failure, or that picks a grammar from a package name, a payload encoding identifier or an envelope's version, fails.
 * *fault-injection*: arbitrary metadata bytes, each decoded or reported as not decoding.
 
 *Rationale.*
@@ -203,6 +211,9 @@ A frame's metadata says what the frame is: which wire, payload family and layout
 The binding carries it unchanged and reads only what it needs to hand the frame over, and the element decides from it whether the frame is the route's.
 So the format has one owner, the wire that the route selects, and an independent implementation reads it from that wire's statement.
 A field that a decoder made up could let a frame pass for another route's.
+
+_Grammar before fields._
+Two grammars can both decode the same bytes with different meanings, so a decoding that succeeds says nothing about the grammar that the writer used, and the grammar has to be known before the first field is read.
 
 [[req-ssr-wire-heap-claim-tested]]
 == A heap-free claim is true, and encoding is repeatable

@@ -259,8 +259,35 @@ The carrier's fact for the egress payload's extent then rests on that mechanism'
 The egress binding establishes its complement as on any send.
 
 *Metadata at egress.*
-Where the egress envelope differs from the ingress envelope, a carrier *MUST* re-encode the metadata only.
-Where the egress route selects a wire to decode frame metadata, a carrier *MUST* use that wire's stated metadata format for any metadata that it re-encodes for that egress (xref:../up-l1/wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
+A carrier *MUST* give each frame's metadata at egress by the action of the row of this table that applies to it, and by no other; the layout relation is that of the egress envelope's layout to the ingress envelope's:
+
+[cols="2,6,6",options="header"]
+|===
+| Layout relation | Metadata condition | Carrier action
+
+| Same
+| The metadata bytes are valid in the egress's selected format, mean there what they meant at ingress, lie within the egress's limits, and have no field update pending
+| It *MAY* reuse the bytes.
+
+| Same
+| Any other
+| It *MUST* convert the metadata by a specified conversion that preserves its meaning and its context, or else refuse the frame under a named cause.
+
+| Different
+| The metadata bytes are valid in the egress's selected format, mean there what they meant at ingress, lie within the egress's limits, and have no field update pending
+| It *MUST* rebuild the metadata's placement, and *MAY* reuse the bytes.
+
+| Different
+| Any other
+| It *MUST* rebuild the metadata's placement and convert the metadata by a specified conversion that preserves its meaning and its context, or else refuse the frame under a named cause.
+|===
+
+A changed layout needs a new placement, and does not by itself force a conversion; the same layout does not by itself permit reuse.
+Where the egress route selects a wire to decode frame metadata, a carrier *MUST* use that wire's stated metadata format for any metadata that it converts for that egress (xref:../up-l1/wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]).
+On opaque carriage, whichever row applies, a carrier *MUST NOT* decode the payload, replace its encoding identifier, erase its native or protection context, or use a resource that its route does not declare.
+A carrier *MUST NOT* take a received sample to be publishable as it stands: the egress uses its own admitted storage and ownership operation.
+A conversion of the metadata alone keeps a protection claim only where every input that the protection profile covers is unchanged.
+For the element, in what its carrier primitives do, and for the Streamer, this revision replaces the duty of revision 3 of this item to re-encode the metadata only, wherever the egress envelope differs from the ingress envelope.
 --
 
 [horizontal]
@@ -275,7 +302,9 @@ Verification:: test
 ** A lending egress given one copy of the bytes, written at the address of its loan.
 ** On a route with no encoding filter, a serialized payload under an identifier that no wire of the route names, carried with its identifier and bytes unchanged: an assigned identifier, an unassigned one, a reserved one, a private-use one, `0` and `0xFFFF`.
 ** An absent payload kept absent, and a present zero-length payload kept present with its identifier, between two different envelopes.
-** Between different ingress and egress envelopes, with different selected metadata formats: the re-encoded metadata checked against the egress route's selected wire's stated format by an independent reader of that format; the payload's identifier, presence and bytes unchanged, including a serialized payload whose encoding no wire of the route reads; a control that re-encodes in the ingress format to produce metadata outside the egress format fails this check.
+** Between different ingress and egress envelopes, with different selected metadata formats: the converted metadata checked against the egress route's selected wire's stated format by an independent reader of that format; the payload's identifier, presence and bytes unchanged, including a serialized payload whose encoding no wire of the route reads; a control that converts into the ingress format, to produce metadata outside the egress format, fails this check.
+** Each row of the table of "Metadata at egress", with the same layout and with a different one: metadata bytes that are valid at the egress with the same meaning, within its limits and with no update pending, reused, with their placement rebuilt where the layout differs; and metadata that needs a conversion, converted by its specified conversion, or refused under its named cause.
+** A control: metadata whose bytes parse in both formats with different meanings, such as `01 00 00 00` under a little-endian and under a big-endian UInt32 grammar, reused as bytes: fails.
 ** The same frames carried the same way after a wire that reads their encoding is added to the route.
 ** A control: a carrier that refuses a frame because no wire of the route names its identifier fails.
 ** A held native frame forwarded from an ingress whose delivered-initialized extent covers the outer extent into an egress of the iceoryx2 profile: the route admitted at setup; one copy of the outer extent into the egress's loan; the egress binding's complement written; the frame published.
@@ -302,11 +331,15 @@ It is kept apart from what a carrier can read, so that no route starts to refuse
 _Presence._
 A payload and its identifier are present together or absent together (xref:../basics/uattributes.adoc#common-attributes[UAttributes], `payloadEncodingId`).
 So keeping the identifier unchanged keeps the presence too.
-A different egress envelope writes the metadata again, and an envelope that could not tell an absent payload from an empty one would lose the difference.
+A different egress envelope places the metadata anew, and an envelope that could not tell an absent payload from an empty one would lose the difference.
 
 _A native representation._
 A reader borrows a native representation in place, so a frame that names one has no serialized payload and is not carried as serialized bytes.
 <<req-ssr-streamer-qos-per-leg,Both legs are checked, at setup and per frame>> says when a leg carries it.
+
+_Metadata at egress._
+The same layout does not make the bytes valid at the egress, and a different layout does not make a conversion necessary: the bytes are reused only where they mean at the egress what they meant at the ingress, and they are converted only by a conversion that keeps that meaning.
+Anything else is refused, so that no loss is hidden behind "compatible".
 
 _A native frame at a lending egress._
 A carrier that forwards a native frame into a lending egress is one more producer of the egress's sample.
