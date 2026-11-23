@@ -267,7 +267,7 @@ A carrier *MUST* give each frame's metadata at egress by the action of the row o
 
 | Same
 | The metadata bytes are valid in the egress's selected format, mean there what they meant at ingress, lie within the egress's limits, and have no field update pending
-| It *MAY* reuse the bytes.
+| It *MAY* reuse the bytes; where it does not, it *MUST* convert the metadata by a specified conversion that preserves its meaning and its context.
 
 | Same
 | Any other
@@ -275,7 +275,7 @@ A carrier *MUST* give each frame's metadata at egress by the action of the row o
 
 | Different
 | The metadata bytes are valid in the egress's selected format, mean there what they meant at ingress, lie within the egress's limits, and have no field update pending
-| It *MUST* rebuild the metadata's placement, and *MAY* reuse the bytes.
+| It *MUST* rebuild the metadata's placement, and *MAY* reuse the bytes; where it does not, it *MUST* convert the metadata by a specified conversion that preserves its meaning and its context.
 
 | Different
 | Any other
