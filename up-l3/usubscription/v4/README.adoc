@@ -400,6 +400,11 @@ When a client calls the `Unsubscribe()` operation for a remote topic with xref:s
 After a client calls the `Unsubscribe()` operation, uSubscription service *MUST* stop sending subscription change Notifications to that client whenever there are any changes to the state of the subscription.
 --
 
+[.specitem,oft-sid="req~usubscription-unsubscribe-last-remote-change-context~1",oft-needs="impl,utest",oft-tags="uSubscription"]
+--
+When the last client subscribed to a remote topic calls the `Unsubscribe()` operation on that topic, uSubscription service *MUST NOT* remove the data with which it tracks that client's subscription before it has made the topic, the subscriber and the new xref:subscription-status[SubscriptionStatus] of this change available for the `Publish` message that `req~usubscription-change-topic~1` requires for it. That message *MAY* be sent after the removal.
+--
+
 .Unsubscribe operation
 ====
 [mermaid]
