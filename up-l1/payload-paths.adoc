@@ -295,11 +295,12 @@ That holds for a loan that a wire encodes into as for one that a sender writes.
 [[req-ssr-payload-route-form]]
 === A route's form is fixed at setup, by what the route declares and never by a name
 
-[.specitem,oft-sid="req~ssr-payload-route-form~2",oft-title="A route's form is fixed at setup, by what the route declares and never by a name",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
+[.specitem,oft-sid="req~ssr-payload-route-form~3",oft-title="A route's form is fixed at setup, by what the route declares and never by a name",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
 --
 *What is declared.*
 A route is declared with its wire, the bound and the alignment of its payload, its heap class, its QoS and, where it needs it, a requirement to lend.
 The smallest payload of a route is its type's size on a native route.
+On a route that selects the native protection composition, it is the smallest outer extent that the route admits, E on a topic's or a request's route and H on a response route, the route's bound is E, and its payload alignment is the inner type's alignment A (xref:wires/e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition").
 On a serialized route it is, for sending, the smallest encoding that the route's wire states (xref:wires/serialized.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns], "Sizing"), or zero where the wire states none, and, for receiving, zero.
 A binding's capability is what it declares of whether it lends, the payload bound and the alignment that it carries, the smallest payload that it carries where it carries no shorter one, and the counts and the QoS settings that it serves: the binding declares it as xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting] states, and its own heap class as xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
 
@@ -352,7 +353,7 @@ What the element states of each route's form in its report is specified in xref:
 --
 
 [horizontal]
-ID:: `+req~ssr-payload-route-form~2+`
+ID:: `+req~ssr-payload-route-form~3+`
 ASIL:: B
 Allocated to:: the element; each binding, for naming the route and the capability in its refusal in route preparation, for the reasons of that refusal, and for keeping in runtime mode whether it lends or hands off
 Verification:: test, review
@@ -366,6 +367,7 @@ Verification:: test, review
 ** A route whose smallest payload is below the smallest that its binding carries: refused, with the size named.
 ** A wire that states a smallest encoding of eight bytes, on a binding whose smallest payload is one byte, with every other check met: a route that only sends admitted, and a route that receives refused, with the size named.
 ** A native route whose alignment the binding does not carry: refused in route preparation, with the alignment named.
+** A protected native response route with H 48, A 8 and N 16, declared with smallest payload 48, bound 64 and alignment 8: admitted on a binding that carries payloads from 48 to 64 bytes at that alignment, and refused, with the size named, on one whose smallest payload is above 48.
 ** A binding double that is renamed, and a wire double that is renamed, with no change in what setup admits.
 ** A setup operation of a binding double that fails for a cause that no declaration states: returned as that named error, and not as a refusal of the route's declaration.
 ** A binding double that refuses a route for a reason that is not a declared one, and one that changes in runtime mode from lending to handing off: each fails the binding contract suite.
@@ -379,6 +381,7 @@ _By capability._
 A binding differs from another in what it can serve: whether it lends, how large a payload it holds, which QoS it offers.
 A route asks for these, so setup compares them.
 A route that receives meets the input of every compatible writer, not only what its own wire encodes, so its smallest payload is zero.
+A protected native response route carries a value of extent E and answers of extent H, so its declaration admits both.
 
 _Who admits, and who refuses._
 The element admits, because only the element sees every check of a route.

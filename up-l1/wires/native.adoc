@@ -49,7 +49,7 @@ What its integrator owes for its `+unsafe+` code: xref:../../safety/elements/up-
 [[req-ssr-native-type]]
 == A native payload type holds its whole value in one fixed layout
 
-[.specitem,oft-sid="req~ssr-native-type~3",oft-title="A native payload type holds its whole value in one fixed layout",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-native-type~4",oft-title="A native payload type holds its whole value in one fixed layout",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 The element answers for each duty of this item, apart from the derive's refusal in "Decided from the declaration".
 
@@ -75,7 +75,8 @@ A number that names something, such as an index or an identifier, is carried as 
 *Size zero, and unions.*
 The element *MAY* admit as native a type of size zero, and a union where this item admits each of its fields.
 The permission obliges no implementation and no derive to admit every such type, and the element *MUST* state truthfully which of them it admits.
-The frames of a type of size zero are present payloads of length zero (xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), and storage lent for one is lent as storage of zero bytes is (xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], "An empty payload").
+On a native route that does not select the native protection composition, the frames of a type of size zero are present payloads of length zero (xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), and storage lent for one is lent as storage of zero bytes is (xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], "An empty payload").
+On a route that selects that composition, a value of size zero is a present value inside an outer extent E, which is never zero (xref:e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition").
 Both are native only inside the Rust-only native domain (<<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>, "Only between binaries that use the element").
 
 *Padding.*
@@ -97,10 +98,11 @@ The element *MUST* treat a type as native only where one of these made it so:
 *Size.*
 The encoded size of a native type is the type's size in memory, and its alignment is the type's alignment.
 Wherever the element declares or reports a size or an alignment for a native type, it *MUST* give those values, and the size as exact.
+Under the native protection composition, they are the size N and the alignment A of the inner value, and the frame's outer extent is the route's (xref:e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition").
 --
 
 [horizontal]
-ID:: `+req~ssr-native-type~3+`
+ID:: `+req~ssr-native-type~4+`
 ASIL:: B
 Allocated to:: the element; the derive, for refusing at build time a type that breaks this item
 Verification:: compile-fail, test, review, gate
@@ -109,7 +111,8 @@ Verification:: compile-fail, test, review, gate
 * *test* or *compile-fail*: a type of size zero and a union that the element states that it does not admit: neither is treated as native, refused at setup (test) or at build time (compile-fail).
 * *test*
 ** A type that the derive accepts: its size, its alignment and the place of each field, compared with its layout as built and with what the element declares and reports for it.
-** A type of size zero and a union that the element states that it admits: each is native, and a frame of the first is a present payload of length zero.
+** A type of size zero and a union that the element states that it admits: each is native, and a frame of the first is a present payload of length zero on a route that does not select the native protection composition, and a present value of size zero inside an outer extent E on one that does.
+** Under the native protection composition, the size and the alignment that the element declares and reports for the inner type: N and A, and not the outer extent.
 ** Two frames of a type with padding, each built as bytes, that differ only in their padding bytes: every comparison and every view that the element makes gives the same result for both, and no case requires padding bytes to be zero, to be equal or to be read.
 ** A value sent on a native route: the frame's payload is the value's bytes, with no address of a value, of a buffer or of a shared-memory segment in their place.
 * *review*: each `+unsafe+` declaration of a native type, against the obligations of this item; and the element's statement of the types of size zero and the unions that it admits, against what its derive accepts.
@@ -140,6 +143,9 @@ Inside the Rust-only native domain, a writer and a reader lay out and read a val
 Another language can lay out such a type, or read it, differently, so they stay inside that domain.
 Padding can hold any bytes, so nothing reads a meaning into it.
 
+_The size under the native protection composition._
+The composition adds a header and an alignment gap around the value, so the route's extent grows while the type's size and alignment stay as the type declares them.
+
 _The two ways._
 A wire is written in safe code, and the element's memory safety does not depend on it (xref:README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]).
 The derive checks a type, and a reviewer checks an inventoried `+unsafe+` declaration.
@@ -148,7 +154,7 @@ A wire's description of a type is neither a derive nor a reviewed declaration, s
 [[req-ssr-native-agreement]]
 == A native type is read only under its exactly agreed layout
 
-[.specitem,oft-sid="req~ssr-native-agreement~3",oft-title="A native type is read only under its exactly agreed layout",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-native-agreement~4",oft-title="A native type is read only under its exactly agreed layout",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Layout identity.*
 The _layout identity_ of a native type is everything that decides how its bytes are read:
@@ -169,6 +175,7 @@ A binary outside that domain is reached through a serialized wire (xref:serializ
 
 *Agreed by the deployment.*
 A _native agreement_ is the deployment data that names, for each native route, the route's type with its layout identity, the ABI for which it states that layout, and the payload encoding identifier that the frames of the route carry.
+On a route that selects the native protection composition, that identifier is the composition's own, and the inner value has no second identifier (xref:e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition").
 The integrator supplies it, and chooses that identifier as the registry's rules for originating one allow (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]; xref:README.adoc#encoding-identifier[the encoding identifier is the registry's]).
 
 * The element *MUST* prepare a native route only for a type that the agreement names for that route, with its layout identity.
@@ -202,7 +209,7 @@ It *MUST* still refuse a frame for which the complete comparison fails, or was n
 *Three identities.*
 The payload encoding identifier, the layout identity and the ABI fingerprint say three different things:
 
-* the identifier says that the payload is a native representation under this deployment's agreement;
+* the identifier says that the payload is a native representation under this deployment's agreement, and, where it is the native protection composition's, that the composition protects it;
 * the layout identity says which type, with which complete layout;
 * the fingerprint says for which ABI.
 
@@ -218,7 +225,7 @@ This item leaves to the implementation which table, digest or algorithm is used,
 --
 
 [horizontal]
-ID:: `+req~ssr-native-agreement~3+`
+ID:: `+req~ssr-native-agreement~4+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, fault-injection, review
@@ -229,6 +236,7 @@ Verification:: test, fault-injection, review
 ** Where the element uses a short value to select a layout: two different layouts that are built to share that value, with the frame still refused.
 ** A frame with the route's layout identity and another payload encoding identifier: refused (xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
 ** A frame sent on a native route carries the payload encoding identifier that the agreement names for the route.
+** On a route that selects the native protection composition: each frame sent with the composition's identifier, which the agreement names for the route, and its layout identity and ABI compared as on any native route.
 * *fault-injection*: a peer that is built for another layout of a type, on real processes.
 * *review*: the comparison and its argument: that it covers every part of a layout identity, that it is made before a view for every writer whose frames a reader can get, and, where a computed value is compared, why two different layout identities do not share it.
 
@@ -248,6 +256,7 @@ It cannot stand in for the comparison, however rarely two layouts share it.
 _Three identities._
 A deployment can carry many native types under one private-use identifier, one type can exist with two layouts, and one layout can be built for two ABIs.
 Each of the three values tells one of these apart, and none tells another's.
+On a protected route the identifier is the composition's, because the frames that it names carry the composition's header around the value; the layout identity and the fingerprint still say which type and which ABI.
 
 _The mechanism._
 This item requires the outcome, and <<guidance>> describes one way to reach it.

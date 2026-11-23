@@ -112,8 +112,8 @@ On a receive route that crosses upward, or whose writer's level is unknown, the 
 
 * acquire the frame's header and metadata into storage of its own, reserved at setup, within the frame's extent as the binding gives it;
 * take the payload's place and length from that acquired copy and, before it reads the payload, establish with checked arithmetic that the payload lies within that frame extent, and check that its length is within the bound that the route declares and the storage reserved for the reader;
-* once the acquired header and metadata have passed the admission that the clause "Admission on the copy route" states, copy only the payload extent into storage that the reader owns, reserved at setup, and read nothing of the shared memory for the frame beyond its header, its metadata and that payload extent;
-* validate the acquired header and metadata, by that admission, and the copied payload there: by shape and identity for a native type, by decoding for a serialized payload;
+* once the acquired header and metadata have passed the admission that the clause "Admission on the copy route" states, copy only the payload extent into storage that the reader owns, reserved at setup, and read nothing of the shared memory for the frame beyond its header, its metadata and that payload extent; on a route that selects the native protection composition, the payload extent is the frame's outer extent, and the reader's storage starts at an address aligned to A (xref:wires/e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition");
+* validate the acquired header and metadata, by that admission, and the copied payload there: by shape and identity for a native type, by decoding for a serialized payload, and, on a route that selects the native protection composition, by the checks of <<req-ssr-integrity-checked-at-admission,In-place frames are checked once, at admission>> and then by the E2E wire's check, both made on the copy;
 * hand out only the validated copy, and show a reader no value of a frame before that validation has passed;
 * read the shared bytes as racing bytes, never assuming that they stay unchanged while it reads, and only through reads that are valid on a read-only mapping.
 
@@ -165,6 +165,7 @@ Verification:: fault-injection, test, miri, heap-window, review
 ** A serialized route with every condition of the clause "Decoding from shared memory" established: decoded from the frame; the same route crossing upward, with a valid copy route: decoded from the validated copy; the same route without established tenure or synchronization: not decoded in shared memory.
 ** A frame on the copy route that fails its validation: no value of it is shown to a reader.
 ** On the copy route, a shared header whose payload length changes after the acquisition: the length that the admission compares with the metadata and that the copy uses is the acquired one, and the changed bytes are not read.
+** On a route that selects the native protection composition and takes the copy route: the outer extent copied once into storage aligned to A, and the composition's checks, then the E2E wire's check, made on the copy.
 ** On the copy route, an acquired header that fails one of the binding's physical checks: refused under the binding's cause, counted once, its metadata not decoded and its payload not copied, and nothing of it admitted, delivered or forwarded.
 ** A route that needs the copy route, on a wire that declares allocation for decoding: refused at setup, naming the route and the class.
 ** On a receive route of a lending binding, the form that the route got, a read of the shared storage or the copy route's copy, as its report shows it (xref:bindings.adoc#req-ssr-error-route-report[Each route reports what it got]).
@@ -253,22 +254,44 @@ The derive runs when a type is built, so a type that breaks the rule is refused 
 [[req-ssr-integrity-checked-at-admission]]
 == In-place frames are checked once, at admission
 
-[.specitem,oft-sid="req~ssr-integrity-checked-at-admission~2",oft-title="In-place frames are checked once, at admission",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-integrity-checked-at-admission~3",oft-title="In-place frames are checked once, at admission",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 The element *MUST* check an in-place frame's identity and shape once, when the frame is admitted, before any reader can see it.
 
 The element *MUST* refuse and count a frame that fails, so a reader's typed view of an admitted frame cannot fail on its bits.
 
 An in-place frame is a frame of a native route.
-A frame's shape is the size of its payload and the alignment of the address at which the payload lies, compared with the size and the alignment that the type's agreed layout fixes.
+A frame's shape is the size of its payload and the alignment of the address at which the payload lies, compared with the size and the alignment that the type's agreed layout fixes; on a route that selects the native protection composition, it is what the clause "On a route that selects the native protection composition" checks.
 The conditions for a view of an admitted frame are those of <<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>, "When a view is allowed".
+
+*On a route that selects the native protection composition.*
+For each frame that the earlier checks of its route have admitted, the element *MUST* make these checks, in this order, before it gives the frame to the E2E wire, and *MUST NOT* make a later one for a frame that an earlier one refuses (xref:wires/e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition"):
+
+. stable, legal access to the P bytes of the frame's outer extent, for the whole check and for the life of any view: on the copy route, the bytes of the element's own copy, in storage aligned to A (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>);
+. the outer extent against the route's admitted set, E on a topic's or a request's route and E or H on a response route: a frame whose P is not in that set *MUST* be refused under the native shape cause;
+. the shape selector, evaluated on the acquired bytes: it gives the value branch or the header-only branch, and its result decides only which checks run before the CRC;
+. on the value branch only, the writer's established layout identity and ABI (xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]), and the inner value's address, the region's base plus the outer payload's offset plus I, not null and a multiple of A, computed as a number with checked arithmetic: a frame that fails one of them *MUST* be refused under the native agreement or shape cause.
+On the header-only branch none of these is made: no inner address is computed, no inner pointer is formed and no view exists.
+
+Because I is a multiple of A, the inner address is a multiple of A exactly where the outer payload is; both are checked, so that neither is trusted from a header field.
+The element *MUST* count each frame that one of these checks refuses once, in the route's counter under that cause, and *MUST NOT* count it in the E2E counter or as `+unprotected+`; the E2E wire reads no CRC of it and changes no state for it, and a request so refused gets no answer (xref:../up-l2/api.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered]).
+After the E2E wire accepts a frame, the element *MUST* form a view of its value only where the wire's verdict is a Value and the value-branch checks passed for that frame, for a value of size zero a view of size zero at the checked address.
+A Value verdict for a frame on which those checks did not run forms no view: the element *MUST* refuse the response under the native shape cause, once, and its call stays open (xref:../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
+No native check follows the E2E wire's check.
 --
 
 [horizontal]
-ID:: `+req~ssr-integrity-checked-at-admission~2+`
+ID:: `+req~ssr-integrity-checked-at-admission~3+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test (an in-place frame whose payload has the wrong size, one at an address of the wrong alignment, and one whose identity is not the route's: each refused at admission and counted)
+Verification:: test
+* *test*
+** An in-place frame whose payload has the wrong size, one at an address of the wrong alignment, and one whose identity is not the route's: each refused at admission and counted.
+** Under the native protection composition, with H 48, A 8 and N 16: on a response route, outer extents of 47, 56 and 65, and on a request route an outer extent of 48, each refused under the native shape cause, once, with no CRC read, no E2E count, no state changed and no answer.
+** With A 64, I 64 and an outer payload offset of 128: a region based at 0x1000, giving an inner address of 0x10C0, admitted; one based at 0x1008, giving 0x10C8, refused under the native shape cause; a header that claims an alignment of 1 changing neither.
+** With E equal to H: a response whose header reads as a Value's pair, from a writer whose layout is not established, refused at the value-branch checks under the native agreement cause, with no CRC read; a refusal answer from such a writer, taken on the header-only branch and accepted as a Control, as where N is greater than 0.
+** An over-aligned type of size zero, with H 48 and A 64: a Value of extent 64, its gap from 48 to 64 initialized and left out of the CRC; a Control and a Failed response of extent 48, with no inner address computed.
+** On stable acquired bytes with E equal to H, a test double at the documented boundary that makes the element's selector give the other branch than the selector gives for those bytes: forced to the value branch on a Control or a Failed frame, the value-branch checks run and the frame is then handled by its verified shape, with no view; forced to the header-only branch on a Value frame, no view is formed, and the response is refused under the native shape cause once and its call kept open.
 
 *Rationale.*
 In-place frames are borrowed through a checked typed view.
@@ -279,14 +302,20 @@ Because in-place types accept every bit pattern (<<req-ssr-integrity-any-bits,In
 Checking once is sound only for a frame that the reader's view keeps still.
 A frame whose writer is below the reader's level, or of unknown level, could still be changed by that writer, so it takes the copy route and is validated on the copy (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>).
 
+_The native protection composition._
+Every native check comes before the E2E wire runs, so no native refusal follows a change of the wire's state, and an outer extent that the route does not admit has one owner, the element; a header whose own length field disagrees with the extent is the wire's corruption.
+That I can exceed H proves nothing about a pointer: on the header-only branch no address beyond the header is computed, and what a concrete pointer operation needs, such as allocation bounds and provenance at a view of size zero, is shown at the source.
+
 [[req-ssr-integrity-carrier-crossing]]
 == Upward carrier crossings copy once, or are refused
 
-[.specitem,oft-sid="req~ssr-integrity-carrier-crossing~3",oft-title="Upward carrier crossings copy once, or are refused",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-integrity-carrier-crossing~4",oft-title="Upward carrier crossings copy once, or are refused",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Copy once.*
 The element *MUST* ensure that a carrier route whose ingress is a lending leg, and whose writer's level at that ingress, as the ingress's binding reports it, is below the egress's level or unknown (<<req-ssr-integrity-declared,Each transport declares one integrity level>>), copies each frame's payload extent once, directly into the lending egress's loan, which holds the payload alone, reading the ingress bytes through a source-access mechanism that is valid while the writer races it.
 That copy is the only integrity copy of the payload on the route.
+On a route that selects the native protection composition, the payload extent is the frame's outer extent, and the element *MUST* ensure that the egress's loan starts at an address aligned to A (xref:wires/e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition"); the frame is carried as a native frame, never as serialized bytes, and under no encoding filter (xref:../up-l2/streamer.adoc#req-ssr-streamer-qos-per-leg[Both legs are checked, at setup and per frame]).
+What that copy's bytes rest on for the egress's initialized extent, and how setup compares it with the egress binding's requirement, is stated in xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes], "A native frame at a lending egress".
 The element *MUST* ensure that the frame's header and metadata are acquired at the ingress through such a mechanism, within the frame's extent as the ingress's binding gives it, into storage of its own reserved at setup, and that the payload's place and length are taken from that acquired copy.
 Before it reads the payload, the element *MUST* establish with checked arithmetic that the payload lies within that frame extent, and check that its length is within the bound that the route declares and the payload capacity of the egress's loan.
 The element *MUST NOT* read anything else of the ingress's shared memory for the frame.
@@ -313,10 +342,10 @@ What a copy, a level and a refusal do not establish is stated in <<req-ssr-integ
 --
 
 [horizontal]
-ID:: `+req~ssr-integrity-carrier-crossing~3+`
+ID:: `+req~ssr-integrity-carrier-crossing~4+`
 ASIL:: B
 Allocated to:: the element (carrier routes)
-Verification:: fault-injection (a writer changing a frame while it is forwarded: the frame is admitted or refused by its acquired header and metadata and its copied payload, no frame is sent before that admission, and the egress's loan holds the payload alone; a writer that places a frame's payload outside the frame's extent, or gives it a length above the route's bound or the payload capacity of the egress's loan: no byte read outside the frame's extent, and the frame not sent), test (at setup, a route from a lending ingress whose writer's level is below its egress's level, or unknown, to a byte-only egress, and such a route whose ingress offers no valid source-access mechanism, each refused, naming the route and both levels, or the unknown one; with every other route and frame admission condition met and no receive condition at the ingress requiring an integrity copy, a route whose ingress writer's level is at or above its egress's level, forwarded without an additional integrity copy), heap-window (the acquisition of the header and metadata, the payload copy, their validation and the second admission), review (each ingress's source-access mechanism, with the extent that it reads, at source level)
+Verification:: fault-injection (a writer changing a frame while it is forwarded: the frame is admitted or refused by its acquired header and metadata and its copied payload, no frame is sent before that admission, and the egress's loan holds the payload alone; a writer that places a frame's payload outside the frame's extent, or gives it a length above the route's bound or the payload capacity of the egress's loan: no byte read outside the frame's extent, and the frame not sent), test (at setup, a route from a lending ingress whose writer's level is below its egress's level, or unknown, to a byte-only egress, and such a route whose ingress offers no valid source-access mechanism, each refused, naming the route and both levels, or the unknown one; with every other route and frame admission condition met and no receive condition at the ingress requiring an integrity copy, a route whose ingress writer's level is at or above its egress's level, forwarded without an additional integrity copy; on a route that selects the native protection composition, a frame's outer extent copied once into an egress loan aligned to A, carried as a native frame and under no encoding filter), heap-window (the acquisition of the header and metadata, the payload copy, their validation and the second admission), review (each ingress's source-access mechanism, with the extent that it reads, at source level)
 
 *Rationale.*
 A carrier keeps a frame's bytes unchanged and makes at most one payload copy, into a lending egress's loan.
@@ -328,3 +357,5 @@ An unknown level counts as lower, as it does on a receive route (<<req-ssr-integ
 
 A copy made with ordinary loads from memory that a writer races, with nothing ordering them, is a data race (<<req-ssr-integrity-zero-copy,Zero-copy only from a writer at or above the reader>>).
 So the copy is sound only through a source-access mechanism that is valid while the writer races it.
+
+Under the native protection composition the protected extent is copied whole, header, gap and value, into a loan aligned to the value, so the endpoint's check reads the bytes that the sender protected.
