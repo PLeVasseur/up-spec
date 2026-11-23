@@ -184,7 +184,8 @@ xref:../basics/payload_encoding_registry.adoc[payload-encoding registry].
 
 *Revision 4 of this mapping.*
 For each uProtocol Transport Library that uses this mapping, revision 4 of `dsn~cloudevents-umessage-mapping` replaces the full `UInt32` range that revision 3 implied for `ttl` and `permission_level` by the rows above: the mapping admits `0` to `2147483647` for both, a sender fails a larger value with `UCode.OutOfRange`, and a receiver rejects a negative one.
-Both attributes stay `UInt32` in the UAttributes, and the rest of revision 3 stays as it was.
+Revision 4 also covers the rows of `id` and `reqid` as they stand above, with the lower-case hyphenated string form of the UUID that RFC 9562 defines: for the same libraries, it replaces a revision 3 text of those two rows that names the hyphenated form of RFC 4122.
+`ttl` and `permission_level` stay `UInt32` in the UAttributes, and the other rows are those of revision 3.
 
 [#ce-formats]
 === uPayload Mapping
