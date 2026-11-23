@@ -212,7 +212,7 @@ The width at which a representation keeps the request ID and the peer tied to th
 [[req-ssr-rpc-check-at-arrival]]
 === A response completes its call only once its wire accepts it
 
-[.specitem,oft-sid="req~ssr-rpc-check-at-arrival~3",oft-title="A response completes its call only once its wire accepts it",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-rpc-check-at-arrival~4",oft-title="A response completes its call only once its wire accepts it",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *First, the tie to the call.*
 When a response arrives, the element *MUST* first tie it to the call's current tenure as <<req-ssr-peer-rpc-correlation,A response reaches only its own call>> requires, which also states what becomes of a response that does not match.
@@ -221,13 +221,26 @@ When a response arrives, the element *MUST* first tie it to the call's current t
 After the tie to the call succeeds, the element *MUST* check the response's TTL as xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states, and then apply xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding] before it gives the response to a wire.
 A response that one of these checks refuses is a refused response: no later check is made for it, and no wire reads it.
 
+*Then, on the native protection composition, its checks.*
+On a response route that selects the native protection composition, the element *MUST* then make the checks of xref:../up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission], "On a route that selects the native protection composition", before it gives the response to the E2E wire: for every response, stable, legal access to its outer extent, and that extent against the route's admitted set, E or H; and, on the value branch, the writer's layout identity and ABI and the inner value's address.
+A response that one of them refuses is a refused response: nothing completes, the call stays open for another copy, and the element *MUST* count the refusal once, under the native shape or agreement cause, in the route's counter, not in the E2E counter and not as `+unprotected+`, and record it as the call's last refusal.
+
 *Then, the wire check.*
 Otherwise the element *MUST* run the route's wire check on the bytes the call keeps, before the call completes.
 
 * The element *MUST* complete nothing with a refused response, and *MUST* keep the call open for another copy.
 * The element *MUST* count each refused response once on its route, under the cause of the check that refused it.
-It *MUST NOT* count again a refusal that the TTL check or the admission above counted, and on a response route that selects the E2E wire the one count of a refusal is the count that xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once] states.
+It *MUST NOT* count again a refusal that the TTL check, the admission or the checks of the native protection composition above counted, and on a response route that selects the E2E wire the one count of a refusal by that wire, or of a response with no E2E header, is the count that xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once] states.
 * The element *MUST* end at its TTL a call that is still pending then, naming, where the call got an advisory refusal answer, the kind that xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory] has it name, and otherwise the last refusal that it recorded.
+
+*After the wire accepts, on the native protection composition.*
+On a response route that selects the native protection composition, the element *MUST* act on the shape that the E2E wire's verdict names (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call], "Shapes of a protected native response"):
+
+* a Value completes the call with a view of its value, formed only where the value-branch checks passed for that response;
+* a Failed response completes the call with its commstatus, and no payload is decoded;
+* a final Control rejects the call with `+Aborted+`, naming the kind, and an advisory Control leaves it open (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory]).
+
+A Value verdict for a response on which the value-branch checks did not run forms no view: the element *MUST* refuse that response under the native shape cause, once, and keep the call open.
 
 *A failed response, and a response with no payload.*
 
@@ -253,7 +266,7 @@ On a response route that a binding serves by push, the binding delivers one resp
 --
 
 [horizontal]
-ID:: `+req~ssr-rpc-check-at-arrival~3+`
+ID:: `+req~ssr-rpc-check-at-arrival~4+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, miri, heap-window
@@ -272,6 +285,9 @@ Verification:: test, miri, heap-window
 ** A call whose request got an advisory refusal answer: still open after that answer, and completed by the real response that arrives later.
 ** A call whose only request copy was corrupt and got no answer: still pending at its TTL, and ending then.
 ** The call's tag recorded before its request is sent, and a response that arrives before then refused.
+** On a response route that selects the native protection composition, with H 48, A 8 and N 16: a response of outer extent 56, then one of extent E whose writer's layout is not established: each refused before the wire runs and counted once, under the native shape cause and under the native agreement cause, not in the E2E counter and not as `+unprotected+`; the call kept open, and, where it ends at its TTL, that refusal named.
+** On such a route: a Value completing the call with a view of a 16-byte value; a final Control rejecting it with `+Aborted+`, naming the kind; an advisory Control leaving it open, and the real response completing it later; a Failed response completing it with its commstatus, with no value read.
+** On such a route, a test double at the documented boundary that makes the element's selector give the header-only branch for a Value frame: no view formed, the response refused under the native shape cause once, and the call kept open.
 * *miri*: the give-back and the delivering phases, with threads.
 * *heap-window*: the recording of a call's tag, the arrival checks of a response, a refused response, a refusal answer, a call's end at its TTL, the completion of a call by an accepted response and a peer's failure that finds a response being checked, with no heap use on a native route, and on a serialized route none beyond what its declared class permits and setup admits and none in deciding, reporting or counting an outcome, as xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path] states.
 
@@ -279,6 +295,8 @@ Verification:: test, miri, heap-window
 Completing a call before checking its wire would let a corrupt first copy exclude a later intact response.
 
 Refusal answers come only from a wire that protects calls (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory]).
+
+On the native protection composition, every native check of a response comes before the wire, and a client keeps no receiving slot, so nothing is committed before a native refusal; the one refusal after the wire's acceptance, of a Value verdict for which the value-branch checks did not run, follows no change of state either.
 
 A call that ends at its TTL ends logically (xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
 
@@ -301,7 +319,7 @@ Where the element's RPC server role receives a request whose header the element 
 When a request whose header the element can parse reaches the route of its RPC server role, the element *MUST* make these checks of it in this order, and *MUST NOT* make a later one of them for a request that an earlier one refuses:
 
 . its TTL: a TTL of 0, its expiry, and a clock that cannot be read (xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed], which also states that a request that it refuses gets no check of its payload and no other count);
-. its payload, before any wire: on a route that does not select the E2E wire, its encoding and its presence (xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]); on a route that selects it, whether it carries an E2E header (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once]), and then, on a route that selects the native protection composition, the element's protected-native preflight: stable, legal access to the request's outer extent, and that extent against the extents that the route admits, and, where a view of a value may follow, the writer's layout identity and ABI and the actual address of the inner value (xref:../up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]; xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]);
+. its payload, before any wire: on a route that does not select the E2E wire, its encoding and its presence (xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]); on a route that selects it, whether it carries an E2E header (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once]), and then, on a route that selects the native protection composition, the element's protected-native preflight: stable, legal access to the request's outer extent, that extent against the one extent that the route admits for a request, E, and, because a request always takes the value branch, the writer's layout identity and ABI and the actual address of the inner value (xref:../up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]; xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]);
 . on a route that selects the E2E wire, that wire's check (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory]);
 . the decode of its payload, where it has one, with, on a native route that does not select the E2E wire, the check of its agreed layout (xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]); on a route that selects the native protection composition, this check makes no native check of its own: the view of the request's value rests on the protected-native preflight that the second check made for that request, and no native refusal follows the E2E wire's check.
 
