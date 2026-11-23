@@ -654,6 +654,7 @@ The binding *MUST NOT* let any part of a sample that it refuses reach the elemen
 For each sample that it refuses, the binding *MUST* either return the refusal as the error of the call that met the sample, or count it exactly once on the receiving route.
 The binding *MUST* name the cause in that error or that counter: a refused envelope (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 The binding *MUST* return each refused sample to LoLa as it returns a frame whose lease is dropped, so that a refused sample does not stay charged to the route (xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+On a route that it serves by pull, the binding *MUST* count each refusal of its own once, and not return it as the error of the receive call, and *MUST* then take the next sample, within the work that the receive call is allowed (xref:bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]); each refused sample is one unit of that work, whichever part refused it.
 A refused sample is peer input, and xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input] holds for it.
 
 *What the element checks.*
@@ -668,12 +669,14 @@ ASIL:: B
 Allocated to:: the LoLa binding
 Verification:: test, fault-injection, review
 * *test*: one sample for each case above: refused, with no part of it handed on, returned or counted once under the cause of a refused envelope, and given back to LoLa; and a well-formed sample next to each, handed to the element; and a sample whose header passes every check above while its metadata names no payload encoding with a payload length of 1, and one whose metadata does not decode: handed to the element, and neither refused nor counted by the binding.
+* *test*, on a route that the binding serves by pull: a sample that the binding refuses, and one whose frame the element refuses, each followed by a valid one: one refusal, counted once and not returned as the error of the receive call, one return to LoLa, and the valid sample received within the work that the call is allowed.
 * *fault-injection*: truncated samples, and samples with each field of the header set to its largest value, sent on a route by a faulty peer: each refused, and returned or counted once, with no panic, and with the route's count of retained samples unchanged afterwards.
 * *review*: at source level, that every length and the offset is checked with arithmetic that cannot overflow before any range is formed from it, and that the binding reads nothing of the metadata.
 
 *Rationale.*
 A peer writes the whole sample, header included (xref:peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]), so every field is input that has to be checked before it is trusted as a bound.
 The binding checks the layout that only it knows; what the metadata says is read once, by the element through the selected wire, so that no second reading of it stands beside the wire's.
+On a pull route, each refused sample is one unit of the receive call's bounded work, so one malformed sample neither ends the call before a valid one nor lets the call's work grow without bound.
 
 [[req-ssr-binding-lola-envelope-presence]]
 === On LoLa, an absent payload and a present empty payload stay apart
