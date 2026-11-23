@@ -644,8 +644,9 @@ The translator *MUST* keep these rules, whichever part assigns the Session IDs:
 . A request uses active session handling. The candidates of a scope run `0x0001`, `0x0002` and so on to `0xFFFF`, and then `0x0001` again; `0x0000` is never one.
 . The _next candidate_ of a scope is `0x0001` where the scope has used none, and otherwise the value after the one that it used last.
 . _Strict next candidate._ A request takes the scope's next candidate and no other. Where that candidate is held or excluded (key rules 1 and 2), the request is refused with `UCode.ResourceExhausted`: nothing is transmitted, the candidate is not used, and the next request of the scope meets the same candidate. No other value is tried, even where one is free. Exclusion wins over the wrap: `0x0001` after `0xFFFF` is a candidate like any other.
-. A candidate is _used_ when the hand-over of its request to SOME/IP delivery is accepted or indeterminate (<<someip-hand-over>>). A request that is refused before the hand-over uses none. Where the hand-over itself fails as a refusal before exposure, the translator's documentation says whether the candidate is used or met again; either is safe, because that key was never on the wire. The choice is the same where an answer claimed the entry before such an outcome ("Order", in <<someip-entry>>): the claim releases the entry, so the key is excluded like any released key, and the claim does not by itself make the candidate used. Where the documentation says "met again", the next request meets that key under the scope's boundary: at once under `cycle`, and under `bound D` once D has passed since the release. Under `association` the case lies outside the premise.
+. A candidate is _used_ when the hand-over of its request to SOME/IP delivery is accepted or indeterminate (<<someip-hand-over>>). A request that is refused before the hand-over uses none. Where the hand-over itself fails as a refusal before exposure, the translator's documentation says whether the candidate is used or met again; either is safe, because that key was never on the wire. The choice is the same where an answer claimed the entry before such an outcome ("Order", in <<someip-entry>>): the claim (row FW5) does not release the entry: the entry stays claimed, also where row FW8 keeps the answer, and its key held, until row FW7, FW9 or FW10 releases it, and the key's exclusion, and under `bound D` its time D, start at that release. A stale claim of a request that was never exposed does not by itself make the candidate used. Where the documentation says "met again", the next request meets that key under the scope's boundary: at once under `cycle`, and under `bound D` once D has passed since the release; "met again" bypasses neither a claim that still holds the key nor an exclusion that applies to it. Under `association` the case lies outside the premise.
 . An event carries Client ID `0x0000` and Session ID `0x0000`, unless the contract declares session handling for it or the message is segmented; then the same start and wrap apply. A response never has a RequestID of its own: it copies the request's.
+. _Settlement._ A candidate that has been given to a request stays assigned to it until rule 4 settles it, also where the request's entry has been released before the outcome of its hand-over: a release frees the entry's capacity and starts the key's exclusion, and it does not end that assignment. The translator *MUST NOT* give a candidate so assigned to a second request. A late outcome settles it: an accepted or indeterminate one uses it, and the next candidate then follows it (rule 2); a refusal before exposure keeps the choice that rule 4 lets the documentation make. Knowing that a request has been exposed rules out a refusal before exposure, and does not by itself use the candidate or advance the next candidate before the outcome settles. This chapter prescribes no result for a request whose next candidate is only so assigned: it neither requires a refusal for it nor excludes waiting for the settlement.
 
 *Who assigns the value.*
 The rules are duties of the translator whichever part assigns the Session IDs, and the stack may assign them.
@@ -680,13 +681,13 @@ The translator *MUST* keep these rules:
 | The same, while the premise holds. An answer later than D is outside the promise.
 
 | `cycle`
-| When the session cycle has returned to it: when it is the scope's next candidate and no unreleased entry holds it. That is the whole condition. Where the sequence came back to the key while a request still held it, the key is assignable as soon as that request is released, and no further turn of the cycle and no time after the release is waited for: only `bound D` counts a time from the release, so under `cycle` a next candidate is refused only while it is held.
+| When the session cycle has returned to it: when it is the scope's next candidate and no unreleased entry holds it. The cycle itself adds no other condition, no time after the release and no further turn of the cycle: where the sequence came back to the key while a request still held it, the key is assignable as soon as that request is released, and only `bound D` counts a time from the release. The key stays subject to a candidate's assignment to a request whose hand-over has not settled (session rule 6) and to uniqueness or exclusion over a wider set than one scope (key rule 6): under `cycle` a next candidate is refused while it is held or excluded through such a set, and one that is only assigned is not given to another request.
 | None
 | Key rule 4 only. The deployment declares that it accepts the residual of key rule 5.
 |===
-. _What always holds._ An answer whose key matches no open entry, and none that is active in its hand-over, is _unmatched_. An answer whose key matches an open entry, but whose Message ID or Interface Version differs from the entry's, is _mismatched_, and the entry stays open. Both are ignored and counted, under every boundary (rows FW6 and FW12 of <<someip-entry>>).
+. _What always holds._ An answer whose key matches no matchable entry (<<someip-entry>>, "Matchable entries") is _unmatched_. An answer whose key matches a matchable entry, but whose Message ID or Interface Version differs from the entry's, is _mismatched_, and the entry stays as it was. Both are ignored and counted, under every boundary (rows FW6 and FW12 of <<someip-entry>>).
 . _The residual under `cycle`._ An answer to a released request that arrives after its key has been assigned again, by the cycle's return or after a restart, and whose Message ID and Interface Version equal the later request's, is taken as the later request's answer. This is the one deliberate exception to ignoring responses to an expired request, and it applies only where a deployment has declared `cycle`.
-. _The size of a scope._ One Client ID leaves 65,535 Session IDs that are not zero. Under `association` a scope therefore has at most 65,535 uses for the life of its association, and fewer where the translator applies uniqueness and exclusion across a wider set than one scope, which it may do and need not. Once the sequence has come round to keys that were released on that association, they stay excluded for as long as it lives, and every further request of that scope is refused with `UCode.ResourceExhausted` by session rule 3. The translator may continue on a new association, which is a new scope, where the premise holds for it. Nothing here commands a connection to be closed at that count, and nothing makes a reconnection automatic. Uniqueness over a wider set than one scope stays permitted, and its cost under session rule 3 is this: where the sets of two scopes overlap, a scope whose next candidate is held or excluded on account of the other is refused with `UCode.ResourceExhausted` for as long as that lasts, and no other value is tried; under `association` that can be the life of the association.
+. _The size of a scope._ One Client ID leaves 65,535 Session IDs that are not zero. Under `association` a scope therefore has at most 65,535 uses for the life of its association, and fewer where the translator applies uniqueness and exclusion across a wider set than one scope, which it may do and need not. Once the sequence has come round to keys that were released on that association, they stay excluded for as long as it lives, and every further request of that scope is refused with `UCode.ResourceExhausted` by session rule 3. The translator may continue on a new association, which is a new scope, where the premise holds for it. Nothing here commands a connection to be closed at that count, and nothing makes a reconnection automatic. Uniqueness over a wider set than one scope stays permitted, and its cost under session rule 3 is this: where the sets of two scopes overlap, a scope whose next candidate is held or excluded on account of the other is refused with `UCode.ResourceExhausted` for as long as that lasts, and no other value is tried; under `association` that can be the life of the association. The cost depends on the whole identity that the wider set compares, so it is not the same for every such set: equal Session ID values alone do not make the sets of two scopes overlap.
 . _Restart, and the loss of correlation state._ A restart shortens no exclusion.
 +
 [cols="2,9",options="header"]
@@ -725,8 +726,10 @@ It asks no peer to send at most one answer either: with answer affinity and no r
 *Requests that the translator receives.*
 Assignment, exclusion and the reuse boundary do not apply to them, because the stock client assigns those keys; live uniqueness does.
 The _received key_ of an inbound request is its remote endpoint, the server endpoint that it reached, and its complete RequestID.
-While an entry that was created from a request with a given received key is not released, the translator *MUST* refuse a further `REQUEST` with that key at step 7 of the `REQUEST` list (<<someip-inbound>>): it is counted, nothing is sent, no second entry and no second reconstructed request arise, and the first entry goes on unchanged.
-After the first entry's release, a `REQUEST` with that key is a new request.
+The live uniqueness of a received key runs from the start of the reconstructed request's hand-over, its private preparation included, until its entry is withdrawn (row RV3) or released.
+Within that interval the translator *MUST* refuse a further `REQUEST` with that key at step 7 of the `REQUEST` list (<<someip-inbound>>): it is counted, nothing is sent, no second entry and no second reconstructed request arise, and the first entry goes on unchanged.
+A withdrawal is no release, and it starts no exclusion.
+After the withdrawal or the release, a `REQUEST` with that key is a new request, also where the first hand-over has not returned: a late outcome of that hand-over belongs to the first entry (row RV13) and does not change the new one.
 
 The residual is stated, not removed.
 The translator cannot tell a retry or a network duplicate from a new call that reuses the RequestID, which the profile lets a client do as soon as it stops expecting an answer.
@@ -836,7 +839,7 @@ No error object is fabricated, and nothing is relabelled.
 | On every method: an RpcResponse with the commstatus of the inbound status rule, never `Ok`, and no payload. A body is not interpreted, and is _lost_.
 
 | `ERROR`, code `0x00`
-| Refused: an invalid pair. It never becomes an `Ok` response, and the entry stays open until its expiry.
+| Refused: an invalid pair. It never becomes an `Ok` response, and the entry stays as it was (row FW6 of <<someip-entry>>).
 
 | `ERROR`, another code, on a modelled-error method
 | An RpcResponse with that commstatus and the error slot's payload
@@ -993,7 +996,7 @@ The projection is many to one, and a cache cannot recover a lost original status
 *Two control paths.*
 The pipeline of this item is for application traffic: the RPC and event messages that arrive at the translator's endpoints.
 Two kinds of control unit do not enter it.
-The translator *MUST* take each of them out at the framing and demultiplexing boundary that its released documentation names, and only in its complete form, as <<someip-control-units>> states.
+The translator *MUST* take each of them out at the framing and demultiplexing boundary that its released documentation names, as <<someip-control-units>> states: a SOME/IP-SD candidate by its Message ID pair alone, for the SD path to validate, and a TCP magic cookie only in its complete form for the direction in which it arrives.
 
 .Control units
 [[someip-control-units]]
@@ -1015,7 +1018,7 @@ The translator *MUST* take each of them out at the framing and demultiplexing bo
 A reserved identifier alone takes no unit out of the pipeline, and it exempts none from validation or from its count.
 A unit with Service ID `0xFFFF` that is neither an SD candidate nor the complete cookie of its direction passes the stages below like any other unit, and so do a cookie's bytes over UDP.
 A near-cookie with Message Type `0x01` is a `REQUEST_NO_RETURN`, and is refused by name.
-Nothing here makes a translator send cookies, and nothing requires a stack to support them.
+This chapter adds no duty to send cookies or to resynchronize by them; the framing and demultiplexing component that the translator's documentation names still removes every complete TCP magic cookie of the right direction that arrives.
 
 *The pipeline.*
 Every other unit that arrives at one of the translator's endpoints passes the stages of <<someip-pipeline>>, in this order, and the first row that applies ends its handling.
@@ -1155,6 +1158,10 @@ An entry exists from its _activation_, the point from which it is matchable unde
 An entry is active at the latest when its hand-over ends accepted or indeterminate; a translator may activate it earlier, inside the hand-over, and the visibility rule says when it has to.
 The rows that judge an answer against an entry take one that is active in hand-over like an open one (rows FW5, FW6, RV5 and RV6), and no two active entries ever share a key.
 
+*Matchable entries.*
+An entry is _matchable_ for an answer while it is open, or active in its hand-over, and its original deadline has not passed, under its key and with the checks that the row which judges the answer states; a claimed or released entry, and a prepared record, are not matchable for a new answer.
+Where the deadline passes while the hand-over's outcome is pending and the translator does not know that the request has been exposed, an answer that arrives before the outcome is decided claims nothing, and goes to the rows of an answer after the expiry (rows FW12 and RV11); the admission of the inbound pipeline, and rows 1 and 2 of <<someip-results>> for a response, still come first.
+
 *Visibility.*
 Whenever an answer that a request caused can be processed, the entry of that request *MUST* be active under the right key.
 For a forward entry that key is the RequestID that the `REQUEST` carries on the wire, whichever part assigned it; for a reverse entry it is the reconstructed request's `id`.
@@ -1170,7 +1177,7 @@ A claim, and the decision of a hand-over's outcome, are single transitions on an
 
 Where a claim came first and the outcome is then a refusal before exposure, the request cannot have caused that answer.
 For a forward entry this is the declared residual under `cycle`, and under the other two boundaries the premise was broken; a translator that activates an entry only at exposure never meets it.
-A reverse entry has no such residual: its key is the reconstructed request's `id`, which is not reused, so a response that claims it shows that the request reached a server, and the claim stands there too.
+A reverse entry has no such residual: its key is the reconstructed request's `id`, which is not reused, so a response that claims it shows that the request reached a server, and a later report that nothing was handed over contradicts the contract that the report rests on. The claim stands there too, also where row RV8 later undoes the answer's claim: the entry is then open again, and the late outcome still changes nothing in it (row RV13).
 Whether the candidate of such a forward request counts as used stays as session rule 4 of <<uuid-mapping>> states.
 
 *Deadlines.*
@@ -1223,7 +1230,7 @@ The entry holds the request's `id`, source, sink, priority and TTL, and the Mess
 | The hand-over's result, which is no statement that nothing was sent. The caller may call again: that is a new attempt with its own key and entry, and the server can then execute twice. Where the caller sends the same UMessage again, both entries carry its `id`, and each can end in a response or in a generated timeout with that one `reqid`; nothing here removes the duplicate.
 
 | FW5
-| Open, or active in hand-over
+| Matchable: open, or active in hand-over, before its deadline
 | A `RESPONSE` or an `ERROR` on the key passes every check: an equal Message ID and Interface Version, a valid pair of the joint table, and the slot rules
 | Claimed
 | The first such answer wins. The reconstructed response takes source, sink, `reqid`, priority and TTL from the entry, and is offered to uProtocol delivery.
@@ -1231,7 +1238,7 @@ The entry holds the request's `id`, source, sink, priority and TTL, and the Mess
 | Nothing
 
 | FW6
-| Open, or active in hand-over
+| Matchable: open, or active in hand-over, before its deadline
 | An answer on the key fails a check
 | Unchanged
 | It is ignored.
@@ -1271,7 +1278,7 @@ The entry holds the request's `id`, source, sink, priority and TTL, and the Mess
 | Nothing
 
 | FW11
-| Open
+| Open, or active in hand-over where the translator knows that the request has been exposed ("Deadlines", rule 3)
 | The entry expires
 | Released
 | The translator builds an RpcResponse with `DeadlineExceeded` for the entry's request and offers it to uProtocol delivery once. Accepted or not, the entry stays released: nothing is retried, and nothing reopens. No wire code is involved, and no receipt by the requester is promised.
@@ -1279,8 +1286,8 @@ The entry holds the request's `id`, source, sink, priority and TTL, and the Mess
 | Nothing
 
 | FW12
-| Claimed, released or none
-| An answer arrives on a key that has no open entry, and none that is active in hand-over
+| Claimed, released or none, or not matchable
+| An answer arrives on a key that has no matchable entry, also one that arrives after the deadline while the outcome of a hand-over whose exposure is unknown is pending
 | Unchanged
 | It is ignored: a duplicate, an answer after the expiry and before the key is used again, an answer on a key that was never used, or an answer on a key that is only prepared.
 | _Unmatched_
@@ -1290,7 +1297,7 @@ The entry holds the request's `id`, source, sink, priority and TTL, and the Mess
 | Claimed or released
 | A late result: the outcome of the request's hand-over is decided after the entry was claimed or released, or an offer of the answer that was under way when FW10 released the entry ends
 | Unchanged
-| Nothing changes: no transition, no second release, no further offer and no count follow from it.
+| Nothing changes in the entry: no transition, no second release, no further offer and no count follow from it. A late outcome of the request's hand-over still settles its candidate (<<uuid-mapping>>, session rule 6).
 | Nothing
 | For the request's hand-over, its own result
 |===
@@ -1361,7 +1368,7 @@ The entry lives until the supplied TTL has passed.
 | Nothing
 
 | RV5
-| Open, or active in hand-over
+| Matchable: open, or active in hand-over, before its deadline
 | A response is given to `send` whose `reqid` selects the entry, whose source and sink equal the reconstructed request's sink and source, and which the joint table can represent
 | Claimed
 | The first such response wins. The answer copies the Message ID, the complete RequestID and the Interface Version from the entry, and no Client ID is computed from a URI. It is given to SOME/IP delivery.
@@ -1369,7 +1376,7 @@ The entry lives until the supplied TTL has passed.
 | The call goes on to RV7, RV8 or RV9
 
 | RV6
-| Open, or active in hand-over
+| Matchable: open, or active in hand-over, before its deadline
 | A response that selects the entry is refused by one of rows 1 to 7 of <<someip-results>>
 | Unchanged
 | Nothing is overwritten.
@@ -1388,7 +1395,7 @@ The entry lives until the supplied TTL has passed.
 | Claimed
 | The hand-over fails, and is a refusal before exposure
 | Open
-| The claim is undone, and the entry is as it was before RV5. The caller may call `send` again until the entry expires.
+| The answer's claim is undone: the entry is open and unclaimed again, and the caller may call `send` again until the entry's original deadline. The earlier claim stays part of the entry's history, which asks for no state or field of its own: a late outcome of the reconstructed request's hand-over still changes nothing in the entry (row RV13), and a later report that nothing was handed over does not become true by this.
 | Nothing
 | The hand-over's result
 
@@ -1401,7 +1408,7 @@ The entry lives until the supplied TTL has passed.
 | The hand-over's result. A further `send` gets `UCode.NotFound`.
 
 | RV10
-| Open
+| Open, or active in hand-over where the translator knows that the request has been exposed ("Deadlines", rule 3)
 | The entry expires
 | Released
 | Nothing is sent, or the declared expiry reply is offered to SOME/IP delivery once (<<someip-generated>>). `E_TIMEOUT` is never sent.
@@ -1409,15 +1416,15 @@ The entry lives until the supplied TTL has passed.
 | Silence, or the declared reply
 
 | RV11
-| Claimed, released or none
-| A further response for the entry, or a response whose `reqid` selects no entry at all, is given to `send` and passes rows 1 and 2 of <<someip-results>>
+| Claimed, released or none, or not matchable
+| A further response for the entry, or a response whose `reqid` selects no matchable entry, also one that arrives after the deadline while the outcome of a hand-over whose exposure is unknown is pending, is given to `send` and passes rows 1 and 2 of <<someip-results>>
 | Unchanged
 | It is refused by row 3.
 | _Response refused_
 | `UCode.NotFound`
 
 | RV12
-| Open or claimed, or in hand-over
+| Open or claimed, or in hand-over and neither withdrawn nor released, from the start of the hand-over, private preparation included
 | A `REQUEST` arrives under the same received key
 | Unchanged
 | It is refused at step 7: no second entry and no second reconstruction.
@@ -1425,13 +1432,19 @@ The entry lives until the supplied TTL has passed.
 | Nothing
 
 | RV13
-| Claimed or released
-| A late result: the outcome of the reconstructed request's hand-over is decided after the entry was claimed or released
+| Claimed or released, or open again through RV8 after an earlier claim
+| A late result: the outcome of the reconstructed request's hand-over is decided after the entry was claimed or released, or opened again through RV8 after a claim
 | Unchanged
-| Nothing changes: no transition, no second release and no count follow from it. In particular, RV3 counts nothing for a request that a response has already answered.
+| Nothing changes in the entry: no transition, no second release and no count follow from it, and its original deadline and its one release stay. In particular, RV3 counts nothing for a request that a response has already answered, and a report that nothing was handed over does not take back that response's evidence.
 | Nothing
 | Nothing
 |===
+
+*Example: a reverse entry opened again.*
+The initial hand-over of a reconstructed request is still pending when a genuine response claims the entry (RV5).
+The response's own hand-over to SOME/IP delivery is refused before exposure (RV8), and the entry is open again, with the earlier claim in its history.
+The initial hand-over then ends accepted or indeterminate: that late result changes nothing in the entry (RV13), which stays open and retryable until its original deadline.
+A report that nothing was handed over would contradict the response's evidence, and "Order" still keeps the claim from being rolled back; this example adds no duty.
 
 Row RV11 is row 3 of <<someip-results>> seen from the entry.
 A response that fails validation, or that a determinable authority check refuses, gets row 1 or row 2 of that table first, whatever the state of any entry, and it is counted as _response refused_ like every refused response.
@@ -1479,7 +1492,7 @@ Rows 1 to 7 are decided before the hand-over, so they are refusals before exposu
 | `UCode.PermissionDenied`. Where the violation cannot be determined then, this row does not apply and the call goes on, as `+req~utransport-send-prevent-address-spoofing~1+` states. The row claims no authentication of any peer.
 
 | 3
-| A response that answers no open call here: its `reqid` selects no open entry, or its source or sink disagrees with the entry
+| A response that answers no open call here: its `reqid` selects no matchable entry (<<someip-entry>>, "Matchable entries"), or its source or sink disagrees with the entry. A valid response may select an entry that is active in its hand-over.
 | `UCode.NotFound`; an entry that it selected is untouched
 
 | 4
@@ -1607,7 +1620,7 @@ Four things are not counted, on purpose.
 Every refusal of a `send`-shaped call other than a refused response is returned to its caller, and that is its observation.
 Steps 5 and 6 of the `REQUEST` list are answered on the wire.
 A Publish or a Notification for which no listener matches was asked for by nobody.
-And a control unit that framing or the SD path takes is no unit of the translation (<<someip-control-units>>): a magic cookie is no refusal, and of the SD path the register counts the declined subscription only.
+And a control unit that framing or the SD path takes lies outside this translation register (<<someip-control-units>>): a magic cookie is no refusal, and of the SD path the register counts the declined subscription only; it adds no count for the SD path's other refusals and grants them no exemption from being observed, which the stack's documentation states.
 --
 
 == Application Layer Translation
