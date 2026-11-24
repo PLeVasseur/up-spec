@@ -1002,6 +1002,7 @@ def git_run(git_dir, *args):
         env.pop(name, None)
     env["GIT_OPTIONAL_LOCKS"] = "0"
     env["GIT_TERMINAL_PROMPT"] = "0"
+    env["GIT_NO_LAZY_FETCH"] = "1"
     return subprocess.run(["git", "--git-dir=" + git_dir, "--no-replace-objects"] + list(args),
                           capture_output=True, env=env, stdin=subprocess.DEVNULL)
 
@@ -1542,8 +1543,10 @@ Pins
   pin only, from the tree that the fixture carries for it (a fixture tree for any other pin is
   refused as unsupported), else from a --checkout given for it, else from --git-dir. A Git
   directory is read
-  with git rev-parse, git ls-tree and git cat-file only. A pin that none of them holds is reported
-  as unsupported.
+  with git rev-parse, git ls-tree and git cat-file only, with GIT_NO_LAZY_FETCH=1 so a promisor
+  remote triggers no network fetch. A --checkout COMMIT=DIR directory is trusted as labelled; the
+  checker does not verify its contents against Git. A pin that none of them holds is reported as
+  unsupported.
 
 Fixtures (--fixtures; by default fixtures/ next to this file)
   One directory per case, AS01 to AS19, each with case.json and the files that it names. case.json
@@ -1638,7 +1641,7 @@ def main(argv=None):
         epilog=HELP, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--git-dir", metavar="DIR", help="a Git directory that holds the pins, read-only")
     parser.add_argument("--checkout", metavar="COMMIT=DIR", action="append", default=[],
-                        help="an exported checkout of the full commit ID COMMIT (repeatable)")
+                        help="an exported checkout of the full commit ID COMMIT (repeatable; trusted as labelled)")
     parser.add_argument("--fixtures", metavar="DIR", default=os.path.join(HERE, "fixtures"),
                         help="the fixture directory (default: fixtures/ next to this file)")
     parser.add_argument("--assessments", metavar="DIR", default=HERE,
