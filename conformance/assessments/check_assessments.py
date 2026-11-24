@@ -81,8 +81,13 @@ class JsonNumber:
             self.exp10 = 0
         else:
             nz = digits.rstrip("0")
-            self.exp10 = (int(epart) if epart else 0) - len(fpart or "") + (len(digits) - len(nz))
-            self.mantissa = -int(nz) if sign else int(nz)
+            try:
+                exp_val = int(epart) if epart else 0
+                mant_val = int(nz)
+            except ValueError as exc:
+                raise Unsupported("a JSON number exceeds the host numeric conversion limit: %s" % exc)
+            self.exp10 = exp_val - len(fpart or "") + (len(digits) - len(nz))
+            self.mantissa = -mant_val if sign else mant_val
 
 
 def num_parts(value):
@@ -91,9 +96,12 @@ def num_parts(value):
     if isinstance(value, int) and not isinstance(value, bool):
         if value == 0:
             return 0, 0
-        s = str(abs(value))
-        nz = s.rstrip("0")
-        m = int(nz)
+        try:
+            s = str(abs(value))
+            nz = s.rstrip("0")
+            m = int(nz)
+        except ValueError as exc:
+            raise Unsupported("a JSON number exceeds the host numeric conversion limit: %s" % exc)
         return (-m if value < 0 else m), len(s) - len(nz)
     if isinstance(value, float):
         if not math.isfinite(value):
@@ -111,7 +119,12 @@ def exact_int(value):
         return 0
     if e > 1000:
         raise Unsupported("an integer exponent outside the supported range")
-    return m * (10 ** e)
+    res = m * (10 ** e)
+    try:
+        str(res)
+    except ValueError as exc:
+        raise Unsupported("an integer exceeds the host numeric conversion limit: %s" % exc)
+    return res
 
 
 def schema_version_of(value):
@@ -132,8 +145,11 @@ def num_cmp(a, b):
     sb = 1 if mb > 0 else (-1 if mb < 0 else 0)
     if sa != sb:
         return -1 if sa < sb else 1
-    da = str(abs(ma))
-    db = str(abs(mb))
+    try:
+        da = str(abs(ma))
+        db = str(abs(mb))
+    except ValueError as exc:
+        raise Unsupported("a JSON number exceeds the host numeric conversion limit: %s" % exc)
     oa = len(da) + ea
     ob = len(db) + eb
     if oa != ob:
@@ -1606,7 +1622,10 @@ Schema keywords
   ^ and $, and is searched for, not anchored; other pattern syntax is refused. Numbers are parsed
   as exact decimal values (no binary floating-point rounding): a number is an integer only when its
   exact fractional part is zero, equality is exact JSON equality, minLength counts code points, and
-  a document with a duplicate object member is unparseable.
+  a document with a duplicate object member is unparseable. Valid JSON numbers whose digit count or
+  exact integer expansion exceeds the host numeric conversion limit (such as Python's
+  int_max_str_digits) or the exact-integer exponent bound are reported as unsupported (exit 2), not
+  as unparseable.
 
 Occurrences and anchors
   An occurrence is a block attribute line of an AsciiDoc file (a name ending in .adoc) whose
