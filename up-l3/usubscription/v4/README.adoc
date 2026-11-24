@@ -284,7 +284,7 @@ When a local uSubscription service receives a reply to a remote `Subscribe()` re
 When a client calls the `Subscribe()` operation for a remote topic with xref:subscription-status[SubscriptionStatus] `UNSUBSCRIBE_PENDING`, uSubscription service *MUST* initiate the regular remote subscription process, i.e. send a subscription request to the remote uSubscription service and set xref:subscription-status[SubscriptionStatus] to `SUBSCRIBE_PENDING`.
 --
 
-[.specitem,oft-sid="req~usubscription-subscribe-notifications~1",oft-needs="impl,utest",oft-tags="uSubscription"]
+[.specitem,oft-sid="req~usubscription-subscribe-notifications~2",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
 After a client calls the `Subscribe()` operation, uSubscription service *MUST* send a subscription change notification to that client whenever the subscription status of the topic is changed.
 --
