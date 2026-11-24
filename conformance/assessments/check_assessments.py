@@ -870,6 +870,12 @@ class Scan:
         while (t < n and items[t][0] == items[t - 1][0] + 1
                and (ATTRIBUTE_LINE.fullmatch(items[t][1]) or BLOCK_TITLE.fullmatch(items[t][1]))):
             t += 1
+        head_style = None
+        for _, hline in items[k:t]:
+            if ATTRIBUTE_LINE.fullmatch(hline):
+                hs = block_style(hline)
+                if hs is not None:
+                    head_style = hs
         target = None
         target_kind = None
         statement = None
@@ -901,6 +907,11 @@ class Scan:
                        and (e == t or not (delimiter(items[e][1]) or ATTRIBUTE_LINE.fullmatch(items[e][1])))):
                     e += 1
                 statement = items[t:e]
+        if (entries is not None and before not in ("list", "verbatim")
+                and (target_kind == "delimited:comment"
+                     or (head_style == "comment" and target_kind in ("delimited:open", "paragraph")))):
+            self.inert.append((no, "in_comment"))
+            return
         above = items[i - 1][1] if i > 0 and items[i - 1][0] == no - 1 else None
         self.occurrences.append({
             "sid": sid, "line": no, "head_start": items[k][0], "target": target,
@@ -1630,7 +1641,9 @@ Schema keywords
 Occurrences and anchors
   An occurrence is a block attribute line of an AsciiDoc file (a name ending in .adoc) whose
   oft-sid attribute has exactly the value <requirement_id>~<requirement_revision>, outside
-  verbatim, passthrough and comment blocks and outside plain table cells. The checker reads the
+  verbatim, passthrough and comment blocks (including comment-styled open blocks and paragraphs
+  headed by [comment] or [comment.specitem,...], and //// targets) and outside plain table cells.
+  The checker reads the
   block structure itself: delimited blocks to their first closing line, AsciiDoc table cells,
   paragraphs that a block attribute line ends, line comments and atx section titles. The anchor
   derivation reads the line directly above the attribute line within the same block or AsciiDoc
