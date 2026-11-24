@@ -1,0 +1,18 @@
+{
+  "case": "ST06c",
+  "subject": "S5F-3 stop witness: syntactically valid JSON number with 4301-digit exponent must stop as unsupported, never unparseable",
+  "required_outcome": "Exit 2 unsupported (host numeric conversion limit)",
+  "decided_by": "Tool numeric conversion boundary (S5F-3)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker stop witness ST06c",
+      "expect": {
+        "outcome": "refused"
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

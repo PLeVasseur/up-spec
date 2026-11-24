@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/cyclic-direct.json",
+  "$defs": {
+    "loop": {
+      "$ref": "#/$defs/loop"
+    }
+  },
+  "$ref": "#/$defs/loop"
+}

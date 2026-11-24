@@ -1,0 +1,18 @@
+{
+  "case": "ST06b",
+  "subject": "S5F-3 stop witness: syntactically valid 5000-digit assessment_revision must stop as unsupported, never unparseable",
+  "required_outcome": "Exit 2 unsupported (host numeric conversion limit)",
+  "decided_by": "Tool numeric conversion boundary (S5F-3 / S5-ASTRA-C-02)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker stop witness ST06b",
+      "expect": {
+        "outcome": "admitted"
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "case": "RT12",
+  "subject": "S5F-5 witness: horizontal tabs in item attribute lists (P4) resolve as live occurrences matching Asciidoctor 2.0.23",
+  "required_outcome": "All tab-separated and space-separated control items admitted with occurrences_in_file 1",
+  "decided_by": "Resolution (checker regression, S5F-5 / S5-NEON-09)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test RT12 step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test RT12 step 2",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "provenance": "checker regression test RT12 step 3",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-4.json",
+      "provenance": "checker regression test RT12 step 4",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-5.json",
+      "provenance": "checker regression test RT12 step 5",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

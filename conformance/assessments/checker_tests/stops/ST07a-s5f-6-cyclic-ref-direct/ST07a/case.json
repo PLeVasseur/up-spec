@@ -1,0 +1,18 @@
+{
+  "case": "ST07a",
+  "subject": "S5F-6 stop witness: direct cyclic local schema $ref (P7) must stop as unsupported before running any case, never RecursionError",
+  "required_outcome": "Exit 2 unsupported (cyclic $ref)",
+  "decided_by": "Schema audit (S5F-6 / S5-NEON-09 P7)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker stop witness ST07a",
+      "expect": {
+        "outcome": "admitted"
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

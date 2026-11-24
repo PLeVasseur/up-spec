@@ -1,0 +1,6 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "unsupported:",
+  "expected_substring": "host numeric conversion limit",
+  "before_repair_failure": "exited 1 misclassifying valid 5000-digit JSON integer as reasons: ['unparseable']"
+}

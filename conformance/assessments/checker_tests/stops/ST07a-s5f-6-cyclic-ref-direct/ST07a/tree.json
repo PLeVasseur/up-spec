@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/s.adoc": "= T\n\n== S\n\n[.specitem,oft-sid=\"req~s5f3~1\"]\n--\nBody.\n--\n"
+  }
+}

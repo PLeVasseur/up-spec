@@ -1,0 +1,122 @@
+{
+  "case": "RT11",
+  "subject": "S5F-4 witness: comment-styled item heads (P2a/P2b/P2d, //// target, [comment] override) are omitted like Asciidoctor 2.0.23, while [open] override and ordinary live items remain admitted",
+  "required_outcome": "Comment-styled heads yield 0 occurrences (ordinal_absent); live controls admitted",
+  "decided_by": "Resolution (checker regression, S5F-4 / S5-NEON-09)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test RT11 step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test RT11 step 2",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "provenance": "checker regression test RT11 step 3",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-4.json",
+      "provenance": "checker regression test RT11 step 4",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-5.json",
+      "provenance": "checker regression test RT11 step 5",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-6.json",
+      "provenance": "checker regression test RT11 step 6",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-7.json",
+      "provenance": "checker regression test RT11 step 7",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-8.json",
+      "provenance": "checker regression test RT11 step 8",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-9.json",
+      "provenance": "checker regression test RT11 step 9",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

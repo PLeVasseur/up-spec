@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/cyclic-multihop.json",
+  "$defs": {
+    "node_a": {
+      "type": "object",
+      "properties": {
+        "next": {
+          "$ref": "#/$defs/node_b"
+        }
+      }
+    },
+    "node_b": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/node_a"
+        }
+      ]
+    }
+  },
+  "$ref": "#/$defs/node_a"
+}

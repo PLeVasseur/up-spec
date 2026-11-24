@@ -17,7 +17,9 @@
     "RT07-e3-1f-table-cell-boundary",
     "RT08-e3-1g-level0-title",
     "RT09-section-target-guard",
-    "RT10-checker-order-two-failure"
+    "RT10-checker-order-two-failure",
+    "RT11-s5f-4-comment-styled-heads",
+    "RT12-s5f-5-tab-in-attributes"
   ],
   "stops_dir": "stops",
   "stops": [
@@ -27,6 +29,11 @@
     "ST02c-e3-1c-id-eq-section",
     "ST03-e3-1e-fixture-tree-non-zero-pin",
     "ST04-e3-2-number-spelling",
-    "ST05-two-records"
+    "ST05-two-records",
+    "ST06a-s5f-3-large-ordinal-4301",
+    "ST06b-s5f-3-large-revision-5000",
+    "ST06c-s5f-3-large-exponent-digits",
+    "ST07a-s5f-6-cyclic-ref-direct",
+    "ST07b-s5f-6-cyclic-ref-multihop"
   ]
 }

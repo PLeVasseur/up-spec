@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/rt11.adoc": "= S5F-4 Comment-Styled Heads\n\n== Section\n\n[comment]\n[.specitem,oft-sid=\"req~s5f4-p2a~1\"]\n--\nCommented open block via preceding [comment].\n--\n\n[.specitem,oft-sid=\"req~s5f4-p2b~1\"]\n[comment]\n--\nCommented open block via trailing [comment].\n--\n\n[comment.specitem,oft-sid=\"req~s5f4-p2d-para~1\"]\nCommented paragraph via inline [comment.specitem,...].\n\n[comment.specitem,oft-sid=\"req~s5f4-p2d-open~1\"]\n--\nCommented open block via inline [comment.specitem,...].\n--\n\n[.specitem,oft-sid=\"req~s5f4-delim~1\"]\n////\nCommented block via //// delimiter.\n////\n\n[comment]\n[open.specitem,oft-sid=\"req~s5f4-override-open~1\"]\n--\nLive open block where [open] overrides earlier [comment].\n--\n\n[open.specitem,oft-sid=\"req~s5f4-override-comment~1\"]\n[comment]\n--\nCommented open block where [comment] overrides earlier [open].\n--\n\n////\n[.specitem,oft-sid=\"req~s5f4-fenced-comment~1\"]\n--\nInside //// comment block.\n--\n////\n\n[.specitem,oft-sid=\"req~s5f4-live~1\"]\n--\nOrdinary live requirement.\n--\n"
+  }
+}

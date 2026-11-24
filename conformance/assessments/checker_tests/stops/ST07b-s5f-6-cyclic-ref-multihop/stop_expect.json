@@ -1,0 +1,7 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "unsupported:",
+  "expected_substring": "cyclic $ref",
+  "assessments_dir": "assessments",
+  "before_repair_failure": "accepted cyclic schema during audit instead of refusing it before running cases"
+}

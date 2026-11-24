@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/rt12.adoc": "= S5F-5 Horizontal Tabs in Item Attributes\n\n== Section\n\n[.specitem,\toft-sid=\"req~s5f5-after-comma~1\"]\n--\nTab after comma.\n--\n\n[.specitem,oft-sid\t=\t\"req~s5f5-around-eq~1\"]\n--\nTabs around equals.\n--\n\n[.specitem,oft-sid=req~s5f5-unquoted-trail~1\t]\n--\nTab trailing unquoted value.\n--\n\n[.specitem,oft-sid=\"req~s5f5-after-quote~1\"\t,oft-title=\"T\"]\n--\nTab after closing quote before comma.\n--\n\n[.specitem, oft-sid=\"req~s5f5-space-ctrl~1\"]\n--\nOrdinary space-separated control.\n--\n"
+  }
+}
