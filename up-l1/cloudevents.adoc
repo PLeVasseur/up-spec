@@ -198,7 +198,7 @@ NOTE: When sending an opaque payload, `datacontenttype` is
 byte sequence, while `pformat` carries the payload's uProtocol encoding
 identity. The value does not change with the encoding.
 
-[.specitem,oft-sid="dsn~ce-payload-opaque-carriage~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+[.specitem,oft-sid="dsn~ce-payload-opaque-carriage~2",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
 .UMessage to CloudEvent
 [cols="2,5", options="header"]
@@ -228,10 +228,13 @@ bytes to choose a data property.
 |===
 |Condition |Required result
 
-|No payload data property
+|No payload data property and `pformat` absent
 |Both `payload` and `payload_encoding_id` *MUST* be absent.
 
-|Binary payload (`binary_data` or `data_base64`)
+|No payload data property and `pformat` present
+|The binding *MUST* reject the event, even if `pformat` is an integer in the range `0` to `65535`; the binding *MUST NOT* erase `pformat` or fabricate a payload.
+
+|Binary payload (`binary_data` or `data_base64`) with valid `pformat` (`0` to `65535`)
 |`payload` *MUST* contain exactly those octets and `payload_encoding_id` *MUST*
 equal `pformat`, even when `datacontenttype` is absent or is not
 `application/octet-stream` (source: Protobuf Event Format for CloudEvents, Version 1.0.2, section 3 Data; JSON Event Format for CloudEvents, Version 1.0.2, section 3.1.2 Payload Deserialization).
