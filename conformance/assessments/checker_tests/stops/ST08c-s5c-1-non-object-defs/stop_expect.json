@@ -1,0 +1,7 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "unsupported:",
+  "expected_substring": "$defs that is not an object",
+  "assessments_dir": "assessments",
+  "before_repair_failure": "stopped with internal 'error: TypeError: argument of type JsonNumber is not a container or iterable'"
+}

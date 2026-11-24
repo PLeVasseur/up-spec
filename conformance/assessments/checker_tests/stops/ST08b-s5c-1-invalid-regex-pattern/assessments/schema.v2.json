@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/bad-regex.json",
+  "type": "object",
+  "properties": {
+    "catalogue_kind": {
+      "type": "string",
+      "pattern": "a{2,1}"
+    }
+  }
+}

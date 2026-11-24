@@ -1,0 +1,18 @@
+{
+  "case": "ST07c",
+  "subject": "S5C-1 stop witness: 1050-node shallow local $ref cycle must stop cleanly as unsupported cyclic $ref without RecursionError",
+  "required_outcome": "Exit 2 unsupported (cyclic $ref)",
+  "decided_by": "Schema audit (S5C-1 / S5R2-ASTRA-A-02)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker stop witness ST07c",
+      "expect": {
+        "outcome": "admitted"
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

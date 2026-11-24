@@ -1,0 +1,14 @@
+{
+  "files": {
+    "example/rt13-open.adoc": "= RT13 Open Comment Before Item\n\n[[sec-open]]\n== Section\n\n[comment]\n--\nAn invisible comment open block.\n--\n\n[.specitem,oft-sid=\"req~rt13-open~1\"]\n--\nSole live item.\n--\n",
+    "example/rt13-para.adoc": "= RT13 Comment Paragraph Before Item\n\n[[sec-para]]\n== Section\n\n[comment]\nAn invisible comment paragraph.\nSecond line of invisible comment paragraph.\n\n[.specitem,oft-sid=\"req~rt13-para~1\"]\n--\nSole live item.\n--\n",
+    "example/rt13-quoted.adoc": "= RT13 Quoted Comment With Title Before Item\n\n[[sec-quoted]]\n== Section\n\n.Hidden title\n[\"comment\"]\n--\nHidden quoted comment block.\n--\n\n['comment']\nHidden single-quoted comment paragraph.\n\n[.specitem,oft-sid=\"req~rt13-quoted~1\"]\n--\nSole live item.\n--\n",
+    "example/rt13-commented-item.adoc": "= RT13 Commented Out Item Before Live Item\n\n[[sec-commented-item]]\n== Section\n\n[comment]\n[.specitem,oft-sid=\"req~rt13-old~1\"]\n--\nCommented out item.\n--\n\n[.specitem,oft-sid=\"req~rt13-live~1\"]\n--\nSole live item.\n--\n",
+    "example/rt13-slash.adoc": "= RT13 Slash Comment Control\n\n[[sec-slash]]\n== Section\n\n////\nSlash comment block.\n////\n\n[.specitem,oft-sid=\"req~rt13-slash~1\"]\n--\nSole live item.\n--\n",
+    "example/rt13-visible.adoc": "= RT13 Visible Paragraph Guard\n\n[[sec-visible]]\n== Section\n\nA visible paragraph precedes the item.\n\n[.specitem,oft-sid=\"req~rt13-visible~1\"]\n--\nSole live item.\n--\n",
+    "example/rt13-example.adoc": "= RT13 Visible Comment-Styled Example Guard\n\n[[sec-example]]\n== Section\n\n[comment]\n====\nVisible example block in Asciidoctor.\n====\n\n[.specitem,oft-sid=\"req~rt13-example~1\"]\n--\nSole live item.\n--\n",
+    "example/rt13-override-open.adoc": "= RT13 Visible Override Open Guard\n\n[[sec-override]]\n== Section\n\n[comment]\n[open]\n--\nVisible open block.\n--\n\n[.specitem,oft-sid=\"req~rt13-override~1\"]\n--\nSole live item.\n--\n",
+    "example/rt13-linecomment-head.adoc": "= RT13 Comment Paragraph With Intervening Line Comment\n\n[[sec-midcomment]]\n== Section\n\n[comment]\n// intervening line comment\nHidden comment paragraph.\n\n[.specitem,oft-sid=\"req~rt13-midcomment~1\"]\n--\nSole live item.\n--\n",
+    "example/rt13-list-guard.adoc": "= RT13 Visible List Guard After Comment Style\n\n[[sec-list]]\n== Section\n\n[comment]\n* Visible list item in Asciidoctor.\n\n[.specitem,oft-sid=\"req~rt13-list~1\"]\n--\nSole live item.\n--\n"
+  }
+}

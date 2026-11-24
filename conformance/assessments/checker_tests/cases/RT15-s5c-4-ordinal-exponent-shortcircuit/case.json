@@ -1,0 +1,44 @@
+{
+  "case": "RT15",
+  "subject": "S5C-4 witness: impossible high-exponent ordinals (1e1000, 1e1001) are safely refused as ordinal_absent by exact comparison without needing exact-integer expansion",
+  "required_outcome": "Ordinal 1 admitted; ordinals 1e1000 and 1e1001 refused as ordinal_absent",
+  "decided_by": "Resolution (checker regression, S5C-4 / S5R2-ASTRA-A-01 / S5R2-ASTRA-B-03)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test RT15 step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted"
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test RT15 step 2",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "provenance": "checker regression test RT15 step 3",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

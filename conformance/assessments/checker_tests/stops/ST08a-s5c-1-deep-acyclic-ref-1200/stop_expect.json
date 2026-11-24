@@ -1,0 +1,7 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "unsupported:",
+  "expected_substring": "local $ref chain depth",
+  "assessments_dir": "assessments",
+  "before_repair_failure": "crashed with uncaught RecursionError and exit 1"
+}

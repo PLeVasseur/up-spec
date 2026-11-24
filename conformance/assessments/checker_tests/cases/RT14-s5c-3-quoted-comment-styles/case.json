@@ -1,0 +1,158 @@
+{
+  "case": "RT14",
+  "subject": "S5C-3 witness: quoted positional comment styles are omitted matching pinned Asciidoctor 2.0.23, while spaces-inside-quotes, [open] override, non-open example delimiter stay live and leading space/tab stay rejected",
+  "required_outcome": "Quoted comment forms and leading-whitespace forms yield 0 occurrences; live controls admitted",
+  "decided_by": "Resolution (checker regression, S5C-3 / S5R2-NEON-03)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test RT14 step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test RT14 step 2",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "provenance": "checker regression test RT14 step 3",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-4.json",
+      "provenance": "checker regression test RT14 step 4",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-5.json",
+      "provenance": "checker regression test RT14 step 5",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-6.json",
+      "provenance": "checker regression test RT14 step 6",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-7.json",
+      "provenance": "checker regression test RT14 step 7",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-8.json",
+      "provenance": "checker regression test RT14 step 8",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-9.json",
+      "provenance": "checker regression test RT14 step 9",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-10.json",
+      "provenance": "checker regression test RT14 step 10",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-11.json",
+      "provenance": "checker regression test RT14 step 11",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-12.json",
+      "provenance": "checker regression test RT14 step 12",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

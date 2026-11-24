@@ -19,7 +19,10 @@
     "RT09-section-target-guard",
     "RT10-checker-order-two-failure",
     "RT11-s5f-4-comment-styled-heads",
-    "RT12-s5f-5-tab-in-attributes"
+    "RT12-s5f-5-tab-in-attributes",
+    "RT13-s5c-2-section-anchor-after-comment",
+    "RT14-s5c-3-quoted-comment-styles",
+    "RT15-s5c-4-ordinal-exponent-shortcircuit"
   ],
   "stops_dir": "stops",
   "stops": [
@@ -34,6 +37,11 @@
     "ST06b-s5f-3-large-revision-5000",
     "ST06c-s5f-3-large-exponent-digits",
     "ST07a-s5f-6-cyclic-ref-direct",
-    "ST07b-s5f-6-cyclic-ref-multihop"
+    "ST07b-s5f-6-cyclic-ref-multihop",
+    "ST07c-s5c-1-cyclic-ref-long-1050",
+    "ST08a-s5c-1-deep-acyclic-ref-1200",
+    "ST08b-s5c-1-invalid-regex-pattern",
+    "ST08c-s5c-1-non-object-defs",
+    "ST09-s5c-4-revision-1e1001"
   ]
 }

@@ -1,0 +1,205 @@
+{
+  "case": "RT13",
+  "subject": "S5C-2 witness: invisible comment-style open blocks and paragraphs before sole item preserve second-form section anchor, while visible paragraphs, [comment] example blocks, and [open] overrides prevent it",
+  "required_outcome": "Comment-style invisible predecessors derive section anchor; visible guards derive null",
+  "decided_by": "Resolution (checker regression, S5C-2 / S5R2-ASTRA-B-01)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test RT13 step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "derived_anchor": "sec-open",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test RT13 step 2",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "derived_anchor": "sec-open",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "provenance": "checker regression test RT13 step 3",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "derived_anchor": "sec-para",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-4.json",
+      "provenance": "checker regression test RT13 step 4",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "derived_anchor": "sec-para",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-5.json",
+      "provenance": "checker regression test RT13 step 5",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "derived_anchor": "sec-quoted",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-6.json",
+      "provenance": "checker regression test RT13 step 6",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "derived_anchor": "sec-commented-item",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-7.json",
+      "provenance": "checker regression test RT13 step 7",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "derived_anchor": "sec-slash",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-8.json",
+      "provenance": "checker regression test RT13 step 8",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "derived_anchor": "sec-midcomment",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-9.json",
+      "provenance": "checker regression test RT13 step 9",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-10.json",
+      "provenance": "checker regression test RT13 step 10",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-11.json",
+      "provenance": "checker regression test RT13 step 11",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-12.json",
+      "provenance": "checker regression test RT13 step 12",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-13.json",
+      "provenance": "checker regression test RT13 step 13",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-14.json",
+      "provenance": "checker regression test RT13 step 14",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-15.json",
+      "provenance": "checker regression test RT13 step 15",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-16.json",
+      "provenance": "checker regression test RT13 step 16",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

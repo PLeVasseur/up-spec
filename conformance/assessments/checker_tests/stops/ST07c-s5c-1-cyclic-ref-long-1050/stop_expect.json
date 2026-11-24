@@ -1,0 +1,7 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "unsupported:",
+  "expected_substring": "cyclic $ref",
+  "assessments_dir": "assessments",
+  "before_repair_failure": "crashed with uncaught RecursionError in recursive check_ref_cycles and exit 1"
+}

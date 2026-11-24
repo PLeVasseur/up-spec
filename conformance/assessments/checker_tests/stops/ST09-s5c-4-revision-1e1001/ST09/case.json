@@ -1,0 +1,18 @@
+{
+  "case": "ST09",
+  "subject": "S5C-4 stop witness: requirement_revision 1e1001 requires exact integer expansion and stops as unsupported",
+  "required_outcome": "Exit 2 unsupported (integer exponent outside the supported range)",
+  "decided_by": "Tool numeric conversion boundary (S5C-4 / S5R2-ASTRA-A-01)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker stop witness ST09",
+      "expect": {
+        "outcome": "refused"
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

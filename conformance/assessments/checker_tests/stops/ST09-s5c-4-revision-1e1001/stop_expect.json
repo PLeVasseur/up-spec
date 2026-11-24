@@ -1,0 +1,6 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "unsupported:",
+  "expected_substring": "integer exponent outside the supported range",
+  "before_repair_failure": "baseline control: already stopped unsupported when exact integer expansion is required"
+}

@@ -1,0 +1,18 @@
+{
+  "case": "ST08a",
+  "subject": "S5C-1 stop witness: 1200-hop acyclic local $ref chain must stop cleanly as unsupported depth bound before any case runs, never RecursionError",
+  "required_outcome": "Exit 2 unsupported (local $ref chain depth)",
+  "decided_by": "Schema audit (S5C-1 / S5R2-NEON-05)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker stop witness ST08a",
+      "expect": {
+        "outcome": "admitted"
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

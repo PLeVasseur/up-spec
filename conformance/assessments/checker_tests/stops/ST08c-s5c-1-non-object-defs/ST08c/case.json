@@ -1,0 +1,18 @@
+{
+  "case": "ST08c",
+  "subject": "S5C-1 stop witness: non-object $defs with earlier $ref must stop cleanly as unsupported schema diagnostic, never internal TypeError",
+  "required_outcome": "Exit 2 unsupported ($defs that is not an object)",
+  "decided_by": "Schema audit (S5C-1 / S5R2-NEON-05)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker stop witness ST08c",
+      "expect": {
+        "outcome": "admitted"
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}
