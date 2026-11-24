@@ -1490,7 +1490,7 @@ Room in a delivery mechanism is a different bound, and it is judged where that m
 
 [.specitem,oft-sid="dsn~up-transport-someip-results~1",oft-needs="impl,utest",oft-covers="req~up-transport-someip-service-translation~1",oft-tags="SomeIpTranslator"]
 --
-<<someip-result-table>> is the one ordered table of results for a `send`-shaped call, and the other items of this chapter refer to it.
+<<someip-result-table>> is the ordered table of prescribed results for a `send`-shaped call, and the other items of this chapter refer to it.
 A local result and a wire return code are two things, and none of the results below is put on the SOME/IP wire by that fact.
 The translator *MUST* give the result of the first row that applies.
 Rows 1 to 7 are decided before the hand-over, so they are refusals before exposure (<<someip-hand-over>>): nothing is translated or handed over, no entry is created or changed, and no candidate is used.
@@ -1539,6 +1539,7 @@ Rows 2, 3 and 5 to 8 depend on authority, state, capacity or a peer, which `+dsn
 Static and dynamic stay apart in the same way: a service instance that the configuration does not bind has no image (row 4), and one that is bound but not offered at that moment is a peer's state (row 7).
 Every refusal is returned to its caller, and a response that rows 1 to 7 refuse is counted as well (<<someip-counts>>).
 Row 6 is a request's row: a response uses the entry that it answers and needs neither a candidate nor a free entry, so the rows that can refuse a response are 1 to 5 and 7.
+A request whose scope's next candidate is only assigned to an unsettled hand-over has no prescribed result in this table (<<uuid-mapping>>, session rule 6): this chapter neither requires row 6's refusal for it nor excludes waiting for settlement.
 A Publish or a Notification uses no correlation resource at all: where an event carries a Session ID (<<uuid-mapping>>, session rule 5), that value is no key and is never held or excluded.
 A delivery mechanism's own lack of room is not row 6 either: it is that mechanism's refusal, at the hand-over (row 8) or at uProtocol delivery.
 --
