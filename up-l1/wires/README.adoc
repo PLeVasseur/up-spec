@@ -8,7 +8,7 @@ The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*
 This page holds common transport-wire contract and boundary requirements of the up-rust SEooC requirement family (`+req~ssr-*+`, `ASIL:: B`, `Safety*` tags).
 Filing on this page does not broaden any requirement to all uP-L1 implementations: whom each item binds, and how the repository's requirement families meet, is stated in xref:../../contract-generations.adoc[Which requirements an implementation follows] (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
 
-Each item's statement says whom it binds: here, each wire under the conditions that the statement gives, and the element for the metadata encoding duty in <<req-ssr-wire-metadata-format,A wire states the format of its frame metadata, and decodes it>> and the wire-boundary memory-safety duty in <<req-ssr-unsafe-wire-untrusted,No wire can break the element's memory safety>>.
+Each item's statement says whom it binds: here, each wire under the conditions that the statement gives, and the element for the metadata encoding and no-fallback-decoding duties in <<req-ssr-wire-metadata-format,A wire states the format of its frame metadata, and decodes it>> and the wire-boundary memory-safety duty in <<req-ssr-unsafe-wire-untrusted,No wire can break the element's memory safety>>.
 What a wire is, and what is not one: <<req-ssr-wire-scope,What a wire is, and the wire contract>>.
 
 Conventions and tags: xref:../../safety/README.adoc[Safety and assurance view].

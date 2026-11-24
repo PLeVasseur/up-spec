@@ -58,9 +58,9 @@ What the translator promises instead is the directional table of <<common-umessa
 
 * The translator's supplier *MUST* state, in the translator's released documentation, that the translator is a service translator under this chapter, and *MUST* name the tables of this chapter in it.
 The translator *MUST* meet every row and every refusal of the items of this chapter, `+dsn~up-transport-someip-uri-mapping~1+` (<<uri-mapping>>) and `+dsn~up-transport-someip-subscription-mapping~1+` (<<eventgroup-entry-mapping>>) among them.
-* The translator's supplier *MUST NOT* claim `+req~utransport-send-preserve-data~1+` for the conversion.
+* The translator's supplier *MUST NOT* claim `+req~utransport-send-preserve-data~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]) for the conversion.
 That requirement is neither amended nor waived: it binds each UTransport implementation unchanged, the transports that bring a message to the translator and take a reconstructed message away from it included, and it has no subject across the conversion, which is not a transmission.
-* A component that drops or defaults an attribute that the tables of this chapter do not state as lost does not conform by being called a translator: it meets neither `+req~utransport-send-preserve-data~1+` nor this chapter.
+* A component that drops or defaults an attribute that the tables of this chapter do not state as lost does not conform by being called a translator: it meets neither `+req~utransport-send-preserve-data~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]) nor this chapter.
 * The translator may be reached through whatever call shape its language library gives a transport, such as xref:README.adoc#send[`send`] and xref:README.adoc#register-listener[`registerListener`], and no second application API is required.
 Which duties of the UTransport call items it owes is stated item by item in <<someip-call-allocation>>: no duty is inferred from a method's name, a method named `send` establishes no UTransport conformance, and it removes no duty of validation, access control or delivery either.
 
@@ -219,7 +219,7 @@ The published note on xref:README.adoc#send[`send`] already says that an unsucce
 | _Refused before exposure_
 | A refusal that is decided before the message is given to the delivery mechanism: rows 1 to 7 of <<someip-results>>, or uProtocol delivery that does not accept the message for lack of a recipient or of room. Or a failed hand-over that the mechanism's contract, as the translator's released documentation cites it, states to leave nothing accepted and nothing transmitted.
 | Nothing was exposed.
-| As if the hand-over had not been attempted: nothing is created, and a state that the attempt had changed is restored. One thing is not undone: an answer that claimed the entry before the outcome was decided ("Order", in <<someip-entry>>). The party that the lifecycle names may try again: the caller of `send`, or the translator itself for an answer that it holds (row FW8).
+| As if the hand-over had not been attempted: nothing is created, and a state that the attempt had changed is restored. One thing is not undone: an answer that claimed the entry before the outcome of its request's hand-over was decided ("Order", in <<someip-entry>>). The party that the lifecycle names may try again: the caller of `send`, or the translator itself for an answer that it holds (row FW8).
 
 | _Accepted_
 | The delivery mechanism has accepted the message.
@@ -262,7 +262,7 @@ Acceptance is the event at which a deliverable message stops being the correlati
 | That leg's `send` completes successfully, which is its own row 5.
 | The leg's `send` fails, and that transport's contract states that such a failure hands nothing over. A result code alone states no such thing.
 | The leg's `send` fails otherwise.
-| The leg carries the message under `+req~utransport-send-preserve-data~1+`, and the translator no longer owns it.
+| The leg carries the message under `+req~utransport-send-preserve-data~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]), and the translator no longer owns it.
 |===
 
 Where the translator offers both push and pull, its released documentation says which of them takes a message, and acceptance is that mechanism's.
@@ -300,7 +300,7 @@ This item replaces, in the form that xref:../contract-generations.adoc#req-ssr-c
 | The service translation of this chapter: this item, the tables, correlation and refusal rules of the items that follow it, and the call contracts of <<someip-call-allocation>> for each operation that the translator exposes
 
 | What does not change
-| `+req~utransport-send-preserve-data~1+` and every other UTransport item, for every UTransport implementation: each transmission of a uProtocol message from a sender to receivers, the legs to and from a translator included, and the exact adapter between a classic API and an owned-frame route (xref:payload-paths.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name]). No kind of UTransport implementation is exempt from `+req~utransport-send-preserve-data~1+`.
+| `+req~utransport-send-preserve-data~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]) and every other UTransport item, for every UTransport implementation: each transmission of a uProtocol message from a sender to receivers, the legs to and from a translator included, and the exact adapter between a classic API and an owned-frame route (xref:payload-paths.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name]). No kind of UTransport implementation is exempt from `+req~utransport-send-preserve-data~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]).
 |===
 
 The published text of this chapter that the service translation replaces, as the same rule requires each to be named:
@@ -671,7 +671,7 @@ Where the stack assigns them, the translator's declared configuration *MUST* det
 The released documentation names the supplier's assignment domain and rule, and the reuse boundary that the configuration supports.
 A configuration that cannot do both is refused at setup, or is not offered as conforming.
 A counter that several scopes share is the plain example: no scope gets its own sequence from it, so it meets these rules only where it serves one scope.
-No hook, interface or patch is prescribed, and whether a given stack can be configured so is a matter for implementation conformance.
+No hook, interface or patch is prescribed; whether a given stack can be configured so is not decided by this chapter.
 
 *Key rules.*
 The profile lets a client reuse a RequestID as soon as the response has arrived or is no longer expected, and its UDP binding gives no guaranteed delivery.
@@ -680,7 +680,7 @@ Reuse is permitted by the profile and is no violation.
 The translator *MUST* keep these rules:
 
 . _Live uniqueness._ No two entries of one scope that are not yet released hold the same RequestID. A RequestID that an unreleased entry of the scope holds is _held_.
-. _Exclusion after release._ A RequestID that has been released in a scope is _excluded_: it is not assigned again in that scope before the scope's reuse boundary allows it. Every release counts, whatever caused it: an answer that was delivered, an expiry, an indeterminate hand-over of an answer, and a restart or a loss that ends the entry. An indeterminate hand-over of a request is no release: its entry stays open and its key held (<<someip-hand-over>>).
+. _Exclusion after release._ A RequestID that has been released in a scope is _excluded_: it is not assigned again in that scope before the scope's reuse boundary allows it. Every release counts, whatever caused it: an answer that was delivered, an expiry, an indeterminate hand-over of an answer, and a restart or a loss that ends the entry. An indeterminate hand-over of a request is no release: where no earlier answer has already claimed or released it (rows FW4 and FW13 of <<someip-entry>>), its entry stays open and its key held (<<someip-hand-over>>).
 . _The reuse boundary of every scope is explicit_, and it is one of three, each with its premise and the party that supplies it:
 +
 [cols="2,4,6,4",options="header"]
@@ -704,7 +704,7 @@ The translator *MUST* keep these rules:
 |===
 . _What always holds._ An answer whose key matches no matchable entry (<<someip-entry>>, "Matchable entries") is _unmatched_. An answer whose key matches a matchable entry, but whose Message ID or Interface Version differs from the entry's, is _mismatched_, and the entry stays as it was. Both are ignored and counted, under every boundary (rows FW6 and FW12 of <<someip-entry>>).
 . _The residual under `cycle`._ An answer to a released request that arrives after its key has been assigned again, by the cycle's return or after a restart, and whose Message ID and Interface Version equal the later request's, is taken as the later request's answer. This is the one deliberate exception to ignoring responses to an expired request, and it applies only where a deployment has declared `cycle`.
-. _The size of a scope._ One Client ID leaves 65,535 Session IDs that are not zero. Under `association` a scope therefore has at most 65,535 uses for the life of its association, and fewer where the translator applies uniqueness and exclusion across a wider set than one scope, which it may do and need not. Once the sequence has come round to keys that were released on that association, they stay excluded for as long as it lives, and every further request of that scope is refused with `UCode.ResourceExhausted` by session rule 3. The translator may continue on a new association, which is a new scope, where the premise holds for it. Nothing here commands a connection to be closed at that count, and nothing makes a reconnection automatic. Uniqueness over a wider set than one scope stays permitted, and its cost under session rule 3 is this: where the sets of two scopes overlap, a scope whose next candidate is held or excluded on account of the other is refused with `UCode.ResourceExhausted` for as long as that lasts, and no other value is tried; under `association` that can be the life of the association. The cost depends on the whole identity that the wider set compares, so it is not the same for every such set: equal Session ID values alone do not make the sets of two scopes overlap. What the replacement of a shared connection does to the events and other services that use it is not decided here, and is a matter for reconciling each implementation with this chapter.
+. _The size of a scope._ One Client ID leaves 65,535 Session IDs that are not zero. Under `association` a scope therefore has at most 65,535 uses for the life of its association, and fewer where the translator applies uniqueness and exclusion across a wider set than one scope, which it may do and need not. Once the sequence has come round to keys that were released on that association, they stay excluded for as long as it lives, and every further request of that scope is refused with `UCode.ResourceExhausted` by session rule 3. The translator may continue on a new association, which is a new scope, where the premise holds for it. Nothing here commands a connection to be closed at that count, and nothing makes a reconnection automatic. Uniqueness over a wider set than one scope stays permitted, and its cost under session rule 3 is this: where the sets of two scopes overlap, a scope whose next candidate is held or excluded on account of the other is refused with `UCode.ResourceExhausted` for as long as that lasts, and no other value is tried; under `association` that can be the life of the association. The cost depends on the whole identity that the wider set compares, so it is not the same for every such set: equal Session ID values alone do not make the sets of two scopes overlap. What the replacement of a shared connection does to the events and other services that use it is not decided by this chapter.
 . _Restart, and the loss of correlation state._ A restart shortens no exclusion.
 +
 [cols="2,9",options="header"]
@@ -751,7 +751,7 @@ After the withdrawal or the release, a `REQUEST` with that key is a new request,
 The residual is stated, not removed.
 The translator cannot tell a retry or a network duplicate from a new call that reuses the RequestID, which the profile lets a client do as soon as it stops expecting an answer.
 Where a stock client's own response timeout is shorter than the TTL that the contract supplies, the client may send a new request under a key whose entry is still live: that request is refused as above, and the answer to the earlier request, which goes out under the same RequestID, may be taken by the client as the answer to its newer one.
-The translator promises a stock client neither at-most-once execution nor a way to tell its requests' generations apart, and a deployment that needs the two timeouts to agree chooses the supplied TTL to fit. No supersession of the first entry and no store of past requests is added.
+The translator promises a stock client neither at-most-once execution nor a way to tell its requests' generations apart, and a deployment that needs the two timeouts to agree chooses the supplied TTL to fit. This chapter defines no supersession of the first entry and no store of past requests.
 --
 
 ==== Message Type
@@ -877,7 +877,7 @@ The rows above give it one outcome: the commstatus, and a present, empty payload
 The translator carries zero bytes and supplies presence and the encoding ID; it decodes nothing and constructs no field of an error.
 The wire cannot say more: an error that a stack generated without any detail, and a modelled error whose encoding is empty, are the same bytes.
 The declared slot is the rule of interpretation, and it does not recover what the sender meant: what zero bytes mean is for the consumer's codec to say, and a consumer whose codec cannot decode them handles that as it handles any error payload that it cannot decode, the commstatus having already told it that the call failed.
-A `RESPONSE` with a code other than `0x00` on the same method stays the branch with no payload. No fall-back to absence, no new discriminator and no promise that the inbound side mirrors the outbound fallback is added.
+A `RESPONSE` with a code other than `0x00` on the same method stays the branch with no payload. This chapter defines no fall-back to absence, no discriminator and no promise that the inbound side mirrors the outbound fallback.
 --
 
 ==== Sink & Source Mapping
@@ -1140,7 +1140,7 @@ The translator *MUST* give every generated reply the one form of <<someip-genera
 The translator *MUST* offer a generated reply to SOME/IP delivery once, and *MUST NOT* offer it again.
 An accepted offer is not counted.
 An offer that fails, as a refusal before exposure or indeterminately (<<someip-hand-over>>), is counted once as _generated reply offer failed_; after an indeterminate failure the reply may be on the wire, and the count does not say otherwise.
-The form stays `RESPONSE` whichever type a stack would choose for the same cause; a stack that generates such replies itself, below the translator's code and in another type, is a matter for reconciling that implementation with this chapter, and no reason to change the form.
+The form stays `RESPONSE` whichever type a stack would choose for the same cause; a stack that generates such replies itself, below the translator's code and in another type, does not change this form.
 
 *The optional expiry reply.*
 When a stock client's request gets no uProtocol answer within the supplied TTL, the default is silence: the stock client's own response timeout ends its call, and that indication is local to the client.
@@ -1462,7 +1462,7 @@ The entry lives until the supplied TTL has passed.
 The initial hand-over of a reconstructed request is still pending when a genuine response claims the entry (RV5).
 The response's own hand-over to SOME/IP delivery is refused before exposure (RV8), and the entry is open again, with the earlier claim in its history.
 The initial hand-over then ends accepted or indeterminate: that late result changes nothing in the entry (RV13), which stays open and retryable until its original deadline.
-A report that nothing was handed over would contradict the response's evidence, and "Order" still keeps the claim from being rolled back; this example adds no duty.
+A report that nothing was handed over would contradict the response's evidence, and "Order" still keeps that report from rolling back the earlier claim's evidence; this example adds no duty.
 
 Row RV11 is row 3 of <<someip-results>> seen from the entry.
 A response that fails validation, or that a determinable authority check refuses, gets row 1 or row 2 of that table first, whatever the state of any entry, and it is counted as _response refused_ like every refused response.
@@ -1507,7 +1507,7 @@ Rows 1 to 7 are decided before the hand-over, so they are refusals before exposu
 
 | 2
 | The message violates a configured authority of the submitting uEntity, and the translator's means determine that at sending (row 3 of <<someip-call-allocation>>)
-| `UCode.PermissionDenied`. Where the violation cannot be determined then, this row does not apply and the call goes on, as `+req~utransport-send-prevent-address-spoofing~1+` states. The row claims no authentication of any peer.
+| `UCode.PermissionDenied`. Where the violation cannot be determined then, this row does not apply and the call goes on, as `+req~utransport-send-prevent-address-spoofing~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]) states. The row claims no authentication of any peer.
 
 | 3
 | A response that answers no open call here: its `reqid` selects no matchable entry (<<someip-entry>>, "Matchable entries"), or its source or sink disagrees with the entry. A valid response may select an entry that is active in its hand-over.
@@ -1515,7 +1515,7 @@ Rows 1 to 7 are decided before the hand-over, so they are refusals before exposu
 
 | 4
 | The message lies outside the intrinsic domain of the tables and the declared context: an identifier with no image; a service, a method or an event that the service contract does not declare, which has no slot and so no image; a kind that differs from the event's declared kind; a service-side authority or instance that the endpoint and discovery configuration do not bind to the service instance; a Notification sink with no recipient binding; a Publish sink whose authority the contract maps to no endpoint; a client with no entry in the client identity agreement; a token or a permission level whose loss is not declared; a payload that the selected slot does not admit; a message over the unsegmented limit where the stack has no segmentation
-| `UCode.OutOfRange` (`+dsn~utransport-send-error-unrepresentable~1+`)
+| `UCode.OutOfRange` (`+dsn~utransport-send-error-unrepresentable~1+`, xref:README.adoc[Transport & Session Layer (uP-L1)])
 
 | 5
 | The message's TTL has expired at the translator
@@ -1535,7 +1535,7 @@ Rows 1 to 7 are decided before the hand-over, so they are refusals before exposu
 |===
 
 Only row 4 is `UCode.OutOfRange`.
-Rows 2, 3 and 5 to 8 depend on authority, state, capacity or a peer, which `+dsn~utransport-send-error-unrepresentable~1+` keeps apart from the intrinsic domain.
+Rows 2, 3 and 5 to 8 depend on authority, state, capacity or a peer, which `+dsn~utransport-send-error-unrepresentable~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]) keeps apart from the intrinsic domain.
 Static and dynamic stay apart in the same way: a service instance that the configuration does not bind has no image (row 4), and one that is bound but not offered at that moment is a peer's state (row 7).
 Every refusal is returned to its caller, and a response that rows 1 to 7 refuse is counted as well (<<someip-counts>>).
 Row 6 is a request's row: a response uses the entry that it answers and needs neither a candidate nor a free entry, so the rows that can refuse a response are 1 to 5 and 7.

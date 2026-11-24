@@ -133,6 +133,7 @@ Verification:: test, heap-window
 ** The shape selector on each admitted extent and, where E and H are equal, on a Value's pair and on every other pair, with the same branch given by every evaluation of it on the same bytes.
 ** The CRC of a 16-byte record with a `+u8+` at 0 and a `+u64+` at 8, over the header fields and the spans from 0 to 1 and from 8 to 16: unchanged by a change of padding or of the gap only.
 ** A union with no always-initialized spans: a route that selects the composition for it refused at setup by name, and the same type admitted as an ordinary native type on a route that does not select it.
+** A route that selects the native protection composition for an inner type of alignment A and declares a payload alignment other than A: refused at setup by the element, naming the route.
 ** The composition's maximum encoded length, E, stated as exact.
 
 *Rationale.*
