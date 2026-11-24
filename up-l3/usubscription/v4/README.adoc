@@ -798,7 +798,7 @@ The uSubscription `UnregisterForNotifications()` operation *MUST* implement an e
 The uSubscription `UnregisterForNotifications()` operation *MUST* implement an empty response message.
 --
 
-[.specitem,oft-sid="req~usubscription-unregister-notifications~1",oft-needs="impl,utest",oft-tags="uSubscription"]
+[.specitem,oft-sid="req~usubscription-unregister-notifications~2",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
 uSubscription service *MUST* stop sending subscription change Notification messages to clients after they have _opted-out_ by calling `UnregisterForNotifications()`. 
 --
