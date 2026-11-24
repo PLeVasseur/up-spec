@@ -99,4 +99,6 @@ python3 -I -B check_assessments.py --git-dir ../../.git
 
 It is read-only: it opens no file for writing, uses no network, imports no real assessment and qualifies nothing. Its `--help` describes its options, the layout of the fixtures and of the derived data that it reports, and the subset of JSON Schema that it implements.
 
+**Open comparison-form boundary (Q-3e-4):** I5 fixes key order, UTF-8 encoding and insignificant whitespace, and does not decide how equal JSON numbers written in different forms (such as `1` against `1.0`) compare. The checker does not normalize numbers; wherever an outcome would turn on how a number is written, it stops as undecided.
+
 This non-normative documentary structure establishes no product conformance, safety qualification, or runtime guarantee.

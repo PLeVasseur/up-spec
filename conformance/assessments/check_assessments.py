@@ -1190,14 +1190,54 @@ def resolve_v2(tree, subject):
     return result
 
 
+def set_math_equal(a, b):
+    if len(a) != len(b):
+        return False
+    used = set()
+    for x in a:
+        matched = None
+        for k, y in enumerate(b):
+            if k not in used and json_equal(x, y):
+                matched = k
+                break
+        if matched is None:
+            return False
+        used.add(matched)
+    return True
+
+
+def math_equal_records(a, b):
+    if a.keys() != b.keys():
+        return False
+    for k in a:
+        if k == "subject":
+            sa, sb = a[k], b[k]
+            if sa.keys() != sb.keys():
+                return False
+            for sk in sa:
+                if sk in ("component_identities", "selected_functions"):
+                    if not set_math_equal(sa[sk], sb[sk]):
+                        return False
+                elif not json_equal(sa[sk], sb[sk]):
+                    return False
+        elif not json_equal(a[k], b[k]):
+            return False
+    return True
+
+
 def comparison_form(record):
     subject = record["subject"]
-    components = [canonical(c) for c in subject["component_identities"]]
-    if len(set(components)) != len(components):
+    comps = subject["component_identities"]
+    components = [canonical(c) for c in comps]
+    raw_dup = len(set(components)) != len(components)
+    math_dup = any(json_equal(comps[i], comps[j]) for i in range(len(comps)) for j in range(i))
+    if math_dup and not raw_dup:
+        raise Undecided("whether duplicate component_identities differing only in number spelling are equal is not decided by the rules (Q-3e-4)")
+    if raw_dup:
         return None
     copy = dict(record)
     copy["subject"] = dict(subject)
-    copy["subject"]["component_identities"] = sorted(subject["component_identities"], key=canonical)
+    copy["subject"]["component_identities"] = sorted(comps, key=canonical)
     copy["subject"]["selected_functions"] = sorted(subject["selected_functions"], key=canonical)
     return canonical(copy)
 
@@ -1276,6 +1316,7 @@ class Catalogue:
             entry.update(identity="duplicate", outcome="refused", reasons=["duplicate_component_identity"], kept=NOT_STATED)
             return entry
         entry["form"] = form
+        entry["record"] = record
         entry["comparison_form_sha256"] = sha256(form)
         key = identity_of(record)
         entry["assessment_identity"] = key
@@ -1284,6 +1325,8 @@ class Catalogue:
             first = admitted[0]
             if first["form"] == form:
                 entry.update(identity="no-op", outcome="no-op", kept=NOT_AGAIN, same_as_step=first["step"])
+            elif math_equal_records(first["record"], record):
+                raise Undecided("the outcome for %s turns on how equal numbers are written in the comparison form (Q-3e-4)" % name)
             else:
                 entry.update(identity="conflict", outcome="refused", reasons=["conflict"], kept=KEPT_PROVENANCE,
                              conflicts_with_step=first["step"])
@@ -1318,7 +1361,7 @@ class Catalogue:
 
 
 def public(entry):
-    return {k: v for k, v in entry.items() if k not in ("bytes", "form")}
+    return {k: v for k, v in entry.items() if k not in ("bytes", "form", "record")}
 
 
 def inside(base, rel):
@@ -1536,7 +1579,9 @@ Derived data
   refused_submission_with_reason (README.md, I4), refused_submission_with_provenance (I8),
   not_again_no_op (I8), and not_stated_by_the_rules for a refusal whose keeping the rules leave
   open. A submission whose identity is that of an earlier submission that was not admitted is
-  reported as undecided.
+  reported as undecided. The comparison form does not normalize JSON number spellings: where an
+  outcome (such as no-op versus conflict on 1 against 1.0) would turn on how equal numbers are
+  written, the checker stops as undecided (Q-3e-4).
 
 Reasons
   shape        unparseable, schema_version_unknown, shape_invalid
