@@ -649,10 +649,23 @@ def attribute_entries(inner):
 def block_style(line):
     if line.startswith("[["):
         return None
-    first = line[1:-1].split(",", 1)[0].strip()
-    if not first or first[0] in ".#%\"'" or "=" in first:
+    try:
+        entries = attribute_entries(line[1:-1])
+    except ValueError:
+        first = line[1:-1].split(",", 1)[0].strip()
+        if not first or first[0] in ".#%\"'" or "=" in first:
+            return None
+        return re.split(r"[.#%]", first, maxsplit=1)[0]
+    if not entries:
         return None
-    return re.split(r"[.#%]", first, maxsplit=1)[0]
+    name, val, quote = entries[0]
+    if name is not None:
+        return None
+    if quote is None:
+        val = val.strip()
+    if not val or val[0] in ".#%":
+        return None
+    return re.split(r"[.#%]", val, maxsplit=1)[0]
 
 
 def setext(line1, line2):
@@ -1718,7 +1731,8 @@ Occurrences and anchors
   An occurrence is a block attribute line of an AsciiDoc file (a name ending in .adoc) whose
   oft-sid attribute has exactly the value <requirement_id>~<requirement_revision>, outside
   verbatim, passthrough and comment blocks (including comment-styled open blocks and paragraphs
-  headed by [comment] or [comment.specitem,...], and //// targets) and outside plain table cells.
+  headed by [comment], ["comment"], ['comment'], or [comment.specitem,...], and //// targets)
+  and outside plain table cells.
   Block attribute lists accept ASCII spaces and horizontal tabs around commas, =, and entry
   boundaries. The checker reads the
   block structure itself: delimited blocks to their first closing line, AsciiDoc table cells,
