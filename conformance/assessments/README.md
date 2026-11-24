@@ -101,4 +101,6 @@ It is read-only: it opens no file for writing, uses no network, imports no real 
 
 **Open comparison-form boundary (Q-3e-4):** I5 fixes key order, UTF-8 encoding and insignificant whitespace, and does not decide how equal JSON numbers written in different forms (such as `1` against `1.0`) compare. The checker does not normalize numbers; wherever an outcome would turn on how a number is written, it stops as undecided.
 
+**Checker order of kinds (Q-3e-1):** The checker runs shape, then resolution, then identity, with short-circuit. That order is the checker's own, and whether a submission that fails more than one kind is kept (or which failure reason takes precedence) stays open for the format owner (Q-3e-1).
+
 This non-normative documentary structure establishes no product conformance, safety qualification, or runtime guarantee.

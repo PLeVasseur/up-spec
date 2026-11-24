@@ -1532,8 +1532,10 @@ The three kinds of check (README.md, "Three kinds of check")
                spec_commit (README.md, "Resolution rules")
   identity     the written import rules, against the submissions already kept in the same fixture
                (README.md, "Import rules")
-  A submission is checked for shape, then resolution, then identity. A refusal gives the reasons of
-  the kind that refused it, and the later kinds are "not reached".
+  This checker runs shape, then resolution, then identity, with short-circuit: a refusal gives the
+  reasons of the kind that refused it, and the later kinds are "not reached". That order is the
+  checker's own; which reason or keeping rule governs a submission that fails more than one kind is
+  open (Q-3e-1).
 
 Pins
   A pin is a full 40-character commit ID. The files of a pin are read, for the 40-zero synthetic
