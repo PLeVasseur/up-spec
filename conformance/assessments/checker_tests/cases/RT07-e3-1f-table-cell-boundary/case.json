@@ -1,0 +1,33 @@
+{
+  "case": "RT07",
+  "subject": "E3-1(f) witness: first-form anchor inside a| cell found, and anchor from preceding cell not leaked across boundary",
+  "required_outcome": "req~cell-a~1 derives cell-anchor (first form); req~cell-b~1 derives null",
+  "decided_by": "Resolution (checker regression, E3-1f / Neon 05)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "anchor_form": "first",
+        "derived_anchor": "cell-anchor"
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test, step 2",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "anchor_form": null,
+        "derived_anchor": null
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

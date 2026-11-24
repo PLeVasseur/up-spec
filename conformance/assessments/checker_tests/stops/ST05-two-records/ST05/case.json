@@ -1,0 +1,15 @@
+{
+  "case": "ST05",
+  "subject": "Q-3e-2 witness: submission containing two records",
+  "required_outcome": "Checker stops with exit 2 as undecided",
+  "decided_by": "Undecided stop (Q-3e-2)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "outcome": "admitted"
+      }
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "undecided:",
+  "expected_substring": "Q-3e-4",
+  "before_repair_failure": "exited 1 silently refusing 1.0 as conflict against 1"
+}

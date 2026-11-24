@@ -1,0 +1,36 @@
+{
+  "case": "RT03",
+  "subject": "R1 unresolvable branch: v1 record naming an absent ID and a v1 record naming an absent revision at C",
+  "required_outcome": "Each passes shape, fails resolution as unresolvable with 0 occurrences, kept with reason",
+  "decided_by": "Resolution (checker regression, E3-4 / Fable PE)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "kept": "refused_submission_with_reason",
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test, step 2",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "kept": "refused_submission_with_reason",
+        "occurrences": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "case": "RT09",
+  "subject": "Load-bearing section-target guard under an anchored preceding section (Neon P7b)",
+  "required_outcome": "Item targeting a section title derives null anchor even when preceding section is anchored",
+  "decided_by": "Resolution (checker regression, E3-4 / Neon 02)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "anchor_form": null,
+        "derived_anchor": null
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

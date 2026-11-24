@@ -1,0 +1,6 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "undecided:",
+  "expected_substring": "[id=sec-id]",
+  "before_repair_failure": "exited 0 with derived_anchor null"
+}

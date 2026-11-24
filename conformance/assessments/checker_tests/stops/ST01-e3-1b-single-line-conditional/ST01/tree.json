@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/conditional.adoc": "= Conditional probe\n:probe-enabled:\n\n[.specitem,oft-sid=\"req~as19-only-item~1\"]\n--\nOrdinary item.\n--\n\nifdef::probe-enabled[[.specitem,oft-sid=\"req~as19-only-item~1\"]]\n--\nConditional item.\n--\n"
+  }
+}

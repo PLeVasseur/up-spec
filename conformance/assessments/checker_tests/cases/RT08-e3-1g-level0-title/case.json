@@ -1,0 +1,36 @@
+{
+  "case": "RT08",
+  "subject": "E3-1(g) witness: level-0 document title = Title is not a section title for the second form",
+  "required_outcome": "Preamble item derives null anchor, not doc-anchor",
+  "decided_by": "Resolution (checker regression, E3-1g / Neon 05)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "anchor_form": null,
+        "derived_anchor": null
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test, step 2",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "anchor_form": null,
+        "derived_anchor": null
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

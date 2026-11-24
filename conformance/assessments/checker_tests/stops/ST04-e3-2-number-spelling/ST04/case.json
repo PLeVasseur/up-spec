@@ -1,0 +1,22 @@
+{
+  "case": "ST04",
+  "subject": "E3-2 witness: resubmission differing only in number spelling (1 vs 1.0, Q-3e-4)",
+  "required_outcome": "Checker stops with exit 2 as undecided instead of silently refusing as conflict",
+  "decided_by": "Undecided stop (E3-2 / Q-3e-4)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "outcome": "admitted"
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test, step 2",
+      "expect": {
+        "outcome": "no-op"
+      }
+    }
+  ]
+}

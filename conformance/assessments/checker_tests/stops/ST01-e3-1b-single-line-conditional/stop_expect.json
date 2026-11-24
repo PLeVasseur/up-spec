@@ -1,0 +1,6 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "undecided:",
+  "expected_substring": "single_line_conditional",
+  "before_repair_failure": "exited 0 admitting v1 record as unique"
+}

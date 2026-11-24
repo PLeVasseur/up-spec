@@ -1,0 +1,23 @@
+{
+  "case": "RT05",
+  "subject": "E3-1(a) witness: fractional ordinal 1.0000000000000001 must not round to integer 1",
+  "required_outcome": "Refused at shape as shape_invalid",
+  "decided_by": "Shape (checker regression, E3-1a / Astra 01)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "shape": "fail",
+        "resolution": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "shape_invalid"
+        ]
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

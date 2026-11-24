@@ -1,0 +1,46 @@
+{
+  "case": "RT01",
+  "subject": "Positive [#id] derivation on C:basics/uri.adoc:305 and C:basics/payload_encoding_registry.adoc:63",
+  "required_outcome": "Derives pattern-matching and partition by the second form; rejects null anchor",
+  "decided_by": "Resolution (checker regression, E3-4 / Fable PA)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 308,
+        "anchor_form": "second",
+        "derived_anchor": "pattern-matching"
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test, step 2",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "derived_anchor": "pattern-matching",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "provenance": "checker regression test, step 3",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 66,
+        "anchor_form": "second",
+        "derived_anchor": "partition"
+      }
+    }
+  ]
+}

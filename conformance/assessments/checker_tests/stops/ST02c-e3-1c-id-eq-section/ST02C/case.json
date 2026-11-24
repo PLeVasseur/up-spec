@@ -1,0 +1,18 @@
+{
+  "case": "ST02C",
+  "subject": "E3-1(c) witness: [id=sec-id] above section title",
+  "required_outcome": "Checker stops with exit 2 as undecided",
+  "decided_by": "Undecided stop (E3-1c / Neon 03)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "outcome": "admitted"
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

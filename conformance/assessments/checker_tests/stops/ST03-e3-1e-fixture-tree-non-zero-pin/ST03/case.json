@@ -1,0 +1,18 @@
+{
+  "case": "ST03",
+  "subject": "E3-1(e) witness: fixture tree keyed to pin C instead of the 40-zero pin",
+  "required_outcome": "Checker stops with exit 2 as unsupported",
+  "decided_by": "Unsupported stop (E3-1e / Fable 03)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "outcome": "admitted"
+      }
+    }
+  ],
+  "trees": {
+    "fc32a01fe7ec772940c143bce4f0973896a9decb": "tree.json"
+  }
+}

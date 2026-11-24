@@ -1,0 +1,6 @@
+{
+  "files": {
+    "notes/item.md": "= Probe\n\n[.specitem,oft-sid=\"req~probe-md~1\",oft-needs=\"impl\"]\n--\nAn item in a non-.adoc file.\n--\n",
+    "pages/other.adoc": "= Other\n\nNo item here.\n"
+  }
+}

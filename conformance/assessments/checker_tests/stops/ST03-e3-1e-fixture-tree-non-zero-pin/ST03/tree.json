@@ -1,0 +1,5 @@
+{
+  "files": {
+    "fake/page.adoc": "= Fake\n\n[[probe-anchor]]\n[.specitem,oft-sid=\"req~probe-fake~1\",oft-needs=\"impl\"]\n--\nFake.\n--\n"
+  }
+}

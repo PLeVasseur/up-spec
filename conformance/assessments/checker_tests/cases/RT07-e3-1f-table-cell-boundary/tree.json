@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/cells.adoc": "= Table cell boundary witness\n\n|===\n| h1 | h2\n\n| x\na| [[cell-anchor]]\n[.specitem,oft-sid=\"req~cell-a~1\",oft-needs=\"impl\"]\n--\nCell anchor.\n--\n\n| plain text\n[[leaked-anchor]]\na| [.specitem,oft-sid=\"req~cell-b~1\",oft-needs=\"impl\"]\n--\nNo anchor.\n--\n|===\n"
+  }
+}

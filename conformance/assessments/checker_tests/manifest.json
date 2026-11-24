@@ -1,0 +1,32 @@
+{
+  "label": "checker_regression_tests",
+  "not_section_10_as_cases": true,
+  "notes": [
+    "These files are checker regression tests (E3-4) and are not counted among section 10's documentary AS1-AS19 cases in ../fixtures/.",
+    "All synthetic specification trees are carried as JSON only (no .adoc files and no oft-sid items) so the repository census and trace are unchanged.",
+    "In ../fixtures/, AS4 (decided by no check, configured_value null) and each step's stored_bytes_unchanged check are documentary statements, not behavioral verification checks."
+  ],
+  "cases_dir": "cases",
+  "cases": [
+    "RT01-shorthand-anchor-positive",
+    "RT02-only-item-guard",
+    "RT03-r1-unresolvable",
+    "RT04-shape-negatives",
+    "RT05-e3-1a-fractional-ordinal",
+    "RT06-e3-1d-file-domain",
+    "RT07-e3-1f-table-cell-boundary",
+    "RT08-e3-1g-level0-title",
+    "RT09-section-target-guard",
+    "RT10-checker-order-two-failure"
+  ],
+  "stops_dir": "stops",
+  "stops": [
+    "ST01-e3-1b-single-line-conditional",
+    "ST02a-e3-1c-id-eq-unquoted",
+    "ST02b-e3-1c-id-eq-quoted",
+    "ST02c-e3-1c-id-eq-section",
+    "ST03-e3-1e-fixture-tree-non-zero-pin",
+    "ST04-e3-2-number-spelling",
+    "ST05-two-records"
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/sec-target.adoc": "= T\n\n[[prev-sec]]\n== Previous Section\n\n[.specitem,oft-sid=\"req~hdr-item~1\",oft-needs=\"impl\"]\n== Next Section\n\nBody.\n"
+  }
+}

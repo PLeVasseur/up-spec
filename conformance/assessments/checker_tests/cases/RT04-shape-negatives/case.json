@@ -1,0 +1,68 @@
+{
+  "case": "RT04",
+  "subject": "Shape negative controls: unknown schema_version, missing occurrence, ordinal 0, extra occurrence member, duplicate JSON key",
+  "required_outcome": "Each refused at shape before resolution",
+  "decided_by": "Shape (checker regression, E3-4)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "shape": "fail",
+        "resolution": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "schema_version_unknown"
+        ]
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test, step 2",
+      "expect": {
+        "shape": "fail",
+        "resolution": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "shape_invalid"
+        ]
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "provenance": "checker regression test, step 3",
+      "expect": {
+        "shape": "fail",
+        "resolution": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "shape_invalid"
+        ]
+      }
+    },
+    {
+      "submission": "submission-4.json",
+      "provenance": "checker regression test, step 4",
+      "expect": {
+        "shape": "fail",
+        "resolution": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "shape_invalid"
+        ]
+      }
+    },
+    {
+      "submission": "submission-5.json",
+      "provenance": "checker regression test, step 5",
+      "expect": {
+        "shape": "fail",
+        "resolution": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "unparseable"
+        ]
+      }
+    }
+  ]
+}

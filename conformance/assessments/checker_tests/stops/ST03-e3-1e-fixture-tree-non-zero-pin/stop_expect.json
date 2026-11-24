@@ -1,0 +1,6 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "unsupported:",
+  "expected_substring": "40-zero",
+  "before_repair_failure": "exited 0 shadowing real pin C with fixture tree"
+}

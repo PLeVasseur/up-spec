@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/p.adoc": "= Test\n\n[id=sec-id]\n== Sec\n\n[.specitem,oft-sid=\"req~p1s~1\"]\n--\nBody.\n--\n"
+  }
+}

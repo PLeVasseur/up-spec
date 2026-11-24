@@ -1,0 +1,46 @@
+{
+  "case": "RT10",
+  "subject": "Checker short-circuit order on two-failure submissions (E3-3 / Fable PH); keeping in two-failure cases stays open (Q-3e-1)",
+  "required_outcome": "Resolution refuses before identity is reached (the checker's own order, not a section-10 rule)",
+  "decided_by": "Checker order observation (Q-3e-1 open)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "identity": "new",
+        "outcome": "admitted"
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test, step 2",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "identity": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "service_version_mismatch"
+        ],
+        "kept": "not_stated_by_the_rules"
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "provenance": "checker regression test, step 3",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "identity": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "ambiguous"
+        ],
+        "kept": "refused_submission_with_reason"
+      }
+    }
+  ]
+}

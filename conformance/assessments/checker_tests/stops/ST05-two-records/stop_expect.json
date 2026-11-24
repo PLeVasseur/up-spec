@@ -1,0 +1,6 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "undecided:",
+  "expected_substring": "2 records",
+  "before_repair_failure": "regression guard (already stopped as undecided)"
+}

@@ -1,0 +1,50 @@
+{
+  "case": "RT06",
+  "subject": "E3-1(d) witness: unified .adoc file domain for v1 and v2, plus binary file at pin C",
+  "required_outcome": "notes/item.md yields 0 occurrences in both v1 and v2; basics/protobuf.png is refused ordinal_absent without UTF-8 error",
+  "decided_by": "Resolution (checker regression, E3-1d / Astra 03, Neon 04, Fable 02)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test, step 2",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "provenance": "checker regression test, step 3",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

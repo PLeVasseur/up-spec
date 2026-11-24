@@ -1,0 +1,35 @@
+{
+  "case": "RT02",
+  "subject": "First block in an anchored section that holds other items in its own body (C:up-l3/usubscription/v3/README.adoc:88)",
+  "required_outcome": "No second-form anchor derived; null admitted, subscribe-operation refused",
+  "decided_by": "Resolution (checker regression, E3-4 / Fable PJ)",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker regression test, step 1",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 88,
+        "anchor_form": null,
+        "derived_anchor": null
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "checker regression test, step 2",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "located_line": 88,
+        "anchor_form": null,
+        "derived_anchor": null
+      }
+    }
+  ]
+}

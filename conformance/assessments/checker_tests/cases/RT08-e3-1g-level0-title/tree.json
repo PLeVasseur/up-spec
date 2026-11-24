@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/doc-title.adoc": "[[doc-anchor]]\n= Document Title\n\n[.specitem,oft-sid=\"req~preamble-item~1\",oft-needs=\"impl\"]\n--\nPreamble item.\n--\n"
+  }
+}
