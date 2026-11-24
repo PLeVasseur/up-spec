@@ -100,7 +100,7 @@ channels:
           schema:
             $ref: "./usubscription.proto#/uprotocol.core.usubscription.v4.FetchSubscriptionsResponse"
   registerForNotificationsRequests:
-    summary: Requests to receive subscription change Notification messages for an indicated topic.
+    summary: Requests to receive subscription change Notification messages for any tracked subscription.
     messages:
       protobuf:
         contentType: "application/protobuf"
@@ -221,7 +221,7 @@ operations:
         # [dsn->req~usubscription-fetch-subscriptions-method_id~1]
         methodId: 0x0003
   RegisterForNotifications:
-    summary: Register to be sent subscription change Notification messages for an indicated topic.
+    summary: Register to be sent subscription change Notification messages for any tracked subscription.
     tags:
       - name: uSubscription
         description: uProtocol uSubscription API operation.

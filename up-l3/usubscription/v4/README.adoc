@@ -812,7 +812,7 @@ sequenceDiagram
 
 actor C as Client [/80/2]
 participant T as uSubscription Service
-Note right of T: Client [/90/1] subscribed to topic [//vehicle/A1B/1/1/9A10]<br/>Client [/80/2] has previously registered for change notifications of topic [//vehicle/A1B/1/1/9A10]
+Note right of T: Client [/90/1] subscribed to topic [//vehicle/A1B/1/1/9A10]<br/>Client [/80/2] has previously registered for subscription change notifications
 participant N as Subscription Change<br/>Message Topic
 
 T-->T : "//vehicle/A1B/1/1/9A10" becomes UNSUBSCRIBED
