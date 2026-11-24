@@ -1,4 +1,5 @@
 import argparse
+from decimal import Decimal
 import hashlib
 import json
 import math
@@ -26,7 +27,7 @@ LINE_COMMENT = re.compile(r"//(?:[^/]|$)")
 ATTRIBUTE_LINE = re.compile(r"\[(?:|[\w.#%{,\"'].*|\[(?:|(?:[^\W\d]|:)[\w\-:.]*(?:, *.+)?)\])\]")
 BLOCK_ANCHOR = re.compile(r"\[\[((?:[^\W\d]|:)[\w\-:.]*)(?:, *.+)?\]\]")
 SHORTHAND_ANCHOR = re.compile(r"\[#((?:[^\W\d]|:)[\w\-:]*)\]")
-OTHER_ID = re.compile(r"\[(?:[^\],\"']*#|.*?(?:\[|,)\s*id\s*=)")
+OTHER_ID = re.compile(r"\[(?:[^\],\"']*#|\s*id\s*=|.*?,\s*id\s*=)")
 BLOCK_TITLE = re.compile(r"\.\.?[^ \t.].*")
 SECTION_TITLE = re.compile(r"(=={0,5}|#{1,6})[ \t]+(.+?)(?:[ \t]+\1)?")
 ATTRIBUTE_ENTRY = re.compile(r":!?\w[^:]*:(?:[ \t]+.*)?")
@@ -44,8 +45,11 @@ COLUMN_SPEC = re.compile(r"(?:\d+\*)?(?:[<^>](?:\.[<^>]?)?|(?:[<^>]?\.)?[<^>])?(
 SETEXT_TITLE = re.compile(r"(?!\.).*?[^\W_].*")
 SERVICE_VERSION = re.compile(r"up-l3/([^/]+)/(v[0-9]+)/")
 COMMIT = re.compile(r"[0-9a-f]{40}")
-STRUCTURAL_NOTES = ("include_directive", "conditional_region", "unterminated_block", "setext_title",
-                    "heading_in_block", "unmatched_endif")
+ZERO_PIN = "0" * 40
+NUM_RE = re.compile(r"(-)?(0|[1-9][0-9]*)(?:\.([0-9]+))?(?:[eE]([+-]?[0-9]+))?")
+INERT_SOURCE_STYLE = re.compile(r"\[source(?:,[^\]\[=\"']*)?\]")
+STRUCTURAL_NOTES = ("include_directive", "conditional_region", "single_line_conditional",
+                    "unterminated_block", "setext_title", "heading_in_block", "unmatched_endif")
 CELL_NOTES = ("cell_style_from_columns", "oft_sid_in_delimited_data_table", "text_before_first_cell")
 DOUBTFUL_FLAGS = ("unreadable_attribute_list", "multiple_oft_sid", "single_quoted",
                   "attribute_reference", "attribute_line_in_list_item", "in_verbatim_paragraph",
@@ -62,6 +66,113 @@ class Undecided(Exception):
 
 def sha256(data):
     return hashlib.sha256(data).hexdigest()
+
+
+class JsonNumber:
+    def __init__(self, raw):
+        m = NUM_RE.fullmatch(raw)
+        if not m:
+            raise ValueError("invalid JSON number %r" % raw)
+        self.raw = raw
+        sign, ipart, fpart, epart = m.groups()
+        digits = (ipart + (fpart or "")).lstrip("0")
+        if not digits:
+            self.mantissa = 0
+            self.exp10 = 0
+        else:
+            nz = digits.rstrip("0")
+            self.exp10 = (int(epart) if epart else 0) - len(fpart or "") + (len(digits) - len(nz))
+            self.mantissa = -int(nz) if sign else int(nz)
+
+
+def num_parts(value):
+    if isinstance(value, JsonNumber):
+        return value.mantissa, value.exp10
+    if isinstance(value, int) and not isinstance(value, bool):
+        if value == 0:
+            return 0, 0
+        s = str(abs(value))
+        nz = s.rstrip("0")
+        m = int(nz)
+        return (-m if value < 0 else m), len(s) - len(nz)
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("non-finite float")
+        n = JsonNumber(str(Decimal(value)))
+        return n.mantissa, n.exp10
+    raise TypeError("not a number")
+
+
+def exact_int(value):
+    m, e = num_parts(value)
+    if e < 0:
+        raise ValueError("not an integer")
+    if m == 0:
+        return 0
+    if e > 1000:
+        raise Unsupported("an integer exponent outside the supported range")
+    return m * (10 ** e)
+
+
+def schema_version_of(value):
+    if not is_number(value):
+        return None
+    m, e = num_parts(value)
+    if e == 0 and m in SCHEMA_FILES:
+        return m
+    return None
+
+
+def num_cmp(a, b):
+    ma, ea = num_parts(a)
+    mb, eb = num_parts(b)
+    if (ma, ea) == (mb, eb):
+        return 0
+    sa = 1 if ma > 0 else (-1 if ma < 0 else 0)
+    sb = 1 if mb > 0 else (-1 if mb < 0 else 0)
+    if sa != sb:
+        return -1 if sa < sb else 1
+    da = str(abs(ma))
+    db = str(abs(mb))
+    oa = len(da) + ea
+    ob = len(db) + eb
+    if oa != ob:
+        mag = -1 if oa < ob else 1
+    else:
+        mag = -1 if da < db else 1
+    return mag if sa > 0 else -mag
+
+
+def dump_json(value, indent=None, level=0):
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, JsonNumber):
+        return value.raw
+    if isinstance(value, (int, float)):
+        return json.dumps(value)
+    if isinstance(value, str):
+        return json.dumps(value, ensure_ascii=False)
+    if isinstance(value, list):
+        if not value:
+            return "[]"
+        if indent is None:
+            return "[" + ",".join(dump_json(v) for v in value) + "]"
+        pad = " " * (indent * (level + 1))
+        end = " " * (indent * level)
+        return "[\n" + ",\n".join(pad + dump_json(v, indent, level + 1) for v in value) + "\n" + end + "]"
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        keys = sorted(value)
+        if indent is None:
+            return "{" + ",".join(json.dumps(k, ensure_ascii=False) + ":" + dump_json(value[k]) for k in keys) + "}"
+        pad = " " * (indent * (level + 1))
+        end = " " * (indent * level)
+        parts = [pad + json.dumps(k, ensure_ascii=False) + ": " + dump_json(value[k], indent, level + 1) for k in keys]
+        return "{\n" + ",\n".join(parts) + "\n" + end + "}"
+    raise TypeError("cannot encode %r" % type(value).__name__)
 
 
 def finite_and_encodable(value):
@@ -92,18 +203,19 @@ def strict_json(data):
     def constant(name):
         raise ValueError("%s is not JSON" % name)
 
-    value = json.loads(data.decode("utf-8"), object_pairs_hook=pairs, parse_constant=constant)
+    value = json.loads(data.decode("utf-8"), object_pairs_hook=pairs, parse_constant=constant,
+                       parse_float=JsonNumber, parse_int=JsonNumber)
     if not finite_and_encodable(value):
         raise ValueError("a number that is not finite, or a string that is not Unicode text")
     return value
 
 
 def canonical(value):
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return dump_json(value, indent=None).encode("utf-8")
 
 
 def is_number(value):
-    return isinstance(value, (int, float)) and not isinstance(value, bool)
+    return isinstance(value, (int, float, JsonNumber)) and not isinstance(value, bool)
 
 
 def type_ok(value, name):
@@ -119,14 +231,14 @@ def type_ok(value, name):
         return isinstance(value, str)
     if name == "number":
         return is_number(value)
-    return is_number(value) and (isinstance(value, int) or value.is_integer())
+    return is_number(value) and num_parts(value)[1] >= 0
 
 
 def json_equal(a, b):
     if isinstance(a, bool) or isinstance(b, bool):
         return isinstance(a, bool) and isinstance(b, bool) and a == b
     if is_number(a) and is_number(b):
-        return a == b
+        return num_parts(a) == num_parts(b)
     if a is None or b is None:
         return a is None and b is None
     if isinstance(a, str) and isinstance(b, str):
@@ -305,8 +417,9 @@ class Schema:
                 except Unsupported as exc:
                     self.fail(here, str(exc))
             elif key in ("minLength", "minItems", "maxItems"):
-                if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+                if not (is_number(value) and num_parts(value)[1] >= 0 and num_cmp(value, 0) >= 0):
                     self.fail(here, "%s that is not a non-negative integer" % key)
+                exact_int(value)
             elif key == "minimum":
                 if not is_number(value):
                     self.fail(here, "minimum that is not a number")
@@ -338,21 +451,21 @@ class Schema:
             if not any(type_ok(value, n) for n in names):
                 errors.append("%s: the type is not %s" % (where, " or ".join(names)))
         if "const" in schema and not json_equal(value, schema["const"]):
-            errors.append("%s: not the constant %s" % (where, json.dumps(schema["const"])))
+            errors.append("%s: not the constant %s" % (where, dump_json(schema["const"])))
         if "enum" in schema and not any(json_equal(value, e) for e in schema["enum"]):
             errors.append("%s: not one of the enumerated values" % where)
         if isinstance(value, str):
-            if "minLength" in schema and len(value) < schema["minLength"]:
-                errors.append("%s: shorter than %d characters" % (where, schema["minLength"]))
+            if "minLength" in schema and len(value) < exact_int(schema["minLength"]):
+                errors.append("%s: shorter than %d characters" % (where, exact_int(schema["minLength"])))
             if "pattern" in schema and not self.compiled[schema["pattern"]].search(value):
                 errors.append("%s: does not match the pattern %s" % (where, schema["pattern"]))
-        if is_number(value) and "minimum" in schema and value < schema["minimum"]:
-            errors.append("%s: less than %s" % (where, schema["minimum"]))
+        if is_number(value) and "minimum" in schema and num_cmp(value, schema["minimum"]) < 0:
+            errors.append("%s: less than %s" % (where, dump_json(schema["minimum"])))
         if isinstance(value, list):
-            if "minItems" in schema and len(value) < schema["minItems"]:
-                errors.append("%s: fewer than %d items" % (where, schema["minItems"]))
-            if "maxItems" in schema and len(value) > schema["maxItems"]:
-                errors.append("%s: more than %d items" % (where, schema["maxItems"]))
+            if "minItems" in schema and len(value) < exact_int(schema["minItems"]):
+                errors.append("%s: fewer than %d items" % (where, exact_int(schema["minItems"])))
+            if "maxItems" in schema and len(value) > exact_int(schema["maxItems"]):
+                errors.append("%s: more than %d items" % (where, exact_int(schema["maxItems"])))
             if schema.get("uniqueItems") and any(json_equal(value[a], value[b]) for a in range(len(value)) for b in range(a)):
                 errors.append("%s: two items are equal" % where)
             if "items" in schema:
@@ -514,7 +627,11 @@ class Scan:
                     depth.append(k)
                     self.notes.append((k, "conditional_region"))
                     continue
-                self.notes.append((k, "single_line_conditional"))
+                body = m.group(4)
+                next_line = self.lines[k] if k < len(self.lines) else ""
+                prev_line = self.lines[k - 2] if k >= 2 else ""
+                if not (INERT_SOURCE_STYLE.fullmatch(body) and delimiter(next_line) == "listing" and "oft-sid" not in prev_line):
+                    self.notes.append((k, "single_line_conditional"))
             elif line.startswith("include::"):
                 self.notes.append((k, "include_directive"))
             if depth:
@@ -768,9 +885,10 @@ class Scan:
                        and (e == t or not (delimiter(items[e][1]) or ATTRIBUTE_LINE.fullmatch(items[e][1])))):
                     e += 1
                 statement = items[t:e]
+        above = items[i - 1][1] if i > 0 and items[i - 1][0] == no - 1 else None
         self.occurrences.append({
             "sid": sid, "line": no, "head_start": items[k][0], "target": target,
-            "target_kind": target_kind, "context": ctx, "flags": flags,
+            "target_kind": target_kind, "context": ctx, "flags": flags, "above": above,
             "statement": None if statement is None else [text for _, text in statement],
             "statement_lines": None if not statement else [statement[0][0], statement[-1][0]],
         })
@@ -785,15 +903,24 @@ def anchor_value(line):
             return m.group(1)
     if DIRECTIVE.fullmatch(line):
         raise Undecided("a preprocessor directive stands where the derivation reads an anchor")
-    if ATTRIBUTE_LINE.fullmatch(line) and OTHER_ID.match(line):
-        raise Undecided("an identifier is written in a form that the rules do not name: %s" % line)
+    if ATTRIBUTE_LINE.fullmatch(line):
+        try:
+            entries = attribute_entries(line[1:-1])
+        except ValueError:
+            if OTHER_ID.match(line):
+                raise Undecided("an identifier is written in a form that the rules do not name: %s" % line)
+            return None
+        for idx, (name, val, quote) in enumerate(entries):
+            if name == "id" or (idx == 0 and name is None and quote is None and "#" in val):
+                raise Undecided("an identifier is written in a form that the rules do not name: %s" % line)
     return None
 
 
 def scan_doubts(scan, sid):
     unsure = [o for o in scan.occurrences if o["sid"] is None or "{" in o["sid"]]
     relevant = unsure or any(sid in line for line in scan.lines)
-    doubts = ["line %d: %s" % (no, code) for no, code in scan.notes if code in STRUCTURAL_NOTES and relevant]
+    doubts = ["line %d: %s" % (no, code) for no, code in scan.notes
+              if code == "single_line_conditional" or (code in STRUCTURAL_NOTES and relevant)]
     for o in scan.occurrences:
         if any(f in DOUBTFUL_FLAGS for f in o["flags"]):
             if o in unsure or o["sid"] == sid or sid in scan.lines[o["line"] - 1]:
@@ -806,7 +933,7 @@ def scan_doubts(scan, sid):
 
 def derive_anchor(scan, occ):
     lines = scan.lines
-    above = lines[occ["line"] - 2] if occ["line"] >= 2 else None
+    above = occ["above"]
     value = anchor_value(above)
     if value is not None:
         return value, "first"
@@ -816,6 +943,8 @@ def derive_anchor(scan, occ):
     if not titles:
         return None, None
     title = titles[-1]
+    if title.level == 0:
+        return None, None
     value = anchor_value(title.above)
     if value is None:
         return None, None
@@ -861,6 +990,10 @@ def canonical_path(path):
 
 def under_conformance(path):
     return path.split("/")[0] == "conformance"
+
+
+def is_asciidoc_path(path):
+    return path.endswith(".adoc")
 
 
 def git_run(git_dir, *args):
@@ -993,14 +1126,14 @@ class Pins:
 
 
 def sid_of(subject):
-    return "%s~%d" % (subject["requirement_id"], int(subject["requirement_revision"]))
+    return "%s~%d" % (subject["requirement_id"], exact_int(subject["requirement_revision"]))
 
 
 def resolve_v1(tree, subject):
     sid = sid_of(subject)
     found = []
     for path in tree.paths():
-        if not path.endswith(".adoc") or under_conformance(path) or tree.kind(path) != "file":
+        if not is_asciidoc_path(path) or under_conformance(path) or tree.kind(path) != "file":
             continue
         scan = tree.scan(path)
         doubts = scan_doubts(scan, sid)
@@ -1032,6 +1165,9 @@ def resolve_v2(tree, subject):
         reasons.append("source_path_under_conformance")
     elif tree.kind(path) != "file":
         reasons.append("source_path_absent")
+    elif not is_asciidoc_path(path):
+        result["occurrences_in_file"] = 0
+        reasons.append("ordinal_absent")
     else:
         scan = tree.scan(path)
         doubts = scan_doubts(scan, sid)
@@ -1039,10 +1175,10 @@ def resolve_v2(tree, subject):
             raise Undecided("%s at %s: %s" % (path, tree.commit, "; ".join(doubts)))
         same = [o for o in scan.occurrences if o["sid"] == sid]
         result["occurrences_in_file"] = len(same)
-        if int(occ["ordinal"]) > len(same):
+        if num_cmp(occ["ordinal"], len(same)) > 0:
             reasons.append("ordinal_absent")
         else:
-            target = same[int(occ["ordinal"]) - 1]
+            target = same[exact_int(occ["ordinal"]) - 1]
             anchor, form = derive_anchor(scan, target)
             result.update(located_line=target["line"], anchor_form=form, derived_anchor=anchor, statement=target["statement"])
             if not json_equal(occ["anchor"], anchor):
@@ -1068,14 +1204,14 @@ def comparison_form(record):
 
 def identity_of(record):
     a = record["assessment"]
-    return [a["producer_authority"], a["assessment_id"], int(a["assessment_revision"])]
+    return [a["producer_authority"], a["assessment_id"], exact_int(a["assessment_revision"])]
 
 
 def loose_identity(data):
     try:
         document = strict_json(data)
         return identity_of(document["records"][0])
-    except (ValueError, KeyError, TypeError, IndexError, AttributeError):
+    except (ValueError, KeyError, TypeError, IndexError, AttributeError, Unsupported):
         return None
 
 
@@ -1106,11 +1242,10 @@ class Catalogue:
         except (ValueError, UnicodeDecodeError) as exc:
             entry.update(shape="fail", outcome="refused", reasons=["unparseable"], errors=[str(exc)], kept=NOT_STATED)
             return entry
-        version = document.get("schema_version") if isinstance(document, dict) else None
-        if not (is_number(version) and json_equal(version, int(version)) and int(version) in SCHEMA_FILES):
+        version = schema_version_of(document.get("schema_version") if isinstance(document, dict) else None)
+        if version is None:
             entry.update(shape="fail", outcome="refused", reasons=["schema_version_unknown"], kept=NOT_STATED)
             return entry
-        version = int(version)
         entry["schema_version"] = version
         entry["schema"] = SCHEMA_FILES[version]
         errors = schemas[version].validate(document)
@@ -1202,8 +1337,8 @@ def read_inside(case_dir, rel):
 def load_fixture_trees(case, case_dir):
     trees = {}
     for commit, rel in case.get("trees", {}).items():
-        if not COMMIT.fullmatch(commit):
-            raise Unsupported("a fixture tree for %r, which is not a full commit ID" % commit)
+        if commit != ZERO_PIN:
+            raise Unsupported("a fixture tree is allowed only for the 40-zero synthetic pin, not %r" % commit)
         spec = strict_json(read_inside(case_dir, rel))
         files = spec.get("files") if isinstance(spec, dict) else None
         if not isinstance(files, dict) or not all(isinstance(v, str) and canonical_path(k) for k, v in files.items()):
@@ -1215,10 +1350,9 @@ def load_fixture_trees(case, case_dir):
 def compare(expected, actual, where, differences):
     for key, value in expected.items():
         if key not in actual:
-            differences.append("%s: %s is expected as %s but not reported" % (where, key, json.dumps(value, ensure_ascii=False)))
+            differences.append("%s: %s is expected as %s but not reported" % (where, key, dump_json(value)))
         elif not json_equal(value, actual[key]):
-            differences.append("%s: %s is %s, expected %s" % (where, key, json.dumps(actual[key], ensure_ascii=False),
-                                                              json.dumps(value, ensure_ascii=False)))
+            differences.append("%s: %s is %s, expected %s" % (where, key, dump_json(actual[key]), dump_json(value)))
 
 
 def check_index(spec, context, differences):
@@ -1226,11 +1360,11 @@ def check_index(spec, context, differences):
         raw = fh.read()
     document = strict_json(raw)
     result = {"file": "index.json", "sha256": sha256(raw), "schema": None, "shape": "fail"}
-    version = document.get("schema_version") if isinstance(document, dict) else None
-    if is_number(version) and json_equal(version, int(version)) and int(version) in SCHEMA_FILES:
-        result["schema_version"] = int(version)
-        result["schema"] = SCHEMA_FILES[int(version)]
-        errors = context["schemas"][int(version)].validate(document)
+    v_int = schema_version_of(document.get("schema_version") if isinstance(document, dict) else None)
+    if v_int is not None:
+        result["schema_version"] = v_int
+        result["schema"] = SCHEMA_FILES[v_int]
+        errors = context["schemas"][v_int].validate(document)
         result["shape"] = "fail" if errors else "pass"
         if errors:
             result["errors"] = errors
@@ -1252,7 +1386,7 @@ def check_index(spec, context, differences):
 
 
 def check_reading(spec, case_dir, catalogue, differences):
-    entry = catalogue.entries[spec["step"] - 1]
+    entry = catalogue.entries[exact_int(spec["step"]) - 1]
     raw = read_inside(case_dir, spec["configuration"])
     configuration = strict_json(raw)
     record = strict_json(entry["bytes"])["records"][0]
@@ -1269,9 +1403,9 @@ def check_reading(spec, case_dir, catalogue, differences):
     if not is_number(value) or not result["clause_as_expected"] or not result["configuration_digest_matches"]:
         result["reading"] = "not applicable"
     elif relation == "at_least":
-        result["reading"] = "within" if value >= bound else "violates"
+        result["reading"] = "within" if num_cmp(value, bound) >= 0 else "violates"
     else:
-        result["reading"] = "within" if value == bound else "violates"
+        result["reading"] = "within" if json_equal(value, bound) else "violates"
     result["standing"] = ("a documentary reading of the resolved clause, not an assessment: a pass still needs "
                           "evidence, provenance and authority")
     compare(spec["expect"], result, "reading", differences)
@@ -1283,8 +1417,8 @@ def check_contrast(spec, report, results, differences):
     a = other["steps"][0]
     b = report["steps"][0]
     result = {"with": spec["case"],
-              "same_pin_and_occurrence": ((a.get("spec_commit"), a.get("submitted_occurrence"))
-                                          == (b.get("spec_commit"), b.get("submitted_occurrence"))),
+              "same_pin_and_occurrence": (a.get("spec_commit") == b.get("spec_commit")
+                                          and json_equal(a.get("submitted_occurrence"), b.get("submitted_occurrence"))),
               "same_clause": a.get("statement") == b.get("statement"),
               "readings": [other.get("reading", {}).get("reading"), report.get("reading", {}).get("reading")]}
     result["conclusion_transfers"] = result["same_pin_and_occurrence"] and result["same_clause"]
@@ -1323,8 +1457,8 @@ def run_case(case_dir, case, context):
         entry = catalogue.submit(number, step["submission"], data, step.get("provenance"), context["schemas"],
                                  context["pins"], fixture_trees)
         if "occurrence_equals_derived_of_step" in step:
-            other = catalogue.entries[step["occurrence_equals_derived_of_step"] - 1]
-            entry["occurrence_equals_derived_of_step"] = entry.get("submitted_occurrence") == other.get("derived_occurrence")
+            other = catalogue.entries[exact_int(step["occurrence_equals_derived_of_step"]) - 1]
+            entry["occurrence_equals_derived_of_step"] = json_equal(entry.get("submitted_occurrence"), other.get("derived_occurrence"))
     catalogue.finish(case_dir)
     for number, (step, entry) in enumerate(zip(steps, catalogue.entries), 1):
         compare(step["expect"], entry, "step %d" % number, differences)
@@ -1359,8 +1493,10 @@ The three kinds of check (README.md, "Three kinds of check")
   the kind that refused it, and the later kinds are "not reached".
 
 Pins
-  A pin is a full 40-character commit ID. The files of a pin are read from the tree that the fixture
-  carries for it, else from a --checkout given for it, else from --git-dir. A Git directory is read
+  A pin is a full 40-character commit ID. The files of a pin are read, for the 40-zero synthetic
+  pin only, from the tree that the fixture carries for it (a fixture tree for any other pin is
+  refused as unsupported), else from a --checkout given for it, else from --git-dir. A Git
+  directory is read
   with git rev-parse, git ls-tree and git cat-file only. A pin that none of them holds is reported
   as unsupported.
 
@@ -1417,9 +1553,10 @@ Schema keywords
   and description are annotations. A schema with any other keyword, or with another form of these,
   is refused as unsupported before any case runs. A pattern is ECMA-262 restricted to literals,
   character classes, \\d, groups, alternation, the quantifiers ? * + {n} {n,} {n,m} and the anchors
-  ^ and $, and is searched for, not anchored; other pattern syntax is refused. A number with a zero
-  fractional part is an integer, equality is JSON equality, minLength counts code points, and a
-  document with a duplicate object member is unparseable.
+  ^ and $, and is searched for, not anchored; other pattern syntax is refused. Numbers are parsed
+  as exact decimal values (no binary floating-point rounding): a number is an integer only when its
+  exact fractional part is zero, equality is exact JSON equality, minLength counts code points, and
+  a document with a duplicate object member is unparseable.
 
 Occurrences and anchors
   An occurrence is a block attribute line of an AsciiDoc file (a name ending in .adoc) whose
@@ -1427,12 +1564,16 @@ Occurrences and anchors
   verbatim, passthrough and comment blocks and outside plain table cells. The checker reads the
   block structure itself: delimited blocks to their first closing line, AsciiDoc table cells,
   paragraphs that a block attribute line ends, line comments and atx section titles. The anchor
-  derivation reads the line directly above the attribute line (first form), else the line directly
-  above the title of the section whose own body holds the item (second form). Where a file has a
-  construct that the checker does not read (an include or a conditional region, an unterminated
-  block, an underlined section title, an oft-sid that is single-quoted, holds an attribute
-  reference or stands in list item text, or an identifier written in a form that the anchor
-  derivation does not name), it reports the case as undecided instead of deciding it.
+  derivation reads the line directly above the attribute line within the same block or AsciiDoc
+  table cell (first form; never across a cell boundary), else the line directly above the section
+  title (level 1 or deeper, ==..====== / ##..######; a level-0 document title is not a section
+  title) whose own body holds the item (second form). Both version-1 and version-2 resolution use
+  the same .adoc file test. Where a file has a construct that the checker does not read (an
+  include, a conditional region, a single-line conditional other than [source,...] directly before
+  a ---- listing delimiter, an unterminated block, an underlined section title, an oft-sid that is
+  single-quoted, holds an attribute reference or stands in list item text, or an identifier written
+  in a form that the anchor derivation does not name, such as [id=x], [id="x"] or [#id.role]), it
+  reports the case as undecided instead of deciding it.
 
 Exit status
   0 every case is as stated; 1 a case differs; 2 an unsupported schema, pin or construct, a case
@@ -1531,8 +1672,7 @@ def main(argv=None):
                 print("  differs: %s" % d)
         print(report.get("stopped") or "summary: %s" % json.dumps(report["summary"]))
     else:
-        json.dump(report, sys.stdout, indent=1, ensure_ascii=False, sort_keys=True)
-        sys.stdout.write("\n")
+        sys.stdout.write(dump_json(report, indent=1) + "\n")
     return code
 
 

@@ -58,7 +58,7 @@ Shape is decided by the JSON Schema of the document's declared version.
 
 ## Resolution rules
 
-Resolution is decided by the specification files at the subject's own `spec_commit`, and any failure rejects the record. An *occurrence* of a requirement ID and revision is a block attribute line of an AsciiDoc file whose `oft-sid` attribute is exactly `<ID>~<revision>`; an attribute line in a verbatim, passthrough or comment block, or in a plain table cell, is not one.
+Resolution is decided by the specification files at the subject's own `spec_commit`, and any failure rejects the record. An *occurrence* of a requirement ID and revision is a block attribute line of an AsciiDoc file (a regular file whose path ends in `.adoc`) whose `oft-sid` attribute is exactly `<ID>~<revision>`; an attribute line in a verbatim, passthrough or comment block, or in a plain table cell, is not one.
 
 - **R1. A version-1 record** has no occurrence. The resolver looks for occurrences of its ID and revision at its `spec_commit`, in the files that R3 admits. Exactly one: the record is admitted, together with the occurrence that the resolver derived (kept by I3). More than one, or none: the submission is refused as *ambiguous* or *unresolvable* (kept by I4). Nothing is guessed.
 - **R2. A version-2 record** carries the occurrence, and the resolver checks each of its members by R3 to R6.
