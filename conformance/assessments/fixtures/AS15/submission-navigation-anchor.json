@@ -32,7 +32,7 @@
           "service_version": null
         },
         "actor_duty": "documentary fixture duty",
-        "contract_family": "classic_protocol",
+        "contract_family": "up_rust_seooc",
         "component_identities": [
           {
             "name": "fixture-component-a",
