@@ -69,7 +69,7 @@ Each rule of this chapter names the party that supplies what the rule needs:
 
 * the _translator_, which is its own code and its SOME/IP stack together: where the stack meets a duty, the duty is still the translator's, and the translator's released documentation says which part meets it;
 * the _author of a service contract_, for what the contract declares: the kind of each event, the identifier table, the payload slots, the failure representation of each method, the recipient bindings and the client identity agreement;
-* the _deployment_, for its endpoints, its discovery configuration and each premise that a rule calls declared.
+* the _deployment_, for its endpoints, its discovery configuration, its declarations of every route onto the translator's fixed service, and each premise that a rule calls declared.
 
 *Identity and authorization.*
 On the uProtocol side, the translator keeps the two access duties of the call items, as rows 3 and 18 of <<someip-call-allocation>> state.
@@ -81,6 +81,7 @@ A `token` or a `permission_level` is refused or lost as <<common-umessage-attrib
 
 *Routes onto the translator's fixed service.*
 Where a component forwards uProtocol messages to the translator on a route onto the fixed service that the translator translates, the route ends at that service, whose contract fixes the slots of its methods and events, and the translator is the uProtocol endpoint of each message on it ("Standing").
+As a deployment premise, the deployment declares to the translator every route that forwards uProtocol messages onto the translator's fixed service, so that the setup refusal below covers every such route and is not narrowed to whichever declarations happen to arrive; this premise selects no new API, transport mechanism or payload behaviour.
 A forwarding leg's duty to carry every attribute and payload unchanged (`+req~utransport-send-preserve-data~1+`, xref:README.adoc[Transport & Session Layer (uP-L1)], and xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]) holds up to the hand-over to the translator and makes no claim beyond it; across the conversion, <<common-umessage-attributes>> governs each field and payload state.
 The translator *MUST* refuse at setup, by name, a route onto its fixed service whose declaration either leaves its payload encoding identifiers unrestricted or names an encoding identifier that no slot of the service admits, or promises unchanged carriage beyond the translator of an attribute that <<common-umessage-attributes>> states as lost, not carried, absent, refused, supplied from context, or projected by the status rules of <<commstatus-error-mapping>> and <<commstatus-inbound>> in the direction in which the route carries it.
 An unrestricted opaque route onto the fixed service, which declares no limit on the encoding identifiers that it carries, is refused at setup under this rule.
