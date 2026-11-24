@@ -1,0 +1,77 @@
+{
+  "case": "AS9",
+  "subject": "v4 path with service_version null; an occurrence for which the resolver derives a non-null anchor, submitted with anchor null; an unversioned page with a non-null service_version",
+  "required_outcome": "Each rejected",
+  "decided_by": "Resolution",
+  "pins": {
+    "C": "fc32a01fe7ec772940c143bce4f0973896a9decb"
+  },
+  "steps": [
+    {
+      "submission": "submission-a.json",
+      "provenance": "documentary fixture producer; received first",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "fail",
+        "identity": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "service_version_mismatch"
+        ],
+        "kept": "not_stated_by_the_rules",
+        "derived_service_version": "usubscription/v4",
+        "located_line": 827,
+        "derived_anchor": null
+      }
+    },
+    {
+      "submission": "submission-b.json",
+      "provenance": "documentary fixture producer; received second",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "fail",
+        "identity": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "kept": "not_stated_by_the_rules",
+        "derived_anchor": "req-ssr-requirements-bind",
+        "anchor_form": "second",
+        "located_line": 72,
+        "derived_service_version": null
+      }
+    },
+    {
+      "submission": "submission-c.json",
+      "provenance": "documentary fixture producer; received third",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "fail",
+        "identity": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "service_version_mismatch"
+        ],
+        "kept": "not_stated_by_the_rules",
+        "derived_service_version": null,
+        "located_line": 132,
+        "derived_anchor": null
+      }
+    }
+  ],
+  "catalogue": {
+    "version_2_records": [],
+    "version_1_documents": [],
+    "kept_refused_submissions": [],
+    "no_ops": [],
+    "refused_keeping_not_stated": [
+      1,
+      2,
+      3
+    ]
+  }
+}

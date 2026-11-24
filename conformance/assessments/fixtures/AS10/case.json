@@ -1,0 +1,49 @@
+{
+  "case": "AS10",
+  "subject": "A version-1 record whose ID and revision occur once at its pin",
+  "required_outcome": "Passes the frozen schema; admitted; the derived occurrence is kept beside it; the submission is not rewritten",
+  "decided_by": "Shape, resolution",
+  "pins": {
+    "C": "fc32a01fe7ec772940c143bce4f0973896a9decb"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "provenance": "documentary fixture producer; received first",
+      "expect": {
+        "schema": "schema.json",
+        "shape": "pass",
+        "resolution": "pass",
+        "identity": "new",
+        "outcome": "admitted",
+        "reasons": [],
+        "kept": "version_1_document_with_derived_occurrence",
+        "occurrences": [
+          {
+            "source_path": "safety/assurance.adoc",
+            "ordinal": 1,
+            "line": 19
+          }
+        ],
+        "derived_occurrence": {
+          "source_path": "safety/assurance.adoc",
+          "ordinal": 1,
+          "anchor": "violation",
+          "service_version": null
+        },
+        "located_line": 19,
+        "anchor_form": "first",
+        "stored_bytes_unchanged": true
+      }
+    }
+  ],
+  "catalogue": {
+    "version_2_records": [],
+    "version_1_documents": [
+      1
+    ],
+    "kept_refused_submissions": [],
+    "no_ops": [],
+    "refused_keeping_not_stated": []
+  }
+}

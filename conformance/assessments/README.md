@@ -1,6 +1,6 @@
 # Conformance assessments
 
-This directory defines the successor documentary format for **separately identified conformance assessments**: the frozen version-1 schema [`schema.json`](schema.json), the version-2 schema [`schema.v2.json`](schema.v2.json) and the index [`index.json`](index.json). It also holds the written rules below.
+This directory defines the successor documentary format for **separately identified conformance assessments**: the frozen version-1 schema [`schema.json`](schema.json), the version-2 schema [`schema.v2.json`](schema.v2.json) and the index [`index.json`](index.json). It also holds the written rules below, the documentary fixtures AS1 to AS19 in [`fixtures/`](fixtures/), and their read-only checker [`check_assessments.py`](check_assessments.py).
 
 It accompanies the immutable historical intake catalogue in [`../README.md`](../README.md) (`../INPUT-MANIFEST.v2.json` and `../intake.v2.json`) without modifying any historical intake record, generator output, or unassessed status. All 31 files in the historical intake catalogue remain reproducible via `python3 -B generate.py --check` in `../`.
 
@@ -86,5 +86,17 @@ Identity and conflict are decided by the set of submissions already kept.
 - **I7. Equal subjects.** Two subjects are equal when their comparison forms are equal, the occurrence included. Subjects that differ only in occurrence are different subjects.
 - **I8. No-ops and conflicts.** The same identity with an equal comparison form is an idempotent no-op. The same identity with a different one is refused, and both submissions are kept with their provenance.
 - **I9. Corrections.** A correction is a new assessment revision that uses the existing `supersedes_or_revises` member; no new linking property is needed.
+
+## Fixtures and checker
+
+[`fixtures/`](fixtures/) holds the documentary cases AS1 to AS19, one directory each (`AS01` to `AS19`). Each case's `case.json` states its subject, its required outcome and the kind of check that decides it, and names the submissions, in the order received, with the outcome that the rules give each one. The submissions are documentary: none is a real assessment, and none qualifies a product.
+
+[`check_assessments.py`](check_assessments.py) applies the shape, resolution and import rules to the fixtures against the specification files at each fixture's pin, and reports each outcome. For example, from this directory of a clone that holds the fixtures' pins:
+
+```sh
+python3 -I -B check_assessments.py --git-dir ../../.git
+```
+
+It is read-only: it opens no file for writing, uses no network, imports no real assessment and qualifies nothing. Its `--help` describes its options, the layout of the fixtures and of the derived data that it reports, and the subset of JSON Schema that it implements.
 
 This non-normative documentary structure establishes no product conformance, safety qualification, or runtime guarantee.

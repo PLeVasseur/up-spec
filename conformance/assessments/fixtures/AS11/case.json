@@ -1,0 +1,70 @@
+{
+  "case": "AS11",
+  "subject": "The same identity twice, differing only in the order of component_identities; then differing in the order of the evidence list",
+  "required_outcome": "No-op; then refused with both kept",
+  "decided_by": "Identity",
+  "pins": {
+    "C": "fc32a01fe7ec772940c143bce4f0973896a9decb"
+  },
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "documentary fixture producer; received first",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "pass",
+        "identity": "new",
+        "outcome": "admitted",
+        "reasons": [],
+        "kept": "version_2_record",
+        "stored_bytes_unchanged": true,
+        "located_line": 159,
+        "derived_service_version": "usubscription/v4"
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "provenance": "documentary fixture producer; received second",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "pass",
+        "identity": "no-op",
+        "outcome": "no-op",
+        "reasons": [],
+        "kept": "not_again_no_op",
+        "same_as_step": 1
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "provenance": "documentary fixture producer; received third",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "pass",
+        "identity": "conflict",
+        "outcome": "refused",
+        "reasons": [
+          "conflict"
+        ],
+        "kept": "refused_submission_with_provenance",
+        "conflicts_with_step": 1
+      }
+    }
+  ],
+  "catalogue": {
+    "version_2_records": [
+      1
+    ],
+    "version_1_documents": [],
+    "kept_refused_submissions": [
+      3
+    ],
+    "no_ops": [
+      2
+    ],
+    "refused_keeping_not_stated": []
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "case": "AS14",
+  "subject": "source_path written with a leading ./",
+  "required_outcome": "Rejected: not the canonical spelling",
+  "decided_by": "Resolution",
+  "pins": {
+    "C": "fc32a01fe7ec772940c143bce4f0973896a9decb"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "provenance": "documentary fixture producer; received first",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "fail",
+        "identity": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "source_path_not_canonical"
+        ],
+        "kept": "not_stated_by_the_rules"
+      }
+    }
+  ],
+  "catalogue": {
+    "version_2_records": [],
+    "version_1_documents": [],
+    "kept_refused_submissions": [],
+    "no_ops": [],
+    "refused_keeping_not_stated": [
+      1
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "remote_subscribe_unsubscribe_timeout_seconds": 360,
+  "note": "Documentary fixture configuration: the configured request timeout of the remote Subscribe and Unsubscribe requests."
+}

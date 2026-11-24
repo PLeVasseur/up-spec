@@ -1,0 +1,48 @@
+{
+  "case": "AS1",
+  "subject": "A version-1 record: pin C, req~usubscription-remote-max-timeout, revision 1",
+  "required_outcome": "Passes the frozen schema; refused as ambiguous, since two occurrences exist at that pin",
+  "decided_by": "Shape, then resolution",
+  "pins": {
+    "C": "fc32a01fe7ec772940c143bce4f0973896a9decb"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "provenance": "documentary fixture producer; received first",
+      "expect": {
+        "schema": "schema.json",
+        "shape": "pass",
+        "resolution": "fail",
+        "identity": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "ambiguous"
+        ],
+        "kept": "refused_submission_with_reason",
+        "occurrences": [
+          {
+            "source_path": "up-l3/usubscription/v3/README.adoc",
+            "ordinal": 1,
+            "line": 462
+          },
+          {
+            "source_path": "up-l3/usubscription/v4/README.adoc",
+            "ordinal": 1,
+            "line": 827
+          }
+        ],
+        "stored_bytes_unchanged": true
+      }
+    }
+  ],
+  "catalogue": {
+    "version_2_records": [],
+    "version_1_documents": [],
+    "kept_refused_submissions": [
+      1
+    ],
+    "no_ops": [],
+    "refused_keeping_not_stated": []
+  }
+}

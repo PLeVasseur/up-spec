@@ -1,0 +1,6 @@
+{
+  "observation": "A response from the remote uSubscription service was observed six minutes (360 seconds) after its Subscribe request.",
+  "observed_response_delay_seconds": 360,
+  "configured_value": null,
+  "note": "Documentary fixture AS4: an observation, not a configuration, and not an assessment."
+}

@@ -1,0 +1,67 @@
+{
+  "case": "AS3",
+  "subject": "The same with the v4 path and usubscription/v4; configured timeout 360 seconds",
+  "required_outcome": "Resolves to the exactly-five-minutes clause; the configuration violates it. AS2's conclusion does not transfer.",
+  "decided_by": "Resolution",
+  "pins": {
+    "C": "fc32a01fe7ec772940c143bce4f0973896a9decb"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "provenance": "documentary fixture producer; received first",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "pass",
+        "identity": "new",
+        "outcome": "admitted",
+        "reasons": [],
+        "kept": "version_2_record",
+        "stored_bytes_unchanged": true,
+        "located_line": 827,
+        "anchor_form": null,
+        "derived_anchor": null,
+        "derived_service_version": "usubscription/v4",
+        "occurrences_in_file": 1
+      }
+    }
+  ],
+  "catalogue": {
+    "version_2_records": [
+      1
+    ],
+    "version_1_documents": [],
+    "kept_refused_submissions": [],
+    "no_ops": [],
+    "refused_keeping_not_stated": []
+  },
+  "reading": {
+    "step": 1,
+    "configuration": "configuration.json",
+    "member": "remote_subscribe_unsubscribe_timeout_seconds",
+    "clause": "Remote Subscribe/Unsubscribe requests *MUST* use a timeout of 5 minutes.",
+    "bound": {
+      "relation": "exactly",
+      "seconds": 300
+    },
+    "expect": {
+      "configuration_digest_matches": true,
+      "configured_value": 360,
+      "clause_as_expected": true,
+      "reading": "violates"
+    }
+  },
+  "contrast": {
+    "case": "AS2",
+    "expect": {
+      "same_pin_and_occurrence": false,
+      "same_clause": false,
+      "readings": [
+        "within",
+        "violates"
+      ],
+      "conclusion_transfers": false
+    }
+  }
+}

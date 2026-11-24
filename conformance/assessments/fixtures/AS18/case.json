@@ -1,0 +1,85 @@
+{
+  "case": "AS18",
+  "subject": "One assessment identity, first in a version-1 submission that is admitted, then in a version-2 submission that names the occurrence which the resolver had derived",
+  "required_outcome": "The comparison forms differ, because the second has the occurrence object. The second is refused as a conflict, and both are kept with their provenance. A correction is a new assessment revision.",
+  "decided_by": "Identity",
+  "pins": {
+    "C": "fc32a01fe7ec772940c143bce4f0973896a9decb"
+  },
+  "steps": [
+    {
+      "submission": "submission-v1.json",
+      "provenance": "documentary fixture producer; received first",
+      "expect": {
+        "schema": "schema.json",
+        "shape": "pass",
+        "resolution": "pass",
+        "identity": "new",
+        "outcome": "admitted",
+        "reasons": [],
+        "kept": "version_1_document_with_derived_occurrence",
+        "derived_occurrence": {
+          "source_path": "up-l3/usubscription/v4/README.adoc",
+          "ordinal": 1,
+          "anchor": null,
+          "service_version": "usubscription/v4"
+        },
+        "located_line": 103,
+        "stored_bytes_unchanged": true
+      }
+    },
+    {
+      "submission": "submission-v2.json",
+      "provenance": "documentary fixture producer; received second",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "pass",
+        "identity": "conflict",
+        "outcome": "refused",
+        "reasons": [
+          "conflict"
+        ],
+        "kept": "refused_submission_with_provenance",
+        "conflicts_with_step": 1,
+        "occurrence_equals_derived_of_step": true
+      },
+      "occurrence_equals_derived_of_step": 1
+    },
+    {
+      "submission": "submission-v2-revision-2.json",
+      "provenance": "documentary fixture producer; received third",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "pass",
+        "identity": "new",
+        "outcome": "admitted",
+        "reasons": [],
+        "kept": "version_2_record",
+        "stored_bytes_unchanged": true,
+        "located_line": 103,
+        "derived_service_version": "usubscription/v4",
+        "assessment_identity": [
+          "documentary fixture producer",
+          "fixture-AS18",
+          2
+        ]
+      }
+    }
+  ],
+  "catalogue": {
+    "version_2_records": [
+      3
+    ],
+    "version_1_documents": [
+      1
+    ],
+    "kept_refused_submissions": [
+      2
+    ],
+    "no_ops": [],
+    "refused_keeping_not_stated": []
+  },
+  "note": "Step 3 is the correction that the case names: a new assessment revision that revises revision 1 through supersedes_or_revises; it has an identity of its own."
+}

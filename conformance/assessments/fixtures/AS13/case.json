@@ -1,0 +1,37 @@
+{
+  "case": "AS13",
+  "subject": "A version-2 record that is valid against the schema and names a path that does not exist at the pin",
+  "required_outcome": "Passes shape; rejected by resolution. The schema is not asked to decide it.",
+  "decided_by": "Shape, resolution",
+  "pins": {
+    "R": "2290fdbf35418387d0b94ca72e250a3820f68ae5"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "provenance": "documentary fixture producer; received first",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "fail",
+        "identity": "not reached",
+        "outcome": "refused",
+        "reasons": [
+          "source_path_absent"
+        ],
+        "kept": "not_stated_by_the_rules",
+        "derived_service_version": null
+      }
+    }
+  ],
+  "catalogue": {
+    "version_2_records": [],
+    "version_1_documents": [],
+    "kept_refused_submissions": [],
+    "no_ops": [],
+    "refused_keeping_not_stated": [
+      1
+    ]
+  },
+  "note": "The path is the item's path at pin C (AS6). At the relocation pin R the file no longer exists, and nothing is inferred across pins."
+}

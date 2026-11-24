@@ -1,0 +1,61 @@
+{
+  "case": "AS19",
+  "subject": "An anchor written [[id,Some text]]; an item that is the only item of a section's own body while a subsection holds another item",
+  "required_outcome": "The value is id. The subsection does not count, so the second form applies if the item is also the first block.",
+  "decided_by": "Resolution",
+  "pins": {
+    "S": "0000000000000000000000000000000000000000"
+  },
+  "steps": [
+    {
+      "submission": "submission-second-form.json",
+      "provenance": "documentary fixture producer; received first",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "pass",
+        "identity": "new",
+        "outcome": "admitted",
+        "reasons": [],
+        "kept": "version_2_record",
+        "stored_bytes_unchanged": true,
+        "located_line": 6,
+        "anchor_form": "second",
+        "derived_anchor": "as19-section",
+        "derived_service_version": null
+      }
+    },
+    {
+      "submission": "submission-first-form.json",
+      "provenance": "documentary fixture producer; received second",
+      "expect": {
+        "schema": "schema.v2.json",
+        "shape": "pass",
+        "resolution": "pass",
+        "identity": "new",
+        "outcome": "admitted",
+        "reasons": [],
+        "kept": "version_2_record",
+        "stored_bytes_unchanged": true,
+        "located_line": 23,
+        "anchor_form": "first",
+        "derived_anchor": "as19-item",
+        "derived_service_version": null
+      }
+    }
+  ],
+  "catalogue": {
+    "version_2_records": [
+      1,
+      2
+    ],
+    "version_1_documents": [],
+    "kept_refused_submissions": [],
+    "no_ops": [],
+    "refused_keeping_not_stated": []
+  },
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "note": "The pin S is 40 zeros and names no commit: the fixture carries its tree in tree.json, so that the repository holds no AsciiDoc file with these synthetic items. Step 1 is decided by the second form, step 2 by the first."
+}

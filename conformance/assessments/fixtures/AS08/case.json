@@ -1,0 +1,29 @@
+{
+  "case": "AS8",
+  "subject": "The index after adoption",
+  "required_outcome": "schema_version 2, records empty, 787 slots unassessed; schema.json unchanged",
+  "decided_by": "Shape",
+  "pins": {
+    "C": "fc32a01fe7ec772940c143bce4f0973896a9decb"
+  },
+  "catalogue": {
+    "version_2_records": [],
+    "version_1_documents": [],
+    "kept_refused_submissions": [],
+    "no_ops": [],
+    "refused_keeping_not_stated": []
+  },
+  "index": {
+    "schema_json_pin": "fc32a01fe7ec772940c143bce4f0973896a9decb",
+    "expect": {
+      "schema": "schema.v2.json",
+      "shape": "pass",
+      "schema_version": 2,
+      "records": 0,
+      "unassessed_slots": 787,
+      "schema_json_sha256": "4aa6945915406868bb89f816f15ca2ce0e5b21e705ea41f372c01e8e523c22dc",
+      "schema_json_equals_pin": true
+    }
+  },
+  "note": "The case checks index.json itself, and compares schema.json byte for byte with its blob at pin C."
+}

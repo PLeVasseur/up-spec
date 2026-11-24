@@ -1,0 +1,31 @@
+{
+  "case": "AS4",
+  "subject": "A response observed six minutes late, with no configured value known",
+  "required_outcome": "Proves no configuration; decides neither AS2 nor AS3",
+  "decided_by": "—",
+  "pins": {
+    "C": "fc32a01fe7ec772940c143bce4f0973896a9decb"
+  },
+  "catalogue": {
+    "version_2_records": [],
+    "version_1_documents": [],
+    "kept_refused_submissions": [],
+    "no_ops": [],
+    "refused_keeping_not_stated": []
+  },
+  "observation": {
+    "file": "observation.json",
+    "against": [
+      "AS2",
+      "AS3"
+    ],
+    "expect": {
+      "configured_value": null,
+      "decided_by": [],
+      "decides": {
+        "AS2": "nothing: no configured value is known",
+        "AS3": "nothing: no configured value is known"
+      }
+    }
+  }
+}
