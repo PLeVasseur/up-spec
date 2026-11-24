@@ -705,6 +705,7 @@ class Scan:
             raw.pop()
         self.lines = [line.rstrip(" \t\r\n\f\v\0") for line in raw]
         self.kinds = {}
+        self.comment_lines = set()
         self.titles = []
         self.occurrences = []
         self.inert = []
@@ -758,6 +759,7 @@ class Scan:
     def parse(self, items, ctx):
         para = None
         style = None
+        head_lines = []
         i = 0
         n = len(items)
         while i < n:
@@ -766,6 +768,7 @@ class Scan:
                 self.mark(no, ctx, "blank")
                 para = None
                 style = None
+                head_lines = []
                 i += 1
                 continue
             if DIRECTIVE.fullmatch(line):
@@ -789,6 +792,13 @@ class Scan:
                 self.mark(no, ctx, "delimiter")
                 if j < n:
                     self.mark(items[j][0], ctx, "delimiter")
+                if kind == "comment" or (kind == "open" and style == "comment"):
+                    self.comment_lines.update(head_lines)
+                    self.comment_lines.add(no)
+                    for no2, _ in inner:
+                        self.comment_lines.add(no2)
+                    if j < n:
+                        self.comment_lines.add(items[j][0])
                 verbatim = (kind in VERBATIM_BLOCKS or (kind == "open" and style in VERBATIM_STYLES)
                             or (kind == "quote" and style == "verse"))
                 if verbatim:
@@ -804,12 +814,16 @@ class Scan:
                     self.parse(inner, "cell" if ctx == "cell" else "block")
                 para = None
                 style = None
+                head_lines = []
                 i = j + 1
                 continue
             if ATTRIBUTE_LINE.fullmatch(line):
                 before = para
+                if before is not None:
+                    head_lines = []
                 para = None
                 self.mark(no, ctx, "head")
+                head_lines.append(no)
                 if "oft-sid" in line:
                     self.item(items, i, ctx, before)
                 s = block_style(line)
@@ -820,12 +834,14 @@ class Scan:
             if para is None:
                 if BLOCK_TITLE.fullmatch(line):
                     self.mark(no, ctx, "head")
+                    head_lines.append(no)
                     i += 1
                     continue
                 m = SECTION_TITLE.fullmatch(line)
                 if m and ctx == "top" and self.discrete(items, i):
                     self.mark(no, ctx, "discrete_heading")
                     style = None
+                    head_lines = []
                     i += 1
                     continue
                 if m and ctx == "top":
@@ -833,6 +849,7 @@ class Scan:
                     self.titles.append(Title(no, len(m.group(1)) - 1, m.group(2), above))
                     self.mark(no, ctx, "title")
                     style = None
+                    head_lines = []
                     i += 1
                     continue
                 if m:
@@ -844,6 +861,7 @@ class Scan:
                 if BREAK.fullmatch(line):
                     self.mark(no, ctx, "break")
                     style = None
+                    head_lines = []
                     i += 1
                     continue
                 if i + 1 < n and items[i + 1][0] == no + 1 and setext(line, items[i + 1][1]):
@@ -852,22 +870,31 @@ class Scan:
                 self.mark(no, ctx, "continuation")
                 para = None
                 style = None
+                head_lines = []
                 i += 1
                 continue
             if "oft-sid" in line:
                 self.inert.append((no, "in_list_item_text" if para == "list" else "mention"))
             if para is None:
-                if style in VERBATIM_STYLES or (line[0] in " \t" and not LIST_ITEM.match(line)):
+                if style == "comment" and not LIST_ITEM.match(line) and not BLOCK_MACRO.fullmatch(line):
+                    self.comment_lines.update(head_lines)
+                    self.comment_lines.add(no)
+                    para = "comment_para"
+                elif (style in VERBATIM_STYLES and style != "comment") or (line[0] in " \t" and not LIST_ITEM.match(line)):
                     para = "verbatim"
                 elif LIST_ITEM.match(line):
                     para = "list"
                 elif BLOCK_MACRO.fullmatch(line):
                     self.mark(no, ctx, "macro")
                     style = None
+                    head_lines = []
                     i += 1
                     continue
                 else:
                     para = "paragraph"
+                head_lines = []
+            elif para == "comment_para":
+                self.comment_lines.add(no)
             self.mark(no, ctx, "text")
             style = None
             i += 1
@@ -948,7 +975,7 @@ class Scan:
             flags.append("attribute_reference")
         if before == "list":
             flags.append("attribute_line_in_list_item")
-        if before == "verbatim":
+        if before in ("verbatim", "comment_para"):
             flags.append("in_verbatim_paragraph")
         if no in self.conditional:
             flags.append("conditional")
@@ -994,7 +1021,7 @@ class Scan:
                        and (e == t or not (delimiter(items[e][1]) or ATTRIBUTE_LINE.fullmatch(items[e][1])))):
                     e += 1
                 statement = items[t:e]
-        if (entries is not None and before not in ("list", "verbatim")
+        if (entries is not None and before not in ("list", "verbatim", "comment_para")
                 and (target_kind == "delimited:comment"
                      or (head_style == "comment" and target_kind in ("delimited:open", "paragraph")))):
             self.inert.append((no, "in_comment"))
@@ -1066,9 +1093,7 @@ def derive_anchor(scan, occ):
         ctx, kind = scan.kinds.get(no, (None, None))
         if kind == "directive":
             raise Undecided("a preprocessor directive stands between the section title and the item")
-        if kind in ("blank", "comment", "attribute_entry"):
-            continue
-        if kind in ("delimiter", "verbatim") and comment_block_between(scan, no):
+        if kind in ("blank", "comment", "attribute_entry") or no in scan.comment_lines:
             continue
         return None, None
     later = [t for t in scan.titles if t.line > title.line]
@@ -1079,16 +1104,6 @@ def derive_anchor(scan, occ):
     if len(body) != 1:
         return None, None
     return value, "second"
-
-
-def comment_block_between(scan, no):
-    ctx, kind = scan.kinds.get(no, (None, None))
-    if kind == "delimiter":
-        return scan.lines[no - 1].startswith("////")
-    k = no
-    while k > 0 and scan.kinds.get(k, (None, None))[1] == "verbatim":
-        k -= 1
-    return k > 0 and scan.lines[k - 1].startswith("////")
 
 
 def service_version_of(path):
