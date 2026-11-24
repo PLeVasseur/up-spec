@@ -458,6 +458,18 @@ def setext(line1, line2):
     return bool(SETEXT_TITLE.fullmatch(line1)) and abs(len(line1) - len(line2)) < 2
 
 
+def cell_lstrip(content):
+    out = list(content)
+    while out:
+        no, text = out[0]
+        text = text.lstrip(" \t\r\n\f\v\0")
+        if text:
+            out[0] = (no, text)
+            break
+        out.pop(0)
+    return out
+
+
 def column_styles(head):
     m = re.search(r"(?:^|[\[,])\s*cols\s*=\s*(\"[^\"]*\"|'[^']*'|[^,\]]*)", head)
     if not m:
@@ -676,13 +688,15 @@ class Scan:
                         content = seg[:m.start()]
                 if current is not None and (start > 0 or content != ""):
                     current[1].append((no, content))
-                current = [style, []]
+                current = [style, [], no]
                 cells.append(current)
                 start = p + 1
             if text[start:] != "":
                 current[1].append((no, text[start:]))
-        for style, content in cells:
+        for style, content, opened in cells:
             if style == "a":
+                if content and content[0][0] == opened:
+                    content = cell_lstrip(content)
                 self.parse(content, "cell")
                 continue
             for no, text in content:
