@@ -259,7 +259,7 @@ When a client calls the `Subscribe()` operation for a topic that it is already s
 When a client calls the `Subscribe()` operation for a topic that it is already subscribed to where the `expiration` field value differs from the current expiration time and lies in the past, uSubscription service *MUST* unregister the subscription and set xref:subscription-status[SubscriptionStatus] `UNSUBSCRIBED`.
 --
 
-[.specitem,oft-sid="req~usubscription-subscribe-remote~1",oft-needs="impl,utest",oft-tags="uSubscription"]
+[.specitem,oft-sid="req~usubscription-subscribe-remote~2",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
 When a client makes the first call to `Subscribe()` to a xref:local-remote-subscriptions[remote] topic, uSubscription service *MUST* establish a remote subscription to that topic by sending a `Subscribe()` request to the uSubscription service running on the host indicated by the remote topic _authority_. 
 --
