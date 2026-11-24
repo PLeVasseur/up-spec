@@ -15,6 +15,8 @@ ASSERTIONS = ("type", "properties", "required", "additionalProperties", "const",
               "then", "minimum", "minItems", "maxItems", "uniqueItems")
 JSON_TYPES = ("null", "boolean", "object", "array", "number", "string", "integer")
 SCHEMA_FILES = {1: "schema.json", 2: "schema.v2.json"}
+MAX_REF_DEPTH = 64
+MAX_SCHEMA_DEPTH = 128
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 DELIMITERS = {"----": "listing", "....": "literal", "====": "example", "****": "sidebar",
@@ -362,7 +364,10 @@ def translate_pattern(pattern):
             i += 1
     if depth:
         raise Unsupported("an unbalanced (")
-    return re.compile("".join(out))
+    try:
+        return re.compile("".join(out))
+    except re.error as exc:
+        raise Unsupported("an invalid pattern: %s" % exc)
 
 
 class Schema:
@@ -379,53 +384,80 @@ class Schema:
             raise Unsupported("%s: the schema is not an object" % name)
         if self.root.get("$schema") != DIALECT:
             raise Unsupported("%s: $schema is not %s" % (name, DIALECT))
-        self.audit(self.root, "#", True)
+        if "$defs" in self.root and not isinstance(self.root["$defs"], dict):
+            self.fail("#/$defs", "$defs that is not an object")
+        self.audit(self.root, "#", True, 0)
         self.check_ref_cycles()
 
-    def collect_refs(self, schema, out):
-        if "$ref" in schema:
-            out.append(schema["$ref"][8:])
-        for sub in schema.get("properties", {}).values():
-            self.collect_refs(sub, out)
-        for key in ("items", "not", "if", "then"):
-            if key in schema:
-                self.collect_refs(schema[key], out)
-        for key in ("oneOf", "allOf"):
-            for sub in schema.get(key, []):
-                self.collect_refs(sub, out)
+    def collect_refs(self, schema):
+        out = []
+        stack = [schema]
+        while stack:
+            cur = stack.pop()
+            if "$ref" in cur:
+                out.append(cur["$ref"][8:])
+            for sub in cur.get("properties", {}).values():
+                stack.append(sub)
+            for key in ("items", "not", "if", "then"):
+                if key in cur:
+                    stack.append(cur[key])
+            for key in ("oneOf", "allOf"):
+                for sub in cur.get(key, []):
+                    stack.append(sub)
+        return out
 
     def check_ref_cycles(self):
         defs = self.root.get("$defs", {})
-        edges = {}
-        for name, sub in defs.items():
-            refs = []
-            self.collect_refs(sub, refs)
-            edges[name] = refs
+        edges = {name: self.collect_refs(sub) for name, sub in defs.items()}
         state = {}
-        path = []
-
-        def visit(name):
-            state[name] = 1
-            path.append(name)
-            for target in edges.get(name, []):
-                st = state.get(target, 0)
-                if st == 1:
-                    idx = path.index(target)
-                    cycle = " -> ".join(path[idx:] + [target])
-                    self.fail("#/$defs/" + pointer(target), "a cyclic $ref (%s)" % cycle)
-                if st == 0:
-                    visit(target)
-            path.pop()
-            state[name] = 2
-
+        depth = {}
+        for start in sorted(defs):
+            if state.get(start, 0) != 0:
+                continue
+            state[start] = 1
+            path = [start]
+            stack = [[start, 0]]
+            while stack:
+                frame = stack[-1]
+                node = frame[0]
+                targets = edges.get(node, [])
+                if frame[1] < len(targets):
+                    target = targets[frame[1]]
+                    frame[1] += 1
+                    st = state.get(target, 0)
+                    if st == 1:
+                        idx = path.index(target)
+                        cyc = path[idx:] + [target]
+                        if len(cyc) <= 12:
+                            desc = " -> ".join(cyc)
+                        else:
+                            desc = "%s -> %s -> ... -> %s (%d nodes)" % (cyc[0], cyc[1], cyc[-1], len(cyc) - 1)
+                        self.fail("#/$defs/" + pointer(target), "a cyclic $ref (%s)" % desc)
+                    if st == 0:
+                        state[target] = 1
+                        path.append(target)
+                        stack.append([target, 0])
+                else:
+                    stack.pop()
+                    path.pop()
+                    state[node] = 2
+                    depth[node] = 0 if not targets else 1 + max(depth[t] for t in targets)
         for name in sorted(defs):
-            if state.get(name, 0) == 0:
-                visit(name)
+            if depth[name] > MAX_REF_DEPTH:
+                self.fail("#/$defs/" + pointer(name),
+                          "local $ref chain depth %d exceeds the supported bound of %d" % (depth[name], MAX_REF_DEPTH))
+        root_refs = self.collect_refs(self.root)
+        if root_refs:
+            root_depth = 1 + max(depth[t] for t in root_refs)
+            if root_depth > MAX_REF_DEPTH:
+                self.fail("#", "local $ref chain depth %d exceeds the supported bound of %d" % (root_depth, MAX_REF_DEPTH))
 
     def fail(self, where, what):
         raise Unsupported("%s: %s at %s" % (self.name, what, where))
 
-    def audit(self, schema, where, root=False):
+    def audit(self, schema, where, root=False, depth=0):
+        if depth > MAX_SCHEMA_DEPTH:
+            self.fail(where, "schema nesting depth exceeds the supported bound of %d" % MAX_SCHEMA_DEPTH)
         if not isinstance(schema, dict):
             self.fail(where, "a subschema that is not an object")
         for key, value in schema.items():
@@ -445,14 +477,14 @@ class Schema:
                 if not isinstance(value, dict):
                     self.fail(here, "%s that is not an object" % key)
                 for name, sub in value.items():
-                    self.audit(sub, here + "/" + pointer(name))
+                    self.audit(sub, here + "/" + pointer(name), False, depth + 1)
             elif key in ("items", "not", "if", "then"):
-                self.audit(value, here)
+                self.audit(value, here, False, depth + 1)
             elif key in ("oneOf", "allOf"):
                 if not isinstance(value, list) or not value:
                     self.fail(here, "%s that is not a non-empty array" % key)
                 for k, sub in enumerate(value):
-                    self.audit(sub, "%s/%d" % (here, k))
+                    self.audit(sub, "%s/%d" % (here, k), False, depth + 1)
             elif key == "type":
                 names = value if isinstance(value, list) else [value]
                 if not names or len(set(map(str, names))) != len(names) or any(n not in JSON_TYPES for n in names):
@@ -486,7 +518,8 @@ class Schema:
             elif key == "$ref":
                 if not isinstance(value, str) or not re.fullmatch(r"#/\$defs/[^/~]+", value):
                     self.fail(here, "a $ref other than #/$defs/<name>")
-                if value[8:] not in self.root.get("$defs", {}):
+                defs = self.root.get("$defs")
+                if not isinstance(defs, dict) or value[8:] not in defs:
                     self.fail(here, "a $ref to a missing definition")
 
     def validate(self, value):
@@ -1668,9 +1701,10 @@ Schema keywords
   schema.json and schema.v2.json use: type, properties, required, additionalProperties (true or
   false), const, enum, pattern, minLength, items (one schema), $ref (#/$defs/<name>) with $defs,
   oneOf, allOf, not, if with then, minimum, minItems, maxItems and uniqueItems; $schema, $id, title
-  and description are annotations. Local #/$defs/<name> references must be acyclic; a schema with
-  any other keyword, another form of these, or a cyclic $ref is refused as unsupported before any
-  case runs. A pattern is ECMA-262 restricted to literals,
+  and description are annotations. Local #/$defs/<name> references must be acyclic and within
+  supported chain depth (64) and schema nesting depth (128); a schema with any other keyword,
+  another form of these, non-object $defs, an invalid pattern, a cyclic $ref, or deeper graph
+  structure is refused as unsupported before any case runs. A pattern is ECMA-262 restricted to literals,
   character classes, \\d, groups, alternation, the quantifiers ? * + {n} {n,} {n,m} and the anchors
   ^ and $, and is searched for, not anchored; other pattern syntax is refused. Numbers are parsed
   as exact decimal values (no binary floating-point rounding): a number is an integer only when its
