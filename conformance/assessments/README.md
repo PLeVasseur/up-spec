@@ -1,12 +1,22 @@
 # Conformance assessments
 
-This directory defines the successor documentary format for **separately identified conformance assessments**: the frozen version-1 schema [`schema.json`](schema.json), the version-2 schema [`schema.v2.json`](schema.v2.json) and the index [`index.json`](index.json).
+This directory defines the successor documentary format for **separately identified conformance assessments**: the frozen version-1 schema [`schema.json`](schema.json), the version-2 schema [`schema.v2.json`](schema.v2.json) and the index [`index.json`](index.json). It also holds the written rules below.
 
 It accompanies the immutable historical intake catalogue in [`../README.md`](../README.md) (`../INPUT-MANIFEST.v2.json` and `../intake.v2.json`) without modifying any historical intake record, generator output, or unassessed status. All 31 files in the historical intake catalogue remain reproducible via `python3 -B generate.py --check` in `../`.
 
 ## Current state
 
 [`index.json`](index.json) declares `schema_version` 2, is validated by [`schema.v2.json`](schema.v2.json), and currently holds `records: []`: **zero assessments have been ingested or claimed**. The historical intake counts referenced for provenance (`504` obligations, `271` historical follow-ups, `12` observation cases, and `90` pending destinations from `84` entries) are overlapping documentary categories, not additive completion denominators, and all `787` historical implementation/evidence slots remain unassessed.
+
+## Three kinds of check
+
+A JSON Schema checks the shape of one document. It cannot read a file at a commit, compare two submissions or keep a refused one. So three kinds of check are kept apart, and each rule below belongs to exactly one of them:
+
+| Kind | What decides | Where it is written |
+|---|---|---|
+| Shape | The JSON Schema of the document's declared version | [`schema.json`](schema.json) (version 1, unchanged) and [`schema.v2.json`](schema.v2.json) (version 2), selected by the [shape rules](#shape-rules) |
+| Resolution | The specification files at the subject's own `spec_commit` | The [resolution rules](#resolution-rules) |
+| Identity and conflict | The set of submissions already kept | The [import rules](#import-rules) |
 
 ## Design rules
 
@@ -45,5 +55,36 @@ Shape is decided by the JSON Schema of the document's declared version.
   - `ordinal`: a positive integer;
   - `anchor`: a string or `null`;
   - `service_version`: a string or `null`.
+
+## Resolution rules
+
+Resolution is decided by the specification files at the subject's own `spec_commit`, and any failure rejects the record. An *occurrence* of a requirement ID and revision is a block attribute line of an AsciiDoc file whose `oft-sid` attribute is exactly `<ID>~<revision>`; an attribute line in a verbatim, passthrough or comment block, or in a plain table cell, is not one.
+
+- **R1. A version-1 record** has no occurrence. The resolver looks for occurrences of its ID and revision at its `spec_commit`, in the files that R3 admits. Exactly one: the record is admitted, together with the occurrence that the resolver derived (kept by I3). More than one, or none: the submission is refused as *ambiguous* or *unresolvable* (kept by I4). Nothing is guessed.
+- **R2. A version-2 record** carries the occurrence, and the resolver checks each of its members by R3 to R6.
+- **R3. `source_path`** is the file's path relative to the repository root at `spec_commit`: forward slashes, no leading slash, and no empty, `.` or `..` segment, compared by exact characters. A path in another form is rejected, so that one occurrence has one accepted spelling. The file exists at that pin and is not under `conformance/`.
+- **R4. `ordinal`** is the position of the occurrence among the occurrences of the exact `oft-sid` for that ID and revision in that file, in document order, counted from 1. That occurrence exists.
+- **R5. `anchor`** equals the anchor that the resolver derives for that occurrence, and is `null` exactly when the resolver derives none. The derivation reads explicit anchors only, written `[[id]]`, `[[id,text]]` or `[#id]`, and the value is the bare `id`; an identifier that a renderer generates for a heading is not one.
+  - *First form:* an explicit anchor on the line directly above the item's attribute line.
+  - *Second form, otherwise:* an explicit anchor directly above the title of a section in which this item is the first block and the only item. A section here is its own body, from its title to the next title of any level, without its subsections.
+  - *Otherwise none.* So an item in a table cell, one of several items under one anchored heading, an item that follows a NOTE or a paragraph in its section, and an item whose attribute line stands directly above a section title each have none, unless the first form applies. An anchor that only serves navigation is not a second accepted spelling.
+- **R6. `service_version`** equals `<service>/v<N>` exactly when `source_path` begins with `up-l3/<service>/v<N>/`, and is `null` otherwise.
+- **R7. Nothing is inferred across pins.** An item that moved has one path at an old pin and another at a new one, and each record uses the path at its own pin.
+
+`anchor` and `service_version` corroborate the occurrence and add no identity beyond pin, path, ID, revision and ordinal: because each must equal exactly what the resolver derives, `null` included, two accepted subjects never differ in them alone.
+
+## Import rules
+
+Identity and conflict are decided by the set of submissions already kept.
+
+- **I1. Identity.** Producer (`producer_authority`), `assessment_id` and `assessment_revision` stay the immutable identity of an assessment.
+- **I2. The producer's bytes.** A stored submission is the producer's bytes. Normalization produces a comparison form only: it never rewrites a submission, and no historical identity changes.
+- **I3. Version-1 documents and version-2 records stay apart.** A kept version-1 submission is a document of its own. The occurrence that the resolver derived for an admitted version-1 record (R1) is derived data, kept beside that submission. Neither is an element of a version-2 index's `records`, and `schema.v2.json` defines no legacy form of a record.
+- **I4. Refused version-1 submissions.** A version-1 submission refused as ambiguous or unresolvable (R1) is kept as a refused submission, with that reason.
+- **I5. The comparison form** of a record is its JSON with object keys sorted, UTF-8, no insignificant whitespace, and arrays in the order submitted, with two exceptions: `subject.component_identities` and `subject.selected_functions` are sets, and in the comparison form their elements stand in the order of their own comparison forms, compared as byte strings. Every other array is a sequence, and its order is part of the content.
+- **I6. Duplicate components.** A `component_identities` array with two equal elements is rejected.
+- **I7. Equal subjects.** Two subjects are equal when their comparison forms are equal, the occurrence included. Subjects that differ only in occurrence are different subjects.
+- **I8. No-ops and conflicts.** The same identity with an equal comparison form is an idempotent no-op. The same identity with a different one is refused, and both submissions are kept with their provenance.
+- **I9. Corrections.** A correction is a new assessment revision that uses the existing `supersedes_or_revises` member; no new linking property is needed.
 
 This non-normative documentary structure establishes no product conformance, safety qualification, or runtime guarantee.
