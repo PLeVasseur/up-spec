@@ -435,7 +435,9 @@ xref:../basics/uri.adoc[`UUri`] is translated to SOME/IP attributes per <<uri-ma
 
 [.specitem,oft-sid="dsn~up-transport-someip-uri-mapping~1",oft-needs="impl,utest",oft-covers="req~up-transport-someip-service-translation~1",oft-tags="SomeIpTranslator"]
 --
-The translator *MUST* map each part of a UUri to and from the SOME/IP field that <<uri-mapping>> names for it, with each identifier value as <<someip-identifiers>> states it; a rule of that table or of its notes that has its own key word keeps it, and the translator is the actor of each rule of the table and of its notes that names no other actor.
+For each UUri and direction that <<common-umessage-attributes>> and <<uattribute-mapping>> map through this table (the service-side entity: the source of a Publish or Notification, the sink of an RpcRequest and the source of an RpcResponse), the translator *MUST* map its parts to and from the SOME/IP fields that <<uri-mapping>> names, with each identifier value as <<someip-identifiers>> states it and with `authority_name`, `ue_instance_id` and `ue_version_major` governed in each direction by <<common-umessage-attributes>>.
+UUris of other roles (a request's client-side source, a response's sink, a Notification's sink and a Publish's optional sink) are governed by <<common-umessage-attributes>>, <<someip-client-identity>> and <<uattribute-mapping>>, not by this table.
+The inherited notes on specific SOME/IP libraries (the *vsomeip* NOTE in the `authority_name` row, the library-override bullet of the `ue_version_major` row, and the `NOTES` list below the table) are non-normative implementation notes and state no duty of the translator.
 
 .UUri Mapping
 [[uri-mapping]]
@@ -1650,11 +1652,11 @@ The following section will elaborate only on the translation of *uSubscription* 
 The following section we will elaborate on how Eventgroup Entry types are mapped to xref:../up-l3/usubscription/v4/README.adoc[*uSubscription*] messages for the subscribe
 and unsubscribe flows.
 
-==== Common Fields
+==== Common Fields and Eventgroup Entry Mapping
 
 [.specitem,oft-sid="dsn~up-transport-someip-subscription-mapping~1",oft-needs="impl,utest",oft-covers="req~up-transport-someip-service-translation~1",oft-tags="SomeIpTranslator"]
 --
-The translator *MUST* map between each eventgroup entry type of SOME/IP-SD and the uSubscription message that <<eventgroup-entry-mapping>> pairs with it, with the common fields that <<common-field-mappings>> maps; a rule of these tables or of their notes that has its own key word keeps it, and the translator is the actor of each rule of the tables and of their notes that names no other actor.
+The translator *MUST* map between each eventgroup entry type of SOME/IP-SD and the uSubscription message that <<eventgroup-entry-mapping>> pairs with it, with the common fields that <<common-field-mappings>> maps and with each identifier value mapped directly by default or through the service contract's declared identifier table and its inverse (<<someip-identifiers>>); a rule of these tables or of their notes that has its own key word keeps it, the translator is the actor of each rule of the tables and of their notes that names no other actor, and the inherited notes on ECU firmware and underlying SOME/IP libraries are non-normative.
 
 <<common-field-mappings>> table below illustrates the common *SOME/IP-SD* EventGroup Entry fields that are present in all *SOME/IP-SD* Eventgroup entry types (`SubscribeEventgroup`, `SubscribeEventGroupAck`, `SubscribeEventgroupNack`, `StopSubscribeEventGroup`).
 
