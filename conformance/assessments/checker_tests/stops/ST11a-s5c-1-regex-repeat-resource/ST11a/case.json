@@ -1,0 +1,18 @@
+{
+  "case": "ST11a",
+  "subject": "Resource stop: regex-repeat-resource; clean unsupported before cases run",
+  "required_outcome": "Exit 2 unsupported",
+  "decided_by": "Checker resource support boundary",
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "provenance": "checker stop witness ST11a",
+      "expect": {
+        "outcome": "admitted"
+      }
+    }
+  ],
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  }
+}

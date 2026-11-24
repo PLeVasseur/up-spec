@@ -1,0 +1,7 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "unsupported:",
+  "expected_substring": "expanded schema traversal depth",
+  "assessments_dir": "assessments",
+  "before_repair_failure": "uncaught host resource exception; exit 1"
+}

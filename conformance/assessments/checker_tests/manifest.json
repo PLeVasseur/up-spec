@@ -42,6 +42,9 @@
     "ST08a-s5c-1-deep-acyclic-ref-1200",
     "ST08b-s5c-1-invalid-regex-pattern",
     "ST08c-s5c-1-non-object-defs",
-    "ST09-s5c-4-revision-1e1001"
+    "ST09-s5c-4-revision-1e1001",
+    "ST10-s5c-1-expanded-schema-depth",
+    "ST11a-s5c-1-regex-repeat-resource",
+    "ST11b-s5c-1-regex-group-resource"
   ]
 }

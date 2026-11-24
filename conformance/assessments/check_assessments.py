@@ -368,6 +368,8 @@ def translate_pattern(pattern):
         return re.compile("".join(out))
     except re.error as exc:
         raise Unsupported("an invalid pattern: %s" % exc)
+    except (OverflowError, RecursionError) as exc:
+        raise Unsupported("a pattern exceeds the host regex compiler's supported resources: %s" % exc)
 
 
 class Schema:
@@ -406,11 +408,30 @@ class Schema:
                     stack.append(sub)
         return out
 
+    def expanded_depth(self, schema, depths):
+        deepest = 0
+        stack = [(schema, 0)]
+        while stack:
+            cur, level = stack.pop()
+            deepest = max(deepest, level)
+            if "$ref" in cur:
+                deepest = max(deepest, level + 1 + depths[cur["$ref"][8:]])
+            for sub in cur.get("properties", {}).values():
+                stack.append((sub, level + 1))
+            for key in ("items", "not", "if", "then"):
+                if key in cur:
+                    stack.append((cur[key], level + 1))
+            for key in ("oneOf", "allOf"):
+                for sub in cur.get(key, []):
+                    stack.append((sub, level + 1))
+        return deepest
+
     def check_ref_cycles(self):
         defs = self.root.get("$defs", {})
         edges = {name: self.collect_refs(sub) for name, sub in defs.items()}
         state = {}
         depth = {}
+        expanded = {}
         for start in sorted(defs):
             if state.get(start, 0) != 0:
                 continue
@@ -442,6 +463,7 @@ class Schema:
                     path.pop()
                     state[node] = 2
                     depth[node] = 0 if not targets else 1 + max(depth[t] for t in targets)
+                    expanded[node] = self.expanded_depth(defs[node], expanded)
         for name in sorted(defs):
             if depth[name] > MAX_REF_DEPTH:
                 self.fail("#/$defs/" + pointer(name),
@@ -451,6 +473,13 @@ class Schema:
             root_depth = 1 + max(depth[t] for t in root_refs)
             if root_depth > MAX_REF_DEPTH:
                 self.fail("#", "local $ref chain depth %d exceeds the supported bound of %d" % (root_depth, MAX_REF_DEPTH))
+        for name, level in expanded.items():
+            if level > MAX_SCHEMA_DEPTH:
+                self.fail("#/$defs/" + pointer(name),
+                          "expanded schema traversal depth %d exceeds the supported bound of %d" % (level, MAX_SCHEMA_DEPTH))
+        root_expanded = self.expanded_depth(self.root, expanded)
+        if root_expanded > MAX_SCHEMA_DEPTH:
+            self.fail("#", "expanded schema traversal depth %d exceeds the supported bound of %d" % (root_expanded, MAX_SCHEMA_DEPTH))
 
     def fail(self, where, what):
         raise Unsupported("%s: %s at %s" % (self.name, what, where))
@@ -1730,9 +1759,12 @@ Schema keywords
   false), const, enum, pattern, minLength, items (one schema), $ref (#/$defs/<name>) with $defs,
   oneOf, allOf, not, if with then, minimum, minItems, maxItems and uniqueItems; $schema, $id, title
   and description are annotations. Local #/$defs/<name> references must be acyclic and within
-  supported chain depth (64) and schema nesting depth (128); a schema with any other keyword,
+  supported chain depth (64), schema nesting depth (128), and expanded traversal depth (128),
+  counting nested subschemas and reference steps together; a schema with any other keyword,
   another form of these, non-object $defs, an invalid pattern, a cyclic $ref, or deeper graph
-  structure is refused as unsupported before any case runs. A pattern is ECMA-262 restricted to literals,
+  structure is refused as unsupported before any case runs. Patterns exceeding the host regex
+  compiler's repetition or recursion resources also stop as unsupported before any case runs.
+  A pattern is ECMA-262 restricted to literals,
   character classes, \\d, groups, alternation, the quantifiers ? * + {n} {n,} {n,m} and the anchors
   ^ and $, and is searched for, not anchored; other pattern syntax is refused. Numbers are parsed
   as exact decimal values (no binary floating-point rounding): a number is an integer only when its
