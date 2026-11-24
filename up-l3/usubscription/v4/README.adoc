@@ -234,7 +234,7 @@ When a client calls the `Subscribe()` operation for a topic that it is already s
 `SUBSCRIBED` or `SUBSCRIBE_PENDING`
 ====
 
-[.specitem,oft-sid="req~usubscription-subscribe-no-expiration~1",oft-needs="impl,utest",oft-tags="uSubscription"]
+[.specitem,oft-sid="req~usubscription-subscribe-no-expiration~2",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
 When a subscription request does not specify an `expiration` time, uSubscription service *MUST* track the associated client-topic subscription until the subscription is canceled by the client.
 --
@@ -395,7 +395,7 @@ When sending an `Unsubscribe()` request to a remote uSubscription service, uSubs
 When a client calls the `Unsubscribe()` operation for a remote topic with xref:subscription-status[SubscriptionStatus] `SUBSCRIBE_PENDING`, uSubscription service *MUST* initiate the regular remote unsubscribe process, i.e. send an unsubscribe request to the remote uSubscription service and set xref:subscription-status[SubscriptionStatus] to `UNSUBSCRIBED`.
 --
 
-[.specitem,oft-sid="req~usubscription-unsubscribe-notifications~1",oft-needs="impl,utest",oft-tags="uSubscription"]
+[.specitem,oft-sid="req~usubscription-unsubscribe-notifications~2",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
 After a client calls the `Unsubscribe()` operation, uSubscription service *MUST* stop sending subscription change Notifications to that client whenever there are any changes to the state of the subscription.
 --
@@ -407,7 +407,7 @@ When the last client subscribed to a remote topic calls the `Unsubscribe()` oper
 For every uSubscription v4 service implementation, this item retires `+req~usubscription-remote-unsubscribe-notifications~1+`, which required uSubscription service to stop publishing subscription change messages for a remote topic to the xref:subscription-change-message-topic[subscription change message topic] once the last client subscribed to that topic had called `Unsubscribe()` on it.
 --
 
-NOTE: Publication on the subscription change message topic and the Notifications that `+req~usubscription-unsubscribe-notifications~1+` stops for the departing client are separate. That item concerns only the subscription that the client leaves; a client that leaves one subscription can still hold others.
+NOTE: Publication on the subscription change message topic and the Notifications that `+req~usubscription-unsubscribe-notifications~2+` stops for the departing client are separate. That item concerns only the subscription that the client leaves; a client that leaves one subscription can still hold others.
 
 .Unsubscribe operation
 ====
@@ -739,7 +739,7 @@ The uSubscription `RegisterForNotifications()` operation *MUST* implement an emp
 The uSubscription `RegisterForNotifications()` operation *MUST* implement an empty response message.
 --
 
-[.specitem,oft-sid="req~usubscription-register-notifications~1",oft-needs="impl,utest",oft-tags="uSubscription"]
+[.specitem,oft-sid="req~usubscription-register-notifications~2",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
 After a client has called `RegisterForNotifications()`, uSubscription service *MUST* send subscription change Notification messages to that client whenever subscription `status`, `expiration` time or `samplePeriod` of any subscription tracked by uSubscription service changes.
 --
@@ -856,7 +856,7 @@ The uSubscription `Reset()` operation *MUST* implement an empty request message.
 The uSubscription `Reset()` operation *MUST* implement an empty response message.
 --
 
-[.specitem,oft-sid="req~usubscription-reset~1",oft-needs="impl,utest",oft-tags="uSubscription"]
+[.specitem,oft-sid="req~usubscription-reset~2",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
 When a client invokes the uSubscription service's `Reset()` operation, uSubscription service *MUST* (in this order)
 
@@ -865,7 +865,7 @@ When a client invokes the uSubscription service's `Reset()` operation, uSubscrip
 3. send `Subscription` messages to each client subscribed to a topic or that has registered for notifications about a topic, with xref:subscription-status[SubscriptionStatus] `UNSUBSCRIBED`
 --
 
-[.specitem,oft-sid="req~usubscription-reset-only-usubscription~1",oft-needs="impl,utest",oft-tags="uSubscription"]
+[.specitem,oft-sid="req~usubscription-reset-only-usubscription~2",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
 When receiving a `Reset()` call from a source that is not another uSubscription services (i.e. from source URIs where uEntity type does not equal `0x0`), uSubscription service *MUST* return a failure status message with {ucode_proto_ref} `PermissionDenied`.
 --
@@ -910,7 +910,7 @@ sequenceDiagram
 
 Subscribe (and unsubscribe) to xref:local-remote-subscriptions[remote topics] are handled by RPC calls between uSubscription services running on the different devices. Given that networked connections are inherently undeterministic, the onus is on uSubscription service to ensure that a such command is received by its remote counterpart. Below are the common retry and timeout policies for uSubscription service implementations to follow.
 
-[.specitem,oft-sid="req~usubscription-remote-max-timeout~1",oft-needs="impl",oft-tags="uSubscription"]
+[.specitem,oft-sid="req~usubscription-remote-max-timeout~2",oft-needs="impl",oft-tags="uSubscription"]
 --
 Remote Subscribe/Unsubscribe requests *MUST* use a timeout of 5 minutes.
 --
