@@ -533,9 +533,9 @@ def attribute_entries(inner):
     entries = []
     i = 0
     n = len(inner)
-    named = re.compile(r"([\w][\w\-]*)[ ]*=[ ]*")
+    named = re.compile(r"([\w][\w\-]*)[ \t]*=[ \t]*")
     while True:
-        while i < n and inner[i] == " ":
+        while i < n and inner[i] in " \t":
             i += 1
         name = None
         m = named.match(inner, i)
@@ -556,7 +556,7 @@ def attribute_entries(inner):
             if i >= n:
                 raise ValueError("an unterminated quoted value")
             i += 1
-            while i < n and inner[i] == " ":
+            while i < n and inner[i] in " \t":
                 i += 1
             if i < n and inner[i] != ",":
                 raise ValueError("text after a quoted value")
@@ -565,7 +565,7 @@ def attribute_entries(inner):
             j = inner.find(",", i)
             if j < 0:
                 j = n
-            entries.append((name, inner[i:j].rstrip(" "), None))
+            entries.append((name, inner[i:j].rstrip(" \t"), None))
             i = j
         if i >= n:
             return entries
@@ -1643,7 +1643,8 @@ Occurrences and anchors
   oft-sid attribute has exactly the value <requirement_id>~<requirement_revision>, outside
   verbatim, passthrough and comment blocks (including comment-styled open blocks and paragraphs
   headed by [comment] or [comment.specitem,...], and //// targets) and outside plain table cells.
-  The checker reads the
+  Block attribute lists accept ASCII spaces and horizontal tabs around commas, =, and entry
+  boundaries. The checker reads the
   block structure itself: delimited blocks to their first closing line, AsciiDoc table cells,
   paragraphs that a block attribute line ends, line comments and atx section titles. The anchor
   derivation reads the line directly above the attribute line within the same block or AsciiDoc
