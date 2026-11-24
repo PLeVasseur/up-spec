@@ -380,6 +380,47 @@ class Schema:
         if self.root.get("$schema") != DIALECT:
             raise Unsupported("%s: $schema is not %s" % (name, DIALECT))
         self.audit(self.root, "#", True)
+        self.check_ref_cycles()
+
+    def collect_refs(self, schema, out):
+        if "$ref" in schema:
+            out.append(schema["$ref"][8:])
+        for sub in schema.get("properties", {}).values():
+            self.collect_refs(sub, out)
+        for key in ("items", "not", "if", "then"):
+            if key in schema:
+                self.collect_refs(schema[key], out)
+        for key in ("oneOf", "allOf"):
+            for sub in schema.get(key, []):
+                self.collect_refs(sub, out)
+
+    def check_ref_cycles(self):
+        defs = self.root.get("$defs", {})
+        edges = {}
+        for name, sub in defs.items():
+            refs = []
+            self.collect_refs(sub, refs)
+            edges[name] = refs
+        state = {}
+        path = []
+
+        def visit(name):
+            state[name] = 1
+            path.append(name)
+            for target in edges.get(name, []):
+                st = state.get(target, 0)
+                if st == 1:
+                    idx = path.index(target)
+                    cycle = " -> ".join(path[idx:] + [target])
+                    self.fail("#/$defs/" + pointer(target), "a cyclic $ref (%s)" % cycle)
+                if st == 0:
+                    visit(target)
+            path.pop()
+            state[name] = 2
+
+        for name in sorted(defs):
+            if state.get(name, 0) == 0:
+                visit(name)
 
     def fail(self, where, what):
         raise Unsupported("%s: %s at %s" % (self.name, what, where))
@@ -1627,8 +1668,9 @@ Schema keywords
   schema.json and schema.v2.json use: type, properties, required, additionalProperties (true or
   false), const, enum, pattern, minLength, items (one schema), $ref (#/$defs/<name>) with $defs,
   oneOf, allOf, not, if with then, minimum, minItems, maxItems and uniqueItems; $schema, $id, title
-  and description are annotations. A schema with any other keyword, or with another form of these,
-  is refused as unsupported before any case runs. A pattern is ECMA-262 restricted to literals,
+  and description are annotations. Local #/$defs/<name> references must be acyclic; a schema with
+  any other keyword, another form of these, or a cyclic $ref is refused as unsupported before any
+  case runs. A pattern is ECMA-262 restricted to literals,
   character classes, \\d, groups, alternation, the quantifiers ? * + {n} {n,} {n,m} and the anchors
   ^ and $, and is searched for, not anchored; other pattern syntax is refused. Numbers are parsed
   as exact decimal values (no binary floating-point rounding): a number is an integer only when its
