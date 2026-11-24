@@ -1145,7 +1145,8 @@ The form stays `RESPONSE` whichever type a stack would choose for the same cause
 *The optional expiry reply.*
 When a stock client's request gets no uProtocol answer within the supplied TTL, the default is silence: the stock client's own response timeout ends its call, and that indication is local to the client.
 `E_TIMEOUT` is never sent.
-A contract may declare an expiry code for a method: an interface-specific code or `E_NOT_OK`, and never `0x00`, a code that the profile keeps off the wire, or a reserved one.
+A contract may declare an expiry code for a method: an interface-specific code (`0x20` to `0x3F`) or `E_NOT_OK` (`0x01`), and never `0x00`, a code that the profile keeps off the wire (such as `E_TIMEOUT` `0x06`), or a reserved or unassigned code (<<someip-return-codes>>).
+The translator *MUST* refuse at setup, by name, a contract that declares an expiry code outside that permitted set.
 The declaration is complete with that code, because the reply is a generated reply in the form above, with its fields copied from the entry; no body source exists for a modelled error at expiry, so none can be declared, and the translator *MUST* refuse at setup, by name, a contract that declares an expiry body.
 A uProtocol answer that arrives after the release is refused with `UCode.NotFound` and counted (row RV11 of <<someip-entry>>).
 
