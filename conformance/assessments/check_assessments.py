@@ -1737,10 +1737,13 @@ Schema keywords
   ^ and $, and is searched for, not anchored; other pattern syntax is refused. Numbers are parsed
   as exact decimal values (no binary floating-point rounding): a number is an integer only when its
   exact fractional part is zero, equality is exact JSON equality, minLength counts code points, and
-  a document with a duplicate object member is unparseable. Valid JSON numbers whose digit count or
-  exact integer expansion exceeds the host numeric conversion limit (such as Python's
-  int_max_str_digits) or the exact-integer exponent bound are reported as unsupported (exit 2), not
-  as unparseable.
+  a document with a duplicate object member is unparseable. Where host integer-string conversion
+  is required and exceeds the host limit (such as Python's int_max_str_digits), or where
+  exact-integer expansion is required (for example requirement_revision, assessment_revision,
+  schema integer bounds, or an in-range ordinal) and its exponent exceeds 1000 or its expanded
+  digits exceed the host limit, the checker stops as unsupported (exit 2), not as unparseable.
+  Exact comparisons that need no integer expansion (such as refusing an impossible ordinal like
+  1e1001 as ordinal_absent) complete without hitting the expansion bound.
 
 Occurrences and anchors
   An occurrence is a block attribute line of an AsciiDoc file (a name ending in .adoc) whose
