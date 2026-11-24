@@ -42,7 +42,7 @@ image::design.drawio.svg[Overview]
 
 - *Fully Qualified Service URI (FQURI):* A URI that contains all the information needed to uniquely identify a service. A fully qualified service URI contains the following information:
   - *authority_name:* The name of the authority that hosts the service.
-  - *ue_id:* The unique identifier of the service (both the _instance_ and _service ID_ parts).
+  - *ue_type_id* and *ue_instance_id:* The type and the instance identifiers of the service, as xref:../../../basics/uri.adoc#data-model-definition[the UUri data model] defines them.
   - *ue_version_major:* The version of the service.
   - *resource_id:* The resource ID (value of 0 is used to indicate the default ID for the service).
 
