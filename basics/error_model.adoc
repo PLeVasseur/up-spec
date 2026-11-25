@@ -149,7 +149,7 @@ Binding-facing loss counting and route reporting are stated in xref:../up-l1/rou
 [[req-ssr-refuse-before-heap]]
 === Refuse before touching the heap
 
-[.specitem,oft-sid="req~ssr-refuse-before-heap~4",oft-title="Refuse before touching the heap",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-refuse-before-heap~5",oft-title="Refuse before touching the heap",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Errors for refusals.*
 The element *MUST* return an error from an operation that cannot proceed in runtime mode.
@@ -168,32 +168,36 @@ The element *MUST* decide each refusal that can be decided before an operation's
 In deciding a refusal, producing its error and counting it, the element *MUST NOT* acquire or release heap memory, abort or panic.
 
 *Native and heap-free routes.*
-On a native route, and on any route whose heap class is none, the element *MUST NOT* acquire or release heap memory in anything that a refusal does.
-Beyond deciding the refusal, producing its error and counting it, the element *MUST* perform for such a refusal only the accounting and the heap-free ownership cleanup required for the route, such as returning a refused frame's slot to its fixed table without acquiring or releasing heap memory (native decoded types run no destructor, and a serialized heap-free route runs a destructor only where its wire's heap-free claim covers it).
+On a native route, and on any route whose heap class is none, element code *MUST NOT* acquire or release heap memory in deciding a refusal, producing its error, counting it or handing off a refused frame's ownership.
+Beyond deciding the refusal, producing its error and counting it, the element *MUST* perform only the accounting and heap-free ownership disposition required for the route: returning a refused slot to its fixed table or handing a refused retained frame's whole owner once to the binding's pre-reserved return contract without acquiring or releasing heap memory in element code (native decoded types run no destructor, and a serialized heap-free route runs a destructor only where its wire's heap-free claim covers it).
+Any separately permitted Class 2 middleware lifecycle work runs solely under its admitted permit and policy after hand-off, with the refused owner remaining charged until actual return completion, and is never part of producing the refusal.
 
 *Serialized routes.*
 On a serialized route, some refusals are reached only after the operation acquired heap memory under its declared heap class.
 The element *MUST NOT* acquire a further resource in order to produce or report such a refusal.
-The element *MUST* decide and record the refusal's logical outcome, message identity and logical deadline before any destruction or lock that it needs starts, and *MUST* end the ownership already created so that each initialized decoded value (destroyed externally with element invariants restored and no element lock held) and any binding-allocated storage for the frame (returned under the binding's frame-return contract) is released exactly once under the route's declared heap class and resource and failure policy (xref:resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
+The element *MUST* decide and record the refusal's logical outcome, message identity and logical deadline before any destruction, deferred hand-off or lock that it needs starts, and *MUST* end the ownership already created so that each initialized decoded value (destroyed externally with element invariants restored and no element lock held) and any binding-owned frame storage (handed off once under the binding's frame-return contract) is released exactly once under the route's declared heap class and resource and failure policy (xref:resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 That release is the route's declared heap use, under its own contract, and not part of producing the refusal.
 
 *Exhaustion of a declared allocation.*
-On a serialized route, exhaustion at an allocation point that the route's declared class names does what the route's declared failure policy states (xref:resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
-The element *MUST* return it as an error where that policy returns one, or where the route requires recoverable exhaustion (xref:resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]); elsewhere what exhaustion does is the declared failure policy's.
+On a route with an admitted Class 2 middleware permit or Class 3 serialized allocation declaration, exhaustion at an allocation point that the admitted class and permit name does what the declared resource and failure policy states (xref:resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
+The element *MUST* return it as an error where that policy returns one, or where the covered scope requires recoverable exhaustion (xref:resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]); elsewhere what exhaustion does is the declared failure policy's.
+
+*Scoped replacement.*
+For the element across all configurations, this revision replaces revision 4 of this item by separating immediate no-heap/no-panic refusal decisions and pre-reserved owner hand-off from separately permitted Class 2 middleware deferred ownership completion and declared Class 2 allocator-exhaustion policy, while keeping all refusal-before-heap, single-count and serialized ownership-ending duties in force.
 --
 
 [horizontal]
-ID:: `+req~ssr-refuse-before-heap~4+`
+ID:: `+req~ssr-refuse-before-heap~5+`
 ASIL:: B
 Allocated to:: the element
 Verification:: heap-window, test
 * *heap-window*
-** Every refusal inside the window.
+** Every refusal decision, error production, counting and element-side ownership hand-off inside the window with zero own-code heap use.
 ** On a serialized route, a refusal before the first declared allocation acquires nothing.
-** On a serialized route, a refusal after it releases only what was already admitted, once, under the declared class.
+** On a serialized route, a refusal after it releases only what was already admitted, once, under the declared class; on a native route with a Class 2 middleware permit, any admitted middleware deferred lifecycle work stays separated from producing the refusal.
 * *test*
 ** Each named refusal.
-** A check after decode, a failed declared allocation and a response first accepted after its deadline, each ending the admitted ownership exactly once.
+** A check after decode, a failed declared allocation, a refused retained frame handed off to deferred return, and a response first accepted after its deadline, each deciding and counting before cleanup starts and ending admitted ownership exactly once.
 ISO 26262:: 6-7.4.12 (part-clause numbers only)
 
 *Rationale.*
@@ -247,7 +251,7 @@ So a panic reachable in runtime mode is a crash that a peer's bytes or a clock r
 
 A frame whose header or envelope cannot be parsed gives the element nothing it can act on, so it is refused, and the refusal is reported as every loss is.
 
-No waiver can cover a panic: a waiver covers allocation inside middleware only (xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
+No waiver can cover a panic in element, binding or wire code, an unsafe foreign unwind, or any unrelated middleware panic or known failure: a waiver covers only the exact middleware operations, domain, finite envelope and narrow permitted allocator-exhaustion outcome of its Class 2 permit (xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
 
 Code that runs on a runtime path is not always element code (xref:../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code], "Element code").
 Examples are the destructor of an owned value, an allocator's release or a dependency they reach.

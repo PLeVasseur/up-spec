@@ -109,8 +109,8 @@ So heap use on its path would break runtime mode for every route it carries (xre
 
 An ASIL route through the Streamer is only as sound as the Streamer, so it cannot be left as a QM carrier.
 
-A serialized leg's declared allocation belongs to that leg's wire or binding and is reported per route.
-It never reaches the Streamer's own forwarding paths, or a native leg (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+A serialized leg's declared allocation belongs to that leg's wire or binding and is reported per route, and any separately admitted Class 2 middleware lifecycle allocation on a native leg stays confined to its own permit and waiver.
+This requirement governs the Streamer's own forwarding code and never permits heap use in the Streamer's own forwarding paths (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
 [[req-ssr-streamer-no-panic]]
 == The Streamer does not panic in runtime mode
@@ -602,7 +602,7 @@ Verification:: test, heap-window, review
 * *review*: the startup report and refused-startup report formats: no statement presenting the report or any startup-provisioning entry as a safety qualification, a conformance claim or a discharge of an assumption of use.
 
 *Rationale.*
-The report lists the admitted routes and their resources after the transition, in runtime mode, so producing it uses no heap (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
+The report lists the admitted routes and their resources after the transition, in runtime mode, so the Streamer's own report-production work—including every reporting helper it invokes—uses no heap and produces fixed-size records (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 Recording whether a startup-provisioning helper supplied the route-table share of startup storage, together with its declared storage and policy or its named refusal, keeps startup backing inspectable without turning a runtime observation into a qualification claim or an assumption discharge.
 
 [[req-ssr-streamer-config-integrity]]

@@ -571,7 +571,7 @@ Where the item relies on such a frame within a time, bounding the stall is the i
 [[req-ssr-bound-wait]]
 === Every bounded wait has a logical deadline
 
-[.specitem,oft-sid="req~ssr-bound-wait~4",oft-title="Every bounded wait has a logical deadline",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-bound-wait~5",oft-title="Every bounded wait has a logical deadline",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *No unbounded blocking.*
 Element code in a runtime operation *MUST NOT* block without a bound, except in a deliberate idle wait that the transport's documented contract supports while no bounded operation, timeout or deadline check is due.
@@ -579,7 +579,8 @@ Element code in a runtime operation *MUST NOT* block without a bound, except in 
 *The idle wait.*
 In such an idle wait, the element:
 
-* *MUST* use a wake protocol that cannot lose the wake that makes work due;
+* *MUST* use a wake protocol that cannot lose the wake that makes work due (xref:../basics/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules], "Waits");
+* after a spurious wake, an interruption or a late resumption, *MUST* recheck the expected value and the time before it waits again or returns;
 * *MUST NOT* let the wait stand in for a bounded operation or hide unbounded internal work.
 
 *Every other wait.*
@@ -590,17 +591,17 @@ For every other wait of its own, for a peer, a wake, capacity, a completion or a
 * after a spurious wake, an interruption or a late resumption, *MUST* recheck the authoritative state and the time before it waits again or returns (xref:../basics/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules], "Waits").
 
 *Waits inside a declared allocation domain.*
-On a serialized route whose declared heap class admits allocation, an acquisition, a destruction or a release can wait inside the allocation domain that the route's declared policy names, such as behind an allocator's lock (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
-Such a wait is the allocation domain's, not a wait of the element's own, and it cannot observe a deadline.
+On a serialized route whose declared heap class admits Class 3 allocation, or on a route whose binding declares exact enumerated Class 2 permitted middleware acquisition or lifecycle operations under an admitted permit and matching waiver, an admitted allocation, resize, destruction, release or retirement can wait inside the allocation domain that the route's declared policy names, such as behind an allocator's lock (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
+Such a wait is the allocation domain's, not a wait of the element's own, and it cannot observe a deadline; an unknown wait bound supplies no finite latency bound.
 
 * The element *MUST* admit such a wait only where the route's declared policy states it, and *MUST* show it in the route's report.
-* On a route that requires non-waiting acquisition, no acquisition waits.
-On a route that requires non-waiting release, a release that could wait leaves the path that ended its value as pending cleanup (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+* On a route or covered scope that requires non-waiting acquisition, no covered acquisition waits.
+On a route or covered scope that requires non-waiting release, a covered release that could wait leaves the path that ended its value or owner as pending cleanup (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 * Each of the two limits its own operation only.
 On a route that does not require non-waiting acquisition, an acquisition's wait runs on the path that performs it.
-On a route that does not require non-waiting release, a release's wait runs on the path that performs it.
+On a route that does not require non-waiting release, a serialized release's wait runs on the path that performs it.
 How long either wait takes is the allocation domain's.
-* It never occurs in a native operation, in the work one causes or in work that a native route shares, as xref:payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path] and <<req-ssr-heap-slot-types,A decoded value is destroyed once, as its route's class admits>> state.
+* Outside exact enumerated Class 2 permitted middleware operations admitted under xref:payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path], an allocation-domain wait never occurs in a native operation, in the work one causes or in work that a native route shares, as xref:payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path] and <<req-ssr-heap-slot-types,A decoded value is destroyed once, as its route's class admits>> state.
 * The element *MUST NOT* hold a lock or exclusion of its own across such a wait, in an acquisition or in a release that no destruction reaches; for a destruction and what it reaches, <<req-ssr-heap-slot-types,A decoded value is destroyed once, as its route's class admits>> states the same.
 
 It changes no logical deadline.
@@ -649,10 +650,13 @@ The element *MUST* refuse it at setup where the route's binding cannot bound it,
 
 *Idle waiters.*
 The element *MUST NOT* let idle waiters wake each other.
+
+*Scoped replacement.*
+For the element across all configurations, this revision replaces revision 4 of this item by explicitly owning deliberate-idle expected-value rechecks over xref:../basics/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules] and extending the declared allocation-domain wait allowance solely to exact enumerated Class 2 permitted middleware acquisition and lifecycle operations, while preserving own finite logical deadlines, no held element locks and all non-allocator wait prohibitions.
 --
 
 [horizontal]
-ID:: `+req~ssr-bound-wait~4+`
+ID:: `+req~ssr-bound-wait~5+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, heap-window, fault-injection, review
@@ -735,23 +739,30 @@ Runtime resource retention, fixed-table lease returns, isolated release services
 [[req-ssr-release-none]]
 === Nothing is released in runtime mode
 
-[.specitem,oft-sid="req~ssr-release-none~4",oft-title="Nothing is released in runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
+[.specitem,oft-sid="req~ssr-release-none~5",oft-title="Nothing is released in runtime mode",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
 --
-In runtime mode the element *MUST* keep each route, role, slot table, binding resource, worker and transport allocated and attached for the life of the process, partition or firmware instance.
-In runtime mode each binding *MUST* keep its resources, its workers and its transport allocated and attached for the life of the process, partition or firmware instance.
+In runtime mode the element *MUST* keep each route, role, slot table, startup region, permanent binding endpoint or service resource, worker and transport allocated and attached for the life of the process, partition or firmware instance.
+In runtime mode each binding *MUST* keep its permanent endpoint, service, port, node, arena, worker and transport infrastructure allocated and attached for the life of the process, partition or firmware instance.
 
 * The element *MUST* keep each worker created during initialization running and *MUST NOT* let one be joined in runtime mode.
 * Each binding *MUST* keep each of its workers created during initialization running and *MUST NOT* let one be joined in runtime mode.
+
+*Finite-lifetime local middleware connection and view retirement.*
+As a narrow exception to permanent attachment of binding resources, a binding *MAY* retire and release separately owned, separately charged, finite-lifetime local middleware connection, local-view or descriptor resources in runtime mode only where:
+
+* every live, held, pending and in-service local dependency on that connection incarnation has ended with synchronized quiescence;
+* the retirement is explicitly enumerated in the binding's admitted Class 2 lifecycle policy and finite resource envelope (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]);
+* permanent infrastructure (transports, ports, nodes, services, outer arenas, own workers, routes, tables and sealed startup backing) remains retained, and no live held backing or peer-owned predecessor backing is freed or revoked.
 
 *The Streamer.*
 What the Streamer's routes and gates, and the workers of the Streamer binary, keep in runtime mode is stated with the Streamer (xref:../up-l2/streamer.adoc#req-ssr-streamer-route-lock[Routes and subscriptions are locked at activation]; xref:../up-l2/streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate]; xref:../up-l2/streamer.adoc#req-ssr-streamer-workers[Workers are fixed at initialization]).
 
 *Scoped replacement.*
-This revision replaces the process-only lifetime wording of revision 3 of this item for the element and each binding, extending runtime retention scope consistently to processes, partitions and bare-metal firmware instances while preserving all resource-retention, attachment and worker-non-joining duties of revision 3 of this item unchanged.
+For the element and each binding across hosted, partitioned and bare-metal targets, this revision replaces revision 4 of this item by carving out solely separately charged finite-lifetime local middleware connection, local-view and descriptor retirement after ended local dependencies under an admitted Class 2 policy, while preserving process-, partition- or firmware-instance-lifetime retention of all permanent infrastructure and non-joining of initialization workers.
 --
 
 [horizontal]
-ID:: `+req~ssr-release-none~4+`
+ID:: `+req~ssr-release-none~5+`
 ASIL:: B
 Allocated to:: the element; each binding, for its resources, its workers and its transport
 Verification:: compile-fail (for the Streamer, a delete after activation), review (retention for the life of the process, partition or firmware instance)
@@ -764,7 +775,7 @@ So disabling a route remains compatible with retaining its runtime storage.
 [[req-ssr-release-lease-drop]]
 === A lease gives back its slot and nothing else
 
-[.specitem,oft-sid="req~ssr-release-lease-drop~7",oft-title="A lease gives back its slot and nothing else",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
+[.specitem,oft-sid="req~ssr-release-lease-drop~8",oft-title="A lease gives back its slot and nothing else",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
 --
 *The drop.*
 The element *MUST* have the drop of a per-message lease (a received message, an RPC call, a request, a parked frame, a loan) give the lease's slot back to a fixed table exactly once:
@@ -778,7 +789,8 @@ The element *MUST NOT* let its own work in the drop block or panic, or take a lo
 A lock-free retry is allowed only as <<req-ssr-bound-work,Work per call is bounded by setup data>> states for each lock-free retry loop of the element.
 
 *Native routes.*
-On a native route the element *MUST NOT* let the drop do anything else: the drop frees no heap, cannot panic and never waits.
+On a native route the element *MUST NOT* let its own drop or hand-off work do anything else: element drop and hand-off acquire and release no heap, cannot panic and never wait.
+Any separately admitted Class 2 middleware deferred lifecycle work runs only after hand-off under its admitted permit and policy without releasing live backing or permanent infrastructure (xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 
 *Heap-free routes.*
 On a serialized route whose heap class is none, the drop frees no heap.
@@ -812,19 +824,19 @@ A destruction in progress, or pending on a release service, is not a completed o
 The rest of this item binds the element for every release service and all pending cleanup, a binding's deferred return included, and each binding for its deferred return: each for its part.
 
 *The release service.*
-Each for its part, the element and each binding *MUST* create each release service that it uses, a binding's mechanism for its deferred return included, during initialization, and run it as an autonomous service for the life of the process, partition or firmware instance (<<req-ssr-release-none,Nothing is released in runtime mode>>), with hand-off capacity fixed at setup.
+Each for its part, the element and each binding *MUST* create each release service that it uses, a binding's mechanism for its deferred return included, during initialization, and run it as an autonomous service for the life of the process, partition or firmware instance (<<req-ssr-release-none,Nothing is released in runtime mode>>), with pre-reserved owner-return representation fixed at setup.
 
-* Each for its part, the element and each binding *MUST* size a route's capacity, its slots together with that hand-off capacity, to cover every value the route can own at once, counting a hand-off in progress, a value queued or in service and a value whose lease was forgotten.
-* Each for its part, they *MUST NOT* let the service acquire heap memory, and *MUST* have it perform only the destructions and slot returns handed to it, with autonomous progress that does not depend on the next application call.
+* Each for its part, the element and each binding *MUST* pre-reserve return representation and capacity covering the full aggregate budget of every owner the route or shared port can hold at once—counting acquisition reservations, refused frames, held owners, hand-offs in progress, queued or in-service returns and forgotten owners—so that no admitted owner can face a second fallible hand-off queue refusal; any separately retained finite local connection or view resource is charged distinctly from sample/owner capacity and never holds completed sample credit.
+* Each for its part, they *MUST NOT* let own service code acquire heap memory (any permitted Class 2 middleware lifecycle work inside deferred cleanup stays confined to its exact permit and policy), and *MUST* have the service perform only the destructions and owner returns handed to it, with autonomous progress that does not depend on the next application call.
 * Neither a generic caller main-loop pump that relies on later application calls to drive cleanup nor merely placing a blocking destructor in a timer interrupt service routine or in another execution context satisfies this requirement.
-* Each for its part, they *MUST* bound the service's own work for each value, the hand-off, dispatch, bookkeeping and the change of charge, as <<req-ssr-bound-work,Work per call is bounded by setup data>> states.
+* Each for its part, they *MUST* bound the service's own work for each value or owner, the hand-off, dispatch, bookkeeping and the change of charge, as <<req-ssr-bound-work,Work per call is bounded by setup data>> states.
 
 *Pending cleanup.*
-A value handed to a release service, and a retained owner or the binding's own allocation for a frame handed to a binding's deferred return (xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]), is _pending cleanup_ from its hand-off until its release completes.
-Pending cleanup is ownership awaiting release, neither a completed release nor unfinished traffic.
+A value handed to a release service, and a retained owner or the binding's own allocation for a frame handed to a binding's deferred return (xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]), is _pending cleanup_ from its hand-off until actual release or physical sample return completes.
+Pending cleanup is ownership awaiting completion, neither a completed release nor unfinished traffic; hand-off, destructor return, physical offset publication before full in-cell completion, and finite dormant connection retention remain distinct states.
 
 *A wait without a deadline.*
-Each for its part, the element and each binding *MAY* let pending cleanup wait without a finite logical deadline, and only for the dependency that its policy names, such as the lock of an allocation domain or of the middleware's port.
+Each for its part, the element and each binding *MAY* let pending cleanup wait without a finite logical deadline, and only for the dependency that its policy names, such as the lock of an allocation domain, while preserving full isolation from protected traffic, arrival, health and unrelated returns.
 
 * A release handed to the service contains no unbounded computation of its own, which the evidence for non-waiting release establishes.
 * Each for its part, they *MUST NOT* let pending cleanup wait for a lock or other primitive shared with another process, or for another process's progress (<<req-ssr-bound-no-cross-process-lock,No lock shared with another process>>).
@@ -833,21 +845,21 @@ A supported configuration's package can establish a finite cleanup deadline only
 A deadline decides the outcome of the operation that ended the value (<<req-ssr-bound-wait,Every bounded wait has a logical deadline>>), never whether or when its cleanup completes.
 
 *Ownership and charge.*
-Each for its part, the element and each binding *MUST* pass ownership to pending cleanup exactly once, and *MUST* change its route's charge and its count of completed releases only when the release completes.
+Each for its part, the element and each binding *MUST* pass whole ownership to pending cleanup exactly once, and *MUST* restore its route's or shared port's sample/owner charge and increment its count of completed releases once only when actual release or return completes.
 
-* Each for its part, the element and each binding *MUST NOT* start a pending or partly completed release again as a new destruction.
+* Each for its part, the element and each binding *MUST NOT* start, steal or replay a pending, paused or partly completed release again as a new destruction or publication.
 * They *MUST NOT* let an observer, on a timeout or otherwise, revoke its owner, end its release, reuse its storage, report it complete or free its backing or any runtime infrastructure.
 
 *Isolation.*
-While pending cleanup waits, or if it never completes, the element and each binding, each for its part, *MUST NOT* let it hold or occupy a lock, an exclusion section, an execution context, a worker, a task, an interrupt context or any other resource that the element needs for:
+While pending cleanup waits, pauses or never completes, the element and each binding, each for its part, *MUST NOT* let it hold or occupy a lock, an exclusion section, a lock-backed atomic emulation, a shared blocking wake or report path, an execution context, a worker, a task, an interrupt context or any other resource that the element or binding needs for:
 
-* a bounded operation, a drop or a hand-off;
+* a bounded operation, a caller receive or send with genuine remaining capacity, a drop or a hand-off;
 * arrival, deadline, expiry and peer-failure accounting;
 * health and capacity observation; or
 * the return of any owner whose release does not itself need the dependency that the stalled release waits for.
 
-They *MUST* keep this isolation transitively, through the allocation domain's locks—any admitted serialized owned-value runtime adapter acting within its wire or allocation-provider role and its reached dependencies included—the middleware's port locks, the service's dispatch and wake paths, shared exclusion and every callback that the release can reach.
-Neither a separate thread nor merely placing a blocking destructor in a timer interrupt service routine or in another execution context is by itself this isolation.
+They *MUST* keep this isolation transitively, through the allocation domain's locks—any admitted serialized owned-value runtime adapter acting within its wire or allocation-provider role and its reached dependencies included—any middleware port or retirement lock, the service's dispatch, atomic and wake paths, shared exclusion and every callback that the release can reach.
+Neither a separate thread, a short critical section, nor merely placing a blocking destructor in a timer interrupt service routine or in another execution context is by itself this isolation.
 
 The exception in the last entry reaches only an owner whose own release needs the same dependency, the one that the stalled release's policy names.
 What a survivor's operations, accounting, health reports and other owners' returns may wait for after a peer's failure is stated in xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input].
@@ -870,11 +882,11 @@ The hand-off to a release service or to a binding's deferred return holds owners
 The duties of a binding's frame destructor are stated in xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
 
 *Scoped replacement.*
-This revision replaces revision 6 of this item for the element and each binding across hosted, partitioned and bare-metal or no-OS targets and all configurations, incorporating serialized owned-value runtime adapter release paths strictly within their wire or allocation-provider roles, clarifying inline proven non-waiting release versus an initialization-created autonomous release service whose progress does not depend on the next application call and cannot be satisfied by a generic caller main-loop pump or by merely placing a blocking destructor in a timer interrupt service routine or another execution context, requiring setup refusal by name where a platform or composition cannot establish that autonomous service and transitive isolation while keeping ordinary serialized routes with a disclosed waiting route-specific cleanup path separately admissible, and preserving all ownership, capacity-charge, finite-deadline-evidence, non-duplication, non-revocation and infrastructure-retention duties of revision 6 of this item.
+For the element and each binding across hosted, partitioned and bare-metal or no-OS targets and all configurations, this revision replaces revision 7 of this item by separating own-code non-allocating drop/handoff from separately admitted Class 2 middleware deferred lifecycle work, requiring pre-reserved whole-owner return representation over aggregate capacity distinct from finite connection charge, separating hand-off from actual completion credit restoration, and requiring transitive isolation across locks, atomics, wakes, reports and execution resources without stealing or replaying paused continuations.
 --
 
 [horizontal]
-ID:: `+req~ssr-release-lease-drop~7+`
+ID:: `+req~ssr-release-lease-drop~8+`
 ASIL:: B
 Allocated to:: the element; each binding, for its deferred return
 Verification:: heap-window, test, miri, review
@@ -965,10 +977,10 @@ Returning a preallocated loan never frees the backing it lives in (xref:payload-
 [[req-ssr-heap-slot-types]]
 === A decoded value is destroyed once, as its route's class admits
 
-[.specitem,oft-sid="req~ssr-heap-slot-types~5",oft-title="A decoded value is destroyed once, as its route's class admits",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-heap-slot-types~6",oft-title="A decoded value is destroyed once, as its route's class admits",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Native routes.*
-On a native route, the element *MUST* refuse at setup a message type whose values run a destructor when they end, wherever it decodes into a startup slot.
+On a native route, the element *MUST* refuse at setup a message type whose values run a destructor when they end, wherever it decodes into a startup slot; no wrapper or middleware permit reclassification licenses a native payload destructor.
 So overwriting a slot in runtime mode never runs a destructor there.
 
 *Heap-free routes.*
@@ -986,8 +998,8 @@ On a serialized route whose declared heap class admits allocation, a type whose 
 * Destroying its values frees what the route's wire, binding or allocation provider—including any admitted serialized owned-value runtime adapter acting strictly within its wire or allocation-provider role to produce, resize or release serialized message-owned values (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default])—allocated, under the declared policy.
 
 *What a route requires.*
-Where a route requires panic-free cleanup or non-waiting release—including panic-free cleanup required as an explicit claim dependency for covered assured helper scope (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused])—a type on it is admitted, or the route is refused by name, as xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused] states: the guarantee has to be established for the type with the route's wires, binding and allocation provider, including any admitted serialized owned-value runtime adapter acting within its wire or allocation-provider role and every reached dependency.
-Where neither the route nor a covered assured helper scope requires those stronger guarantees, the element *MUST NOT* refuse ordinary serialized destruction for their absence.
+Where a route requires panic-free cleanup or non-waiting release on its route-wide operations—or where an assured helper admission requires panic-free cleanup as an explicit claim dependency across the helper's actual transitive operations on affected routes (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused])—each covered type and operation is admitted, or the route or setup is refused by name, as xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused] states: the guarantee has to be established across the exact covered scope (actual helper-transitive operations for helper-scoped claims, or full route operations for route-wide claims), including any admitted serialized owned-value runtime adapter acting within its wire or allocation-provider role and every reached dependency.
+Where neither the route nor a covered helper-transitive scope requires those stronger guarantees, the element *MUST NOT* refuse ordinary serialized destruction for their absence.
 
 *Never in native work.*
 The element *MUST NOT* run the ending of an owned value—one produced, resized or released via an admitted serialized owned-value runtime adapter included—its destructor, its release and a wait for either included, in a native operation, in the work one causes or in work that a native route shares.
@@ -1025,8 +1037,8 @@ The element *MUST* call it only with its own invariants restored and while holdi
 So none of these leaves element state inconsistent or adds an element lock to a wait.
 
 *Capacity and charge.*
-How a route's capacity covers a value whose destruction is in progress or pending, how the value stays owned and charged, and is not reported as released, until its destruction completes, and how a destruction that stalls or fails shows as capacity pressure, in every transition and wherever the destruction runs, is stated in <<req-ssr-release-lease-drop,A lease gives back its slot and nothing else>>, clause "Every decoded value", with what a release service, pending cleanup and a retained owner add.
-In destroying a value, the element *MUST* return its slot to the fixed table and *MUST NOT* release any other runtime resource.
+How a route's capacity covers a value whose destruction or frame return is in progress or pending, how the value or owner stays owned and charged—and is not reported as released—until actual destruction or physical return completes, and how a destruction or return that stalls or fails shows as capacity pressure, in every transition and wherever it runs, is stated in <<req-ssr-release-lease-drop,A lease gives back its slot and nothing else>>, clause "Every decoded value", with what a release service, pending cleanup and a retained owner add.
+Fixed element slots and permanent runtime infrastructure remain distinct from declared external value or sample cleanup and from any separately charged finite local middleware connection or view resources (<<req-ssr-release-none,Nothing is released in runtime mode>>): in destroying a value, the element *MUST* return its slot to the fixed table and *MUST NOT* release any other runtime resource.
 
 *No reuse while owned.*
 The element *MUST NOT* reuse a slot while its value is still owned:
@@ -1036,11 +1048,11 @@ The element *MUST NOT* reuse a slot while its value is still owned:
 * The element *MUST NOT* let a destruction that stalls or fails make a slot reusable early.
 
 *Scoped replacement.*
-This revision replaces revision 4 of this item for the element across all configurations, incorporating serialized message-owned values produced, resized or released via an admitted serialized owned-value runtime adapter acting strictly within its wire or allocation-provider role into exactly-once destruction, the non-native, non-shared ending-path requirement and setup refusal, outcome, identity and deadline decisions preceding and remaining unchanged by destruction, restoring element invariants with no element lock or exclusion held across external destruction, and panic-free cleanup admission for covered assured helper scope, while preserving ordinary serialized destruction without imposing unrequested stronger guarantees by default and preserving all other duties of revision 4 of this item.
+For the element across all configurations, this revision replaces revision 5 of this item by distinguishing helper-transitive versus route-wide cleanup guarantee scopes and separating fixed element slot/infrastructure retention from declared external value or sample cleanup and separately charged finite local middleware connection resources, while keeping native destructor prohibition, non-native/non-shared serialized ending, logical-before-cleanup ordering and actual-completion charging in force.
 --
 
 [horizontal]
-ID:: `+req~ssr-heap-slot-types~5+`
+ID:: `+req~ssr-heap-slot-types~6+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, heap-window, review
@@ -1288,7 +1300,7 @@ Granting a required stronger claim without its evidence would be a silent downgr
 [[req-ssr-qos-overflow]]
 === Overflow acts as declared
 
-[.specitem,oft-sid="req~ssr-qos-overflow~3",oft-title="Overflow acts as declared",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-qos-overflow~4",oft-title="Overflow acts as declared",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *The policy.*
 In runtime mode the element *MUST* ensure that a full route applies exactly its declared overflow policy (drop the oldest, drop the newest, or wait within a bound).
@@ -1298,7 +1310,8 @@ The element *MUST* count every discard observable to it or to the route's bindin
 The element *MUST* ensure that choosing and applying the policy, waiting and counting acquire and release no heap memory.
 
 *Native and heap-free routes.*
-On a native route, and on any route whose heap class is none, the element *MUST* ensure that a discard releases nothing.
+On a native route, and on any route whose heap class is none, the element *MUST* ensure that its own code acquires and releases no heap memory on a discard, decides and counts the discard before ownership ends, releases no route, table or runtime infrastructure, and hands any discarded or evicted retained frame's whole owner once through the route's and binding's pre-reserved return contract (xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; <<req-ssr-release-lease-drop,A lease gives back its slot and nothing else>>), keeping the owner charged until actual return completes.
+Any separately admitted Class 2 middleware lifecycle work remains strictly bounded by its permit and policy and never runs as part of deciding or counting the overflow.
 
 *Routes that declare allocation.*
 On a serialized route whose declared heap class admits allocation, the policy ends ownership of one of these:
@@ -1307,15 +1320,18 @@ On a serialized route whose declared heap class admits allocation, the policy en
 * a refused newest frame;
 * a waiting sender's frame whose bound ran out.
 
-That ownership is released exactly once as <<req-ssr-heap-slot-types,A decoded value is destroyed once, as its route's class admits>> and xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
-The element *MUST* ensure that this release is the only heap use an overflow causes, and that it releases no route, table or other runtime resource.
+That ownership is released exactly once as <<req-ssr-heap-slot-types,A decoded value is destroyed once, as its route's class admits>> and xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state, after the discard decision and count are recorded.
+The element *MUST* ensure that this release is the only heap use an overflow causes in its own or Class 3 path, and that it releases no route, table or other runtime resource.
 
 *Discards the binding cannot observe.*
 If a discard occurs entirely inside middleware and the binding cannot observe it, the element *MUST* explicitly disclose that limitation in the route's report and make no claim there to count it (xref:route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+
+*Scoped replacement.*
+For the element across all configurations, this revision replaces revision 3 of this item by reconciling native and heap-free overflow disposition with immediate decision/count, pre-reserved whole-owner return hand-off, actual-completion charging and separately admitted Class 2 middleware lifecycle boundaries, while preserving overflow policies, single counting and unobservable-discard disclosure.
 --
 
 [horizontal]
-ID:: `+req~ssr-qos-overflow~3+`
+ID:: `+req~ssr-qos-overflow~4+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test, heap-window

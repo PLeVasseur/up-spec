@@ -42,7 +42,7 @@ A level nobody can read counts as unknown (xref:../integrity.adoc#req-ssr-integr
 [[req-ssr-binding-lent-storage]]
 === Lent storage is exclusive, disjoint and stable for as long as it is held
 
-[.specitem,oft-sid="req~ssr-binding-lent-storage~2",oft-title="Lent storage is exclusive, disjoint and stable for as long as it is held",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-binding-lent-storage~3",oft-title="Lent storage is exclusive, disjoint and stable for as long as it is held",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyUpRustCore"]
 --
 *Scope.*
 This item binds a lending binding, whatever wire a route uses.
@@ -90,9 +90,10 @@ The binding *MUST* keep such a loan or frame charged to its route for the life o
 The binding *MUST NOT* lend or deliver its storage again, give it a second owner, or return or destroy it by another path.
 The binding *MUST* keep each property of this item without relying on a destructor to run.
 
-*Fixed before the transition.*
-The binding *MUST* have sized and mapped the storage that it lends from before its transition returns.
-Where its middleware can enlarge, move or map again such storage after the binding's transition, the binding *MUST* turn that off, or refuse in route preparation every route that would use it.
+*Fixed before the transition and bounded local views of later peers.*
+The binding *MUST* have sized and mapped its own transmit storage and all setup-present backing before its transition returns.
+Where a binding profile admits later-appearing setup-declared peers whose backing is itself static and fixed by the peer, the binding *MAY* establish a bounded local mapping or view of that peer's fixed backing within its declared finite connection/view envelope and admitted Class 2 resource policy before exposing any frame from that incarnation—and on a native route only with required current-incarnation ABI and layout checks satisfied before any typed payload view or access (xref:../peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]).
+The binding *MUST NOT* dynamically grow payload storage, remap or move the storage of any held loan or held frame, or reclaim peer-owned backing; where its middleware can enlarge, move or remap held or transmit storage after the binding's transition, the binding *MUST* turn that off, or refuse in route preparation every route that would use it.
 
 *An empty payload.*
 The binding *MUST* give a loan or a frame of zero bytes an address that is not null and has the route's alignment.
@@ -104,10 +105,14 @@ A declaration, a capability value or a passed test does not establish them.
 *Refusal to lend.*
 A binding that cannot keep these properties for a route *MUST* refuse to lend for it, in route preparation, naming the route and the property.
 It *MUST NOT* present storage that it copies into or out of as lent (xref:interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]).
+
+*Scoped replacement.*
+For each lending binding across all configurations, this revision replaces revision 2 of this item by permitting bounded local mapping/view attachment of a later-appearing setup-declared peer's fixed static backing within a declared finite envelope before frame exposure, while preserving fixed sizing, alignment, address stability, exclusivity, disjointness, forgotten-owner persistence, no dynamic payload growth and no remapping or moving of held storage.
+The element's uninitialized fresh-loan duty remains unchanged.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-lent-storage~2+`
+ID:: `+req~ssr-binding-lent-storage~3+`
 ASIL:: B
 Allocated to:: each lending binding; the element, for no typed read of, and no reference as a value to, a fresh loan's storage before a value is initialized there
 Verification:: test, compile-fail, miri, review
@@ -270,14 +275,15 @@ So a binding never gains a cross-level view by leaving the question open.
 
 [.specitem,oft-sid="req~ssr-binding-metadata-admission~1",oft-title="For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding,SafetyBindingPull"]
 --
-*Scope.*
-This item binds the element and each lending binding whose sample-layout contract separates the binding's physical envelope or frame checks from the element's admission of the frame's metadata.
-It adds no duty to any other binding, profile or classic protocol actor.
+*Scope and conditional invocation.*
+This item binds the element and each lending binding only where the binding's applicable profile or sample-layout contract explicitly invokes this procedure to separate binding physical checks from element metadata admission.
+Structural resemblance, colocation in a catalog or copy-route usage alone imposes no duty under this item; non-invoking bindings, profiles and classic protocol actors keep their own applicable contracts.
+Each invoking profile supplies its physical layout predicates, pre-acquisition enclosing-extent checks, refusal cause mapping, admitted hand-back facts and actual sample-return completion interface; this item defines the complete five-step admission procedure and its ordering and accounting outcomes.
 
 *Physical checks and hand-over.*
-Before forming any range from a received sample's header or envelope, the binding *MUST* make the physical checks that its sample-layout contract states—including, where that contract defines one, comparing the sample's enclosing extent with the receiving route's largest frame—with arithmetic that cannot overflow.
-The binding *MUST NOT* let any part of a sample that its physical checks refuse reach the element, a wire or an application, with the single exception stated for a receive route that takes the copy route (xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Admission on the copy route"): there the element acquires the sample's header and metadata as a bounded raw copy into storage of its own, the binding *MUST* make its physical checks on that acquired header, and a refusal keeps the binding's cause and its one count and ends the sample's admission before its metadata is decoded or its payload is copied.
-Once its physical checks pass, the binding *MUST* hand the element only the frame's metadata extent and the payload length that its header gives, and no byte of its payload.
+Before forming any range from a received sample's physical control data or envelope, an invoking binding *MUST* make the physical checks that its sample-layout contract states—including any contract-specified pre-acquisition enclosing-extent bound—with arithmetic that cannot overflow.
+The binding *MUST NOT* let any part of a sample that its physical checks refuse reach the element, a wire or an application, with the single exception stated for a receive route that takes the copy route (xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Admission on the copy route"): there the element acquires the sample's physical control data and metadata as a bounded raw copy into storage of its own, the binding *MUST* make its physical checks on that acquired control data, and a refusal keeps the binding's cause and its one count and ends the sample's admission before its metadata is decoded or its payload is copied.
+Once its physical checks pass, the binding *MUST* hand the element only the frame's verified metadata extent and verified physical payload length supplied by its sample-layout contract, and no byte of its payload.
 That hand-over is not a delivery to an application.
 
 *The element's admission.*
@@ -285,7 +291,7 @@ Within the same receive step and before a frame reaches its route, the element *
 
 . the route's selected wire decodes the frame's metadata in the format that the wire states, at the one version of it fixed at setup (xref:../wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]); a frame whose metadata does not decode in it is refused metadata, and so is a frame whose prefix names a metadata layout that the format does not define;
 . the metadata holds each field that the format requires, each in its range, and names a payload encoding exactly where it says that the frame has a payload;
-. the metadata names a payload encoding, or the payload length that the header gives is zero; a frame whose metadata names no payload encoding while that length is not zero is refused as `+payload_presence_extent_mismatch+`;
+. the metadata names a payload encoding, or the verified physical payload length is zero; a frame whose metadata names no payload encoding while that length is not zero is refused as `+payload_presence_extent_mismatch+`;
 . the wire, the payload family and the metadata layout, one that the format defines, that the decoded metadata names are those that the route admits, on every route;
 . the metadata matches the source and sink filters of a receive of the route.
 
@@ -295,29 +301,30 @@ A frame with a present payload of length zero, encoding identifier `0` included,
 The element *MUST* make these checks before any of the frame reaches TTL checks (xref:../route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed]), a wire's decoding of the payload or an application (xref:../wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), and *MUST NOT* make them again for the frame when it is taken.
 
 For each frame that it refuses, the element *MUST* return the refusal or count it once, on the route whose receive step held the sample, under the cause that the refusing check names, as xref:../route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states; a frame that the third check refuses is counted as `+payload_presence_extent_mismatch+` and under no other cause.
-On a route that the binding serves by pull, the element *MUST* count each frame that it refuses once and *MUST NOT* return the refusal as the error of the receive call, and the binding *MUST NOT* return a refused sample as the error of the receive call (whether refused by the binding or by the element), *MUST* count each refused sample as one unit of the receive call's bounded work (xref:lifecycle.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]), and *MUST* take the next sample within that bound.
+On a route that the binding serves by pull, the element *MUST* count each frame that it refuses once and *MUST NOT* return the refusal as the error of the receive call, and the binding *MUST NOT* return a refused sample as the error of the receive call (whether refused by the binding or by the element), *MUST* count each refused sample as one unit of the receive call's bounded work (xref:lifecycle.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]), and *MUST* take the next sample within that bound while genuine owner capacity remains.
 
 *Hand-back and sample return.*
-Within the same receive step, the element *MUST* hand its verdict back to the binding, together with the admitted facts that the binding's own contract names for an admitted frame (such as whether the frame has a payload and, where that contract relies on it, the frame's source).
-The binding *MUST* return each sample whose frame the element refuses once, as it returns a frame whose lease is dropped (xref:lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]), *MUST NOT* count it (its one count is the element's), and *MUST NOT* let any part of it reach a wire's decoding of the payload or an application.
+Within the same receive step, the element *MUST* hand its verdict back to the binding, together with the admitted facts that the invoking binding's contract names for an admitted frame (such as whether the frame has a payload and, where that contract relies on it, the frame's source).
+That same-step decision, count and hand-back are distinct from physical return completion: the binding *MUST* hand off each refused sample's whole owner once through its pre-reserved return contract (xref:lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]), keeping the sample charged until actual physical return completes, *MUST NOT* count a sample that the element refused (its one count is the element's), and *MUST NOT* let any part of it reach a wire's decoding of the payload or an application.
 --
 
 [horizontal]
 ID:: `+req~ssr-binding-metadata-admission~1+`
 ASIL:: B
-Allocated to:: the element; each lending binding whose sample-layout contract separates binding physical checks from element metadata admission, for making its physical checks before handing over only the metadata extent and header payload length, for returning a refused sample once without counting it, and on a pull route for counting each refused sample as one unit of bounded receive work and advancing to the next sample
+Allocated to:: the element; each lending binding whose profile or sample-layout contract explicitly invokes this procedure, for making its physical checks before handing over only the verified metadata extent and physical payload length, for handing off a refused sample's whole owner once under its return contract without counting an element refusal, and on a pull route for counting each refused sample as one unit of bounded receive work and advancing to the next sample while genuine owner capacity remains
 Verification:: test, fault-injection, review
 * *test*
-** A sample that fails one of the binding's physical checks: refused and counted once by the binding, with no part reaching the element, a wire or an application (except the copy route's bounded raw header-and-metadata acquisition, where a physical refusal on the acquired header keeps the binding's cause and count and stops metadata decode and payload copy).
+** A sample that fails one of the invoking binding's physical checks: refused and counted once by the binding, with no part reaching the element, a wire or an application (except the copy route's bounded raw control-data and metadata acquisition, where a physical refusal on acquired bytes keeps the binding's cause and count and stops metadata decode and payload copy).
 ** A frame whose metadata does not decode, and one whose prefix names an undefined metadata layout: refused once by the element at the first check, as refused metadata, and not counted by the binding.
-** A frame whose metadata names no payload encoding while its header gives a payload length of 1: refused once by the element at the third check as `+payload_presence_extent_mismatch+`, returned once by the binding without counting it, with no filter evaluation, TTL count, payload processing, forwarding or answer—including where the frame is also expired or names an unadmitted wire.
+** A frame whose physical checks and steps 1–2 pass, whose metadata names no payload encoding while its verified physical payload length is 1: refused once by the element at the third check as `+payload_presence_extent_mismatch+`, handed off once for return by the binding without counting it, with no filter evaluation, TTL count, payload processing, forwarding or answer—including where the frame is also expired or names an unadmitted wire.
 ** A frame with a present payload of length zero and encoding identifier `0`: passes the second and third checks.
 ** A frame whose decoded metadata names an unadmitted wire, payload family or defined metadata layout: refused by the element at the fourth check before payload decode.
 ** A frame matching one receive's filters and not another's: delivered to the first only; a frame matching no receive's filters: refused and returned or counted once.
-** On a pull route, a refused sample (whether refused by the binding or by the element) followed by a valid sample: counted once by the refusing part, not returned as the receive call's error, returned once by the binding, and the valid sample received within the call's bounded work.
+** On a pull route, a refused sample (whether refused by the binding or by the element) followed by a valid sample with work budget for two and genuine remaining owner capacity: counted once by the refusing part, not returned as the receive call's error, whole owner handed off once under the binding's return contract (staying charged until actual completion), and the valid sample received within the same call's bounded work.
 ** A frame admitted to its route and taken later: its metadata not admitted again.
-* *fault-injection*: malformed envelopes, truncated headers, out-of-range lengths and undecodable metadata sent by a faulty peer: each refused at the earliest failing check, counted once by the refusing part, with no panic and no part reaching payload decode or an application.
-* *review*: at source level, overflow-safe arithmetic in binding physical checks before forming ranges; hand-over restricted to metadata extent and header payload length; fixed five-step element admission run once before the frame reaches its route; single sample return without double counting.
+** Negative control: a structurally similar lending binding that does not invoke this procedure acquires no duty from it.
+* *fault-injection*: malformed envelopes, truncated control data, out-of-range lengths and undecodable metadata sent by a faulty peer: each refused at the earliest failing check, counted once by the refusing part, with no panic and no part reaching payload decode or an application.
+* *review*: at source level, explicit invocation precondition; overflow-safe arithmetic in binding physical checks before forming ranges; hand-over restricted to verified metadata extent and physical payload length; fixed five-step element admission run once before the frame reaches its route; pre-reserved whole-owner return hand-off distinct from actual physical completion without double counting.
 
 *Rationale.*
 Separating physical envelope checks (which only the binding knows) from metadata decoding and route admission (which only the selected wire and element know) avoids duplicate parsers and guarantees a single refusal cause and a single count.
@@ -329,18 +336,18 @@ Checking presence against the header's payload length ahead of identity, filters
 [.specitem,oft-sid="req~ssr-binding-loan-sizing~1",oft-title="A lending binding declares whether a transmit loan's payload extent can be shortened",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyUpRustCore"]
 --
 *Scope.*
-This item binds each lending binding and the element when writing a transmit loan on a lending binding.
-It adds no duty to handoff bindings or to classic protocol actors.
+This item binds the element and each lending binding on a composition where a caller or profile invokes transmit-loan sizing (such as writing a variable-extent or header-only protected response).
+It adds no capability declaration duty to handoff bindings, non-invoking lending bindings or classic protocol actors.
 
 *Declared capability.*
-Each lending binding *MUST* declare, as part of its capability (xref:interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]), whether a held transmit loan's payload extent can be shortened before sending, or whether its payload extent is fixed at loan creation.
+Each lending binding participating in an invoking composition *MUST* declare, as part of its capability (xref:interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]), whether a held transmit loan's payload extent can be shortened before sending (together with its supported resulting extents), or whether its payload extent is fixed at loan creation.
 
 *Shortenable loans.*
 On a lending binding that declares shortenable transmit loans:
 
-* the payload's extent *MAY* shrink while the loan is held, and only when the element shortens it;
-* when the element shortens a loan's payload extent, the binding *MUST* write the shortened payload length into the frame's header and *MUST* zero every byte that the shortened payload gives up before the sample is sent (<<req-ssr-binding-initialized-extent,A sample's bytes are initialized before a path needs them, each by the part that owns it>>);
-* neither the metadata's extent nor the payload's start may move, and neither extent may grow.
+* the payload's extent *MAY* shrink while the loan is held to a supported resulting extent, and only when the element shortens it;
+* when the element shortens a loan's payload extent, the binding *MUST* record the shortened payload extent in the physical representation that its own layout contract defines and *MUST* establish the required initialized state of every byte that the shortened payload gives up—zeroing surrendered bytes where required by the invoking caller or binding contract—before the sample is sent (<<req-ssr-binding-initialized-extent,A sample's bytes are initialized before a path needs them, each by the part that owns it>>);
+* neither any non-payload extent nor the payload's start address may move, and no extent may grow while the loan is held.
 
 *Fixed-size loans.*
 On a lending binding that declares fixed-size transmit loans:
@@ -352,13 +359,14 @@ On a lending binding that declares fixed-size transmit loans:
 [horizontal]
 ID:: `+req~ssr-binding-loan-sizing~1+`
 ASIL:: B
-Allocated to:: each lending binding; the element, for shortening a transmit loan only on a lending binding that declares shortenable loans and requesting the exact target length on one that declares fixed-size loans
+Allocated to:: each lending binding on a composition where a caller or profile invokes transmit-loan sizing; the element, for shortening a transmit loan only on a lending binding that declares shortenable loans and requesting the exact target length on one that declares fixed-size loans
 Verification:: test, review
 * *test*
-** On a lending binding that declares shortenable transmit loans: a payload shortened before sending has its shortened length written in the header and every surrendered byte zeroed before sending, with metadata extent and payload start unchanged.
+** On a lending binding that declares shortenable transmit loans: a payload shortened before sending has its shortened extent recorded per the binding's layout contract and every surrendered byte initialized (and zeroed where required) before sending, with non-payload extents and payload start unchanged.
 ** On a lending binding that declares fixed-size transmit loans: the payload extent cannot move or change size while held, and a shorter frame (such as a header-only response) is requested at its exact target length.
-* *review*: each lending binding's declared loan-sizing capability against its transmit-loan interface and initialized-extent complement; element callers selecting shortening versus exact-length loan request strictly by that capability.
+** Negative control: an unrelated non-invoking lending binding acquires no new capability-declaration duty from this item.
+* *review*: each participating lending binding's declared loan-sizing capability against its transmit-loan interface, physical representation and initialized-extent complement; element callers selecting shortening versus exact-length loan request strictly by that capability.
 
 *Rationale.*
-Some lending bindings allow shrinking a held transmit loan's logical payload length before publication while zeroing surrendered bytes, whereas others fix the payload extent when the loan is created.
-Stating both contracts once in the shared binding layer lets shared protocols such as header-only E2E responses adapt solely to the binding's declared capability without naming concrete middlewares.
+Lending bindings differ in whether a held transmit loan's logical payload extent can shrink before publication or is fixed when the loan is created.
+A layout-neutral capability interface lets callers select shortening or exact-length allocation directly from the binding's declared capability without prescribing a single in-band header format.

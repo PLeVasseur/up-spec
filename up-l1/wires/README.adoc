@@ -52,7 +52,7 @@ A serialized wire can run over either a lending or a handoff binding; each wire 
 [.specitem,oft-sid="req~ssr-wire-scope~2",oft-title="What a wire is, and the wire contract",oft-needs="uman",oft-tags="SafetyWire"]
 --
 *What a wire is.*
-A wire is the part through which a route writes a payload into the storage that carries its frame, and reads a payload that has arrived.
+Following the shared vocabulary in xref:../../basics/resources.adoc#sec-words[shared resource lifecycle and storage], a wire is the part through which a route writes a payload into the storage that carries its frame, and reads a payload that has arrived.
 It is written against the interface between the element and a wire, whose side in the element is in part E1 of the element (xref:../../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
 
 *The wire contract.*

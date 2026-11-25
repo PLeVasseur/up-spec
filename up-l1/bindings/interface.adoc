@@ -21,7 +21,7 @@ This section defines the common binding scope and contractual obligations shared
 [.specitem,oft-sid="req~ssr-binding-scope~2",oft-title="What a binding is, and the binding contract",oft-needs="uman",oft-tags="SafetyBinding"]
 --
 *What a binding is.*
-A binding is a uP-L1 transport implementation that adapts the element to one middleware and is written against the element's lending or handoff runtime contract, part E2 of the element (xref:../../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
+Following the shared vocabulary in xref:../../basics/resources.adoc#sec-words[shared resource lifecycle and storage], a binding is a uP-L1 transport implementation that adapts the element to one middleware and is written against the element's lending or handoff runtime contract, part E2 of the element (xref:../../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
 
 *The binding contract.*
 The binding contract of a binding is that runtime contract together with every duty that the statement of a requirement of the up-rust SEooC requirement family gives that binding (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]), wherever the requirement is filed:
@@ -88,17 +88,25 @@ So a duty that an item gives the element, the page on which an item is filed and
 [[req-ssr-binding-no-panic]]
 === No panic on any peer input
 
-[.specitem,oft-sid="req~ssr-binding-no-panic~9",oft-title="No panic on any peer input",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+[.specitem,oft-sid="req~ssr-binding-no-panic~10",oft-title="No panic on any peer input",oft-needs="impl,utest",oft-tags="SafetyBinding"]
 --
 *The rule.*
 Binding code *MUST NOT* panic on any frame, length or sequence a peer produces, or when a peer dies or restarts.
-Each binding *MUST* have each panic path inside its middleware made unreachable by a setup check or by sizing, unless the path is an accepted instance.
+Each binding *MUST* have each panic or process-termination path inside its middleware made unreachable by a setup check or by sizing, unless it falls strictly within the narrow middleware allocator-exhaustion resource-policy classification below or is an accepted instance.
+
+*Permitted middleware allocator-exhaustion classification.*
+Process termination solely from allocator exhaustion at an exact declared permitted Class 2 middleware acquisition or resize operation—covered by a complete named permit, finite resource envelope, five-part resource and failure policy and matching named waiver (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]) and admitted with no conflicting required recovery, panic-free-cleanup or process-survival claim (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused])—is governed by that declared resource and failure policy rather than classified as an accepted panic instance or a middleware panic known failure.
+This narrow classification applies solely to exhaustion at those exact named permitted middleware acquisition or resize operations and *MUST NOT* cover:
+
+* any panic or abort in binding code, element code or wire code;
+* any unsafe foreign unwinding across an FFI boundary;
+* any non-exhaustion middleware panic or termination path—including mutex/lock, refcount, socket, clock, mapping/unmapping, close, logger, callback, reconnect/stop-timeout, invalid-identity or invariant failures—which remain subject to the accepted-instance and known-failure rules below.
 
 *Each binding's account.*
-Each binding *MUST* state, in its qualification record (xref:../../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]), its account of the middleware panic paths that it can reach: that it has no accepted panic path, or each accepted instance by name.
+Each binding *MUST* state, in its qualification record (xref:../../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]), its account of the middleware panic paths that it can reach—that it has no accepted panic path, or each accepted instance by name—separately from any permitted Class 2 middleware allocator-exhaustion resource policy.
 
 *Accepted instances.*
-A middleware panic path is an accepted instance only where all of these hold:
+A middleware panic path outside the narrow allocator-exhaustion resource-policy classification above is an accepted instance only where all of these hold:
 
 * a requirement of the up-rust SEooC requirement family that is specific to the binding names the instance and states the five parts below;
 * the binding's qualification record discloses the instance as a known anomaly;
@@ -116,24 +124,27 @@ Where one requirement names several instances, each is accepted only with its ow
 An accepted instance is not a waiver, and it accepts no other path and no violation of another requirement.
 
 *Any other path.*
-Any other middleware panic path, including another one that only a broken OS can reach, is a known failure of its binding.
+Any other middleware panic or termination path, including another one that only a broken OS can reach, is a known failure of its binding.
 So is a path whose requirement does not state all five parts, or that its binding's qualification record does not disclose.
-An acknowledgement makes no known failure an accepted instance.
+An acknowledgement or waiver makes no known failure an accepted instance.
+
+*Scoped replacement.*
+For each binding across all configurations, this revision replaces revision 9 of this item by placing exhaustion solely at exact declared permitted Class 2 middleware acquisition or resize operations under the declared resource and failure policy ahead of accepted-instance and known-failure classification, while keeping own-code no-panic, five-part accepted instances and all non-exhaustion known-failure classifications in force.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-no-panic~9+`
+ID:: `+req~ssr-binding-no-panic~10+`
 ASIL:: B
 Allocated to:: each binding
 Verification:: fault-injection, test, review
 * *fault-injection*: malformed frames; peers killed and restarted; a faulty peer's writes into shared memory.
 * *test*: the binding contract suite.
-* *review*: for each binding, the account in its qualification record: that it says that the binding has no accepted panic path, or names each accepted instance; for each accepted instance, the requirement that accepts it, with all five of its parts, against the source of its middleware in the configuration that the instance names, and that no peer input, death, restart or shared-memory write reaches the path; and the disclosure of each accepted instance in the binding's qualification record.
+* *review*: for each binding, the account in its qualification record: that it separates permitted Class 2 allocator-exhaustion resource policy from panic paths, and says that the binding has no accepted panic path or names each accepted instance; that no non-exhaustion path (mutex, refcount, socket, clock, mapping, close, logger, callback, timeout, invariant or foreign unwind) is classified under allocator exhaustion; for each accepted instance, the requirement that accepts it, with all five of its parts, against the source of its middleware in the configuration that the instance names, and that no peer input, death, restart or shared-memory write reaches the path; and the disclosure of each accepted instance in the binding's qualification record.
 
 *Rationale.*
-A heap waiver cannot excuse a panic.
-A peer can produce its input again at any time, and can die or restart at any time, so nothing bounds a path that a peer can reach.
-Such a path is a known failure, whatever is disclosed or acknowledged.
+A heap waiver cannot excuse a panic in binding code, an unsafe foreign unwind, or any non-exhaustion middleware failure.
+Separating exhaustion solely at exact named permitted middleware allocator operations into the declared resource policy lets ordinary configurations disclose allocator termination honestly without weakening non-exhaustion known-failure classification or turning a known failure into an accepted instance.
+A peer can produce its input again at any time, and can die or restart at any time, so nothing bounds a non-exhaustion panic path that a peer can reach.
 
 Each binding states its account, so that no binding's silence is read as one.
 The paths of one middleware, and a setup check or a sizing that makes one of them unreachable, are stated with its binding.

@@ -182,7 +182,7 @@ On a route that does not select the native protection composition, the integrato
 * The element *MUST* prepare a native route only for a type that the agreement names for that route, with its layout identity.
 * The element *MUST* make each check of this item itself: what an agreement declares stands in for no check of a layout or of an identity.
 * The element *MUST* send each frame of a native route with the payload encoding identifier that the agreement names for the route (xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding], "On sending").
-* The agreement is part of a native route's configuration, which is fixed at setup: that nothing changes it in runtime mode is stated in xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode].
+* Applying xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode], the element *MUST* fix each native route's native agreement at setup and *MUST NOT* allow any runtime operation to change or replace that agreement in runtime mode.
 
 *At setup.*
 The element *MUST* refuse a native route at setup, naming the route and the type, where:

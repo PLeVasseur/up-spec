@@ -16,7 +16,7 @@ Rust-specific mechanisms referenced in these items are cross-linked from xref:..
 [[req-ssr-platform-contract]]
 == Every platform backend of the element keeps the platform's rules
 
-[.specitem,oft-sid="req~ssr-platform-contract~4",oft-title="Every platform backend of the element keeps the platform's rules",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-platform-contract~5",oft-title="Every platform backend of the element keeps the platform's rules",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Basic rules.*
 Every runtime platform backend of the element *MUST NOT* use the heap, panic, create a thread, or need global state that requires first-use setup.
@@ -27,13 +27,15 @@ In runtime mode, the element *MUST* reach the operating system from the safety c
 *Waits.*
 
 * Each platform backend *MUST NOT* let its wait lose a wake that happens after the caller observed the expected value.
-* After its wait returns spuriously, after an interruption or late, in a deliberate idle wait, the element *MUST* recheck the expected value and the time before it waits again or returns; after such a return in every other bounded wait of its own, the element *MUST* recheck the authoritative state and the time before it waits again or returns.
+* After a backend wait returns spuriously, after an interruption or late, the element *MUST* recheck the awaited condition and the time before waiting again or returning.
+Transport-specific deliberate-idle eligibility and bounded-wait deadline rules are stated in the transport runtime layer.
 
 *Clock reads.*
 
 * Each platform backend of the element *MUST* report a failed clock read instead of panicking or substituting another time base.
 * The element *MUST* treat a monotonic reading earlier than one it already holds as a failed read.
-* The element *MUST* treat a failed read as fail-closed: a bounded operation that depends on it ends as expired and is counted, and the TTL check of a frame whose TTL is greater than 0 refuses the frame and counts it once under a cause that names the unreadable clock and not as expired (a frame whose TTL is 0 needs no reading of the clock and is not refused because the clock cannot be read).
+* The element *MUST* treat a failed clock read as fail-closed so that no operation depending on that clock reading succeeds on an unknown time: any timed operation depending on it fails closed and is counted under its applicable failure cause, while an operation whose contract requires no clock reading is not refused for an unreadable clock.
+Message-TTL expiry and unreadable-clock refusal causes are specialized by the transport observation rules.
 
 *Prefault.*
 Each platform backend *MUST* have its prefault service make the memory that the service is given resident before it returns.
@@ -52,17 +54,22 @@ Each platform backend of the element *MUST* state, in the package of each suppor
 A platform backend that an integrator supplies is no part of the element.
 Each such backend *MUST* keep the rules that this item gives a platform backend of the element, and the element keeps its own rules of this item with it.
 The integrator's duties for such a backend, its qualification and the evidence that it keeps these rules, are stated in xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules].
+
+*Scoped replacement.*
+For the element, this revision replaces revision 4 of this item for wait-recheck and failed-clock-read wording: common backend wait and fail-closed clock duties remain here, while transport-specific deliberate-idle rechecks live in xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] and message-TTL expiry/unreadable-clock specialization lives in xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed].
+All platform-backend rules, prefault duties, stated-contract duties and custom-platform rules remain in force.
 --
 
 [horizontal]
-ID:: `+req~ssr-platform-contract~4+`
+ID:: `+req~ssr-platform-contract~5+`
 ASIL:: B
 Allocated to:: each platform backend of the element (part E4); each platform backend that an integrator supplies, for the rules that this item gives a platform backend of the element; the element, for reaching the operating system only through a platform backend, for its recheck after its backend's wait returns, for its handling of a failed read or of a reading that steps back, and for having its startup memory made resident
 Verification:: gate, test, review
 * *gate*: no path from the safety crate to the operating system outside its platform backends.
 * *test*
 ** The platform contract test, run inside heap windows, for each backend on the targets that its configuration names.
-** A fault-injected backend whose clock read fails or steps back, ending a wait as expired, counted, and refusing the TTL check of a frame whose TTL is greater than 0, with a frame whose TTL is 0 not refused.
+** A fault-injected backend whose wait returns spuriously, interrupted or late: the element rechecks the awaited condition and the time before waiting again or returning.
+** A fault-injected backend whose clock read fails or steps back: a dependent timed operation fails closed and is counted, and an operation that needs no clock reading is not refused.
 ** Startup memory made resident by the prefault service before anything is placed in it.
 * *review*: each backend's source and its package's stated contracts.
 

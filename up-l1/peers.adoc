@@ -74,7 +74,7 @@ The element, the bindings, the wires and the Streamer handle the same frames and
 [[req-ssr-peer-failure-normal]]
 == Peer failure is normal input
 
-[.specitem,oft-sid="req~ssr-peer-failure-normal~4",oft-title="Peer failure is normal input",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-peer-failure-normal~5",oft-title="Peer failure is normal input",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Effects in surviving processes.*
 In each process that stays up, the element *MUST NOT* let a peer process that dies at any instruction, or restarts, cause any of the following in element code:
@@ -105,15 +105,19 @@ On a serialized route whose declared heap class admits allocation, a call or fra
 The element *MUST NOT* let the failure cause any other heap use there.
 
 *What a failure never releases.*
-On every route, the element *MUST NOT* let a peer's failure, or the cleanup that follows it, release a route, a role, a table, a startup region or another runtime resource, or revoke an owner, other than what the failure ended.
+On every route, the element *MUST NOT* let a peer's failure, or the cleanup that follows it, release a route, a role, a table, a startup region or any permanent runtime resource, reclaim peer-owned backing, or revoke an owner other than what the failure ended.
+Bounded retirement by a binding of its own separately charged local middleware connection, local-view or descriptor resources—after all local held, pending and in-service dependencies have ended, under xref:runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode] and any admitted Class 2 permit—is distinct from peer-backing reclamation and never delays survivor operations, accounting or health reporting.
 
 *Other parts.*
 What a binding owes when a peer fails is stated in xref:bindings/interface.adoc#req-ssr-binding-no-panic[No panic on any peer input], xref:bindings/lifecycle.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits] and xref:bindings/interface.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise].
 What the integrator provides is stated in xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated] and xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports].
+
+*Scoped replacement.*
+For the element across all configurations, this revision replaces revision 4 of this item by distinguishing separately charged local middleware connection/view lifecycle from peer-backing reclamation while keeping own-code no-panic/no-heap/no-unbounded-wait, survivor accounting, pending-cleanup isolation and the same-dependency owner-return limit in force.
 --
 
 [horizontal]
-ID:: `+req~ssr-peer-failure-normal~4+`
+ID:: `+req~ssr-peer-failure-normal~5+`
 ASIL:: B
 Allocated to:: the element
 Verification:: fault-injection inside a heap-window
@@ -148,7 +152,7 @@ One owner's return can wait for that cleanup only where its own release needs th
 [[req-ssr-native-abi-agreed]]
 == A native representation never crosses an ABI
 
-[.specitem,oft-sid="req~ssr-native-abi-agreed~2",oft-title="A native representation never crosses an ABI",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
+[.specitem,oft-sid="req~ssr-native-abi-agreed~3",oft-title="A native representation never crosses an ABI",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding"]
 --
 *The fingerprint.*
 The element *MUST* state an ABI fingerprint of its target:
@@ -158,18 +162,20 @@ The element *MUST* state an ABI fingerprint of its target:
 * the size and alignment of each scalar that a native type admits, `+u128+` and `+i128+` included (xref:wires/native.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout]).
 
 *Bindings.*
-Each binding that carries native frames between processes *MUST* exchange the fingerprint at setup.
+Each binding that carries native frames between processes *MUST* exchange the fingerprint at setup and, where the binding profile admits later-appearing setup-declared peer incarnations, for each new peer incarnation before exposing any native frame from it.
 For each route that admits a native wire, such a binding *MUST*:
 
 * record the fingerprint that the element states, when it creates its side of the route;
-* report to the element each fingerprint that it finds recorded for the route's peers, and each peer for which it finds none.
+* report to the element each fingerprint that it finds recorded for every observed peer incarnation on the route, and each observed peer incarnation for which it finds none;
+* distinguish an absent setup-declared peer (no peer incarnation currently present) from an observed peer incarnation that recorded no fingerprint.
 
-Such a binding *MUST NOT* report a fingerprint that it did not find.
+Such a binding *MUST NOT* report a fingerprint that it did not find, and *MUST NOT* treat absence of a peer as an agreed fingerprint.
 
-*Refusal at setup.*
-At setup, the element *MUST* refuse a route whose wire carries a native representation where the route's binding reports a peer's fingerprint that differs from the element's own.
+*Refusal at setup and on later peer incarnations.*
+At setup, the element *MUST* refuse a route whose wire carries a native representation where the route's binding reports an observed peer's fingerprint that differs from the element's own.
 The element *MUST* name the route, both ABIs and a serialized route as the fix in that refusal.
-The element *MUST* also refuse such a route where the binding reports a peer that has recorded no fingerprint, and *MUST* name the route and the missing fingerprint in that refusal.
+The element *MUST* also refuse such a route where the binding reports an observed peer that has recorded no fingerprint, and *MUST* name the route and the missing fingerprint in that refusal.
+Where a binding profile admits a setup-declared peer that is absent at setup, the element *MAY* admit the route only where the binding and element enforce current-incarnation ABI fingerprint verification—and any applicable native layout agreement—before any native payload view, access or delivery from a later-appearing peer incarnation; any later-appearing incarnation whose fingerprint is missing or differs *MUST* be refused before native payload access, and bounded local control/segment mapping for ABI retrieval never authorizes typed payload access before verification passes.
 
 *No substitute.*
 A missing or a different fingerprint has no other outcome than that refusal.
@@ -179,27 +185,27 @@ The element *MUST NOT* reinterpret or convert the payload, serve the route in an
 An equal fingerprint agrees the ABI, and no more: it agrees no type and no layout (xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]).
 The name of an operating system or of a toolchain agrees no ABI.
 
-*Replacement of revision 1.*
-For the element and for each such binding, this revision replaces two sentences of revision 1 of this item: the recording of a fingerprint, which revision 1 gave every peer of the route, is the binding's, and the refusal of a peer that records none, which it gave a native peer, is the element's.
-
 *Peers that do not use the element.*
 This item gives a duty to the element and to a binding in each process that uses them, and to no other peer.
-For a peer that uses neither, this revision retires the recording of a fingerprint and the refusal of a peer that records none, which revision 1 gave every peer and a native peer.
 Such a peer's participation is the deployment's condition: the peers of a route are the deployment's to declare (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]), and the element still refuses a frame whose writer's ABI or layout is not established, on the conditions that xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout] states.
 
 *Scope.*
 A serialized route needs no fingerprint, and this item does not affect it.
+
+*Scoped replacement.*
+For the element and each binding that carries native frames between processes, this revision replaces revision 2 of this item by distinguishing an absent setup-declared peer from an observed fingerprintless peer while requiring current-incarnation ABI verification before any native payload exposure from a later-appearing peer incarnation; setup refusals for observed mismatched or missing fingerprints and retirement of non-element-peer duties from revision 1 remain in force.
 --
 
 [horizontal]
-ID:: `+req~ssr-native-abi-agreed~2+`
+ID:: `+req~ssr-native-abi-agreed~3+`
 ASIL:: B
-Allocated to:: the element; each binding that carries native frames between processes, for exchanging, recording and reporting the fingerprint
+Allocated to:: the element; each binding that carries native frames between processes, for exchanging, recording and reporting the fingerprint at setup and for later-appearing peer incarnations before native exposure
 Verification:: test
 * The fingerprint: its byte order, its pointer width and the size and alignment of each scalar, on targets whose fingerprints differ in each of them.
-* The binding contract suite, on test doubles and between two processes on a real binding that carries native frames: the element's fingerprint recorded and exchanged, and an equal fingerprint, a different one and a missing one each reported as it was found.
-* The element's refusal at setup of a route whose peer's fingerprint differs, naming the route, both ABIs and a serialized route as the fix.
-* The element's refusal at setup of a route whose peer recorded no fingerprint, naming the route and the missing fingerprint.
+* The binding contract suite, on test doubles and between two processes on a real binding that carries native frames: the element's fingerprint recorded and exchanged, and an equal fingerprint, a different one, an observed missing one and an absent declared peer each reported distinctly.
+* The element's refusal at setup of a route whose observed peer's fingerprint differs, naming the route, both ABIs and a serialized route as the fix.
+* The element's refusal at setup of a route whose observed peer recorded no fingerprint, naming the route and the missing fingerprint.
+* A setup-declared absent peer joining later: verified for current-incarnation ABI fingerprint before any native payload view or delivery; a later incarnation with a missing or mismatched fingerprint refused before native payload access, and absence never treated as equality.
 * After each refusal, no route prepared in another form, and no payload converted or reinterpreted.
 
 *Rationale.*
@@ -265,17 +271,20 @@ The exclusion argument still needs the review of each mechanism (xref:../basics/
 [[req-ssr-peer-admission]]
 == Undeclared peers cannot lock out declared ones
 
-[.specitem,oft-sid="req~ssr-peer-admission~2",oft-title="Undeclared peers cannot lock out declared ones",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-peer-admission~3",oft-title="Undeclared peers cannot lock out declared ones",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 On a route with a declared list of peers, the element *MUST* refuse and count a frame from an undeclared source before the frame takes a peer-table entry.
 
-* The element *MUST* size the table from the declaration, and *MUST* have any declaration that the table or the binding cannot hold refused at setup.
+* The element *MUST* compute and size the peer table from the route's declared peer list and declared worst-case semantic load under xref:../basics/resources.adoc#req-ssr-memory-computable[Startup storage is computable before start], and *MUST* have any declaration that the table or the binding cannot hold refused at setup.
 * The element *MUST* return a lost peer's entry.
 * The element *MUST NOT* let that return make a later peer's frames be refused as stale, whatever frames of the lost peer are in flight at that moment.
+
+*Scoped replacement.*
+For the element across all configurations, this revision replaces revision 2 of this item by placing peer-table capacity computation from declared worst-case load directly here under xref:../basics/resources.adoc#req-ssr-memory-computable[Startup storage is computable before start], while preserving pre-runtime capacity refusal and all runtime peer-entry rules.
 --
 
 [horizontal]
-ID:: `+req~ssr-peer-admission~2+`
+ID:: `+req~ssr-peer-admission~3+`
 ASIL:: B
 Allocated to:: the element
 Verification:: fault-injection (strangers first, then declared clients; a lost peer racing its own last frame, on two threads), miri, test

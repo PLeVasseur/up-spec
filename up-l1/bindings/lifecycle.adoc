@@ -30,7 +30,7 @@ Otherwise the element *MUST* refuse the transition, naming the transport, the ro
 ID:: `+req~ssr-waiver-required~1+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test (refused without the waiver, admitted with it)
+Verification:: test (refused without a matching waiver; this gate passes with a matching waiver while all other admission conditions still apply)
 
 *Rationale.*
 Allocation inside middleware is outside the element's control.
@@ -41,30 +41,34 @@ A refusal that names the transport, the route and the permit tells the deploymen
 [[req-ssr-waiver-scope]]
 === A waiver covers middleware and nothing else
 
-[.specitem,oft-sid="req~ssr-waiver-scope~1",oft-title="A waiver covers middleware and nothing else",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-waiver-scope~2",oft-title="A waiver covers middleware and nothing else",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-The element *MUST NOT* let a waiver admit more than allocation inside middleware, for the operations and the bound its permit names.
+The element *MUST NOT* let a waiver admit more than the exact Class 2 middleware lifecycle operations, allocation domain, justified finite resource envelope, declared wait domain and narrow permitted allocator-exhaustion outcome that its permit names (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 
 The element *MUST NOT* let a waiver admit:
 
 * allocation in element, binding or wire code;
-* a wire that declares allocation;
-* a panic.
+* a wire that declares allocation on a native route;
+* any panic or abort in element, binding or wire code, any unsafe foreign unwind, or any non-exhaustion middleware panic or unrelated known failure (xref:interface.adoc#req-ssr-binding-no-panic[No panic on any peer input]);
+* any operation whose disclosed termination outcome conflicts with an overlapping required guarantee or process-survival claim (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 
-Allocation that a serialized route declares for its wire, its binding or its allocation provider (xref:../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing] states what an allocation provider is) is admitted by that route's heap class (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), and by no waiver; allocation inside middleware under a permit needs a waiver on every route, as <<req-ssr-waiver-required,Middleware heap needs a named waiver>> states.
+Allocation that a serialized route declares for its wire, its binding or its allocation provider (xref:../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing] states what an allocation provider is) is admitted by that route's heap class (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), and by no waiver; Class 2 allocation inside middleware under a permit needs a waiver on every route, as <<req-ssr-waiver-required,Middleware heap needs a named waiver>> states.
+
+*Scoped replacement.*
+For the element across all configurations, this revision replaces revision 1 of this item by admitting only the exact Class 2 middleware lifecycle resource effects and narrow permitted allocator-exhaustion outcome of the matching permit, while explicitly excluding own-code allocation, own-code panics, unsafe foreign unwinds, all non-exhaustion middleware known failures and any conflict with an overlapping required guarantee or process-survival claim.
 --
 
 [horizontal]
-ID:: `+req~ssr-waiver-scope~1+`
+ID:: `+req~ssr-waiver-scope~2+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test (a wire that declares allocation on a native route is refused even with a waiver), review
+Verification:: test (a wire that declares allocation on a native route, binding-code allocation, a non-exhaustion middleware panic or known failure, or a terminating permit conflicting with a required recovery or process-survival claim, each refused even with a waiver), review
 
 *Rationale.*
 The element can answer only for its own code.
-So a waiver covers only what middleware does inside itself, for the operations and the bound its permit states.
+So a waiver covers only what middleware does inside itself for the exact operations, allocation domain, finite envelope and narrow allocator-exhaustion resource policy that its permit states.
 
-A known anomaly or a known failure of middleware, such as a panic that it can reach, is outside what a permit names, so no waiver covers it (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]).
+Any non-exhaustion known failure or panic of middleware, unsafe foreign unwind or own-code panic is outside what a permit names, so no waiver covers it (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]).
 
 A serialized route's heap class admits only the allocation that the route declares, and nothing that a native operation causes.
 
@@ -75,31 +79,37 @@ A serialized route's heap class admits only the allocation that the route declar
 [[req-ssr-binding-no-heap]]
 === Binding code allocates nothing in runtime mode on a native path
 
-[.specitem,oft-sid="req~ssr-binding-no-heap~3",oft-title="Binding code allocates nothing in runtime mode on a native path",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+[.specitem,oft-sid="req~ssr-binding-no-heap~4",oft-title="Binding code allocates nothing in runtime mode on a native path",oft-needs="impl,utest",oft-tags="SafetyBinding"]
 --
 *Native paths.*
-In runtime mode, binding code *MUST NOT* acquire or release heap memory on any path that a native payload operation causes, errors, cancellation, retirement and deferred release included.
+In runtime mode, binding code (the adapter's own code and callbacks) *MUST NOT* acquire or release heap memory on any path that a native payload operation causes, errors, cancellation, retirement and deferred release included.
+Relabeling adapter code or an adapter callback as middleware work does not satisfy this rule.
 
 *Every other path.*
 In runtime mode, binding code *MUST NOT* acquire or release heap memory on any other path, except as a serialized route's declared heap class permits and setup admits (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 
 *Middleware.*
-Each binding *MUST* have any allocation inside its middleware declared as a permit on the routes that the allocation affects, and reported separately.
-A permit discloses that allocation and establishes no heap-free guarantee.
-The heap class that a binding states for a route covers the middleware work that its calls cause there (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), so a route with a permit does not have the class none.
+Each binding *MUST* declare any runtime heap acquisition, resize or release inside its middleware—including connection/local-view/descriptor lifecycle, notification/task bookkeeping and deferred work—as a complete Class 2 permit on every route that the middleware work affects, enumerating each middleware lifecycle operation and trigger, its allocation domain, its justified finite resource envelope, its five-part resource and failure policy and clear actor attribution separating middleware code from binding code (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), and *MUST* report it separately.
+A permit discloses that middleware activity and establishes no heap-free, availability, recovery or qualification guarantee.
+The heap class that a binding states for a route covers the middleware work that its calls cause there (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), so a route with a permit has Class 2 and not Class 1 (`none`).
 
 *When the rules apply.*
 These rules bind the binding's transport from its own transition.
+
+*Scoped replacement.*
+For each binding across all configurations, this revision replaces revision 3 of this item by requiring full Class 2 permit enumeration of middleware lifecycle operations, triggers, allocation domains, finite envelopes, five-part policies and actor attribution, while keeping binding code strictly heap-free on native paths.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-no-heap~3+`
+ID:: `+req~ssr-binding-no-heap~4+`
 ASIL:: B
 Allocated to:: each binding
-Verification:: heap-window (on each target and configuration that the binding's qualification record claims)
-* For each binding, over native traffic with errors, cancellation, retirement and deferred release, with middleware allocation reported apart under its permit.
-* On every other path, a serialized route's included: binding code acquiring and releasing heap memory only as a route's declared heap class permits and setup admits, and not at all where no class admits it.
-* On a serialized route, the binding's declared allocation reported, as xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
+Verification:: heap-window (on each target and configuration that the binding's qualification record claims), review
+* *heap-window*
+** For each binding, over native traffic with errors, cancellation, peer join/restart, retirement and deferred release: zero heap use in binding code and callbacks, with middleware lifecycle allocation reported apart under its exact Class 2 permit and operation.
+** On every other path, a serialized route's included: binding code acquiring and releasing heap memory only as a route's declared heap class permits and setup admits, and not at all where no class admits it.
+** On a serialized route, the binding's declared allocation reported, as xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
+* *review*: clear actor attribution separating binding code from middleware code; every reached runtime middleware acquisition, resize and release enumerated with trigger, domain, finite envelope and five-part policy.
 
 *Rationale.*
 Binding code runs inside the process on every runtime path.
@@ -114,19 +124,26 @@ So it is declared as a permit, admitted only by a waiver (<<req-ssr-waiver-requi
 [[req-ssr-binding-lazy-forced]]
 === Lazy state is forced, and threads are idle, before running
 
-[.specitem,oft-sid="req~ssr-binding-lazy-forced~2",oft-title="Lazy state is forced, and threads are idle, before running",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+[.specitem,oft-sid="req~ssr-binding-lazy-forced~3",oft-title="Lazy state is forced, and threads are idle, before running",oft-needs="impl,utest",oft-tags="SafetyBinding"]
 --
 A binding *MUST* take every first lock at construction or route preparation, and force every lazy primitive, before its transition to running returns.
-That holds for the binding's own locks and lazy primitives, and for each one of its middleware that a runtime path of the binding can reach, on every route.
+That holds for all of the binding's own locks and lazy primitives, and for every pre-existing lock and lazy primitive of its middleware that a runtime path of the binding can reach, on every route.
 
-The binding *MUST* have every thread that it starts reach its idle loop by then.
+The binding *MUST* have every thread and autonomous worker that it starts during initialization—including any deferred-return worker—reach its idle ready state before the transition returns.
+
+*Named runtime-created middleware objects.*
+Intrinsic first use of a lock or primitive belonging strictly to a named runtime-created middleware object—such as a local connection or endpoint created when a later-appearing setup-declared peer joins—is permitted only where that runtime lifecycle operation is explicitly enumerated in an admitted Class 2 middleware permit and its declared resource and failure policy (xref:../../basics/resources.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
+This exception never excuses unforced binding locks, pre-existing middleware locks, unready initialization workers, reconnect sleeps or stop-timeout termination.
+
+*Scoped replacement.*
+For each binding across all configurations, this revision replaces revision 2 of this item by mirroring the narrow intrinsic first-use exception for explicitly enumerated runtime-created middleware objects under Class 2 policy while keeping all own-lock, pre-existing middleware-lock and worker-readiness duties in force.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-lazy-forced~2+`
+ID:: `+req~ssr-binding-lazy-forced~3+`
 ASIL:: B
 Allocated to:: each binding
-Verification:: heap-window (first traffic, through the binding contract suite, on each target and configuration that the binding's qualification record claims), fault-injection, review (each first lock and each lazy primitive of the binding's middleware that a runtime path of the binding can reach, at source level for the revision of the middleware that the binding is built against: taken or forced before the transition returns)
+Verification:: heap-window (first traffic, through the binding contract suite, on each target and configuration that the binding's qualification record claims, with any admitted Class 2 runtime-created middleware object reported apart), fault-injection, review (each own lock, pre-existing middleware lock, initialization-created worker readiness and any enumerated runtime-created middleware first-use path at source level for the exact middleware revision the binding is built against)
 
 *Rationale.*
 The element's own rule (xref:../../basics/resources.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]) would not hold if a binding left a lock or a thread to set itself up on first traffic, inside runtime mode.
@@ -138,14 +155,14 @@ A serialized route's declared allocation excuses no lazy first use on any path.
 [[req-ssr-binding-frame-drop]]
 === What a received frame's destructor may do
 
-[.specitem,oft-sid="req~ssr-binding-frame-drop~10",oft-title="What a received frame's destructor may do",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+[.specitem,oft-sid="req~ssr-binding-frame-drop~11",oft-title="What a received frame's destructor may do",oft-needs="impl,utest",oft-tags="SafetyBinding"]
 --
 *No blocking.*
-Each binding *MUST* ensure that dropping one of its received frames does not block, with the one exception that this item states for a declared allocation domain.
+Each binding *MUST* ensure that dropping one of its received frames does not block, with the one exception that this item states for a declared Class 3 allocation domain on a serialized route that does not require non-waiting release.
 The binding *MUST* ensure that the drop takes no lock that can wait behind other work, in the binding or in its middleware, and that any retry in it is lock-free and bounded by other threads' progress.
 
 *Native and heap-free routes.*
-On a native route, and on any route whose heap class is none, the binding *MUST* ensure that the drop frees no heap.
+On a native route, and on any route whose heap class is none, the binding *MUST* ensure that its own drop and hand-off path acquires and releases no heap memory, never releases live frame backing or permanent runtime infrastructure, and performs no forbidden inline wait.
 
 *Routes that admit the binding's allocation.*
 On a serialized route whose declared heap class admits the binding's allocation (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), the binding *MUST* ensure that the drop releases, exactly once, only the storage that the binding allocated for that frame under that class:
@@ -155,48 +172,53 @@ On a serialized route whose declared heap class admits the binding's allocation 
 
 The binding *MUST* ensure that the drop releases no other binding resource and revokes no retained owner.
 
-*Deferred return.*
-Where the middleware's own release of a retained frame can wait, the binding *MUST* have the drop instead hand the frame, without waiting, to the binding's deferred return.
+*Deferred return and actual completion.*
+Where the middleware's own release of a retained frame can wait or involves separately permitted Class 2 middleware deferred lifecycle work, the binding *MUST* have the drop instead hand the whole frame owner once, without waiting, allocating or panicking, through a pre-reserved return representation covering every admitted owner to the binding's autonomous deferred return.
 
-A release that the deferred return performs is pending cleanup, charged until it completes and isolated as xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states.
-On a native route, the binding *MUST* ensure that such a release frees no heap, in binding code and in the middleware work that it causes, and never frees the backing that the frame lives in.
+A release that the deferred return performs is pending cleanup, charged until actual physical return completes and transitively isolated as xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states.
+Hand-off to deferred return, the return of a destructor call, or emitting a diagnostic log does not constitute completed physical return; the binding *MUST NOT* treat a failed, skipped or unconfirmed return as completed.
+On a native route, binding code in deferred return *MUST* acquire and release no heap, and the deferred return *MUST NOT* free live payload backing or permanent infrastructure; any middleware heap release or local connection/view/descriptor retirement performed during deferred or separate lifecycle work *MUST* be explicitly enumerated in an admitted Class 2 permit and policy and kept separately charged from sample return (xref:../runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode]).
 
 *What a route requires.*
-Releasing the binding's allocation is part of the route's cleanup.
+Releasing the binding's allocation and any permitted Class 2 deferred lifecycle work is part of the route's cleanup.
 Whether setup admits that allocation on a route that requires panic-free cleanup or non-waiting release, through the allocator and every dependency that the release reaches, or refuses the route by name, is the element's to decide, as xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused] states.
-That item also states that the element refuses no route for that allocation where the route requires neither.
+That item also states that the element refuses no route for that allocation where the route requires neither and no process-survival conflict applies.
 What the element shows of the binding's declared policy in each route's report is stated in xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Reporting".
-For the element, those two requirements replace the share that revision 9 of this item gave it: the setup that admits or refuses a route by what the route requires of the release of the binding's allocation, and that route's report of the binding's declared policy.
 
 *No panic.*
 The binding's own code *MUST NOT* panic, on the drop or in the deferred return that completes it.
 
-A middleware panic path that the drop or that return can reach is allowed only as an accepted instance of xref:interface.adoc#req-ssr-binding-no-panic[No panic on any peer input].
-The requirement that accepts it is specific to its binding, says that the instance applies to a frame's drop, and states all five parts that the rule asks of an instance.
-On a native route no accepted instance covers a path that the drop or that return can reach, because there the drop cannot panic (xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else], "Native routes").
-Any other middleware panic path that the drop or that return can reach is a known failure of the binding.
+Exhaustion solely at an exact declared permitted Class 2 middleware acquisition or resize operation reached during cleanup—where admitted under xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default] and not forbidden by a required `Panic-free cleanup`, `Recoverable exhaustion` or process-survival claim—is governed by that declared resource policy (xref:interface.adoc#req-ssr-binding-no-panic[No panic on any peer input]).
+A non-allocating return path gains no panic exemption from that rule.
+Any other middleware panic path that the drop or that return can reach is allowed only as an accepted instance of xref:interface.adoc#req-ssr-binding-no-panic[No panic on any peer input] (with all five parts, specific to the binding, and explicitly applying to frame drop).
+On a native route no accepted instance covers a non-exhaustion path that the drop or that return can reach, because there the drop cannot panic (xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else], "Native routes").
+Any other middleware panic or termination path that the drop or that return can reach is a known failure of the binding.
 
 An accepted instance is never a waiver, and covers no other middleware panic path, no owned value's destructor and no allocator or provider failure.
+
+*Scoped replacement.*
+For each binding across all configurations, this revision replaces revision 10 of this item by separating own-code non-allocating drop/handoff from separately permitted Class 2 middleware deferred lifecycle work, requiring pre-reserved whole-owner hand-off distinct from actual physical completion, and applying the narrow Class 2 allocator-exhaustion resource-policy classification solely to actual reached permitted allocation operations while preserving all non-blocking, isolation, non-revocation and non-exhaustion known-failure duties.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-frame-drop~10+`
+ID:: `+req~ssr-binding-frame-drop~11+`
 ASIL:: B
 Allocated to:: each binding
 Verification:: test, heap-window, fault-injection, review
 * *test*
 ** The binding contract suite.
 ** On a serialized route that admits the binding's allocation, one release per frame of exactly what the binding allocated for it.
-** A retained frame whose release in the middleware can wait, taken off the drop through the deferred return, on every route.
+** A retained frame whose release in the middleware can wait, handed off as a whole owner through a pre-reserved return representation to autonomous deferred return without blocking, on every route, staying charged until actual completion.
+** A failed or skipped return not reported as completed; destructor return or log output alone not accepted as completion proof.
 ** On a route that does not require non-waiting release, the release of the binding's allocation on the drop's own path under the declared policy.
 ** On a route that requires it, a release of that allocation that can wait taken off the drop through the deferred return.
-** A deferred return held behind the lock it waits for, while the binding's calls, arrival reports and the returns of owners that do not need that lock continue.
+** A deferred return held behind the dependency it waits for, while the binding's calls, arrival reports, health reports and the returns of owners that do not need that dependency continue.
 * *heap-window*, on each target and configuration that the binding's qualification record claims
-** No free on a native route, on the drop and in a release that the deferred return performs, the middleware's work in it included.
+** Zero heap use in binding code on a native route, on the drop and in deferred return, with no live backing or permanent infrastructure freed and any admitted Class 2 middleware lifecycle work reported separately under its permit.
 ** On a serialized route, only the declared release.
 * *fault-injection*: for a binding with an accepted instance on this path, peer input, death and restart never reach it, as that binding's own item states.
 * *review*
-** The binding's lock use, for every call sequence the element allows.
+** The binding's lock use, pre-reserved return representation and actual completion status interface, for every call sequence the element allows.
 ** For a binding with an accepted instance on this path, its known-anomaly entry in the binding's qualification record.
 
 *Rationale.*
@@ -224,10 +246,11 @@ A panic path inside one middleware is stated, with its bounds, in a requirement 
 [[req-ssr-binding-bounded]]
 === A binding bounds its own work and its waits
 
-[.specitem,oft-sid="req~ssr-binding-bounded~5",oft-title="A binding bounds its own work and its waits",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyBindingPull,SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-binding-bounded~6",oft-title="A binding bounds its own work and its waits",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyBindingPull,SafetyUpRustCore"]
 --
 *Bounded receive.*
 On a route that it serves by pull, a binding *MUST* give up at most the route's bound in each call of its receive, and keep the rest in a bounded queue under the route's QoS.
+While queued traffic, work budget and genuine owner capacity remain, a pull receive call *MUST* make within-bound progress and return its ordinary receive result: the binding *MUST NOT* fabricate a contention, busy, false-empty, invented error, pending or artificial exhaustion result, impose a lower public caller concurrency limit, or defer the required within-bound advance to a later application call.
 
 *Bounded waits.*
 A binding *MUST NOT* let a call of its own wait without a bound, except as the next paragraph allows, or wait for a deferred return to complete.
@@ -235,27 +258,33 @@ A binding *MUST NOT* let a call of its own wait without a bound, except as the n
 *Waits without a deadline.*
 Apart from a deliberate idle wait (xref:../runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]), a binding *MAY* let its work wait without a finite logical deadline in two cases only:
 
-* a release that its deferred return performs as pending cleanup (<<req-ssr-binding-frame-drop,What a received frame's destructor may do>>), isolated as xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states;
-* on a serialized route whose declared heap class admits the binding's allocation, a wait inside the allocation domain that the binding's declared policy names, as xref:../runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] states and limits.
+* a release that its deferred return performs as pending cleanup (<<req-ssr-binding-frame-drop,What a received frame's destructor may do>>), transitively isolated as xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states;
+* a wait inside the allocation domain that the binding's declared policy names for an admitted Class 3 serialized allocation or an exact enumerated Class 2 permitted middleware acquisition or lifecycle operation, as xref:../runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] states and limits.
 
 A binding *MUST* bound its other work, its worker loops, dispatch and wake paths included.
 A binding *MUST NOT* let anything that a binding call, an arrival report or a health report needs wait behind a pending release.
+Neither a short critical section nor splitting work onto a separate worker by itself establishes that isolation: any design in which a pending release contends for a lock, queue, atomic wrapper or execution resource needed by a binding call, arrival report or health report fails this requirement.
 
 *Carrier ingress.*
 At the ingress of a carrier route (xref:../../up-l2/streamer.adoc#req-ssr-carrier-route[A carrier route takes each frame at its ingress and sends it at its egress]), the element *MUST* take pulled or retained frames, and never a borrowed frame whose carriage would need a staged copy.
+
+*Scoped replacement.*
+For each binding across all configurations, this revision replaces revision 5 of this item by extending the allocation-domain wait allowance solely to exact enumerated Class 2 permitted middleware operations while preserving no caller, arrival or health wait behind pending release, ordinary caller results, within-bound receive progress with genuine capacity and mechanism-neutral isolation rules.
+The element's carrier-ingress duty remains unchanged.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-bounded~5+`
+ID:: `+req~ssr-binding-bounded~6+`
 ASIL:: B
 Allocated to:: each binding; the element, for the frames that it takes at the ingress of a carrier route
-Verification:: fault-injection, test
+Verification:: fault-injection, test, review
 * *fault-injection*
 ** A flood.
-** A deferred return held behind the middleware's lock while the binding's calls, arrival reports and health reports continue.
+** A deferred return held or paused while the binding's calls (with genuine remaining owner and work capacity), arrival reports and health reports continue without waiting, fabricating contention/busy/empty/exhaustion results or deferring within-bound advance.
 * *test*
-** No binding call waits for a deferred return.
+** No binding call waits for a deferred return; a refused first sample followed by a valid sample with work budget for two and genuine remaining owner capacity delivers the valid sample within the same pull receive call, while genuine owner-capacity exhaustion is refused separately before ownership.
 ** A carrier ingress taking pulled or retained frames, and never a borrowed frame whose carriage would need a staged copy.
+* *review*: transitive lock, worker, atomic and wake isolation between pending release and binding calls, arrival reports and health reports; no short-critical-section or worker-label assumption; any allocation-domain wait limited strictly to admitted Class 2 or Class 3 declarations.
 
 *Rationale.*
 A receive that gave up any number of frames per call could hold its caller for as long as a peer keeps sending.
@@ -276,7 +305,7 @@ With no place for it, such a binding would be refused on a route that requires n
 [[req-ssr-binding-predecessor-cleanup]]
 === A binding cleans up after a dead predecessor, in initialization
 
-[.specitem,oft-sid="req~ssr-binding-predecessor-cleanup~2",oft-title="A binding cleans up after a dead predecessor, in initialization",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+[.specitem,oft-sid="req~ssr-binding-predecessor-cleanup~3",oft-title="A binding cleans up after a dead predecessor, in initialization",oft-needs="impl,utest",oft-tags="SafetyBinding"]
 --
 *In initialization.*
 A binding *MUST* recover or remove the resources that a dead predecessor left, in its own initialization, before any route is prepared.
@@ -285,15 +314,19 @@ The binding *MUST NOT* refuse setup merely because something that a predecessor 
 For each binding, this item replaces the clauses of revision 2 of xref:../runtime.adoc#req-ssr-mode-restart[A restart is an initialization] on what a dead predecessor left, and on reaching runtime mode with stale predecessor state present.
 
 *Not in a surviving process.*
-Once its transport is in runtime mode, a binding *MUST NOT* clean up after a dead peer: it recovers, removes and takes over nothing that the dead peer left.
+Once its transport is in runtime mode, a binding *MUST NOT* clean up after a dead peer: it recovers, removes and takes over no peer-owned backing or predecessor state that the dead peer left.
 That cleanup belongs to the initialization of the process that replaces the peer (xref:../runtime.adoc#req-ssr-mode-restart[A restart is an initialization]).
+Bounded retirement in a surviving process of the binding's own separately charged local connection, local view or descriptor handles—once all local held, pending and in-service dependencies on that incarnation have ended, under xref:../runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode] and any admitted Class 2 permit—is distinct from predecessor cleanup and *MUST NOT* revoke, take over or remove peer-owned backing.
 
 *What stays in force.*
 What a surviving process releases of its own, and how it accounts for the peer's failure, are stated in xref:../peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input] and xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
+
+*Scoped replacement.*
+For each binding across all configurations, this revision replaces revision 2 of this item by distinguishing bounded local retirement of the binding's own local connection/view/handle resources after local dependencies end from recovering, taking over or removing peer-owned predecessor backing, while keeping all initialization-recovery and surviving-process prohibitions in force.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-predecessor-cleanup~2+`
+ID:: `+req~ssr-binding-predecessor-cleanup~3+`
 ASIL:: B
 Allocated to:: each binding
 Verification:: fault-injection (a peer killed; a restart with its leftovers present, recovered or removed, and setup not refused for their presence; a restart whose recovery fails, with setup refused by an error that names what was not recovered, and no route prepared), review (no cleanup after a dead peer on any runtime path of the binding)

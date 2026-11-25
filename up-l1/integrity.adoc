@@ -121,15 +121,15 @@ The element *MUST* make the acquisition and the copy through a source-access mec
 A mechanism that holds only while the writer keeps a lock or another protocol is no such mechanism, because a faulty writer need not keep it (xref:peers.adoc#req-ssr-peer-fault-model[The requirements hold against a faulty peer]).
 
 *Admission on the copy route.*
-On such a route, every value that the admission of a frame takes from the frame's header or metadata comes from the element's acquired copy, in this order:
+On such a route, every value that the admission of a frame takes from the frame's physical control data (such as a header) or metadata comes from the element's acquired copy, in this order:
 
-. the route's lending binding *MUST* give the frame's enclosing extent as its middleware gives it, compared with the receiving route's largest frame where the binding's sample-layout contract defines one (xref:bindings/storage.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]), before anything is formed from that extent;
-. the element acquires the frame's header and metadata within that extent, as the clause "The copy route" states: a bounded raw copy into storage of its own, which hands on no frame, so that nothing of it is decoded, admitted, delivered or forwarded before the checks of the next step have passed;
-. the binding *MUST* make its physical checks of the frame on the acquired header (xref:bindings/storage.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]), and a refusal keeps the binding's cause and its one count and ends the frame's admission: the element *MUST NOT* decode the acquired metadata of a frame that one of those checks refuses, copy its payload or make a later step of this clause for it;
-. the element *MUST* make its admission of the frame's metadata on the acquired metadata (xref:bindings/storage.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]), and the payload length that it compares with the payload that the metadata states is the acquired header's;
-. the element takes the payload's place and length for the copy from the acquired header, as the clause "The copy route" states.
+. the route's lending binding *MUST* give the frame's enclosing extent as its middleware gives it, applying any contract-specified pre-acquisition enclosing-extent bound defined by the binding's sample-layout contract (without imposing an in-band header or largest-frame formula where a binding's layout contract defines none), before anything is formed from that extent;
+. the element acquires the frame's physical control data and metadata within that extent, as the clause "The copy route" states: a bounded raw copy into storage of its own, which hands on no frame, so that nothing of it is decoded, admitted, delivered or forwarded before the checks of the next step have passed;
+. the binding *MUST* make its physical checks of the frame on that acquired control data—invoking xref:bindings/storage.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order] where its profile invokes that procedure, and otherwise applying its own applicable physical contract—and a refusal keeps the binding's cause and its one count and ends the frame's admission: the element *MUST NOT* decode the acquired metadata of a frame that one of those checks refuses, copy its payload or make a later step of this clause for it;
+. the element *MUST* make its admission of the frame's metadata on the acquired metadata—following xref:bindings/storage.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order] where invoked by the binding's profile, and otherwise the route's applicable metadata checks—comparing the verified physical payload length from the acquired control data;
+. the element takes the payload's place and length for the copy from the acquired control data, as the clause "The copy route" states.
 
-After the acquisition, the element and the binding *MUST NOT* read a byte of the shared sample's header or metadata again, and *MUST NOT* take a decision from a value read there.
+After the acquisition, the element and the binding *MUST NOT* read a byte of the shared sample's physical control data or metadata again, and *MUST NOT* take a decision from a value read there.
 
 *Refusals at setup.*
 
@@ -139,8 +139,8 @@ After the acquisition, the element and the binding *MUST NOT* read a byte of the
 
 *Reporting and heap.*
 What the element states in each route's report of the form that the route got, a read of the shared storage or the copy route's copy, is specified in xref:route-observation.adoc#req-ssr-error-route-report[Each route reports what it got].
-The element *MUST* make each view, the acquisition and the copy, their validation and that report without acquiring or releasing heap memory, in its own work and in the work that it invokes for them, the decoding that validates a serialized payload included.
-A route's declared allocation does not reach these operations (xref:payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path], "What a declaration does not reach").
+The element *MUST* make each view, the acquisition and the copy, their validation and that report without acquiring or releasing heap memory, in its own work and in every operation that it invokes for them, the decoding that validates a serialized payload included.
+Neither a route's Class 3 declared allocation nor a Class 2 middleware permit grants any heap exception for an invoked decoder, validator or allocator on these operations (xref:payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path], "What a declaration does not reach").
 The element *MUST* refuse at setup a route that needs the copy route where the route's wire declares a heap class that admits allocation for decoding, naming the route and that class.
 
 *What the copy protects.*

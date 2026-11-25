@@ -22,22 +22,22 @@ Explanatory overviews below cover the combinations of wire and transport (<<inde
 [[req-ssr-heap-none]]
 === No heap in runtime mode on a native path
 
-[.specitem,oft-sid="req~ssr-heap-none~5",oft-title="No heap in runtime mode on a native path",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyWire"]
+[.specitem,oft-sid="req~ssr-heap-none~6",oft-title="No heap in runtime mode on a native path",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyWire"]
 --
 *Native paths.*
-In runtime mode, no part acquires or releases heap memory on a path that a native payload operation causes, except for the middleware allocation covered by "Named middleware allocation" below, and each part answers for its own work on such a path:
+In runtime mode, no part acquires or releases heap memory on a path that a native payload operation causes, except for the exact named middleware lifecycle operations covered by "Named middleware allocation" below, and each part answers for its own work on such a path:
 
 * element code *MUST NOT* acquire or release heap memory on it;
 * each wire that the native route uses declares a heap class of none in each direction that the route uses, and answers for that claim in all its work there, as xref:wires/README.adoc#req-ssr-wire-heap-claim-tested[A heap-free claim is true, and encoding is repeatable] states;
-* each binding's code keeps the same rule, as xref:bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] states;
-* the element applies the native-route refusal of xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], and, for allocation inside a binding's middleware under a named permit, the transition check of xref:bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
+* each binding's own code keeps the same rule, as xref:bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] states;
+* the element applies the native-route refusal of xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], and, for Class 2 allocation inside a binding's middleware under a named permit, the transition check of xref:bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
 
 What an allocation provider is, is stated in xref:../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing].
 The rule follows the cause, whichever part's code does the work: it reaches the work that the operation causes on another thread or at a later time as well, delayed work, drops, cancellation and release included.
 
 *Named middleware allocation.*
-Allocation inside a binding's middleware is an exception to this item's general native-path prohibition only for the operations and bound of a named permit that a matching named waiver admits, within the scope of xref:bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
-This exception does not apply to a native lease drop, frame return or other native release operation, retirement and deferred release included (xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]); it never becomes a general native-release exception.
+Heap acquisition, resize and release inside a binding's middleware—including deferred middleware lifecycle work and bounded local connection, local-view or descriptor retirement after local dependencies end—are an exception to this item's general native-path prohibition only for the exact enumerated operations, allocation domain, justified finite resource envelope and five-part resource and failure policy of a Class 2 named permit that a matching named waiver admits, within the scope of xref:bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else] and without conflicting with any required guarantee or process-survival claim (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+This exception applies strictly to those named middleware lifecycle operations: element, wire, allocation-provider and binding code on a native drop, hand-off, return or retirement path remain strictly heap-free, live frame backing and permanent runtime infrastructure are never freed, independently scoped unconditional no-heap paths (such as xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] and xref:integrity.adoc#req-ssr-integrity-carrier-crossing[Upward carrier crossings copy once, or are refused]) remain exempt from any middleware permit, and serialized owned-value runtime adapters remain excluded from native paths.
 It replaces no other requirement on an operation.
 What the binding declares and what a permit establishes are stated in xref:bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path], under "Middleware".
 
@@ -94,18 +94,17 @@ It admits the route's ordinary ownership, and it establishes nothing more:
 These rules bind each transport from its own transition.
 
 *Scoped replacement.*
-This revision replaces revision 4 of this item for the element and each wire, extends its native-caused and shared-work exclusion duties to each allocation provider, and extends its serialized-route participant confinement duties to each allocation provider whose role an explicitly selected serialized owned-value runtime adapter implements or serves as an explicitly identified subcomponent of under xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations].
-All causal native-path no-heap and no-free duties, all shared-work exclusions, the exact scope of named middleware permits and waivers, the distinction between general allocator activity in startup-obtained regions and fixed-slot return, and all serialized-route prohibitions of revision 4 of this item remain in force.
+For the element, each wire and each allocation provider across all configurations, this revision replaces revision 5 of this item by permitting explicitly enumerated Class 2 middleware lifecycle acquisition, resize and release (including deferred middleware lifecycle and local connection/view retirement under a complete permit and matching waiver) while preserving own-code causal no-heap duties, unconditional integrity exclusions, non-release of live backing or permanent infrastructure and serialized owned-value runtime adapter exclusions.
 --
 
 [horizontal]
-ID:: `+req~ssr-heap-none~5+`
+ID:: `+req~ssr-heap-none~6+`
 ASIL:: B
 Allocated to:: the element; each wire, in work that a native route causes or shares with a serialized one, and where a serialized owned-value runtime adapter implements or serves as an explicitly identified subcomponent of it, for including the adapter and all reached dependencies in each direction's heap class, policy and guarantee evidence and confining its runtime heap activity to permitted serialized message-owned value acquisition, resize and exactly-once release with no control-state, report or outcome, startup-backing, native, shared-causal or general application allocation; each allocation provider, in work that a native route causes or shares with a serialized one, and where a serialized owned-value runtime adapter implements or serves as an explicitly identified subcomponent of it, for including the adapter and all reached dependencies in each direction's heap class, policy and guarantee evidence and confining its runtime heap activity to permitted serialized message-owned value acquisition, resize and exactly-once release with no control-state, report or outcome, startup-backing, native, shared-causal or general application allocation
 Verification:: heap-window, review, gate
 * *heap-window*
-** Over native traffic, sending and receiving, with refusals and error returns, cancellation, lease drops and a frame's return, retirement and deferred release, delayed work, waits and wake-ups, deadline service, and the wire, binding and control work that these cause; middleware allocation admitted by a matching waiver reported apart by permit and operation, with no heap acquisition or release in a native lease drop, frame return or other native release operation, retirement and deferred release included.
-** Over native traffic while a peer dies and while a peer restarts, with middleware allocation admitted by a matching waiver reported apart by permit and operation, and native release work still acquiring and releasing no heap.
+** Over native traffic, sending and receiving, with refusals and error returns, cancellation, lease drops and a frame's return, retirement and deferred release, delayed work, waits and wake-ups, deadline service, and the wire, binding and control work that these cause: zero heap use in element, wire, allocation-provider and binding code, with any admitted Class 2 middleware lifecycle acquisition, resize or release (including deferred middleware work) reported apart by exact permit and operation, and zero live-backing or permanent-infrastructure release.
+** Over native traffic while a peer dies and while a peer restarts: zero heap use in own code, with any admitted Class 2 middleware lifecycle work reported apart by exact permit and operation.
 ** Over work that a native route shares with a serialized one, while the serialized route allocates under its declared class, including through an explicitly selected serialized owned-value runtime adapter acting as a wire or allocation-provider participant.
 ** On a serialized route, its declared acquisition, resize and exactly-once release of what it admitted—including activity through a selected serialized owned-value runtime adapter and each release that a release service performs—reported under its wire or allocation-provider role.
 ** On a serialized route, no heap use in deciding, reporting or counting any outcome, a refusal, a discard and a peer's failure among them, and no control-state, report or outcome, startup-backing, native, shared-causal or general application allocation.
@@ -343,7 +342,7 @@ A route that does not require it runs handed off there, and its report says so.
 A lending binding's own refusal to lend for a route is stated in xref:bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held].
 
 *Fixed for the run.*
-The element *MUST NOT* let an operation in runtime mode change a route's form, for example from native to serialized, from lent to handed off or from a view to a copy.
+Applying the common setup-fixed rule of xref:../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode] to transport routes, the element *MUST NOT* let an operation in runtime mode change a route's payload form—for example from native to serialized, from lent to handed off or from a view to a copy—or offer an API operation that alters a route's form after the transition.
 A binding *MUST NOT* change in runtime mode whether it lends or hands off for a route.
 Where a route cannot have the form that it declares, the element *MUST* refuse it at setup, and *MUST NOT* serve it in another form (xref:runtime.adoc#req-ssr-mode-entry-no-latent-refusal[Nothing is refused at runtime for a reason setup already knew]).
 The agreement under which a native route's type is read is fixed with the form (xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]).
