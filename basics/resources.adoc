@@ -27,11 +27,8 @@ Where an SDK's core is not the element, a word that an item of the up-rust SEooC
 * An *SDK*, its *core*, a *layer above the core* and an *owned-frame route*: xref:../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
 * A *part* and its *supplier*: xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
 * The *element*: xref:../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code].
-* A *binding* is a transport adapter written against the element's lending or handoff runtime contract to connect the element to one *middleware* (the communication software the binding adapts); a *lending* binding can give a reader shared memory written by a writer, and a *handoff* binding gives the element a private copy.
-* A *wire* is a component written against the element's wire interface that writes payloads into carrying storage and reads arriving payloads, either as a *native* in-place representation or as a *serialized* format encoding.
-* A *route* is a configured message flow declared on a transport with setup-fixed wire, storage, resource, QoS and integrity attributes.
-* A *named middleware allocation permit* and *matching named waiver*: <<req-ssr-heap-declared,The heap class is declared, with no default>>.
-* A *transport*, its *initialization mode* and its *runtime mode*: <<req-ssr-mode-two-types,Two modes, as two types>>.
+* A *binding*, its *middleware*, *binding code*, *lending* and *handoff* bindings, *push* and *pull* delivery, *pulled*, *retained* and *borrowed* frames, a frame's *envelope*, a *wire* (a *serialized* wire, the *native* wire, an *ordinary* or *sequenced* wire), a *route* (a *native* or *serialized* route), a *transport*, its *initialization mode* and its *runtime mode*: <<req-ssr-mode-two-types,Two modes, as two types>>.
+* A *named middleware allocation permit*: <<req-ssr-heap-declared,The heap class is declared, with no default>>; a *matching named waiver*: <<req-ssr-waiver-required,Middleware heap needs a named waiver>>.
 * *Startup memory* and a *region*: <<req-ssr-memory-static,ASIL-path storage is static or caller-provided>>.
 * A *heap class*, an *allocation domain* and a *resource and failure policy*: <<req-ssr-heap-declared,The heap class is declared, with no default>>.
 * A *guarantee*: <<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>>.
@@ -47,10 +44,19 @@ Mode separation at type level and lifecycle boundaries between initialization an
 
 [.specitem,oft-sid="req~ssr-mode-two-types~2",oft-title="Two modes, as two types",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
+*Shared transport, binding, wire and route vocabulary.*
+These definitions establish the common vocabulary shared across the up-rust SEooC requirement family (and read for an owned-frame SDK as stated in xref:../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it], "Words of the up-rust SEooC requirement family"); they allocate no new duties, preserve every part's separate actor boundary and bind no classic protocol implementation:
+
+* *Binding, middleware and binding code.* A _binding_ is a transport adapter written against the element's lending or handoff runtime contract to adapt the element to one _middleware_ (the communication software that the binding adapts the element to). _Binding code_ is the binding's own code; the middleware's code is not binding code. A transport implementation not written against that runtime contract is not a binding, an in-memory test double is a fixture for evidence and not a binding (belonging to the family whose runtime contract it implements), and a binding is not part of the element.
+* *Lending and handoff.* A _lending_ binding is one on which a reader can be given shared memory that a writer wrote; a _handoff_ binding is one that hands the element a private copy. These are the two families of bindings.
+* *Push, pull, received frames and envelopes.* A binding serves each receive route either by _push_ (handing each frame to the element in a call that the binding makes, a _delivery_) or by _pull_ (keeping arriving frames in a queue of its own or of its middleware under the route's QoS, its overflow policy included, for the element to take in a call that the element makes); one binding can serve some routes by push and others by pull. A _pulled_ frame is one that the element took by pull; a _retained_ frame is a received frame that the element keeps after the call that gave it until the frame's lease is dropped (a pulled frame, or a frame that a delivery passes to the element to keep); a _borrowed_ frame is one that a delivery lends to the element for the duration of that call only. A frame's _envelope_ is the form in which a binding carries the frame through its middleware—the parts that make up that form, such as a header, the frame's metadata and its payload, their order and where each lies.
+* *Wire and wire kinds.* A _wire_ is the part written against the element's wire interface through which a route writes a payload into the storage that carries its frame and reads a payload that has arrived; a codec not written against that interface is not a wire. A _serialized_ wire encodes a value into the bytes of a format and decodes such bytes into a value; the _native_ wire carries a native representation (the value of a native type as it lies in memory). A _sequenced_ wire deliberately changes its encoding from one encode to the next; every other wire is an _ordinary_ wire.
+* *Route.* A _route_ is a configured message flow declared on a transport with setup-fixed wire, storage, resource, QoS and integrity attributes: a _native_ route is one whose wire carries a native type in place, and a _serialized_ route is one whose wire carries an encoding of the value in one stated format.
+
 *What a transport is.*
-A transport is what the element builds over one binding.
-Routes and roles are declared on it in initialization mode, and the handles that carry traffic are activated from it in runtime mode.
-A lending transport is one whose binding is a lending binding, and a handoff transport one whose binding is a handoff binding (<<sec-words,Words used on this page>>).
+A _transport_ is what the element builds over one binding.
+Routes and roles are declared on it in _initialization mode_, and the handles that carry traffic are activated from it in _runtime mode_.
+A _lending transport_ is one whose binding is a lending binding, and a _handoff transport_ one whose binding is a handoff binding.
 
 *Two types.*
 The element *MUST* give each lending and each handoff transport an initialization mode and a runtime mode, each a distinct non-generic type.
@@ -62,7 +68,7 @@ The element *MUST* give a transport built directly in code and one built from de
 ID:: `+req~ssr-mode-two-types~2+`
 ASIL:: B
 Allocated to:: the element
-Verification:: test, review (each statement that names a transport, a lending transport or a handoff transport, read with the clause "What a transport is")
+Verification:: test, review (each statement and allocation that names a transport, a lending or handoff transport, a binding, a wire, a route, push/pull delivery, frame retention or an envelope, read with the clauses "Shared transport, binding, wire and route vocabulary" and "What a transport is")
 ISO 26262:: 6-6.4.2 g, 6-7.4.5 (part-clause numbers only)
 
 *Rationale.*
@@ -410,8 +416,8 @@ Running it on another thread, or timing it from outside, does not make it do so.
 The element *MUST NOT* supply a default for a heap class, permit, envelope or policy, and each wire, each binding and each allocation provider *MUST NOT* state one by default.
 
 *Named waiver gate for Class 2.*
-The element *MUST NOT* let a transport with a route whose prepared heap class is Class 2 (`allocation inside middleware under a named permit`) enter runtime mode unless a matching named waiver covers every permit declared for that route, and *MUST* refuse the transition by name (naming the transport, route and permit) otherwise.
-A named waiver covers only the exact middleware operations, allocation domain, finite resource envelope, declared wait domain and narrow permitted allocator-exhaustion outcome of its permit; it never admits allocation in element, binding or wire code, an allocating wire on a native route, an own-code panic, an unsafe foreign unwind or any unrelated middleware panic or known failure.
+A transport with a route whose prepared heap class is Class 2 (`allocation inside middleware under a named permit`) enters runtime mode only when it satisfies the governing named-waiver transition gate of <<req-ssr-waiver-required,Middleware heap needs a named waiver>>, and only within the exact middleware operations, allocation domain, justified finite resource envelope, declared wait domain and narrow permitted allocator-exhaustion outcome that its permit names.
+A matching named waiver satisfies that transition gate only and never admits allocation in element, binding or wire code, an allocating wire on a native route, an own-code panic, an unsafe foreign unwind, any unrelated middleware panic or known failure, or a conflicting guarantee or process-survival scope.
 
 *Refusal at setup and the transition.*
 The element *MUST* refuse at the transition, naming the route and the reason:
@@ -500,6 +506,28 @@ _What a stated policy refuses._
 An ordinary allocator's contract seldom excludes a panic or a process end in its cleanup.
 Refusing every route whose stated policy shows one, or does not exclude one, would refuse ordinary serialized routes for stating the truth.
 So a stated policy refuses only a route that requires the guarantee it violates.
+
+[[req-ssr-waiver-required]]
+=== Middleware heap needs a named waiver
+
+[.specitem,oft-sid="req~ssr-waiver-required~1",oft-title="Middleware heap needs a named waiver",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+--
+The element *MUST NOT* let a transport with a route whose prepared heap class is allocation inside middleware enter runtime mode unless a named waiver matches each permit its binding declares.
+
+Otherwise the element *MUST* refuse the transition, naming the transport, the route and the permit.
+--
+
+[horizontal]
+ID:: `+req~ssr-waiver-required~1+`
+ASIL:: B
+Allocated to:: the element
+Verification:: test (refused without a matching waiver; this gate passes with a matching waiver while all other admission conditions still apply)
+
+*Rationale.*
+Allocation inside middleware is outside the element's control.
+So it enters runtime mode only as a deployment's explicit, recorded decision (xref:../safety/assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found]).
+
+A refusal that names the transport, the route and the permit tells the deployment which decision is missing.
 
 [[req-ssr-heap-guarantees]]
 === A stronger resource guarantee is required by name, and admitted or refused

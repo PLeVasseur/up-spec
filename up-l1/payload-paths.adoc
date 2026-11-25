@@ -30,7 +30,7 @@ In runtime mode, no part acquires or releases heap memory on a path that a nativ
 * element code *MUST NOT* acquire or release heap memory on it;
 * each wire that the native route uses declares a heap class of none in each direction that the route uses, and answers for that claim in all its work there, as xref:wires/README.adoc#req-ssr-wire-heap-claim-tested[A heap-free claim is true, and encoding is repeatable] states;
 * each binding's own code keeps the same rule, as xref:bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] states;
-* the element applies the native-route refusal of xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], and, for Class 2 allocation inside a binding's middleware under a named permit, the transition check of xref:bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
+* the element applies the native-route refusal of xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], and, for Class 2 allocation inside a binding's middleware under a named permit, the transition check of xref:../basics/resources.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
 
 What an allocation provider is, is stated in xref:../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing].
 The rule follows the cause, whichever part's code does the work: it reaches the work that the operation causes on another thread or at a later time as well, delayed work, drops, cancellation and release included.

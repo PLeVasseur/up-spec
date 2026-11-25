@@ -142,7 +142,7 @@ What the element then admits is stated in xref:../payload-paths.adoc#req-ssr-pay
 * The binding *MUST* declare the class none for a route only where accepted evidence in its qualification record covers both the binding's and LoLa's actual runtime lifecycle paths that the route uses—including peer discovery, reconnect, connection bookkeeping, enabled notification paths and first-use paths—and shows that neither acquires or releases heap memory on them (xref:../../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]).
 Without that evidence the binding *MUST* declare allocation inside LoLa under a named permit with the five-part domain, bounded envelope, exhaustion, wait and progress policy that xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default] and xref:lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] require.
 In a polling-only native-event configuration that does not select `+SetReceiveHandler+`, the binding *MUST NOT* attribute optional notification-handler task-posting, task-freeing or stop-state allocation to every send; where an optional notification-handler path is selected, its task, stop-state and lifecycle allocations are declared explicitly under the named permit alongside discovery, reconnect and connection bookkeeping.
-The waiver that then admits the route is stated in xref:lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
+The waiver that then admits the route is stated in xref:../../basics/resources.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
 A permit changes neither xref:lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] nor the allocation that a serialized route declares and that setup admits, and it establishes no stronger guarantee (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 * Where the route needs a capability that the binding or LoLa does not have, the binding *MUST* refuse the route in route preparation, naming the route and that capability.
 
@@ -975,7 +975,7 @@ It states nothing itself.
 | <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>; xref:../route-observation.adoc#req-ssr-error-route-report[Each route reports what it got]
 
 | Heap class of a native route
-| xref:lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>, "Preparation"; xref:lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]
+| xref:lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>, "Preparation"; xref:../../basics/resources.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]
 
 | Heap class of a serialized route
 | xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>
@@ -1075,7 +1075,7 @@ It states nothing itself.
 | <<req-ssr-binding-lola-capacity,On LoLa, a route's counts are declared and its storage is established at setup>>
 
 | xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-waiver-approval[Waivers are approved with an interference argument]
-| <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>, "Preparation"; xref:lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]
+| <<req-ssr-binding-lola-profiles,The LoLa binding carries native and serialized routes, each as itself>>, "Preparation"; xref:../../basics/resources.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]
 
 | xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]
 | <<req-ssr-binding-lola-assumptions,The LoLa binding keeps each of LoLa's assumptions of use, or names who does>>, "An error that LoLa calls non-recoverable"

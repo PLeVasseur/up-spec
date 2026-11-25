@@ -292,7 +292,7 @@ Each binding *MUST* keep a qualification record, versioned with the binding, tha
 
 * each target and configuration for which the binding claims its binding contract;
 * every runtime guarantee that its middleware cannot make, with measured figures where they exist;
-* each middleware permit that it declares—with its exact covered operations, triggers, allocation domains, finite simultaneously-live resource envelope, five-part exhaustion, wait and progress policy and process-wide exposure—recorded separately from limits, deviations and known failures (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]);
+* each middleware permit that it declares—with its exact covered operations, triggers, allocation domains, finite simultaneously-live resource envelope, five-part exhaustion, wait and progress policy and process-wide exposure—recorded separately from limits, deviations and known failures (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../basics/resources.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]);
 * its limits, its deviations and its known failures, each classed as this item defines them;
 * the exact pin, release, build settings, patch identity and configuration of its middleware, dependencies and binding, and of every other source that an entry relies on, without inferring stock-build qualification or equating distinct releases or patched builds;
 * the evidence of the runs that its entries rest on, each with the target and the configuration that it ran on, and the history of each entry.
@@ -369,7 +369,7 @@ This section is a non-normative pointer index; every obligation stands solely in
 ====
 Related technical obligations outside assurance governance:
 
-* *Binding middleware permits and waiver scope:* xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] and xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
+* *Binding middleware permits and waiver scope:* xref:../basics/resources.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] and xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
 * *Rust memory-safety soundness and safe-binding boundary:* xref:../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] and xref:../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety].
 * *Checked-wire memory safety:* xref:../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety].
 ====

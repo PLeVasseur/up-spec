@@ -147,7 +147,7 @@ The ordinary contract of an asynchronous layer and of a scheduler integration: x
 
 What a binding and its middleware are: xref:../../../up-l1/bindings/interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]; what stands outside the element: <<req-ssr-element-boundary,The parts of the element, and element code>>.
 
-* Allocation inside middleware: its permit, xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; its waiver, xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
+* Allocation inside middleware: its permit, xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; its waiver, xref:../../../basics/resources.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
 * What a binding's middleware cannot guarantee: xref:../../assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures].
 
 === Optional layers and code outside the claimed graph

@@ -14,29 +14,7 @@ Related shared chapters: xref:interface.adoc[binding interface], xref:storage.ad
 [[sec-middleware-waivers]]
 == Middleware allocation permits and waivers
 
-Middleware permit matching, named waiver requirements and waiver scope limits:
-
-[[req-ssr-waiver-required]]
-=== Middleware heap needs a named waiver
-
-[.specitem,oft-sid="req~ssr-waiver-required~1",oft-title="Middleware heap needs a named waiver",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
---
-The element *MUST NOT* let a transport with a route whose prepared heap class is allocation inside middleware enter runtime mode unless a named waiver matches each permit its binding declares.
-
-Otherwise the element *MUST* refuse the transition, naming the transport, the route and the permit.
---
-
-[horizontal]
-ID:: `+req~ssr-waiver-required~1+`
-ASIL:: B
-Allocated to:: the element
-Verification:: test (refused without a matching waiver; this gate passes with a matching waiver while all other admission conditions still apply)
-
-*Rationale.*
-Allocation inside middleware is outside the element's control.
-So it enters runtime mode only as a deployment's explicit, recorded decision (xref:../../safety/assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found]).
-
-A refusal that names the transport, the route and the permit tells the deployment which decision is missing.
+Waiver scope limits for middleware allocation permits (the governing element named-waiver transition gate stands in xref:../../basics/resources.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]):
 
 [[req-ssr-waiver-scope]]
 === A waiver covers middleware and nothing else
@@ -52,7 +30,7 @@ The element *MUST NOT* let a waiver admit:
 * any panic or abort in element, binding or wire code, any unsafe foreign unwind, or any non-exhaustion middleware panic or unrelated known failure (xref:interface.adoc#req-ssr-binding-no-panic[No panic on any peer input]);
 * any operation whose disclosed termination outcome conflicts with an overlapping required guarantee or process-survival claim (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 
-Allocation that a serialized route declares for its wire, its binding or its allocation provider (xref:../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing] states what an allocation provider is) is admitted by that route's heap class (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), and by no waiver; Class 2 allocation inside middleware under a permit needs a waiver on every route, as <<req-ssr-waiver-required,Middleware heap needs a named waiver>> states.
+Allocation that a serialized route declares for its wire, its binding or its allocation provider (xref:../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing] states what an allocation provider is) is admitted by that route's heap class (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), and by no waiver; Class 2 allocation inside middleware under a permit needs a waiver on every route, as xref:../../basics/resources.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] states.
 
 *Scoped replacement.*
 For the element across all configurations, revision 2 of this item replaces revision 1 of this item.
@@ -119,7 +97,7 @@ A serialized route may allocate where it declares it and setup admits it.
 That permission cannot reach native work or metadata a native route shares.
 
 Allocation inside middleware is outside the binding's own code.
-So it is declared as a permit, admitted only by a waiver (<<req-ssr-waiver-required,Middleware heap needs a named waiver>>), and reported apart from the binding's own.
+So it is declared as a permit, admitted only by a waiver (xref:../../basics/resources.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]), and reported apart from the binding's own.
 
 [[req-ssr-binding-lazy-forced]]
 === Lazy state is forced, and threads are idle, before running

@@ -20,11 +20,12 @@ This section defines the common binding scope and contractual obligations shared
 
 [.specitem,oft-sid="req~ssr-binding-scope~2",oft-title="What a binding is, and the binding contract",oft-needs="uman",oft-tags="SafetyBinding"]
 --
-*What a binding is.*
-Following the shared vocabulary in xref:../../basics/resources.adoc#sec-words[shared resource lifecycle and storage], a binding is a uP-L1 transport implementation that adapts the element to one middleware and is written against the element's lending or handoff runtime contract, part E2 of the element (xref:../../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
+*Canonical vocabulary and uP-L1 interface.*
+The terms _binding_, _middleware_, _binding code_, _lending_ and _handoff_ bindings, _push_ and _pull_ delivery, _pulled_, _retained_ and _borrowed_ frames, and a frame's _envelope_ have the canonical meanings stated in xref:../../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types] ("Shared transport, binding, wire and route vocabulary").
+At uP-L1, a binding is written against the element's lending or handoff runtime contract whose side in the element is part E2 of the element (xref:../../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
 
 *The binding contract.*
-The binding contract of a binding is that runtime contract together with every duty that the statement of a requirement of the up-rust SEooC requirement family gives that binding (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]), wherever the requirement is filed:
+The binding contract of a binding is that part E2 runtime contract together with every duty that the statement of a requirement of the up-rust SEooC requirement family gives that binding (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]), wherever the requirement is filed:
 
 * each duty that a statement gives each binding;
 * each duty that a statement gives the bindings of its kind or of its profile, such as each lending binding or each binding on a route that it serves by pull;
@@ -36,38 +37,12 @@ A duty that a statement gives another part, such as the element, is not part of 
 A requirement that is specific to one binding names that binding and no other binding.
 It can give another part, such as the element, a duty of its own.
 
-*What is not a binding.*
-A transport implementation that is not written against that runtime contract is not a binding.
-The in-memory bindings that the contract suites run on are test doubles: fixtures for evidence, and not bindings.
+*Exclusions and test doubles.*
+Under the canonical vocabulary of xref:../../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types], a transport implementation not written against the part E2 runtime contract is not a binding, the in-memory bindings that the contract suites run on are test doubles (fixtures for evidence belonging to the family whose runtime contract they implement, and not bindings), and a binding is not part of the element.
 
-*Lending and handoff.*
-A lending binding is one on which a reader can be given shared memory that a writer wrote.
-A handoff binding is one that hands the element a private copy.
-These are the two families of bindings, and a test double belongs to the family whose runtime contract it implements.
-
-*Push and pull.*
-A binding serves each receive route in one of two ways.
-It serves a route by _push_ where it hands each frame to the element in a call that the binding makes, a _delivery_.
-It serves a route by _pull_ where it keeps the frames that arrive in a queue of its own, or of its middleware, under the route's QoS, its overflow policy included, and the element takes each frame that the queue holds in a call that the element makes.
-A push binding, or a pull binding, is a binding on a route that it serves so, and a push route, or a pull route, is such a route.
-One binding can serve some routes by push and others by pull.
-
-*Frames that the element receives.*
-A _pulled_ frame is one that the element took by pull.
-A _retained_ frame is a received frame that the element keeps after the call that gave it, until the frame's lease is dropped: a pulled frame, or a frame that a delivery passes to the element to keep.
-A _borrowed_ frame is one that a delivery lends to the element for the duration of that call only.
-
-*A frame's envelope.*
-A frame's _envelope_ is the form in which a binding carries the frame through its middleware: the parts that make up that form, such as a header, the frame's metadata and its payload, their order and where each lies.
-The envelope of a route, or of a leg, is the envelope in which its binding carries its frames.
-Where a binding's envelope is stated, it is stated with that binding (xref:README.adoc#one-binding[what is specific to one binding]).
-
-*Middleware and binding code.*
-A binding's middleware is the communication software that it adapts the element to.
-Binding code is the binding's own code, and the middleware's code is not binding code.
-
-*A separate element.*
-A binding is not part of the element.
+*Delivery roles and binding envelopes.*
+A _push binding_ or _pull binding_ is a binding on a route that it serves by push or by pull under the canonical delivery definitions, and a _push route_ or _pull route_ is such a route.
+The envelope of a route or of a leg is the envelope in which its binding carries its frames; where a binding's envelope is stated, it is stated with that binding (xref:README.adoc#one-binding[what is specific to one binding]).
 --
 
 [horizontal]

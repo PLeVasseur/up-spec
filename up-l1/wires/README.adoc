@@ -51,12 +51,12 @@ A serialized wire can run over either a lending or a handoff binding; each wire 
 
 [.specitem,oft-sid="req~ssr-wire-scope~2",oft-title="What a wire is, and the wire contract",oft-needs="uman",oft-tags="SafetyWire"]
 --
-*What a wire is.*
-Following the shared vocabulary in xref:../../basics/resources.adoc#sec-words[shared resource lifecycle and storage], a wire is the part through which a route writes a payload into the storage that carries its frame, and reads a payload that has arrived.
-It is written against the interface between the element and a wire, whose side in the element is in part E1 of the element (xref:../../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
+*Canonical vocabulary and uP-L1 wire interface.*
+The terms _wire_, _serialized_ wire, _native_ wire, _ordinary_ wire, _sequenced_ wire, _native_ route and _serialized_ route have the canonical meanings stated in xref:../../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types] ("Shared transport, binding, wire and route vocabulary").
+At uP-L1, a wire is written against the interface between the element and a wire whose side in the element is in part E1 of the element (xref:../../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]); a codec not written against that interface is not a wire.
 
 *The wire contract.*
-The wire contract of a wire is that interface together with every duty that the statement of a requirement of the up-rust SEooC requirement family gives that wire (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]):
+The wire contract of a wire is that part E1 interface together with every duty that the statement of a requirement of the up-rust SEooC requirement family gives that wire (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]):
 
 * each duty that a statement gives each wire;
 * each duty that a statement gives the wires of its kind or of its profile, such as each serialized wire or each wire of one profile;
@@ -64,17 +64,8 @@ The wire contract of a wire is that interface together with every duty that the 
 
 A duty that a statement gives another part is not part of a wire's contract, even where the same item gives that wire a duty too.
 
-*What is not a wire.*
-A codec that is not written against that interface is not a wire.
-
-*Kinds of wire.*
-
-* A serialized wire is one that encodes a value into the bytes of a format, and decodes such bytes into a value.
-* The native wire carries a native representation: the value of a native type as it lies in memory (xref:native.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout]).
-
-*Native and serialized routes.*
-A native route is a route whose wire carries a native type in place.
-A serialized route is a route whose wire carries an encoding of the value in one stated format.
+*Native type layout specialization.*
+For the native wire, the native type whose in-place value it carries satisfies xref:native.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout].
 
 *More than one wire.*
 A route that declares more than one wire is a composition of those wires, and so is a wire that wraps another wire together with the wire that it wraps.
@@ -82,10 +73,6 @@ The route's declaration names each wire of a composition.
 It also names the one of them that decodes the metadata of the route's frames (<<req-ssr-wire-metadata-format,A wire states the format of its frame metadata, and decodes it>>, "The selected wire").
 Each of them keeps its own kind and its own wire contract, under the conditions that the statements of that contract give: a wrapping wire meets its own contract, and the wire that it wraps meets its own.
 A composition gives no wire a duty of another, and what is shown for one of its wires is shown for that wire alone.
-
-*Ordinary and sequenced.*
-A sequenced wire is one that deliberately changes its encoding from one encode to the next.
-Every other wire is an ordinary wire.
 
 *A separate element.*
 The native wire is in part E1 of the element (xref:../../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]), as the element's own wire for the Rust-only native domain (xref:native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout], "Only between binaries that use the element").
