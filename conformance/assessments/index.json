@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "catalogue_kind": "separately_identified_conformance_assessments",
-  "notes": "Successor assessment index. Currently contains zero ingested assessments (records is intentionally empty); all 787 historical intake slots in ../intake.v2.json remain unassessed.",
+  "notes": "The assessment index has zero records; all 787 historical intake slots in ../intake.v2.json remain unassessed.",
   "historical_intake_provenance": {
     "input_manifest": "../INPUT-MANIFEST.v2.json",
     "intake_catalogue": "../intake.v2.json",
