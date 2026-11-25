@@ -17,6 +17,7 @@ Related `+unsafe+` inventory governance and Rust soundness rules: xref:../../saf
 
 What depends on the kind of payload a wire carries is listed in <<one-wire>>.
 Each kind of wire has a page of its own: xref:native.adoc[the native wire], xref:serialized.adoc[serialized wires, and the values they own], xref:xcdrv2.adoc[the XCDR2 little-endian appendable profile], and xref:e2e.adoc[the end-to-end protection wire].
+The concrete E2E records are xref:e2e-profile-v1.adoc[E2E Protection Profile Records 1].
 ====
 
 [[req-ssr-wire-scope]]
@@ -378,6 +379,7 @@ a|
 | End-to-end protection around another wire's payload
 a|
 * The items of xref:e2e.adoc[the end-to-end protection wire]
+* Concrete header, native-composition and Data-ID derivation records: xref:e2e-profile-v1.adoc[E2E Protection Profile Records 1]
 * xref:e2e.adoc#req-ssr-e2e-not-required[The element requires end-to-end protection on no route, outside strict mode's black-channel rule], "A route that selects the E2E wire"
 |===
 

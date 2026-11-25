@@ -148,12 +148,12 @@ A type whose coverage cannot be established is refused for this composition only
 [[req-ssr-e2e-header-format]]
 == The E2E header has one documented format
 
-[.specitem,oft-sid="req~ssr-e2e-header-format~4",oft-title="The E2E header has one documented format",oft-needs="impl,utest",oft-tags="SafetyE2eWire"]
+[.specitem,oft-sid="req~ssr-e2e-header-format~4",oft-title="The E2E header has one documented format",oft-needs="impl,utest,uman",oft-tags="SafetyE2eWire"]
 --
 The E2E wire's headers *MUST* have two fixed formats, each with a 64-bit CRC, documented with the crate:
 
 * a 32-byte data header for topics;
-* a 48-byte method header for RPC routes, which adds a Source ID, a message type, a result and a status.
+* a 48-byte method header for RPC routes, which adds a Source ID, a message type, a result, a status, a refusal-kind byte (offset 32) and seven reserved zero octets (offsets 33 through 39).
 
 The record *MUST* cover:
 
@@ -167,17 +167,23 @@ For the native protection composition (<<req-ssr-e2e-wraps-any-wire,The E2E wire
 
 * the CRC's input order: the header fields other than the CRC, in their documented order, then the inner value's meaningful spans in ascending order;
 * how the meaningful spans of each type are stated, and that they leave out the type's padding and the gap;
-* the table of the shapes of a protected native response, with the result, the status and the first reserved byte of each, and the value of each result, the result of a Failed response included (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>, "Shapes of a protected native response");
+* the table of the shapes of a protected native response, with the result, the status, the refusal-kind byte (offset 32) and the seven reserved zero octets (offsets 33 through 39) of each, and the value of each result, the result of a Failed response included (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>, "Shapes of a protected native response");
 * the largest extent that the composition supports;
 * known-answer vectors for the composition, among them a padded type, a type of size zero and an over-aligned type;
 * the basis of its residual-error figure: the CRC's Hamming distance at the largest covered input that the composition admits;
 * the protection's limits: that the CRC is no authentication, and which fields of the message header the check of a frame's data ID leaves unprotected (<<req-ssr-e2e-data-id,One data ID per sender and route>>).
+
+The common numerical header and CRC parameters are xref:e2e-profile-v1.adoc#req-ssr-e2e-common-profile-v1[The E2E wire uses one numerical header and CRC record].
+The native record, maximum extent, meaningful-span definition, closed shapes, vectors and residual basis are xref:e2e-profile-v1.adoc#req-ssr-e2e-native-profile-v1[The native composition uses profile 1].
+The E2E wire's supplier *MUST* identify immutable revisions of those records in the wire's crate documentation.
+Serialized compositions retain their own identifiers, format extent and detail rules (for ordinary responses and wire refusal answers), maximum extents, vectors and residual bases; they acquire neither the native identifier, its extent limit nor a universal header-only serialized refusal rule.
+
 --
 
 [horizontal]
 ID:: `+req~ssr-e2e-header-format~4+`
 ASIL:: B
-Allocated to:: the E2E wire
+Allocated to:: the E2E wire; its supplier, for the crate documentation's immutable record references
 Verification:: test (the known-answer vectors, encoded and decoded, those of the native protection composition for a padded type, a type of size zero and an over-aligned type among them), review (the stated Hamming distance, against the CRC's published properties; the record's table of shapes and its result values, against <<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>)
 
 *Rationale.*
@@ -209,7 +215,7 @@ It refuses a frame as an undeclared data ID only where it does not find the fram
 So the first of these that applies names the refusal: corrupt; undeclared data ID; identity mismatch; then the counter, the window and the incarnation rules, or at a client the remaining conditions of <<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>.
 
 *Under the native protection composition.*
-On a route that selects the native protection composition (<<req-ssr-e2e-wraps-any-wire,The E2E wire wraps any wire and leaves its bytes alone>>, "The native protection composition"), the corruption-class checks are: the header's length field against the outer extent; the CRC, over the header fields and, where the shape selector gives the value branch, the value's meaningful spans; the reserved bytes; a request's method fields; and, on an RPC route, that the verified result, status and first reserved byte form a row of the table of <<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>, "Shapes of a protected native response", for the shape that the selector gives.
+On a route that selects the native protection composition (<<req-ssr-e2e-wraps-any-wire,The E2E wire wraps any wire and leaves its bytes alone>>, "The native protection composition"), the corruption-class checks are: the header's length field against the outer extent; the CRC, over the header fields and, where the shape selector gives the value branch, the value's meaningful spans; on an RPC route, the seven reserved method-header bytes (offsets 33 through 39); a request's method fields; and, on an RPC route, that the verified result, status and refusal-kind byte (offset 32) form a row of the table of <<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>, "Shapes of a protected native response", for the shape that the selector gives.
 The E2E wire *MUST* refuse as corrupt a frame that fails one of them, and *MUST* evaluate the selector itself, on the same bytes that the element acquired; it is given no branch.
 An accepting verdict names the verified shape: a Value, a Control or a Failed response.
 
@@ -247,7 +253,7 @@ Verification:: test, fault-injection, heap-window, review
 ** Each header check refuses, and changes no state.
 ** A frame that passes and then fails the inner decode advances the reference, and a later copy of it is refused as a repeat.
 ** With the receiver's last counter at exactly `+resync_frames+`, a restart is not refused as a repeat.
-** On a request route, a frame whose admitted metadata names declared sender B and whose intact header carries declared sender A's data ID: refused as an identity mismatch, with the states and the figures of A and B unchanged, and a later genuine frame of A with the same counter admitted; the same frame as a candidate for a replay of A: refused as an identity mismatch, with A's window untouched.
+** On a request route, a frame whose admitted metadata names declared sender B and whose intact header carries declared sender A's distinct data ID: refused as an identity mismatch, with the states and the figures of A and B unchanged, and a later genuine frame of A with the same counter admitted; the same frame as a candidate for a replay of A: refused as an identity mismatch, with A's window untouched.
 ** The same frame with corrupt method fields, and with a corrupt CRC: refused as corrupt, not as an identity mismatch, and changing no state.
 ** A frame from declared source B whose header carries an undeclared data ID: refused as an undeclared data ID, as before.
 ** Under the native protection composition, where E and H differ: a frame of extent E with a refusal's result, and one of extent H with a Value's result, each refused as corrupt; a frame of extent E whose header's length field gives H, refused as corrupt.
@@ -470,7 +476,7 @@ All three are frames of the method's one response wire, all carry the compositio
 
 [cols="2,4,2,2,3,3,3,4",options="header"]
 |===
-| Shape | When | Outer extent | Value | Result | Status | First reserved byte | CRC input
+| Shape | When | Outer extent | Value | Result | Status | Refusal-kind byte (offset 32) | CRC input
 
 | Value
 | Success
@@ -494,17 +500,16 @@ All three are frames of the method's one response wire, all carry the compositio
 | Every other response whose commstatus is not `+Ok+`, an application's own `+Aborted+` and the element's `+InvalidArgument+` answers included
 | H
 | None
-| The result that the header's record gives such a response
+| The error result that the header's record gives such a response
 | That commstatus
 | 0
 | The header fields
 |===
 
-* *Every other combination is corrupt*: a result, a status and a first reserved byte that form no row of this table for the branch that the shape selector gives.
-Among them: a result of 2 or 3 with a status other than `+Aborted+`; a Failed response's result, where it differs from `+normal+`, with `+Ok+`; a first reserved byte other than 0 outside a Control; a kind that the header's record does not define; and a Value's result and status on the header-only branch, or another shape's on the value branch.
-* *The result of a Failed response* is the value that the header's record (<<req-ssr-e2e-header-format,The E2E header has one documented format>>) gives a response whose status is not `+Ok+` and that is not a refusal answer; the composition adds no result value.
-Where that value is `+normal+`, the status alone tells a Value from a Failed response, and nothing else changes.
-An application's `+Aborted+` is a Failed response and a refusal answer is a Control, so a client tells them apart by the result.
+* *Every other combination is corrupt*: a result, a status and a refusal-kind byte (offset 32) that form no row of this table for the branch that the shape selector gives, or any nonzero byte in the seven reserved bytes (offsets 33 through 39).
+Among them: a result of 2 or 3 with a status other than `+Aborted+`; a Failed response's error result with `+Ok+`; a refusal-kind byte (offset 32) other than 0 outside a Control; a kind that the header's record does not define; and a Value's result and status on the header-only branch, or another shape's on the value branch.
+* *The result of a Failed response* is the error result value that the header's record (<<req-ssr-e2e-header-format,The E2E header has one documented format>>) gives a response whose status is not `+Ok+` and that is not a refusal answer (result 1 in xref:e2e-profile-v1.adoc#req-ssr-e2e-common-profile-v1[The E2E wire uses one numerical header and CRC record]); the composition adds no result value.
+An application's `+Aborted+` is a Failed response (result 1, refusal-kind byte 0) and a refusal answer is a Control (result 2 or 3, defined nonzero refusal kind), so a client tells them apart by the result.
 * *No value is made up.* A response that carries no value is a Control or a Failed response, and no wire is added for it.
 * *A failed response carries no detail payload.* On such a route, the element *MUST* send a failed response as a Failed shape, with no UStatus payload, and at a client *MUST* complete the call with the response's commstatus, decode no UStatus from the protected header, and build no value.
 For the element, as service provider and as service consumer on an RPC route that selects the native protection composition, and for the payload of a failed response there only, this item replaces two recommendations of xref:../../basics/error_model.adoc[uProtocol Error Model (UStatus)]: that of `+dsn~service-error-model-error-response~1+`, that a service provider populate the response's payload with a UStatus, and that of `+dsn~service-error-model-failed-rpc~1+`, that a service consumer try to extract a UStatus from it.
@@ -532,10 +537,10 @@ Verification:: test, heap-window
 ** A copy that another server answers.
 ** An answer from another declared server to a misaddressed copy, accepted where the client declares several servers for the method.
 ** One response wire per method, which the element provides: on a route that selects the E2E wire, a response that names another payload encoding reaching no wire and refused, as <<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>> states.
-** A response that the element's call correlation has admitted, with admitted source S1 and a header that carries declared server S2's data ID: refused as an identity mismatch at the client, its call kept open.
+** A response that the element's call correlation has admitted, with admitted source S1 and a header that carries declared server S2's distinct data ID: refused as an identity mismatch at the client, its call kept open.
 ** A response from another declared server whose metadata and data ID agree, on a call that the element's correlation does not tie to one server: accepted, the published limitation; on a call tied to one peer, the element's correlation refuses it first.
 ** Under the native protection composition: a success with a 16-byte value, a Value of extent E; a final refusal, a Control of extent H; an advisory refusal, a Control, then the real response, a Value; a response whose commstatus is not `+Ok+`, a Failed response of extent H with no value read.
-** An application's handler failing with `+Aborted+`: a Failed response with the record's result for it and a first reserved byte of 0; a refusal answer of the wire: a Control with result 2 or 3 and a kind; the two told apart by the result.
+** An application's handler failing with `+Aborted+`: a Failed response with the record's error result for it and a refusal-kind byte (offset 32) of 0; a refusal answer of the wire: a Control with result 2 or 3 and a kind; the two told apart by the result.
 ** A Failed response under the composition: sent with no UStatus payload, and completed at the client with its commstatus, with no UStatus decoded from the header.
 ** A type of size zero with I equal to H: a success, a refusal answer and a failed response, all of extent H; the success taken on the value branch and accepted as a present value of size zero, the other two taken on the header-only branch, with no layout check and no value.
 ** A Control or a Failed response written on a binding whose loan can be shortened, shortened to H, and on one whose loan cannot change size, asked for at length H.
@@ -553,7 +558,7 @@ The two error-model rules that the composition specializes are recommendations, 
 [[req-ssr-e2e-data-id]]
 == One data ID per sender and route
 
-[.specitem,oft-sid="req~ssr-e2e-data-id~6",oft-title="One data ID per sender and route",oft-needs="impl,utest",oft-tags="SafetyE2eWire,SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-e2e-data-id~6",oft-title="One data ID per sender and route",oft-needs="impl,utest,uman",oft-tags="SafetyE2eWire,SafetyUpRustCore"]
 --
 *Derivation.*
 The E2E wire *MUST* ensure that each sender on a route has its own data ID, derived the same way on both sides from deployment data, by one documented function of the sender's URI, the route's resource ID, the message type, and the route's fixed sink where it has one: a notification's destination, a request's method.
@@ -598,18 +603,73 @@ The caller's reply-to address, which is a response's sink, is no input: a client
 The Source ID field keeps its use: a request carries the client's data ID there, and a response echoes it (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>).
 
 *One canonical form.*
-The element *MUST* state, in a derivation record documented with the crate beside the header's record (<<req-ssr-e2e-header-format,The E2E header has one documented format>>), the canonical form of each input, and the derivation *MUST* follow it on both sides:
+The element *MUST* use the function and canonical forms of xref:e2e-profile-v1.adoc#req-ssr-e2e-data-id-profile-v1[Data-ID derivation 1 has one canonical byte sequence].
+The element's supplier *MUST* identify an immutable revision of that record and its vectors in the element's crate documentation beside the header record (<<req-ssr-e2e-header-format,The E2E header has one documented format>>).
+The element *MUST* apply the following context rules:
 
 * *A declared locality context.* An empty authority name means local, and the deployment data of each route that selects the E2E wire declare the route's _locality context_: the one authority name that an empty authority stands for on that route, or that it stands for none.
-The declaration is part of the sender's and of the receiver's deployment data, alike, and the derivation function *MUST* take it as an explicit argument.
+The declaration is part of each sending and receiving role's deployment data.
+For every sending and receiving role on a route that selects the E2E wire, an explicit declaration that no authority stands for empty (`none`) is a complete value; the element *MUST NOT* treat a missing or omitted locality declaration as `none` or default an invalid declaration to it, and *MUST* refuse at setup, naming the route and role, any missing, invalid or uncanonicalizable required local locality declaration (xref:../../basics/configurations.adoc#req-ssr-config-validated[Deployment data is validated in full]; xref:../../basics/configurations.adoc#req-ssr-config-one-path[Direct construction and deployment data are one path]).
+For a sender relation whose effective derivation inputs can contain an empty authority, the sender and receiver declarations agree as complete canonical values; explicit-only relations need no such equality.
+The element *MUST* give the derivation function that declaration as an explicit argument.
 Before derivation, an empty authority in the sender's URI, and in the fixed sink where the kind has one, is replaced by the context's name; where the context declares none, it stays empty on both sides.
-* *A setup check where a part can know.* The element *MUST* refuse at setup, by name, a route that selects the E2E wire where the authority name that the element is configured with differs from the locality context that the route declares while an input of the element's role on that route has an empty authority; an element configured with no authority name relies on the declared context.
-Where the element holds both the sender's and the receiver's declarations of a route's locality context, it *MUST* refuse the route at setup, by name, if the two differ.
+* *A setup check where a part can know.* The element *MUST* refuse at setup, by name, a route that selects the E2E wire where the canonical authority name that the element is configured with differs from the canonical locality context that the route declares while an input of the element's role on that route has an empty authority — including where the element is configured with a nonempty canonical authority name while the route's locality context is explicitly declared `none` (a nonempty configured authority differs from explicit `none`, and explicit `none` equals only explicit `none`).
+An element configured with no authority name relies on the declared route context; that reliance does not exempt any sending or receiving role from complete valid declarations.
+Where the element holds both declarations for a sender relation that admits empty-authority derivation, it *MUST* refuse the route at setup by name if their complete canonical locality values differ; explicit `none` equals only explicit `none`.
 * *No empty authority across contexts.* On a route whose sender and receiver lie in different locality contexts, the inputs carry explicit authority names, in the frames' metadata and in both sides' deployment data, and a receiver *MUST NOT* complete a received empty authority with its own name.
 * *One spelling.* The derivation *MUST* compare authority names as exact strings, in the canonical form that the derivation record states for each admitted kind of authority: a registered name, which the UUri rules already restrict to lower case (xref:../../basics/uri.adoc[UUri]), an IPv4 address, and an IP literal with its hexadecimal digits in lower case.
 
-All of this is setup data, and no name is looked up at runtime.
-A frame whose source does not fit its route's declaration is refused at the first check that finds it: by the source filters of the element's admission of its metadata, where the receive names an authority that an empty source does not match, and otherwise as an undeclared data ID or an identity mismatch; it is never accepted under another authority.
+*Complete declarations at a receiver.*
+This clause states setup checks kept distinct from runtime admission below.
+For each declared sender relation of a receiving role, _empty-authority derivation_ is possible if any input that can reach the derivation for that relation has an empty authority: the declared or admitted source or a kind-applicable fixed sink (a Notification's destination or an RPC request's method).
+A declared sender relation is _explicit-only_ only when both its declared sender UUri and any kind-applicable fixed sink carry explicit nonempty authorities (and effective admission enforces that explicit source).
+The effective domain is the domain permitted by metadata admission, declared-source checks and the route or call configuration together, not a label on the route or declaration.
+A Response's caller sink and a Publish's optional sink (absent or uStreamer-routed with nonempty authority and wildcard fields under `dsn~up-attributes-publish-sink~2` in xref:../../basics/uattributes.adoc[UAttributes]) are excluded inputs and do not trigger this condition.
+
+Before enabling the receiving role, the element *MUST* account for every declared sender relation and determine whether that relation permits empty-authority derivation.
+For each relation that permits it, the element *MUST* hold the receiver's route locality declaration and that sending role's route locality declaration, and *MUST* bind the supplied declaration to the actual declared sending role, source, route resource, message kind and applicable fixed sink.
+The element *MUST* refuse the receiving role at setup, naming the role and affected sender, for a missing, invalid or ambiguous required declaration, including failed canonicalization or a declaration bound to another role or tuple.
+As under "One canonical form", explicit `none` is a complete value; the element *MUST NOT* treat an omitted declaration as `none` or default an invalid declaration to it.
+
+For every applicable relation, the element *MUST* compare complete canonical locality values under the derivation record and *MUST* refuse the receiving role at setup by name if they differ: explicit `none` equals only explicit `none`, and named contexts equal only equal canonical names.
+The element *MUST NOT* substitute equal data IDs for this comparison.
+An enforced explicit-only relation needs no context equality merely because another sender on the receiving role admits empty-authority derivation; a mixed set of explicit cross-context senders and equal-context empty-authority senders is permitted.
+On a mixed-sender Request or Notification receiving route that shares one fixed sink, preserving cross-context explicit-only sender relations without requiring sender/receiver context equality requires an explicit (nonempty) fixed sink alongside explicit declared sender UUris; where that shared fixed sink has an empty authority, every declared sender relation on that route admits empty-authority derivation and requires complete agreeing locality declarations.
+
+The element *MUST NOT* exempt a relation merely because its declaration carries an explicit label while the effective admission path permits an empty derivation input, and *MUST NOT* use a computed or received data ID to select a relation's declaration or to partition ambiguous relations.
+Where admitted metadata and configured route inputs cannot reliably distinguish declared sender relations before derivation, the element *MUST* refuse the ambiguous setup configuration rather than partition relations by hash.
+No canonicalization or setup declaration makes a frame pass a raw metadata or declared-source filter that it otherwise fails.
+
+These setup duties bind the element in every strict-mode state, for serialized inner wires and native composition, for topics, Notifications, Requests and Responses, including an RPC client without an E2E receiving slot.
+The element *MUST NOT* reuse a successful local check after the checked role inputs, effective admission domain, sender set or supplied declarations change, and *MUST* keep the receiving role disabled until setup checks those changed values.
+This permits no setup change in runtime mode (xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
+A supplied peer declaration is integrator deployment data; its comparison does not attest that the remote role applied it or detect a later remote change.
+This clause gives a sending role no receiver-roster duty; its local declaration and configured-authority checks still apply.
+
+*Pre-substitution declared-sender membership.*
+All locality declarations above are setup data, and no name is looked up at runtime.
+After the binding's envelope checks, the element's metadata admission (including its filters) and existing peer classification (xref:../peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected]; xref:../peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones]) have admitted a frame — and, for a Response, after the element has also successfully tied the response to the current tenure of its call as xref:../../up-l2/api.adoc#req-ssr-peer-rpc-correlation[A response reaches only its own call] requires — the element *MUST* make the applicable pre-substitution declared-sender membership check below before its TTL check (xref:../bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]), before its payload encoding, unprotected and protected-native preflight checks, before substituting any locality context into a received derivation input, and before deriving an expected data ID.
+A frame refused by an earlier envelope, metadata, existing peer or Response correlation check gets no check under this clause.
+This additional gate is distinct from ordinary early peer classification: it neither relaxes any restriction of xref:../peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones] nor permits a peer-table entry that that item forbids, and it neither requires a per-method receive route nor permits an unprotected call-slot lookup before protected Response correlation.
+
+Wherever either the frame's uncompleted source UUri or a kind-applicable fixed sink (on a Notification or Request route) has an empty authority, the element *MUST* establish that the frame's uncompleted source UUri matches a declared sender relation for that receiving role, bound to the route's or tied call's actual derivation inputs (route resource, message kind and applicable fixed sink — for a Response, the matched call's method), whose required complete-declaration agreement passed at setup:
+
+* This membership check *MUST* use existing UUri/source-admission equality (exact field equality of the uncompleted `UUri` under xref:../../basics/uri.adoc[UUri], with no wildcards); it introduces no new text or serialization equality and applies no canonicalization or substitution to manufacture a match.
+* Neither the substituted authority, nor a union of declarations across different methods, nor a received or computed data ID establishes membership or selects another method; in particular, a received source with an empty authority *MUST NOT* match an explicitly named declared sender by filling its authority.
+* Where a kind-applicable fixed sink on a Request or Notification route has an empty authority, this same pre-substitution membership check applies even when the received frame's source UUri carries an explicit authority.
+* If the frame's uncompleted source UUri matches no such declared sender relation, the element *MUST* refuse and count the frame once on its route under the existing undeclared-source cause (not in the E2E counter, not as `+unprotected+`, and not under a TTL, native shape or agreement, or undeclared-data-ID cause) and *MUST* make no later TTL, encoding, unprotected or protected-native preflight check for it, derive no expected data ID, invoke no E2E payload check, allocate or mutate no E2E receiving state or figures, and send no wire refusal answer or `+InvalidArgument+` answer.
+The element *MUST* release the refused frame under the route's existing release rules (at once, as for other refused frames); on a Request it gives the application no means to answer (xref:../../up-l2/api.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered]), and on a Response successfully tied to its current call the required call last-refusal bookkeeping, arrival-claim return, advisory-answer precedence and continued openness for another copy are stated in xref:../../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
+An earlier ordinary peer refusal or a failed Response tenure tie records nothing in any call; call bookkeeping is distinct from E2E receiving state, and an RPC client continues to keep no E2E receiving slot (<<req-ssr-e2e-receiver-state,E2E receiving state is one fixed slot per declared data ID>>).
+* Where no received derivation input has an empty authority — that is, the frame's uncompleted source authority is nonempty and any kind-applicable fixed sink authority is nonempty, so no locality substitution occurs — this pre-substitution gate does not apply, and existing metadata/peer admission and the existing explicit-only undeclared-data-ID path remain unchanged.
+
+This runtime admission duty binds the element in every strict-mode state, for serialized inner wires and native composition, for topics, Notifications, Requests and Responses, including an RPC client without an E2E receiving slot.
+It adds no handshake, authentication, remote attestation, extra state lock or publisher receiver roster, and does not make the 32-bit derivation function injective.
+
+A frame that fails earlier metadata or source admission is refused there, before E2E derivation; in particular, an empty source does not match a receive's explicit authority filter.
+After admission, the wire's comparisons are the numeric comparisons in "Acceptance" below, in their stated order.
+Different canonical tuples can have the same data ID, so equality of the transmitted, declared and expected IDs does not establish equality of those tuples or the truth of a supplied remote locality declaration.
+Two residuals remain explicit: a different actual sender emitting the same declared raw empty-source UUri while the receiver holds false or stale agreeing locality records remains observationally indistinguishable to these local checks when its colliding ID and other checks pass; and an undeclared colliding identity on an explicit-only path (no substitution) that passes earlier metadata and peer admission remains outside numeric data-ID discrimination.
+The deployment's collision freedom and the truth and currency of its declarations remain the integrator's duties (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 
 *The expected data ID.*
 For each frame that it gives the E2E wire, the element *MUST* derive one _expected data ID_ with that function, from the inputs that the table gives for the frame's kind, and *MUST* give the wire that one fixed-width value beside the frame's bytes, and nothing else of the route (<<req-ssr-e2e-receiver-state,E2E receiving state is one fixed slot per declared data ID>>, "Route context").
@@ -628,7 +688,8 @@ How the element counts those refusals, and answers a request so refused, is stat
 * Where an interface accepts a data ID, or an E2E value built elsewhere, the element *MUST* derive the data ID again at construction, and refuse a difference by name, before runtime mode and in every state of strict mode.
 * Which roles cannot select the E2E wire, because an input of their tuple is not fixed at setup, is stated in <<req-ssr-e2e-sender-state,E2E sending state is one counter per E2E value>>.
 
-These checks catch a mismatch where a part can know it, and a receiver never accepts a mismatched frame because setup might have caught it.
+The element and E2E wire *MUST NOT* bypass any check of a received frame because setup succeeded.
+Re-derivation of a supplied data ID or an E2E value built elsewhere detects a different original tuple only where that tuple produces a different ID; equality does not establish the value's original tuple.
 
 *Construction.*
 
@@ -643,22 +704,41 @@ What a response carries, and how a client judges it, is stated in <<req-ssr-e2e-
 [horizontal]
 ID:: `+req~ssr-e2e-data-id~6+`
 ASIL:: B
-Allocated to:: the E2E wire; the element, for the derivation that it provides as a function, for its derivation record, for deriving each frame's expected data ID and giving it to the wire, for deriving a sending role's data ID and refusing a supplied one that differs, for refusing at setup, by name, a route on which the authority name that it is configured with differs from the locality context that the route declares while an input of its role has an empty authority, and a route whose sender's and receiver's declarations of its locality context, both of which it holds, differ, and for completing no received empty authority with its own name
-Verification:: test
-* Two clients of one method.
-* An undeclared sender.
-* A second publisher on one topic.
-* A collision in the declared list, refused at construction.
-* A notification for another destination, refused.
-* The function's test vectors.
-* A wildcard in the declared list, refused at construction.
-* The function's vectors for each kind of message, with a response's sink and a published message's optional sink entering no derivation.
-* A legitimate response whose client's reply-to address differs from the server's view of any sink: accepted.
-* A frame from declared source B whose intact header carries declared sender A's data ID: refused as an identity mismatch.
-* Both sides' deployment data declaring locality context `+x+`, the sender configured with authority name `+x+`, its frames carrying an empty authority in their source: both sides replace the empty name by `+x+` before derivation, and the data IDs are equal.
-* The sender's deployment data declaring locality context `+x+`, the receiver's `+y+` or none: refused at setup by name where one part holds both declarations; otherwise every such frame refused and counted, as an undeclared data ID or an identity mismatch, and none accepted.
-* A route that crosses locality contexts, declared with explicit authorities, and a frame whose source has an empty authority: refused by the source filters where the receive names the authority, otherwise by the data-ID checks, and the empty authority never completed with the receiver's name.
-* A sending role given an E2E value whose data ID differs from the one that its configured tuple derives: refused at construction by name.
+Allocated to:: the E2E wire; the element, for the derivation that it provides as a function, for applying the canonical derivation rules, for deriving each frame's expected data ID and giving it to the wire, for deriving a sending role's data ID and refusing a supplied one that differs, for refusing at setup, by name, a missing, invalid or uncanonicalizable local locality declaration on any sending or receiving role, a route on which a configured canonical authority name differs from the declared canonical locality context (including a nonempty configured authority against explicit `none`) while an input of its role has an empty authority, and a route whose held sender's and receiver's canonical context declarations differ on a relation admitting empty-authority derivation, for completing no received empty authority with its own name, for complete per-relation receiving declarations, effective admission-domain checks, named setup refusal and invalidation of local approval, and for runtime pre-substitution declared-sender membership after binding envelope, metadata and existing peer checks (and, for a Response, after a successful current-tenure call tie) and before TTL and payload checks, refusing and counting an unmatched source once under the undeclared-source cause with no later checks, no E2E payload check and no wire answer; the element's supplier, for its crate documentation's immutable derivation record reference
+Verification:: test, review
+* *test*
+** Two clients of one method.
+** An undeclared sender.
+** A second publisher on one topic.
+** A collision in the declared list, refused at construction.
+** A notification for another destination, refused.
+** The function's test vectors.
+** A wildcard in the declared list, refused at construction.
+** The function's vectors for each kind of message, with a response's sink and a published message's optional sink (absent or legal uStreamer wildcard sink) entering no derivation.
+** A legitimate response whose client's reply-to address differs from the server's view of any sink: accepted.
+** A frame from declared source B whose intact header carries declared sender A's distinct data ID: refused as an identity mismatch.
+** Both sides' deployment data declaring locality context `+x+`, the sender configured with authority name `+x+`, its frames carrying an empty authority in their source: both sides replace the empty name by `+x+` before derivation, and the data IDs are equal.
+** For any sending or receiving role on a route selecting the E2E wire: a missing, omitted or invalid local locality declaration refused at setup by name (under deployment data and direct construction alike), never defaulted to explicit `none`; a nonempty configured canonical authority paired with explicit `none` while a role input has an empty authority refused at setup by name.
+** For each sender relation that admits empty-authority derivation: a missing receiver declaration, a missing or invalid declaration for an applicable declared sender, an ambiguous sender-to-role binding, and a declaration bound to another tuple, each refused at setup by name before the role is enabled.
+** Both declarations explicitly saying that no authority stands for empty: complete and equal; an absent declaration is refused rather than defaulted to that value.
+** Sender context `+n16531.example+`, receiver context `+n86120.example+`, empty-source Publish with type `+0x1234+`, instance `+1+`, major `+1+`, source and route resource `+0x8001+`: the derivation record's vectors give `+0x42869DB0+` on both sides, but the complete-context comparison refuses the receiving role at setup by name.
+** Different contexts whose data IDs differ: the same setup refusal, before any numeric receive comparison. An element holding both declarations on that applicable relation also keeps the setup refusal.
+** The local configured authority differing from the declared route context while a role input is empty: refused at setup; no configured authority relies on the declared context and does not exempt a sending or receiving role from complete valid declarations.
+** Several declared senders: every applicable declaration checked; one missing or disagreeing declaration prevents the receiving role from being enabled. Two declared sender tuples with a colliding ID are also refused by the existing construction check.
+** On a Publish route, declared explicit sender `+up://n86120.example/1234/1/1/8001+` at a receiver in context `+n86120.example+` receiving a metadata- and peer-admitted undeclared empty-authority frame `+up:///1234/1/1/8001+` (carrying `+0x42869DB0+`): pre-substitution declared-sender membership compares the uncompleted source UUri using exact UUri equality and refuses and counts the frame once on its route under the existing undeclared-source cause before TTL and payload checks, without deriving an expected data ID, invoking an E2E payload check, allocating or mutating E2E receiving state or figures, or sending a wire refusal or `+InvalidArgument+` answer.
+** An undeclared explicit source arriving on a Request or Notification route whose kind-applicable fixed sink has an empty authority (after metadata and existing peer admission): refused and counted once on its route under the existing undeclared-source cause before TTL, payload checks and locality substitution, with no expected data ID derived, no E2E payload check, no E2E receiving state or figures mutation, no wire answer and, on a Request, no means given to the application to answer.
+** A genuine declared empty-authority sender whose complete-declaration agreement passed at setup: its received uncompleted empty source matches the declared sender relation by exact UUri equality, substitutes the agreed context, derives the expected data ID and enters the E2E wire checks.
+** An explicit-only route whose received source and any kind-applicable fixed sink both have nonempty authorities (no substitution occurs): an undeclared explicit source that passes earlier metadata and peer admission preserves the existing explicit-only undeclared-data-ID path (including `+InvalidArgument+` on a non-corrupt RPC request).
+** A role described as explicit-only whose effective admission still permits an empty derivation authority: no exemption from a label alone; empty inputs require complete setup declarations and runtime pre-substitution declared-sender membership.
+** A cross-context route with explicit derivation inputs and an explicit-only admission path: legitimate explicit frames remain eligible; an empty source is refused before E2E derivation independently of its numeric ID and is never completed from the receiver's own name.
+** An explicit source with an empty kind-applicable fixed sink on a Request or Notification: complete receiving declarations required; an empty caller sink on a Response, or an absent or uStreamer-routed optional sink on a Publish, alone does not trigger that requirement.
+** Topic, Notification, Request and Response receiving roles, on serialized and native compositions, in every strict-mode state: the same setup declaration checks and runtime pre-substitution membership checks, including an RPC response client without an E2E receiving slot (where, after a successful current-tenure call tie, an unmatched empty source is refused and counted once under the undeclared-source cause before TTL and payload checks, recorded as that call's last refusal with its arrival claim returned and the call kept open for another copy until its TTL, with no E2E receiving slot allocated or mutated). A publisher gains no receiver-roster requirement.
+** Multi-fault precedence controls across Publish, Notification, Request and Response (serialized and native, in every strict-mode state): a well-formed, metadata- and peer-admitted frame (and for a Response, successfully tied to an open current-tenure call) whose uncompleted source fails pre-substitution membership while also carrying an expired message TTL, a Request TTL of 0, an absent or wrong-encoding (`+unprotected+`) payload, or a protected-native invalid outer extent within envelope bounds (such as P 40 for Topic/Notification H 32, A 8, N 16, E 48 or P 56 for Request/Response H 48, A 8, N 16, E 64) is refused and counted once under the undeclared-source cause with no TTL, `+unprotected+`, native-shape or E2E count, no expected data ID derived and no wire answer; by contrast, a frame failing an earlier binding envelope, metadata presence/extent or existing peer-admission check is refused and counted at that earlier stage with no membership check, no second count and no call record.
+** Response tenure and matched-call method controls: a delayed response naming an earlier request at a reused call slot (or failing full peer/incarnation correlation) whose raw source would also fail membership is refused by correlation first and records nothing in the later call; a response tied to a call for method A whose raw empty source is declared only for method B is evaluated against method A's actual inputs (never a union of method rosters or the received source to select B), refused once under undeclared-source, recorded as A's last refusal, and keeps A open for a later valid copy (preserving advisory-answer precedence at call TTL).
+** Changing a checked local role input, admission domain, sender set or supplied declaration: the earlier approval not reused, and no receiving-role enablement before setup checks the changed values.
+** A supplied E2E value built from a distinct tuple with an equal data ID: numeric re-derivation alone does not establish its original tuple; a sending role given an E2E value whose data ID differs from the one that its configured tuple derives remains refused at construction by name.
+** A mixed sender set: sender A has enforced explicit inputs under context x, sender B uses empty under context y, and the receiver uses y; on Publish/Response (or Request/Notification with an explicit shared fixed sink), A stays usable without an x/y comparison while B requires full y/y agreement; on Request/Notification with an empty shared fixed sink, both A and B require complete agreeing declarations. Ambiguous pre-derivation partitions are refused at setup rather than partitioned by hash.
+* *review*: truthful/applied peer-record assumption, the distinction between setup declaration checks, ordinary early peer admission, pre-TTL pre-substitution declared-sender membership and tied-call last-refusal bookkeeping (distinct from E2E receiving state), absence of unprotected pre-tie slot lookup or per-method receive-route restrictions, same-raw-empty-source false/stale-record residual (including the Publish collision witness where local setup and raw UUri membership pass while remote truth is violated, with no claim of identity-mismatch refusal), explicit-only undeclared-collision residual, canonical-comparison compatibility, changed-role invalidation, and the absence of handshake, authentication, remote attestation or a sending receiver roster.
 
 *Rationale.*
 A route-only identity would merge different senders, and omitting the destination would admit a misaddressed frame.
@@ -668,7 +748,7 @@ _A response's inputs._
 A server answers many clients with one data ID, so no caller's address enters the response's derivation on either side.
 
 _One canonical form._
-An empty authority means local, and local to what must be the same on both sides, so each route declares it, and the two sides' declarations must agree; across contexts only explicit names are carried.
+An empty authority means local, and local to what must be the same on both sides, so each applicable sender relation has complete agreeing canonical context declarations; a relation with enforced explicit inputs uses no locality substitution and needs no context equality. Across contexts only explicit names are carried. Checking uncompleted source membership against declared sender relations before substituting a context keeps an undeclared empty source from aliasing an explicit sender in the receiver's context without disturbing the explicit-only path where no substitution occurs.
 
 _The expected data ID._
 The element knows the frame's admitted source and its route, and the wire knows neither, so the element derives the expected data ID and gives the wire that one value, and the wire compares two numbers.
@@ -874,7 +954,7 @@ For a refusal that has a kind and a class, the E2E wire *MUST* encode the refusa
 
 * the message result 2, refused and final, or 3, refused and advisory;
 * the status `+Aborted+`;
-* the refusal's kind, in the first reserved byte.
+* the refusal's kind, in the refusal-kind byte (offset 32).
 
 On a route that selects the native protection composition, the refusal answer is a Control (<<req-ssr-e2e-rpc-echo,An E2E response answers exactly its call>>, "Shapes of a protected native response"): its outer extent is H, the header alone, and it carries no value.
 

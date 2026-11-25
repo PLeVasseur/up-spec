@@ -1,0 +1,440 @@
+= E2E Protection Profile Records 1
+:toc: preamble
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14].
+
+[NOTE]
+====
+This page holds concrete records of the up-rust SEooC requirement family. Item statements define their actors and scope; this page creates no obligation for a classic protocol implementation that does not declare that contract.
+The family, declaration and replacement rules are in xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect].
+The reader enters the protection contract at xref:e2e.adoc[The E2E Wire].
+====
+
+[[req-ssr-e2e-common-profile-v1]]
+== The E2E wire uses one numerical header and CRC record
+
+[.specitem,oft-sid="req~ssr-e2e-common-profile-v1~1",oft-title="The E2E wire uses one numerical header and CRC record",oft-needs="impl,utest,uman",oft-tags="SafetyE2eWire"]
+--
+On every route that selects the up-rust E2E wire, serialized or native, the E2E wire *MUST* use the numerical header format and CRC parameters in this item.
+The E2E wire's supplier *MUST* identify an immutable revision of this item and its known-answer records in the wire's crate documentation, without an independently maintained parameter definition.
+This common record defines numerical fields, composition-independent response tuples and CRC calculation; native extent, spans and closed response shapes are defined separately by <<req-ssr-e2e-native-profile-v1,The native composition uses profile 1>>.
+
+*Octets and integers.*
+Every offset below is an octet offset from the start of the outer payload; intervals exclude their upper bound.
+An octet has eight bits.
+Every header integer, including the stored CRC, is unsigned and encoded most-significant octet first, at exactly the width in the table.
+No host struct layout, native endianness, implicit padding, sign extension or variable-width integer encoding defines a header.
+The E2E wire *MUST NOT* truncate an out-of-range field to fit and *MUST* refuse its construction or sending by name before transmission.
+An inner native value retains its agreed native representation; this common header format changes no inner representation.
+
+.Common header fields
+[cols="2,1,3,7",options="header"]
+|===
+|Offset |Octets |Field |Value
+|0 |4 |Data ID |The sender's Data-ID; a response uses the server/method Data-ID
+|4 |4 |Length |The complete outer extent P, including header, alignment gap and inner extent where present
+|8 |6 |Counter |The 48-bit sending counter; a response echoes its request's counter
+|14 |6 |Start |The 48-bit start value of the sender's incarnation; a response echoes its request's start
+|20 |4 |Entropy |The 32-bit entropy component of that incarnation; a response echoes its request's entropy
+|===
+
+The incarnation is the ten octets `[14,24)`, start followed by entropy.
+The counter and incarnation generation, comparison and no-wrap rules remain those of xref:e2e.adoc#req-ssr-e2e-sender-state[E2E sending state is one counter per E2E value].
+
+.Topic header, H = 32
+[cols="2,1,3,7",options="header"]
+|===
+|Offset |Octets |Field |Value
+|0 |24 |Common fields |As above
+|24 |8 |CRC |The numerical CRC result, big endian
+|===
+
+A Publish or Notification uses this topic header.
+The route fixes the message kind; a topic header has no implicit RPC fields.
+
+.Method header, H = 48
+[cols="2,1,3,7",options="header"]
+|===
+|Offset |Octets |Field |Value
+|0 |24 |Common fields |As above
+|24 |4 |Source ID |A request's own client Data-ID; a response echoes that request's Data-ID
+|28 |1 |Message type |2 for RpcRequest; 3 for RpcResponse
+|29 |1 |Result |0 normal, 1 error, 2 final refusal, 3 advisory refusal
+|30 |2 |Status |The numerical UCode value, as a 16-bit unsigned integer
+|32 |1 |Refusal kind |The refusal kind below for a wire refusal answer; zero in every other method message
+|33 |7 |Reserved |All zero
+|40 |8 |CRC |The numerical CRC result, big endian
+|===
+
+In a request, the E2E wire *MUST* carry Source ID equal to Data ID, type 2, result 0, status 0, byte 32 zero and all seven reserved octets 33 through 39 zero.
+In a response, the E2E wire *MUST* carry type 3 and the table's Source ID, counter and incarnation echo.
+Message-type values 2 and 3 are the values of the `UMessageType` definition; this is a fixed header encoding of those values, not protobuf serialization.
+Results 4 through 255 are undefined in this profile.
+
+.Composition-independent response tuples
+[cols="3,1,2,2,2",options="header"]
+|===
+|Response class |Result |Status |Refusal kind (byte 32) |Reserved (bytes 33–39)
+|Ordinary success response |0 |0 (`Ok`) |0 |zero
+|Ordinary error response |1 |1 through 16 (non-`Ok`) |0 |zero
+|Wire refusal answer, final |2 |10 (`Aborted`) |1 through 7 |zero
+|Wire refusal answer, advisory |3 |10 (`Aborted`) |1 through 7 |zero
+|===
+
+An ordinary application `Aborted` response uses result 1, status 10 and byte 32 zero; a wire refusal answer uses result 2 or 3, status 10 and a defined nonzero refusal kind 1 through 7.
+An `InvalidArgument` answer uses result 1, status 3 and byte 32 zero.
+On every route that selects the E2E wire, serialized or native, every response outside these four rows is corrupt under xref:e2e.adoc#req-ssr-e2e-detects[The E2E wire detects each fault].
+This table governs method-header fields only; it sets no serialized inner extent and imports no native shape geometry.
+
+.Status values
+[cols="1,4,1,4",options="header"]
+|===
+|Value |UCode |Value |UCode
+|0 |Ok |9 |FailedPrecondition
+|1 |Cancelled |10 |Aborted
+|2 |Unknown |11 |OutOfRange
+|3 |InvalidArgument |12 |Unimplemented
+|4 |DeadlineExceeded |13 |Internal
+|5 |NotFound |14 |Unavailable
+|6 |AlreadyExists |15 |DataLoss
+|7 |PermissionDenied |16 |Unauthenticated
+|8 |ResourceExhausted |— |—
+|===
+
+The numerical mapping is that of xref:../../up-core-api/uprotocol/v1/ucode.proto[UCode].
+This profile defines status values 0 through 16 only; a future UCode addition is not silently admitted to profile 1.
+The response's outer commstatus is still compared as xref:e2e.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call] requires.
+
+.Refusal kinds
+[cols="1,4",options="header"]
+|===
+|Value |Kind
+|1 |stale
+|2 |repeat
+|3 |out of window
+|4 |below the floor
+|5 |contended
+|6 |retired
+|7 |older
+|===
+
+Only these seven kinds occur in a wire refusal answer.
+Zero means no refusal kind and is invalid in a wire refusal answer; values 8 through 255 are undefined.
+Corrupt requests and identity mismatches are unanswered, and an undeclared Data-ID receives the specified `InvalidArgument` ordinary error response, under xref:e2e.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory]; none gains a refusal kind here.
+The numerical table changes no rule for deciding whether a refusal answer is final or advisory.
+
+*CRC parameters.*
+The CRC is CRC-64/XZ with the following complete parameter tuple:
+
+[cols="3,5",options="header"]
+|===
+|Parameter |Value
+|Width |64 bits
+|Polynomial, normal, implicit leading coefficient |`0x42F0E1EBA9EA3693`
+|Initial register |`0xFFFFFFFFFFFFFFFF`
+|Input reflected |true
+|Output reflected |true
+|Final XOR |`0xFFFFFFFFFFFFFFFF`
+|ASCII `123456789` check |`0x995DC9BBDF1939FA`
+|Stored CRC octets |most significant first
+|===
+
+For an exact definition of the numerical result, initialize a 64-bit register to all ones.
+For each input octet, XOR it into the low eight register bits, then perform eight steps: save the old low bit, shift right by one, and XOR `0xC96C5795D7870F42` when that saved bit was one.
+After the last octet XOR the register with all ones.
+No extra zero octets are fed, and the resulting value is not reflected again.
+This recurrence defines the result, not a required implementation strategy.
+
+*Coverage and composition scope.*
+The E2E wire *MUST* continue one CRC calculation over header octets `[0,H-8)`, excluding the stored CRC rather than feeding it as zero, followed by the inner bytes that the selected composition protects.
+On a serialized route, the E2E wire *MUST* cover every inner serialized payload octet in order after `[0,H-8)`.
+Each selected serialized composition retains its own format rules for inner payload presence and extent—for ordinary success responses, ordinary error responses (retaining UStatus detail behavior under xref:e2e.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call]) and wire refusal answers—without imposing a universal header-only serialized refusal rule or the native extent limit.
+On a native route, the E2E wire *MUST* use the meaningful-span and H-only coverage and closed Value/Failed/Control geometry of <<req-ssr-e2e-native-profile-v1,The native composition uses profile 1>>.
+The E2E wire *MUST* compare the recomputed numerical CRC with the stored big-endian result; an entire-physical-frame residue check is not a substitute.
+The E2E wire *MUST* treat undefined field values, on an RPC route nonzero reserved method-header octets in bytes 33 through 39, response tuples outside the composition-independent response table above, and any combination excluded by its selected composition as corrupt, under xref:e2e.adoc#req-ssr-e2e-detects[The E2E wire detects each fault].
+
+The known-answer fields, published AUTOSAR CRC checks, illustrative contiguous serialized-header examples and native frame records are in link:e2e-profile-v1-frame-vectors.json[the frame vector record].
+Its native extents and spans belong to the native composition, and its common serialized examples illustrate header fields and contiguous-octet CRC arithmetic only; they deliver no complete serialized composition and impose no serialized extent limit or header-only serialized refusal rule.
+Each selected serialized composition retains its own encoding identifier, format extent and detail rules, largest admitted extent, known-answer records and CRC-distance/residual record under xref:e2e.adoc#req-ssr-e2e-header-format[The E2E header has one documented format]; this item assigns none of them and does not assign the native identifier to serialized payloads.
+--
+
+[horizontal]
+ID:: `+req~ssr-e2e-common-profile-v1~1+`
+ASIL:: B
+Allocated to:: the E2E wire; its supplier, for the crate documentation's immutable record reference
+Verification:: test (common-field, composition-independent response-tuple and CRC vectors, field widths, defined values and invalid combinations); review (composition-specific coverage and retained serialized records)
+
+*Source.* AUTOSAR CP R24-11, https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_CRCLibrary.pdf[Specification of CRC Routines], section 7.2.4.1, SWS_Crc_00085/00086: CRC parameter tuple and checks. This reuses those parameters without claiming AUTOSAR E2E profile conformance. The method/status values are the UMessageType and UCode mappings of xref:../../up-core-api/uprotocol/v1/uattributes.proto[uattributes.proto] and xref:../../up-core-api/uprotocol/v1/ucode.proto[ucode.proto].
+
+*Rationale.*
+One common numerical record prevents native and serialized compositions from choosing incompatible header encodings or CRC parameters, while their own coverage and capability records retain their scope.
+
+[[req-ssr-e2e-native-profile-v1]]
+== The native composition uses profile 1
+
+[.specitem,oft-sid="req~ssr-e2e-native-profile-v1~1",oft-title="The native composition uses profile 1",oft-needs="impl,utest,uman",oft-tags="SafetyE2eWire,SafetyUpRustCore"]
+--
+The E2E wire, on a route that selects the native protection composition, *MUST* use `up-rust-e2e-native-v1` as this item defines it and the common numerical record of <<req-ssr-e2e-common-profile-v1,The E2E wire uses one numerical header and CRC record>>.
+The element and E2E wire *MUST* fix the profile at setup and *MUST NOT* choose it by trying several interpretations of received bytes.
+The E2E wire's supplier *MUST* identify an immutable revision of this item and its known-answer records in the wire's crate documentation.
+The shape selector, acquisition, initialization, admission, ownership and lifetime rules remain xref:e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone].
+
+*Identity.*
+The profile's built-in private-use payload encoding identifier is `0xF0E2`.
+It has meaning only under the deployment agreement required by xref:../../basics/payload_encoding_registry.adoc[the payload-encoding registry]; this is no public registry assignment or global reservation.
+The E2E wire *MUST* state that identifier with the profile name.
+A deployment agreement can select another identifier in `0xF000` through `0xFFFE` for these exact profile bytes and rules under the private-use registry contract; this item gives no new registry allocation.
+The E2E wire *MUST* state that agreed value, and the element *MUST* establish its equality with the identifier in the native agreement at setup; no unagreed identifier is an alias.
+The element *MUST* refuse the route at setup by name if the identifier is outside that private-use range, is unagreed, or differs from the native agreement.
+An identifier change is coordinated before the route is enabled and changes no frame byte, CRC input or Data-ID input defined here.
+The element and E2E wire *MUST* use the route's agreed identifier, not infer this profile from an arbitrary private value.
+The identifier names neither a type, a layout nor an ABI, and the inner value has no second on-wire encoding identifier.
+
+.Closed native shape table
+[cols="2,2,1,2,2,2,3",options="header"]
+|===
+|Kind and shape |Extent |Result |Status |Byte 32 |Bytes 33–39 |CRC following the header
+|Topic Value |E |absent |absent |absent |absent |The inner meaningful spans
+|Request Value |E |0 |0 |0 |zero |The inner meaningful spans
+|Response Value |E |0 |0 |0 |zero |The inner meaningful spans
+|Response Failed |H |1 |1 through 16 |0 |zero |Nothing
+|Response Control, final |H |2 |10 |1 through 7 |zero |Nothing
+|Response Control, advisory |H |3 |10 |1 through 7 |zero |Nothing
+|===
+
+An application's Aborted is Failed: result 1, status 10 and byte 32 zero.
+A Control has result 2 or 3, status 10 and a defined nonzero kind.
+An InvalidArgument response is Failed: result 1 and status 3.
+Failed carries no UStatus detail payload or fabricated native value.
+The Value pair read by the shape selector where P = E = H is exactly result 0 and status 0, at offsets 29 and 30–31.
+Every other pair selects the header-only branch; only a verified row of this table can then be accepted.
+An undefined field value, a nonzero reserved octet, or a combination outside the row for the selected shape is corrupt, in the precedence of xref:e2e.adoc#req-ssr-e2e-detects[The E2E wire detects each fault].
+No CRC match makes an invalid row valid.
+
+*Extents and the native profile limit.*
+With the established type's size N and alignment A, I is H rounded up to a multiple of A, and E = I + N.
+The native profile's largest outer extent is 8192 octets, inclusive.
+The element *MUST* refuse the route at setup, naming the route and type, if E cannot be computed without overflow or exceeds 8192, even if some responses could be H-only.
+This limit is on the outer extent, not merely on the sum of meaningful spans, and not on a binding's whole allocation or sample capacity.
+At receive admission, the admitted extents remain exactly E on a topic/request route and E or H on a response route; a value below 8192 is not thereby an admitted shape.
+The route's declared payload alignment remains A, and its maximum native outer extent remains exactly E.
+No restriction here changes N, the reported size of the inner native type.
+
+*The supplier's meaningful-span record.*
+In this item, _the native type's supplier_ is the component producer or party that releases the native type's declaration together with its layout and meaningful-span record (a named component supplier under xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty] and xref:../../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]); this local definition does not make an ordinary application user a composition-package supplier or transfer the element's setup validation and refusal duties.
+For each selected native type, the native type's supplier *MUST* provide a fixed record bound to this profile version, the route's agreed encoding identifier, the complete native type/layout identity and ABI, N, A, and an ordered list of pairs `(offset, length)` relative to the start of the inner value.
+The element *MUST* establish that this record applies to the built type and its agreed complete layout and ABI at setup, with the comparison required by xref:native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout].
+An informal type name, short digest, equal size or equal alignment is not a substitute for that agreement.
+Each offset and length is an exact nonnegative integer; a listed length is positive; checked `offset + length` is at most N.
+Pairs are ordered by increasing offset, do not overlap, and adjacent ranges are merged.
+The list is empty for N = 0.
+The native type's supplier *MUST* make the union of the ranges exactly the always-initialized meaningful bytes of the complete type, recursively: no meaningful field is omitted and no padding is included.
+This is a supplier-controlled declaration established from the type's complete layout; it is neither a callback supplied through a safe API nor an incoming span list in a frame.
+It is fixed for the route; a frame's value cannot select another list.
+The element *MUST* refuse a route at setup, naming route and type, if it cannot establish these facts.
+A union is admitted only if one such complete always-initialized list exists for every admitted value; otherwise only this composition is refused, as xref:e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone] requires.
+
+For a layout of N = 16, A = 8, with a `u8` occupying `[0,1)` and a `u64` occupying `[8,16)`, the list is exactly `[(0,1), (8,8)]`.
+The seven bytes `[1,8)` are padding, not an implicit zero field.
+On an over-aligned layout of N = 64, A = 64, whose entire 64-byte value is meaningful, the list is `[(0,64)]`; its alignment gap starts at H and ends at 64 and is no part of that list.
+
+*CRC input.*
+The E2E wire *MUST* perform one continuing calculation over the header octets other than the CRC, followed, for a Value, by each meaningful span in order.
+Each span's octets are visited in ascending address order.
+The header contribution is `[0,24)` on a topic and `[0,40)` on an RPC route, including every reserved method-header octet.
+The stored CRC is omitted entirely, not fed as zero bytes.
+A native span `(o,l)` contributes the outer octets `[I+o,I+o+l)`.
+A Control or Failed response contributes no inner octet and has no alignment gap.
+The native value's padding, the initialized alignment gap and any sample complement or tail outside P are excluded.
+Excluded bytes have no canonical fill value; their initialization duties remain with the element or binding as xref:e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone] states.
+No intermediate final XOR or restart occurs between header and spans.
+To verify, recompute and compare the numerical result with the big-endian stored CRC.
+The E2E wire *MUST NOT* substitute an entire-physical-frame residue check for that comparison.
+
+*Residual-error basis and limits.*
+Let M be the sum of the trusted meaningful-span lengths.
+For a Value, B = H - 8 + M is the CRC input length in octets.
+Because M is at most N and I is at least H, B is at most E - 8, hence at most 8184.
+The maximum CRC dataword has k = 65472 bits; the logical codeword, including the 64 check bits, has n = 65536 bits.
+Both topic H = 32, A = 1, N = 8160 and method H = 48, A = 1, N = 8144 attain the bound with complete contiguous coverage.
+For H-only responses B is 40, independent of the native type's alignment and size.
+
+The published polynomial table by Philip Koopman lists minimum distance at least 6 through 126701 dataword bits for the explicit polynomial `0x142F0E1EBA9EA3693`; its notes exclude the CRC bits from that threshold and include check-bit errors in the distance.
+Thus the selected maximum k lies within that published bound.
+This record claims only the lower bound *distance at least six*, not an exact distance or a complete weight distribution.
+The CRC64 table marks its higher-distance entries incomplete; no exhaustive independent distance enumeration or weight-six witness is claimed here.
+
+For a fixed trusted span mapping, selected shape and covered length, the result detects every substitution affecting one through five bits among the covered data and check bits.
+The generator has factor `(x + 1)`, so every odd-weight error is detected in that same fixed-length model.
+Initialization and final XOR are affine offsets that cancel in same-length differences; reflection, the big-endian stored check and its physical placement are fixed permutations preserving Hamming weight.
+These facts do not promise detection of every even-weight error of six or more bits, and the CRC corrects no error.
+Because the stored CRC is placed big-endian in the header ahead of the inner value and excluded alignment gaps and native padding are omitted from the CRC input, physical byte adjacency in a frame or mapped memory does not match canonical logical codeword adjacency.
+Accordingly, the fixed-length logical distance and odd-weight results above do not establish a guarantee for arbitrary contiguous physical bursts (including up to 64 physical bits) across stored CRC placement or excluded spans; a physical burst is covered only insofar as its effect on the covered data and check bits satisfies the stated fixed-length weight conditions.
+
+The fixed-length distance theorem does not cover insertion, deletion, truncation, changes of physical extent, corruption selecting another response shape or covered length, corrupted trusted span metadata, or a producer and checker consistently computing the same wrong thing.
+The independent length, shape, custody, identity, state and lifetime rules remain necessary; the CRC theorem is not a proof of those rules.
+It provides no protection against mutation after checking, including post-check DMA mutation, and validates no excluded gap, padding or sample tail.
+
+For an explicit independent-bit-flip model on the n relevant bits, let A_w count undetected nonzero errors of weight w and p be each bit's flip probability.
+The unconditional erroneous-acceptance probability per processed codeword is
+`sum(A_w * p^w * (1-p)^(n-w), w=1..n)`.
+Here A_1 through A_5 and every odd-indexed A_w are zero; the complete remaining distribution is not supplied.
+The conservative count-free bound in that model is `Pr[W >= 6 and W is even]`, with W binomial(n,p).
+No numeric route residual follows without its fault model and event rate.
+Under a different model, a uniformly distributed nonzero n-bit error vector, the undetected fraction is exactly `(2^k - 1)/(2^(k+64) - 1)`, approximately `2^-64`.
+That conditional counting result is not a universal error rate, a safety qualification or an adversarial bound.
+
+CRC and Data-ID are not authentication.
+The expected-ID check compares numerical IDs derived from the canonical sender and route inputs; equality does not prove tuple equality or remote declaration truth; of a received message's outer metadata, only source is taken from the frame for this derivation.
+Outer sink, type, UUID, TTL, priority, token and all other attributes are not thereby CRC protected.
+An attacker or faulty sender able to write consistent metadata, a consistent header and a matching CRC is not detected by this mechanism.
+Data-ID collisions, excluded bytes and same-wrong-value/common-cause failures are not assigned a CRC-width probability.
+Replay, repetition, loss, stale incarnations and RPC correlation retain their separate contracts and residuals.
+
+*Known-answer record.*
+The complete numerical examples and malformed/boundary companions are link:e2e-profile-v1-frame-vectors.json[the frame vector record].
+They include padded, over-aligned and zero-size values, combined gap/padding, all message kinds, maximum extents, counter high bits and invalid message-type, high-status-byte, non-Control refusal-kind, reserved-byte, advisory non-Aborted, shape, CRC, length and Source-ID cases.
+Example excluded-byte fills are not canonical fill values. Control examples presuppose the existing state rule's final/advisory conclusion and do not establish it by a table lookup.
+--
+
+[horizontal]
+ID:: `+req~ssr-e2e-native-profile-v1~1+`
+ASIL:: B
+Allocated to:: the E2E wire; its supplier, for the crate documentation's immutable record reference; the native type's supplier, for the complete meaningful-span record; the element, for fixed setup, identifier agreement and range refusal, extent refusal and establishing the span record against complete type/layout/ABI
+Verification:: test (native vectors, invalid shapes, maximum extents and beyond-limit setup refusal); review (span records, native coverage and the bounded residual argument)
+
+*Source.* Philip Koopman, https://users.ece.cmu.edu/~koopman/crc/crc64.html[CRC Polynomial Zoo, crc64.html, last update November 2019], CRC-64-ECMA row, and https://users.ece.cmu.edu/~koopman/crc/notes.html[interpretation notes, notes.html, last update May 2018], HD-list dataword/check-bit interpretation and `*o` odd-error notes: distance at least six through 126701 dataword bits and odd-weight detection. The table marks higher-distance entries incomplete; this record relies only on the published lower bound and claims no exhaustive independent distance enumeration or complete weight distribution. The CRC parameters themselves are fixed by <<req-ssr-e2e-common-profile-v1,The E2E wire uses one numerical header and CRC record>>.
+
+*Rationale.*
+The selected 8192-byte native extent is a capability choice within the cited distance bound, not a workload-adequacy finding or a limit on serialized compositions. The type supplier controls its layout while the element verifies that the agreed record applies.
+
+[[req-ssr-e2e-data-id-profile-v1]]
+== Data-ID derivation 1 has one canonical byte sequence
+
+[.specitem,oft-sid="req~ssr-e2e-data-id-profile-v1~1",oft-title="Data-ID derivation 1 has one canonical byte sequence",oft-needs="impl,utest,uman",oft-tags="SafetyUpRustCore"]
+--
+For every route that selects the up-rust E2E wire, the element *MUST* provide Data-ID derivation 1 as the function required by xref:e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route].
+The function takes the sender UUri, route resource, message kind, fixed sink where that kind has one, and the explicit locality context.
+Its result is the first four octets of the SHA-256 digest of the canonical byte sequence below, interpreted as one unsigned big-endian 32-bit integer.
+SHA-256 is the algorithm of FIPS 180-4, sections 5 and 6.2, with its standard initial value, padding and digest order.
+No key, salt, random seed, retry count or deployment-private hash function is added.
+All 2^32^ result values are available, including zero and `0xFFFFFFFF`; neither is a wildcard in this Data-ID field.
+
+*Input validity and roles.*
+Inputs are the structured UUri values after their descriptor generation has been fixed and any explicitly selected adapter applied, as xref:../../basics/uri.adoc[UUri] requires; protobuf bytes or a display URI are not hashed.
+They satisfy the UUri and message-kind rules and contain no wildcard.
+For the numeric fields here, type is `0x0000..0xFFFE`, instance `0x0001..0xFFFE`, major version `0x00..0xFE`, and resource `0x0000..0xFFFE`.
+The element *MUST* accept a derivation input only in the following per-kind domain, applying the inherited resource rules of xref:../../basics/uattributes.adoc[UAttributes]:
+
+[cols="2,3,3,3",options="header"]
+|===
+|Kind |Sender resource |Route resource |Applicable fixed-sink resource
+|Publish |`0x8000..0xFFFE` |`0x8000..0xFFFE` |absent
+|Notification |`0x8000..0xFFFE` |`0x8000..0xFFFE` |`0`
+|RpcRequest |`0` |`0x0001..0x7FFF` |`0x0001..0x7FFF`
+|RpcResponse |`0x0001..0x7FFF` |`0x0001..0x7FFF` |absent
+|===
+
+The function domain checks those ranges individually; it does not require equality of source-resource and route-resource, or of fixed-sink resource and route-resource.
+The receiver deliberately combines admitted frame source with established route/call inputs, so the element *MUST* retain derivation for individually valid differing resources to let identity comparison distinguish them.
+At sending setup the element *MUST* establish a coherent configured tuple: the route resource equals the publisher/notifier source resource, the Request's method-sink resource, or the Response's method-source resource, as applicable; it *MUST* refuse an incoherent sending tuple by name.
+These setup coherence checks give no permission to replace an admitted frame's source by the configured source during receive derivation.
+These field bounds do not replace earlier source/sink/resource admission checks.
+The function gives no Data-ID for an invalid input; the element *MUST NOT* replace one by a default or truncate it.
+At setup the element *MUST* refuse the invalid route or declaration by name; on receive it *MUST* preserve the earlier metadata-admission and xref:e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route] rules and *MUST NOT* admit the frame through a fabricated Data-ID.
+
+[cols="2,1,3,2,3",options="header"]
+|===
+|Kind |Numeric kind |Sender |Route resource |Fixed sink
+|Publish |1 |Publisher source UUri |Topic resource |absent
+|RpcRequest |2 |Client source/reply-to UUri |Method resource |Method sink UUri
+|RpcResponse |3 |Server source/method UUri |Method resource |absent
+|Notification |4 |Notifier source UUri |Notification resource |Destination UUri
+|===
+
+The caller's reply-to address as a response's sink, and a Publish's optional sink (whether absent or present as a uStreamer routing sink with nonempty authority and wildcard fields under `dsn~up-attributes-publish-sink~2` in xref:../../basics/uattributes.adoc[UAttributes]), are not inputs and are never encoded.
+For those two kinds the function's fixed-sink argument is absent; the element, when given the whole message, *MUST* omit these non-input attributes when forming the tuple so that a legal Publish optional sink's wildcard fields never enter the derivation domain.
+This omission does not relax the wildcard prohibition on any actual sender or applicable fixed-sink input.
+For Notification and RpcRequest the fixed-sink argument is required.
+The receiver takes source from admitted metadata and the remaining tuple from the route/call exactly as xref:e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route] states.
+
+*Authorities and locality.*
+An authority is first validated under `dsn~uri-host-only~2` and `dsn~uri-authority-name-length~1` in xref:../../basics/uri.adoc[UUri] (the host-only syntax and 128-character UUri limit).
+This admitted authority domain is ASCII: an empty name; a lower-case registered name using letters `a..z`, digits, `-`, `.`, `_`, `~`; an RFC 3986 IPv4 address; or an RFC 3986 bracketed IP literal, including IPvFuture.
+The whole name `*` is not admitted to this function.
+No percent escape is decoded: percent escapes, scoped IPv6 zone identifiers, user information, ports, non-ASCII names and surrounding whitespace are outside this domain.
+Validation is not a Unicode, IDNA, DNS, hostname-resolution or legacy numeric-address conversion service.
+
+The function receives an explicit locality argument: either the distinguished value `none`, meaning no authority stands for empty, or one nonempty valid authority.
+In the JSON vectors, `null` encodes that explicit `none` value; an omitted argument or missing deployment declaration is not that value.
+An empty string is not a second representation of a named context.
+Canonicalize a named context by the rules below; for each empty authority in the sender or applicable fixed sink, substitute that context's canonical name, or retain empty when the explicit context is `none`.
+The element *MUST* apply the setup checks (including complete local declarations for sending and receiving roles and configured-authority agreement) and pre-substitution declared-sender membership rules of xref:e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route], and *MUST NOT* complete an empty received derivation input for an unmatched source or complete an empty source across locality contexts with its own name.
+Context is an explicit function argument used for that substitution; it is not independently appended to the hashed bytes.
+Consequently already explicit authority names yield the same tuple on either side even when the participants themselves have different local contexts.
+
+The canonical authority spelling is:
+
+* *Empty:* zero octets.
+* *IPv4:* the RFC 3986 dotted-decimal spelling of four values 0 through 255, with no leading zero except the single digit `0`. The grammar's first-match rule identifies this form before a registered name.
+* *Registered name:* the validated ASCII string unchanged. A trailing dot is retained; no DNS alias, search suffix or numeric-host equivalence is inferred. For example `192.000.2.1` is a registered name, not a legacy IPv4 spelling.
+* *IPv6:* parse an RFC 3986 IPv6 literal into its 128-bit value, including a permitted dotted-decimal low 32 bits. Write `[` followed by all eight 16-bit groups in most-significant order, each exactly four lower-case hexadecimal digits, separated by seven colons, then `]`. No compression or dotted suffix is emitted. Thus `[::ffff:192.0.2.1]` becomes `[0000:0000:0000:0000:0000:ffff:c000:0201]`.
+* *IPvFuture:* accept exactly RFC 3986's bracketed `v` or `V` + one or more hexadecimal version digits + `.` + one or more `unreserved / sub-delims / ':'` characters. Write the same string with ASCII letters lower case; preserve version leading zeros and all suffix punctuation. No meaning, address resolution or equivalence for a future address mechanism is inferred. `[vA.Foo:BAR]` becomes `[va.foo:bar]`, while `[v0a.foo:bar]` remains distinct.
+
+These are derivation spellings, not a replacement for UUri's public display syntax or an assertion of RFC 5952 presentation conformance.
+Canonicalization gives no permission to bypass an earlier metadata filter: a function vector containing equivalent IPv6 spellings is not a promise that every route admits both input spellings.
+
+*Canonical binary UUri.*
+Encode a canonical UUri as the concatenation of:
+
+. one octet containing its canonical authority's ASCII octet length, 0 through 128;
+. exactly those authority octets;
+. type as two big-endian octets;
+. instance as two big-endian octets;
+. major version as one octet;
+. resource as two big-endian octets.
+
+No terminator, alignment padding, scheme, slash, protobuf field tag or textual hexadecimal digit enters this encoding.
+Its maximum length is 136 octets.
+
+*Canonical tuple.*
+Encode, in exactly this order:
+
+. the 16 octets `55 50 2D 45 32 45 2D 44 41 54 41 2D 49 44 00 01` (ASCII `UP-E2E-DATA-ID`, zero, version 1);
+. the one-octet numeric kind from the table;
+. the canonical binary sender UUri;
+. the route resource as two big-endian octets;
+. one octet, 1 for Notification or RpcRequest and 0 for Publish or RpcResponse;
+. exactly one canonical binary fixed-sink UUri when that octet is 1, and no octet when it is 0.
+
+The maximum tuple length is 292 octets.
+The names are length delimited, the numeric fields are fixed width, the domain/version prefix is fixed, and the sink marker is determined by the kind; concatenation is unambiguous.
+The locality spelling before substitution, the encoding identifier, a native layout, CRC bytes, UUID, TTL, priority, token and every other non-input attribute are excluded.
+
+*Collisions and comparison.*
+The 32-bit result is not an injective encoding of the tuple and is no authentication.
+Different tuples can have the same Data-ID.
+The element *MUST* apply the per-sender complete receiving-declaration check and pre-substitution declared-sender membership rule of xref:e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route] wherever a derivation input can have an empty authority, independently of the hash result.
+That setup comparison detects missing, invalid, ambiguous or disagreeing supplied declarations, and pre-substitution membership refuses and counts an unmatched uncompleted source (including an undeclared empty source aliasing an explicit declared sender or an undeclared explicit source with an empty applicable fixed sink) once under the undeclared-source cause at the stage specified in xref:e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route] — after binding envelope, metadata and existing peer checks (and, for a Response, after a successful current-tenure call tie) and before TTL, payload checks and derivation — without invoking an E2E payload check or mutating E2E receiving state or figures; neither attests a remote role's applied setup.
+The empty-source Publish locality witnesses produce the same `0x42869DB0` from `n16531.example` and `n86120.example`: accurate differing records cause setup refusal, an undeclared empty source does not alias an explicit `n86120.example` sender, while the same declared raw empty source under false or stale agreeing records remains observationally indistinguishable to local checks and can let the collision pass numeric identity checks.
+An enforced explicit-only sender relation (explicit sender UUri and explicit applicable fixed sink, where applicable) retains its own explicit context even alongside a different sender using the receiver's locality; neither locality substitution nor hash values establish declared-sender membership or partition relations.
+The E2E wire's construction-time refusal of duplicate declared data IDs remains xref:e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route], "Construction", and the integrator's duty to keep IDs distinct wherever misaddressed frames can travel remains xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection].
+There is no automatic collision repair by salting or choosing another local hash: that would make the two sides derive different functions.
+A deployment with a collision cannot claim the affected identity agreement; it must resolve that deployment configuration or select a separately reviewed contract before enabling the affected routes.
+The wire compares the expected and protected numerical IDs only, as the E2E contract requires; it evaluates no URI.
+
+*Known-answer record.*
+The canonical bytes, digests, rejected inputs, excluded-sink controls and collision witnesses are link:e2e-profile-v1-data-id-vectors.json[the Data-ID vector record].
+The element's supplier *MUST* identify an immutable revision of this item and its vector record in the element's crate documentation, without independently maintained canonical rules.
+--
+
+[horizontal]
+ID:: `+req~ssr-e2e-data-id-profile-v1~1+`
+ASIL:: B
+Allocated to:: the element, for the function, input domain, sending coherence, applying the canonical derivation rules, receive derivation and invalid-input handling; its supplier, for the element crate documentation's immutable record reference
+Verification:: test (canonical vectors, per-kind boundaries, excluded-sink pairs and collision witnesses); review (canonical domain, declared-relation applicability, pre-substitution membership linkage, residual limits and admission precedence)
+
+*Source.* NIST https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf[FIPS PUB 180-4], sections 5, 6.2 and 7: SHA-256 and leftmost truncation. The 32-bit result is this profile's choice, not a FIPS security-strength claim. https://www.rfc-editor.org/rfc/rfc3986.html#section-3.2.2[RFC 3986, section 3.2.2] and https://www.rfc-editor.org/rfc/rfc3986.html#section-6.2.2.1[section 6.2.2.1]: authority syntax and case normalization within UUri's admitted domain.
+
+*Rationale.*
+Structured bounded encoding avoids protobuf/display ambiguity. Context substitutes only for an empty actual input. Truncation retains the fixed-width field and its explicit collision and truthful-deployment assumptions.

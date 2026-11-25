@@ -1,0 +1,1937 @@
+{
+  "profile": "up-rust-e2e-data-id-v1",
+  "prefix_hex": "55502d4532452d444154412d49440001",
+  "algorithm": "SHA-256, first four digest octets as unsigned big-endian u32",
+  "vectors": [
+    {
+      "id": "ID01",
+      "purpose": "Publish baseline",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "publisher.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "publisher.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101117075626c69736865722e6578616d706c6512340001018001800100",
+      "tuple_length": 45,
+      "sha256": "75b13ae921eff1b36259829a269773278dc1701ed4d9261cad1354957f57e013",
+      "data_id_hex": "75b13ae9",
+      "data_id_decimal": 1974549225
+    },
+    {
+      "id": "ID02",
+      "purpose": "Notification destination A",
+      "input": {
+        "kind": "Notification",
+        "sender": {
+          "authority": "publisher.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": {
+          "authority": "listener.example",
+          "type": 17476,
+          "instance": 4,
+          "major": 1,
+          "resource": 0
+        },
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "publisher.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": {
+        "authority": "listener.example",
+        "type": 17476,
+        "instance": 4,
+        "major": 1,
+        "resource": 0
+      },
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000104117075626c69736865722e6578616d706c6512340001018001800101106c697374656e65722e6578616d706c6544440004010000",
+      "tuple_length": 69,
+      "sha256": "8540dbf50b5616b8320393f5a48fd28dade5171ecc557f80dbd233744c019cc7",
+      "data_id_hex": "8540dbf5",
+      "data_id_decimal": 2235620341
+    },
+    {
+      "id": "ID03",
+      "purpose": "Notification destination B",
+      "input": {
+        "kind": "Notification",
+        "sender": {
+          "authority": "publisher.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": {
+          "authority": "other.example",
+          "type": 17476,
+          "instance": 4,
+          "major": 1,
+          "resource": 0
+        },
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "publisher.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": {
+        "authority": "other.example",
+        "type": 17476,
+        "instance": 4,
+        "major": 1,
+        "resource": 0
+      },
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000104117075626c69736865722e6578616d706c65123400010180018001010d6f746865722e6578616d706c6544440004010000",
+      "tuple_length": 66,
+      "sha256": "2cb30f69ee45f8af470fe8c84ebd2bda76023fac5c75e3eedf68e2b6ec5cc6f9",
+      "data_id_hex": "2cb30f69",
+      "data_id_decimal": 749932393
+    },
+    {
+      "id": "ID04",
+      "purpose": "Request client A",
+      "input": {
+        "kind": "RpcRequest",
+        "sender": {
+          "authority": "client.example",
+          "type": 8738,
+          "instance": 2,
+          "major": 1,
+          "resource": 0
+        },
+        "route_resource": 257,
+        "fixed_sink": {
+          "authority": "server.example",
+          "type": 13107,
+          "instance": 3,
+          "major": 2,
+          "resource": 257
+        },
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "client.example",
+        "type": 8738,
+        "instance": 2,
+        "major": 1,
+        "resource": 0
+      },
+      "canonical_fixed_sink": {
+        "authority": "server.example",
+        "type": 13107,
+        "instance": 3,
+        "major": 2,
+        "resource": 257
+      },
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001020e636c69656e742e6578616d706c65222200020100000101010e7365727665722e6578616d706c6533330003020101",
+      "tuple_length": 64,
+      "sha256": "7bf8989339a39829e56958494820155ab52e11ae32bf5ad79c8c527a16fdda57",
+      "data_id_hex": "7bf89893",
+      "data_id_decimal": 2079889555
+    },
+    {
+      "id": "ID05",
+      "purpose": "Request client B",
+      "input": {
+        "kind": "RpcRequest",
+        "sender": {
+          "authority": "client.example",
+          "type": 8738,
+          "instance": 3,
+          "major": 1,
+          "resource": 0
+        },
+        "route_resource": 257,
+        "fixed_sink": {
+          "authority": "server.example",
+          "type": 13107,
+          "instance": 3,
+          "major": 2,
+          "resource": 257
+        },
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "client.example",
+        "type": 8738,
+        "instance": 3,
+        "major": 1,
+        "resource": 0
+      },
+      "canonical_fixed_sink": {
+        "authority": "server.example",
+        "type": 13107,
+        "instance": 3,
+        "major": 2,
+        "resource": 257
+      },
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001020e636c69656e742e6578616d706c65222200030100000101010e7365727665722e6578616d706c6533330003020101",
+      "tuple_length": 64,
+      "sha256": "3929f5eeddd8c8217be958736776cbe3dccc1089d3911a9d92cf56fd00e0d14f",
+      "data_id_hex": "3929f5ee",
+      "data_id_decimal": 959051246
+    },
+    {
+      "id": "ID06",
+      "purpose": "Response, independent of caller sink",
+      "input": {
+        "kind": "RpcResponse",
+        "sender": {
+          "authority": "server.example",
+          "type": 13107,
+          "instance": 3,
+          "major": 2,
+          "resource": 257
+        },
+        "route_resource": 257,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "server.example",
+        "type": 13107,
+        "instance": 3,
+        "major": 2,
+        "resource": 257
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001030e7365727665722e6578616d706c6533330003020101010100",
+      "tuple_length": 42,
+      "sha256": "d3bf92a1cc547ac438682235def790edbc0ccf7e61ca67931e4a9c84a93e45d2",
+      "data_id_hex": "d3bf92a1",
+      "data_id_decimal": 3552547489
+    },
+    {
+      "id": "ID07",
+      "purpose": "Empty authority under named context",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": "publisher.example"
+      },
+      "canonical_sender": {
+        "authority": "publisher.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101117075626c69736865722e6578616d706c6512340001018001800100",
+      "tuple_length": 45,
+      "sha256": "75b13ae921eff1b36259829a269773278dc1701ed4d9261cad1354957f57e013",
+      "data_id_hex": "75b13ae9",
+      "data_id_decimal": 1974549225
+    },
+    {
+      "id": "ID08",
+      "purpose": "Empty authority with no context",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001010012340001018001800100",
+      "tuple_length": 28,
+      "sha256": "2224db21875de392f872c88e01628ab0c39833a15086f907f6927a3f7e31bbc6",
+      "data_id_hex": "2224db21",
+      "data_id_decimal": 572840737
+    },
+    {
+      "id": "ID09",
+      "purpose": "Explicit authority with unrelated local context",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "publisher.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": "elsewhere.example"
+      },
+      "canonical_sender": {
+        "authority": "publisher.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101117075626c69736865722e6578616d706c6512340001018001800100",
+      "tuple_length": 45,
+      "sha256": "75b13ae921eff1b36259829a269773278dc1701ed4d9261cad1354957f57e013",
+      "data_id_hex": "75b13ae9",
+      "data_id_decimal": 1974549225
+    },
+    {
+      "id": "ID10",
+      "purpose": "IPv4 authority",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "192.0.2.1",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "192.0.2.1",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101093139322e302e322e3112340001018001800100",
+      "tuple_length": 37,
+      "sha256": "c5e45c7d7656b5e5640dc5e6533ebf24e757c372cae45fe0cba8efa9e3847640",
+      "data_id_hex": "c5e45c7d",
+      "data_id_decimal": 3320077437
+    },
+    {
+      "id": "ID11",
+      "purpose": "Numeric-looking registered name, no IPv4 reinterpretation",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "192.000.2.1",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "192.000.2.1",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001010b3139322e3030302e322e3112340001018001800100",
+      "tuple_length": 39,
+      "sha256": "a6dde4c25ebe6843d96c46a5269707cfa4484ec00399883a3fc6f0bb1bc43113",
+      "data_id_hex": "a6dde4c2",
+      "data_id_decimal": 2799559874
+    },
+    {
+      "id": "ID12",
+      "purpose": "Compressed IPv6",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "[2001:db8::1]",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "[2001:0db8:0000:0000:0000:0000:0000:0001]",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101295b323030313a306462383a303030303a303030303a303030303a303030303a303030303a303030315d12340001018001800100",
+      "tuple_length": 69,
+      "sha256": "6c5e75e2630bfbb65f106c445af7395a27a854fa07eb0d0b2b5d1e7a1103fdbf",
+      "data_id_hex": "6c5e75e2",
+      "data_id_decimal": 1818129890
+    },
+    {
+      "id": "ID13",
+      "purpose": "Same IPv6 in full uppercase spelling",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "[2001:0DB8:0000:0000:0000:0000:0000:0001]",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "[2001:0db8:0000:0000:0000:0000:0000:0001]",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101295b323030313a306462383a303030303a303030303a303030303a303030303a303030303a303030315d12340001018001800100",
+      "tuple_length": 69,
+      "sha256": "6c5e75e2630bfbb65f106c445af7395a27a854fa07eb0d0b2b5d1e7a1103fdbf",
+      "data_id_hex": "6c5e75e2",
+      "data_id_decimal": 1818129890
+    },
+    {
+      "id": "ID14",
+      "purpose": "IPv4-embedded IPv6",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "[::ffff:192.0.2.1]",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "[0000:0000:0000:0000:0000:ffff:c000:0201]",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101295b303030303a303030303a303030303a303030303a303030303a666666663a633030303a303230315d12340001018001800100",
+      "tuple_length": 69,
+      "sha256": "09b5f5ed646ba8acc4ffaf519900f728becca7cf095c05489b0aad241e0934ea",
+      "data_id_hex": "09b5f5ed",
+      "data_id_decimal": 162919917
+    },
+    {
+      "id": "ID15",
+      "purpose": "Same IPv6 without dotted suffix",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "[0:0:0:0:0:ffff:c000:201]",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "[0000:0000:0000:0000:0000:ffff:c000:0201]",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101295b303030303a303030303a303030303a303030303a303030303a666666663a633030303a303230315d12340001018001800100",
+      "tuple_length": 69,
+      "sha256": "09b5f5ed646ba8acc4ffaf519900f728becca7cf095c05489b0aad241e0934ea",
+      "data_id_hex": "09b5f5ed",
+      "data_id_decimal": 162919917
+    },
+    {
+      "id": "ID16",
+      "purpose": "IPvFuture with uppercase characters",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "[vA.Foo:BAR]",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "[va.foo:bar]",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001010c5b76612e666f6f3a6261725d12340001018001800100",
+      "tuple_length": 40,
+      "sha256": "a4ce535b76c837795a0c415f30b755ca787adb9786715e7c5f0890db6100311b",
+      "data_id_hex": "a4ce535b",
+      "data_id_decimal": 2764985179
+    },
+    {
+      "id": "ID17",
+      "purpose": "Same IPvFuture lowercase spelling",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "[va.foo:bar]",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "[va.foo:bar]",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001010c5b76612e666f6f3a6261725d12340001018001800100",
+      "tuple_length": 40,
+      "sha256": "a4ce535b76c837795a0c415f30b755ca787adb9786715e7c5f0890db6100311b",
+      "data_id_hex": "a4ce535b",
+      "data_id_decimal": 2764985179
+    },
+    {
+      "id": "ID18",
+      "purpose": "Registered name trailing dot retained",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "publisher.example.",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "publisher.example.",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101127075626c69736865722e6578616d706c652e12340001018001800100",
+      "tuple_length": 46,
+      "sha256": "146920b783b8f0533928e24068e126cd3341f97deb41e6c1bce7540816030001",
+      "data_id_hex": "146920b7",
+      "data_id_decimal": 342433975
+    },
+    {
+      "id": "ID19",
+      "purpose": "Maximum-length canonical request tuple",
+      "input": {
+        "kind": "RpcRequest",
+        "sender": {
+          "authority": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 0
+        },
+        "route_resource": 257,
+        "fixed_sink": {
+          "authority": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 257
+        },
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 0
+      },
+      "canonical_fixed_sink": {
+        "authority": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 257
+      },
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001028061616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161611234000101000001010180626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626212340001010101",
+      "tuple_length": 292,
+      "sha256": "1557397f81942c582aff1c75a0719cd58837245643adfc2edcb84c9d1fb3c60d",
+      "data_id_hex": "1557397f",
+      "data_id_decimal": 358037887
+    },
+    {
+      "id": "ID20",
+      "purpose": "Named context applied to sender and fixed sink",
+      "input": {
+        "kind": "RpcRequest",
+        "sender": {
+          "authority": "",
+          "type": 8738,
+          "instance": 2,
+          "major": 1,
+          "resource": 0
+        },
+        "route_resource": 257,
+        "fixed_sink": {
+          "authority": "",
+          "type": 13107,
+          "instance": 3,
+          "major": 2,
+          "resource": 257
+        },
+        "locality_context": "local.example"
+      },
+      "canonical_sender": {
+        "authority": "local.example",
+        "type": 8738,
+        "instance": 2,
+        "major": 1,
+        "resource": 0
+      },
+      "canonical_fixed_sink": {
+        "authority": "local.example",
+        "type": 13107,
+        "instance": 3,
+        "major": 2,
+        "resource": 257
+      },
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001020d6c6f63616c2e6578616d706c65222200020100000101010d6c6f63616c2e6578616d706c6533330003020101",
+      "tuple_length": 62,
+      "sha256": "180878930da5ff30e050e50bd1c1d1d573ec638f529265aa4b1b512c01a7ebff",
+      "data_id_hex": "18087893",
+      "data_id_decimal": 403208339
+    },
+    {
+      "id": "ID21",
+      "purpose": "Explicit equivalent of both contextual names",
+      "input": {
+        "kind": "RpcRequest",
+        "sender": {
+          "authority": "local.example",
+          "type": 8738,
+          "instance": 2,
+          "major": 1,
+          "resource": 0
+        },
+        "route_resource": 257,
+        "fixed_sink": {
+          "authority": "local.example",
+          "type": 13107,
+          "instance": 3,
+          "major": 2,
+          "resource": 257
+        },
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "local.example",
+        "type": 8738,
+        "instance": 2,
+        "major": 1,
+        "resource": 0
+      },
+      "canonical_fixed_sink": {
+        "authority": "local.example",
+        "type": 13107,
+        "instance": 3,
+        "major": 2,
+        "resource": 257
+      },
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001020d6c6f63616c2e6578616d706c65222200020100000101010d6c6f63616c2e6578616d706c6533330003020101",
+      "tuple_length": 62,
+      "sha256": "180878930da5ff30e050e50bd1c1d1d573ec638f529265aa4b1b512c01a7ebff",
+      "data_id_hex": "18087893",
+      "data_id_decimal": 403208339
+    },
+    {
+      "id": "ID22",
+      "purpose": "IPvFuture version leading zeros retained",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "[v0a.foo:bar]",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "[v0a.foo:bar]",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001010d5b7630612e666f6f3a6261725d12340001018001800100",
+      "tuple_length": 41,
+      "sha256": "8ddc4a802321692c790143b380b2a26b448a5c15ff10ed8c611f7b5b9f9b68d1",
+      "data_id_hex": "8ddc4a80",
+      "data_id_decimal": 2380024448
+    },
+    {
+      "id": "ID23",
+      "purpose": "Collision witness sender A",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "n16531.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "n16531.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001010e6e31363533312e6578616d706c6512340001018001800100",
+      "tuple_length": 42,
+      "sha256": "42869db0f8adff0a32ea03cee89458b80d9cf761ae6adf94c810c1e82384f3a5",
+      "data_id_hex": "42869db0",
+      "data_id_decimal": 1116118448
+    },
+    {
+      "id": "ID24",
+      "purpose": "Collision witness sender B",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "n86120.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "n86120.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001010e6e38363132302e6578616d706c6512340001018001800100",
+      "tuple_length": 42,
+      "sha256": "42869db02230d7581a6d3f612092ed9f551e9274f60527b647b0c528d32b9379",
+      "data_id_hex": "42869db0",
+      "data_id_decimal": 1116118448
+    },
+    {
+      "id": "ID25",
+      "purpose": "Short-octet IPv4-mapped IPv6",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "[::ffff:1.2.3.4]",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "[0000:0000:0000:0000:0000:ffff:0102:0304]",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101295b303030303a303030303a303030303a303030303a303030303a666666663a303130323a303330345d12340001018001800100",
+      "tuple_length": 69,
+      "sha256": "141eaadadba12a8560c16bd4775d46107dd4ec740098756cd6925f1f5386780a",
+      "data_id_hex": "141eaada",
+      "data_id_decimal": 337554138
+    },
+    {
+      "id": "ID26",
+      "purpose": "Uppercase V IPvFuture introducer",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "[VA.Foo:BAR]",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "[va.foo:bar]",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001010c5b76612e666f6f3a6261725d12340001018001800100",
+      "tuple_length": 40,
+      "sha256": "a4ce535b76c837795a0c415f30b755ca787adb9786715e7c5f0890db6100311b",
+      "data_id_hex": "a4ce535b",
+      "data_id_decimal": 2764985179
+    },
+    {
+      "id": "ID27",
+      "purpose": "Valid distinct topic source and established route resources",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "publisher.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32770
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "publisher.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32770
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101117075626c69736865722e6578616d706c6512340001018002800100",
+      "tuple_length": 45,
+      "sha256": "072edbdc067deb81ec54841033bb0085eeb4b16190102c36a160c322f3bb4b6e",
+      "data_id_hex": "072edbdc",
+      "data_id_decimal": 120511452
+    },
+    {
+      "id": "ID28",
+      "purpose": "Valid distinct response source and established route methods",
+      "input": {
+        "kind": "RpcResponse",
+        "sender": {
+          "authority": "server.example",
+          "type": 13107,
+          "instance": 3,
+          "major": 2,
+          "resource": 258
+        },
+        "route_resource": 257,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "server.example",
+        "type": 13107,
+        "instance": 3,
+        "major": 2,
+        "resource": 258
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001030e7365727665722e6578616d706c6533330003020102010100",
+      "tuple_length": 42,
+      "sha256": "e5986b191f7e24b12166b6a7b43c0972b8ac85384f59bbb257e866c23bf0477e",
+      "data_id_hex": "e5986b19",
+      "data_id_decimal": 3851971353
+    },
+    {
+      "id": "ID29",
+      "purpose": "Valid distinct request sink and route methods for diagnostic derivation",
+      "input": {
+        "kind": "RpcRequest",
+        "sender": {
+          "authority": "client.example",
+          "type": 8738,
+          "instance": 2,
+          "major": 1,
+          "resource": 0
+        },
+        "route_resource": 257,
+        "fixed_sink": {
+          "authority": "server.example",
+          "type": 13107,
+          "instance": 3,
+          "major": 2,
+          "resource": 258
+        },
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "client.example",
+        "type": 8738,
+        "instance": 2,
+        "major": 1,
+        "resource": 0
+      },
+      "canonical_fixed_sink": {
+        "authority": "server.example",
+        "type": 13107,
+        "instance": 3,
+        "major": 2,
+        "resource": 258
+      },
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001020e636c69656e742e6578616d706c65222200020100000101010e7365727665722e6578616d706c6533330003020102",
+      "tuple_length": 64,
+      "sha256": "3199b72ec8347623623bcb1c33c28590bc4ca62629c4246be4dfec4dee004acb",
+      "data_id_hex": "3199b72e",
+      "data_id_decimal": 832157486
+    },
+    {
+      "id": "ID30",
+      "purpose": "Topic lower resource boundary",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "publisher.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32768
+        },
+        "route_resource": 32768,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "publisher.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32768
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101117075626c69736865722e6578616d706c6512340001018000800000",
+      "tuple_length": 45,
+      "sha256": "fabfab48b60c593bd9e143d7a5ab78b2e8fa42fa16f329ab1dc32dc8c4b68d8e",
+      "data_id_hex": "fabfab48",
+      "data_id_decimal": 4206865224
+    },
+    {
+      "id": "ID31",
+      "purpose": "Topic upper resource and maximum scalar boundaries",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "publisher.example",
+          "type": 65534,
+          "instance": 65534,
+          "major": 254,
+          "resource": 65534
+        },
+        "route_resource": 65534,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "publisher.example",
+        "type": 65534,
+        "instance": 65534,
+        "major": 254,
+        "resource": 65534
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000101117075626c69736865722e6578616d706c65fffefffefefffefffe00",
+      "tuple_length": 45,
+      "sha256": "497231e80fbc23a95917597b166bb1f8acb13bebb001a07297b4f52500c9ba0d",
+      "data_id_hex": "497231e8",
+      "data_id_decimal": 1232220648
+    },
+    {
+      "id": "ID32",
+      "purpose": "Method lower resource boundary",
+      "input": {
+        "kind": "RpcResponse",
+        "sender": {
+          "authority": "server.example",
+          "type": 13107,
+          "instance": 3,
+          "major": 2,
+          "resource": 1
+        },
+        "route_resource": 1,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "server.example",
+        "type": 13107,
+        "instance": 3,
+        "major": 2,
+        "resource": 1
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001030e7365727665722e6578616d706c6533330003020001000100",
+      "tuple_length": 42,
+      "sha256": "6188166e7461d2b71268c17488588a054c520ddc230ea686fec71a841d5411d0",
+      "data_id_hex": "6188166e",
+      "data_id_decimal": 1636308590
+    },
+    {
+      "id": "ID33",
+      "purpose": "Method upper resource boundary",
+      "input": {
+        "kind": "RpcResponse",
+        "sender": {
+          "authority": "server.example",
+          "type": 13107,
+          "instance": 3,
+          "major": 2,
+          "resource": 32767
+        },
+        "route_resource": 32767,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "canonical_sender": {
+        "authority": "server.example",
+        "type": 13107,
+        "instance": 3,
+        "major": 2,
+        "resource": 32767
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001030e7365727665722e6578616d706c6533330003027fff7fff00",
+      "tuple_length": 42,
+      "sha256": "5547a00fbce464925b14aadc0ccf2a2f2187927c2a057578ea23015ba0a4a185",
+      "data_id_hex": "5547a00f",
+      "data_id_decimal": 1430757391
+    },
+    {
+      "id": "ID34",
+      "purpose": "Locality collision empty sender under context A",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": "n16531.example"
+      },
+      "canonical_sender": {
+        "authority": "n16531.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001010e6e31363533312e6578616d706c6512340001018001800100",
+      "tuple_length": 42,
+      "sha256": "42869db0f8adff0a32ea03cee89458b80d9cf761ae6adf94c810c1e82384f3a5",
+      "data_id_hex": "42869db0",
+      "data_id_decimal": 1116118448
+    },
+    {
+      "id": "ID35",
+      "purpose": "Locality collision empty sender under context B",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": "n86120.example"
+      },
+      "canonical_sender": {
+        "authority": "n86120.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001010e6e38363132302e6578616d706c6512340001018001800100",
+      "tuple_length": 42,
+      "sha256": "42869db02230d7581a6d3f612092ed9f551e9274f60527b647b0c528d32b9379",
+      "data_id_hex": "42869db0",
+      "data_id_decimal": 1116118448
+    },
+    {
+      "id": "ID36",
+      "purpose": "Noncolliding locality control",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": "n16532.example"
+      },
+      "canonical_sender": {
+        "authority": "n16532.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": null,
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001010e6e31363533322e6578616d706c6512340001018001800100",
+      "tuple_length": 42,
+      "sha256": "1944f8efa46a552fc20efe24354b3593e8af84bca6c97c0cf4cb234311940d48",
+      "data_id_hex": "1944f8ef",
+      "data_id_decimal": 423950575
+    },
+    {
+      "id": "ID37",
+      "purpose": "Explicit source and contextual Notification sink",
+      "input": {
+        "kind": "Notification",
+        "sender": {
+          "authority": "publisher.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": {
+          "authority": "",
+          "type": 17476,
+          "instance": 4,
+          "major": 1,
+          "resource": 0
+        },
+        "locality_context": "local.example"
+      },
+      "canonical_sender": {
+        "authority": "publisher.example",
+        "type": 4660,
+        "instance": 1,
+        "major": 1,
+        "resource": 32769
+      },
+      "canonical_fixed_sink": {
+        "authority": "local.example",
+        "type": 17476,
+        "instance": 4,
+        "major": 1,
+        "resource": 0
+      },
+      "canonical_tuple_hex": "55502d4532452d444154412d4944000104117075626c69736865722e6578616d706c65123400010180018001010d6c6f63616c2e6578616d706c6544440004010000",
+      "tuple_length": 66,
+      "sha256": "0ea515a0a7a008aad79909f0ee080640429a4784ae517615a2050577f2252906",
+      "data_id_hex": "0ea515a0",
+      "data_id_decimal": 245700000
+    },
+    {
+      "id": "ID38",
+      "purpose": "Explicit source and contextual Request method sink",
+      "input": {
+        "kind": "RpcRequest",
+        "sender": {
+          "authority": "client.example",
+          "type": 8738,
+          "instance": 2,
+          "major": 1,
+          "resource": 0
+        },
+        "route_resource": 257,
+        "fixed_sink": {
+          "authority": "",
+          "type": 13107,
+          "instance": 3,
+          "major": 2,
+          "resource": 257
+        },
+        "locality_context": "local.example"
+      },
+      "canonical_sender": {
+        "authority": "client.example",
+        "type": 8738,
+        "instance": 2,
+        "major": 1,
+        "resource": 0
+      },
+      "canonical_fixed_sink": {
+        "authority": "local.example",
+        "type": 13107,
+        "instance": 3,
+        "major": 2,
+        "resource": 257
+      },
+      "canonical_tuple_hex": "55502d4532452d444154412d49440001020e636c69656e742e6578616d706c65222200020100000101010d6c6f63616c2e6578616d706c6533330003020101",
+      "tuple_length": 63,
+      "sha256": "a58c0343498226c207db0813b99284d2710b1591f72c032e597d18af8aa03f6f",
+      "data_id_hex": "a58c0343",
+      "data_id_decimal": 2777416515
+    }
+  ],
+  "canonical_equalities": [
+    [
+      "ID01",
+      "ID07"
+    ],
+    [
+      "ID01",
+      "ID09"
+    ],
+    [
+      "ID12",
+      "ID13"
+    ],
+    [
+      "ID14",
+      "ID15"
+    ],
+    [
+      "ID16",
+      "ID17"
+    ],
+    [
+      "ID20",
+      "ID21"
+    ]
+  ],
+  "collision_witness": {
+    "vectors": [
+      "ID23",
+      "ID24"
+    ],
+    "data_id_hex": "42869db0",
+    "required_disposition": "Refuse a receiver declaration containing both; no claim of injectivity or silent salt/rehash."
+  },
+  "locality_collision_witness": {
+    "vectors": [
+      "ID34",
+      "ID35"
+    ],
+    "data_id_hex": "42869db0",
+    "accurate_records": "Complete receiving setup refuses differing canonical context values before enablement despite equal IDs",
+    "undeclared_empty_alias_refusal": "An undeclared received empty source cannot alias an explicit declared sender via receiver context substitution; runtime pre-substitution declared-sender membership refuses it through the early undeclared-source path before derivation",
+    "false_or_stale_agreeing_records": "Local comparison and raw empty-source membership do not establish remote applied setup; the same declared raw empty source under false or stale agreeing records can still pass numeric identity checks under otherwise accepting conditions"
+  },
+  "excluded_sink_pairs": [
+    {
+      "kind": "Publish",
+      "function_vector": "ID01",
+      "outer_sinks": [
+        null,
+        {
+          "authority": "listener-a.example",
+          "type": 65535,
+          "instance": 65535,
+          "major": 255,
+          "resource": 65535
+        },
+        {
+          "authority": "listener-b.example",
+          "type": 65535,
+          "instance": 65535,
+          "major": 255,
+          "resource": 65535
+        }
+      ],
+      "outer_sink_rule": "dsn~up-attributes-publish-sink~2: optional Publish sink is absent or carries a nonempty authority and wildcard type/instance/major/resource; omitted before Data-ID function entry so wildcards do not enter derivation.",
+      "same_function_input_and_result": true
+    },
+    {
+      "kind": "RpcResponse",
+      "function_vector": "ID06",
+      "outer_sinks": [
+        {
+          "authority": "caller-a.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 0
+        },
+        {
+          "authority": "caller-b.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 0
+        },
+        {
+          "authority": "",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 0
+        }
+      ],
+      "outer_sink_rule": "dsn~up-attributes-response-sink~2: caller reply-to sink has resource 0 and no wildcards (authority may be named or empty); omitted before Data-ID function entry and does not trigger empty-authority locality agreement.",
+      "same_function_input_and_result": true
+    }
+  ],
+  "rejections": [
+    {
+      "id": "RJ01",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "*",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "authority_domain"
+    },
+    {
+      "id": "RJ02",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "bad%2Eexample",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "authority_domain"
+    },
+    {
+      "id": "RJ03",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "Upper.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "authority_domain"
+    },
+    {
+      "id": "RJ04",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "[fe80::1%25eth0]",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "authority_domain"
+    },
+    {
+      "id": "RJ05",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "name:123",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "authority_domain"
+    },
+    {
+      "id": "RJ06",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "user@name",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "authority_domain"
+    },
+    {
+      "id": "RJ07",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "\u00e9.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "authority_domain"
+    },
+    {
+      "id": "RJ08",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "authority_domain"
+    },
+    {
+      "id": "RJ09",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "valid.example",
+          "type": 65535,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "numeric_domain"
+    },
+    {
+      "id": "RJ10",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 0,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "numeric_domain"
+    },
+    {
+      "id": "RJ11",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 255,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "numeric_domain"
+    },
+    {
+      "id": "RJ12",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": {
+          "authority": "unused.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "sink_presence"
+    },
+    {
+      "id": "RJ13",
+      "input": {
+        "kind": "Notification",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "sink_presence"
+    },
+    {
+      "id": "RJ14",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": ""
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "empty_named_context"
+    },
+    {
+      "id": "RJ15",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "[v1.]",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "authority_domain"
+    },
+    {
+      "id": "RJ16",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32767
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "topic_resource_domain"
+    },
+    {
+      "id": "RJ17",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32767,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "topic_resource_domain"
+    },
+    {
+      "id": "RJ18",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 65535
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "numeric_domain"
+    },
+    {
+      "id": "RJ19",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 65535,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "numeric_domain"
+    },
+    {
+      "id": "RJ20",
+      "input": {
+        "kind": "Notification",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": {
+          "authority": "sink.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 1
+        },
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "notification_sink_resource"
+    },
+    {
+      "id": "RJ21",
+      "input": {
+        "kind": "RpcRequest",
+        "sender": {
+          "authority": "client.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 1
+        },
+        "route_resource": 1,
+        "fixed_sink": {
+          "authority": "server.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 1
+        },
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "request_resource_domain"
+    },
+    {
+      "id": "RJ22",
+      "input": {
+        "kind": "RpcRequest",
+        "sender": {
+          "authority": "client.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 0
+        },
+        "route_resource": 1,
+        "fixed_sink": {
+          "authority": "server.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 0
+        },
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "request_resource_domain"
+    },
+    {
+      "id": "RJ23",
+      "input": {
+        "kind": "RpcResponse",
+        "sender": {
+          "authority": "server.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 0
+        },
+        "route_resource": 1,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "response_resource_domain"
+    },
+    {
+      "id": "RJ24",
+      "input": {
+        "kind": "RpcResponse",
+        "sender": {
+          "authority": "server.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32768
+        },
+        "route_resource": 1,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "response_resource_domain"
+    },
+    {
+      "id": "RJ25",
+      "input": {
+        "kind": "RpcResponse",
+        "sender": {
+          "authority": "server.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 1
+        },
+        "route_resource": 32768,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "method_resource_domain"
+    },
+    {
+      "id": "RJ26",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 65535,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "numeric_domain"
+    },
+    {
+      "id": "RJ27",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 1,
+          "major": -1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "numeric_domain"
+    },
+    {
+      "id": "RJ28",
+      "input": {
+        "kind": "Unknown",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null,
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "message_kind"
+    },
+    {
+      "id": "RJ29",
+      "input": {
+        "kind": "RpcRequest",
+        "sender": {
+          "authority": "client.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 0
+        },
+        "route_resource": 0,
+        "fixed_sink": {
+          "authority": "server.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 1
+        },
+        "locality_context": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "method_resource_domain"
+    },
+    {
+      "id": "RJ30",
+      "input": {
+        "kind": "Publish",
+        "sender": {
+          "authority": "valid.example",
+          "type": 4660,
+          "instance": 1,
+          "major": 1,
+          "resource": 32769
+        },
+        "route_resource": 32769,
+        "fixed_sink": null
+      },
+      "outcome": "no_data_id",
+      "calculation_reason": "tuple_fields"
+    }
+  ],
+  "limits": "Distinct boundaries: (1) valid function inputs (this record's derivation domain and rejection list); (2) whole-message admission (UAttributes sink/source validity, raw metadata/source filters and runtime pre-substitution declared-sender membership before derivation); and (3) wire corruption checks after admission. A normalized alias can still be refused by prior metadata admission; individually valid differing source/route resources remain derivable for identity discrimination, not permission to misconfigure a sending role; no protocol execution, generalized hostile-input proof or deployment collision proof."
+}

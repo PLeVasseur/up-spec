@@ -226,7 +226,7 @@ For the Streamer: xref:../../../up-l2/streamer.adoc#req-ssr-streamer-containment
 
 | Provided to integrators
 | The end-to-end protection wire; strict mode and its report; the Streamer's boundary, operator interface, mode report, watchdog hook and startup report
-| xref:../streamer.adoc[Streamer Safety Element]; xref:../../../up-l2/streamer.adoc[Streamer]; xref:../../../up-l1/wires/e2e.adoc[The end-to-end protection wire]; xref:build.adoc[Build and shipped content]; xref:strict-mode.adoc[Strict mode]
+| xref:../streamer.adoc[Streamer Safety Element]; xref:../../../up-l2/streamer.adoc[Streamer]; xref:../../../up-l1/wires/e2e.adoc[The end-to-end protection wire]; xref:../../../up-l1/wires/e2e-profile-v1.adoc[E2E Protection Profile Records 1]; xref:build.adoc[Build and shipped content]; xref:strict-mode.adoc[Strict mode]
 
 | Required from bindings
 | The lending or handoff contract, and the bindings' duties
@@ -234,7 +234,7 @@ For the Streamer: xref:../../../up-l2/streamer.adoc#req-ssr-streamer-containment
 
 | Required from wires
 | The wire contract, and the wires' duties
-| The items whose statements give a wire a duty, in xref:../../../up-l1/wires/README.adoc[Wires and the wire contract], xref:../../../up-l1/wires/native.adoc[Native wire], xref:../../../up-l1/wires/serialized.adoc[Serialized wires], xref:../../../up-l1/wires/xcdrv2.adoc[XCDR2], xref:../../../up-l1/wires/e2e.adoc[The end-to-end protection wire], xref:../../../up-l1/payload-paths.adoc[Payload paths], xref:../../assurance.adoc[Safety Assurance Governance, Verification and Evidence] and xref:../../../up-l1/peers.adoc[uP-L1 Peers and Fault Model]
+| The items whose statements give a wire a duty, in xref:../../../up-l1/wires/README.adoc[Wires and the wire contract], xref:../../../up-l1/wires/native.adoc[Native wire], xref:../../../up-l1/wires/serialized.adoc[Serialized wires], xref:../../../up-l1/wires/xcdrv2.adoc[XCDR2], xref:../../../up-l1/wires/e2e.adoc[The end-to-end protection wire], xref:../../../up-l1/wires/e2e-profile-v1.adoc[E2E Protection Profile Records 1], xref:../../../up-l1/payload-paths.adoc[Payload paths], xref:../../assurance.adoc[Safety Assurance Governance, Verification and Evidence] and xref:../../../up-l1/peers.adoc[uP-L1 Peers and Fault Model]
 
 | Provided by the element's supplier or another supported composition-package releaser
 | Versioned supported configuration (composition) packages, compatibility statements and assembled supplier evidence
