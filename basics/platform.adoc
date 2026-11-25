@@ -27,13 +27,13 @@ In runtime mode, the element *MUST* reach the operating system from the safety c
 *Waits.*
 
 * Each platform backend *MUST NOT* let its wait lose a wake that happens after the caller observed the expected value.
-* After its wait returns spuriously, after an interruption or late, in the element's deliberate idle wait (xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]), the element *MUST* recheck the expected value and the time before it waits again or returns; after such a return in every other wait, it rechecks as that item states.
+* After its wait returns spuriously, after an interruption or late, in a deliberate idle wait, the element *MUST* recheck the expected value and the time before it waits again or returns; after such a return in every other bounded wait of its own, the element *MUST* recheck the authoritative state and the time before it waits again or returns.
 
 *Clock reads.*
 
 * Each platform backend of the element *MUST* report a failed clock read instead of panicking or substituting another time base.
 * The element *MUST* treat a monotonic reading earlier than one it already holds as a failed read.
-* The element *MUST* treat a failed read as fail-closed: a bounded operation that depends on it ends as expired and is counted, and the TTL check of a frame whose TTL is greater than 0 refuses the frame, as xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states.
+* The element *MUST* treat a failed read as fail-closed: a bounded operation that depends on it ends as expired and is counted, and the TTL check of a frame whose TTL is greater than 0 refuses the frame and counts it once under a cause that names the unreadable clock and not as expired (a frame whose TTL is 0 needs no reading of the clock and is not refused because the clock cannot be read).
 
 *Prefault.*
 Each platform backend *MUST* have its prefault service make the memory that the service is given resident before it returns.

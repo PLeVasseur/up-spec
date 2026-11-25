@@ -169,12 +169,12 @@ In deciding a refusal, producing its error and counting it, the element *MUST NO
 
 *Native and heap-free routes.*
 On a native route, and on any route whose heap class is none, the element *MUST NOT* acquire or release heap memory in anything that a refusal does.
-Beyond deciding the refusal, producing its error and counting it, the element *MUST* perform for such a refusal only the accounting and the ownership cleanup that the route's items require, such as giving a refused frame's slot back (xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
+Beyond deciding the refusal, producing its error and counting it, the element *MUST* perform for such a refusal only the accounting and the heap-free ownership cleanup required for the route, such as returning a refused frame's slot to its fixed table without acquiring or releasing heap memory.
 
 *Serialized routes.*
 On a serialized route, some refusals are reached only after the operation acquired heap memory under its declared heap class.
 The element *MUST NOT* acquire a further resource in order to produce or report such a refusal.
-It *MUST* end the ownership already created, and what that ownership holds is released exactly once as xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] and xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
+It *MUST* end the ownership already created, and release what that ownership holds—each initialized decoded value and any binding-allocated storage for the frame—exactly once under the route's declared heap class and resource and failure policy (xref:resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 That release is the route's declared heap use, under its own contract, and not part of producing the refusal.
 
 *Exhaustion of a declared allocation.*
@@ -225,8 +225,8 @@ Element code reachable in runtime mode *MUST NOT* panic or abort:
 Element code's arithmetic on runtime paths *MUST* be checked, saturating or wrapping by intent, and *MUST NOT* reach an overflow panic.
 
 *Malformed frames.*
-The element *MUST* refuse a frame whose header or envelope it cannot parse, a frame that lacks them included, and *MUST* return or count that refusal as xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states.
-Where a binding parses a frame's physical envelope, the binding's own items state the refusal of a sample that does not parse (xref:../up-l1/lola.adoc#req-ssr-binding-lola-envelope-checks[On LoLa, a sample that is not a well-formed envelope is refused before any of it is used]; xref:../up-l1/iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]).
+The element *MUST* refuse a frame whose header or envelope it cannot parse, a frame that lacks them included, and *MUST* either return an error to its caller or count that refusal exactly once on its route under a fixed, heap-free counter naming the cause.
+Where a binding parses a frame's physical envelope, that binding's own contract states the refusal of a sample that does not parse; the element *MUST NOT* count again a sample that the binding already refused and counted.
 --
 
 [horizontal]
