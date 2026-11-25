@@ -193,15 +193,15 @@ The element *MUST* seal a startup memory—whether backed by static or caller-pr
 *Once it is sealed.*
 Once a startup memory is sealed:
 
-* the element refuses every further placement from it, as xref:../up-l1/runtime.adoc#req-ssr-mode-backstop[Run-time refusal only where types cannot reach] states;
+* the element *MUST* refuse every further placement from it with a named error and change nothing;
 * the element *MUST NOT* ask a memory source, an allocation provider or a startup-provisioning helper for memory when it refuses a placement;
 * the element *MUST* refuse a setup built on it.
 
-A sealed startup memory stays sealed until the process, partition or firmware instance ends, so a later initialization in that instance needs startup memory that is not sealed (xref:../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]).
+A sealed startup memory stays sealed until the process, partition or firmware instance ends, with no operation returning it to unsealed state, so a later initialization in that instance needs startup memory that is not sealed.
 
 *Partial group success and retained backing.*
-Where `+enter_runtime_all+` fails after one or more earlier transports have entered runtime mode, each earlier successful transport *MUST* survive that later failure and remain in runtime mode (xref:../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]; xref:../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]).
-In sealing shared startup memory or refusing a later transport, the element *MUST NOT* free or invalidate storage—admitted startup-provisioning backing included—that any successful owner can still reach, *MUST NOT* roll back an entered transport, and *MUST NOT* leave a refused transport partly entered (xref:../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]).
+Where `+enter_runtime_all+` fails after one or more earlier transports have entered runtime mode, each earlier successful transport *MUST* survive that later failure and remain in runtime mode until the process, partition or firmware instance ends.
+In sealing shared startup memory or refusing a later transport, the element *MUST NOT* free or invalidate storage—admitted startup-provisioning backing included—that any successful owner can still reach, *MUST NOT* roll back an entered transport, and *MUST NOT* leave a refused transport partly entered, with a runtime-mode value, or carrying traffic.
 Where a configuration's stated retention policy permits retaining startup backing obtained by an admitted startup-provisioning helper after sealing or refusal, the element *MUST NOT* silently reclaim that retained backing during runtime mode.
 
 *Setups still alive.*
@@ -379,9 +379,9 @@ Stating a policy discloses it.
 It admits the route's ordinary ownership under that policy and establishes no stronger guarantee; preserving ordinary serialized declarations imposes no unrequested stronger guarantee by default.
 Owning resources or having a destructor is not by itself a reason to refuse a serialized route, or a message type, wire, binding or allocation provider on it, at setup: the element *MUST NOT* refuse a serialized route at setup solely because its values own resources, because a destructor runs when a value ends, or because an unrequested stronger guarantee is not established for it (<<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>>).
 
-* How setup admits a route's decoded types, and their destruction, is stated in xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits].
+* At setup, a route's decoded types and their once-only destruction are admitted according to the route's declared heap class and any required stronger guarantees (<<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>>).
 * Which guarantees a route is promised, and which routes a stated policy leads the element to refuse, is stated in <<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>>.
-* A release that is handed to a release service, or to a binding's deferred return, is pending cleanup, isolated as xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states.
+* A release that is handed to a release service, or to a binding's deferred return, is pending cleanup that stays charged to its route until it completes and is isolated from bounded operations, accounting, health observation and unrelated slot returns.
 
 A release returns by a finite logical deadline only where its own mechanism does.
 Running it on another thread, or timing it from outside, does not make it do so.
@@ -396,7 +396,7 @@ The element *MUST* refuse at the transition, naming the route and the reason:
 * a serialized route whose wire, binding or allocation provider—including any admitted serialized owned-value runtime adapter acting within its wire or allocation-provider role—declares allocation that the route does not declare;
 * a route for which a wire, its binding, an allocation provider or the route's own declaration states no class, or for which a wire, a binding or an allocation provider states no resource and failure policy where this item requires one, including where an admitted serialized owned-value runtime adapter or a dependency that it reaches is omitted from its wire's or allocation provider's declaration.
 
-The element *MUST* also refuse at setup, naming the route and the reason, any serialized route or composition that offers no non-native, non-shared ending path on which to end an owned value that the route admits (xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
+The element *MUST* also refuse at setup, naming the route and the reason, any serialized route or composition that offers no non-native, non-shared ending path on which to end an owned value that the route admits (because the ending, destruction, release or wait of an owned value may never run in a native operation, in work it causes, or in work shared with a native route).
 
 The element applies xref:../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] to the runtime transition of a transport with a route whose binding declares allocation inside its middleware under a named permit, a native route included; the waiver's scope is stated in xref:../up-l1/bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
 
@@ -411,10 +411,10 @@ The element *MUST* show in it each route's admitted heap class, naming which of 
 
 * It *MUST* show every wire the route uses, in each direction, with the route's binding and each allocation provider, including any declared serialized owned-value runtime adapter participating in a wire or allocation provider.
 * It *MUST* show the declared policy of each that allocates, an unknown as unknown.
-* It *MUST* show the declared policy of each memory source and each allocation provider that the element's setup relied on, also where no route uses it (xref:../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure]; what a memory source is, is stated in <<req-sdk-owned-frame-provider-selection,The selected memory provider is the only one used, and selecting it claims nothing>>).
+* It *MUST* show the declared policy of each memory source and each allocation provider that the element's setup relied on, also where no route uses it, including any outcome that the source's or provider's stated contract permits and setup cannot exclude (what a memory source is, is stated in <<req-sdk-owned-frame-provider-selection,The selected memory provider is the only one used, and selecting it claims nothing>>).
 * What it shows for each stronger guarantee is stated in <<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>>.
 
-In each route's report, the element *MUST* show the declared policy of the route's binding where the binding allocates on the route, whatever the route requires (the release of a received frame's storage: xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+In each route's report, the element *MUST* show the declared policy of the route's binding where the binding allocates on the route—including for the release of a received frame's storage—whatever the route requires.
 
 *Scoped replacement.*
 This revision replaces revision 4 of this item for the element, each wire, each binding and each allocation provider across all configurations, incorporating any admitted serialized owned-value runtime adapter and all of its reached dependencies into each direction's declared heap class, policy, reporting and guarantee-evidence accounting strictly within its existing wire or allocation-provider role, stating explicitly the setup refusal of a serialized route or composition with no non-native, non-shared ending path, and preserving ordinary serialized declarations, non-refusal for ownership or destructors alone, and all other duties of revision 4 of this item without imposing unrequested stronger guarantees by default.
@@ -492,19 +492,19 @@ The element *MUST NOT* refuse at setup such a route, or a message type, wire, bi
 * because a destructor runs when one of them ends; or
 * because a guarantee of this item, a timing bound or an assurance scope that the route does not require is not established for it.
 
-An ordinary serialized route that does not require non-waiting release *MAY* use its disclosed waiting release path under its declared policy (<<req-ssr-heap-declared,The heap class is declared, with no default>>; xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
+An ordinary serialized route that does not require non-waiting release *MAY* use its disclosed waiting release path under its declared policy (<<req-ssr-heap-declared,The heap class is declared, with no default>>), keeping each value owned and charged to its route until its destruction completes.
 The explicit claim dependencies of an assured helper admission below apply only where that assured helper scope is selected, and impose no unrequested stronger guarantee on ordinary serialized routes by default.
 
-A refusal that another item states for a reason of its own is no refusal for ownership: such is the refusal of a route that needs the integrity copy route on a wire that allocates when it decodes (xref:../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]).
-A decoded type is admitted as xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] states.
+A refusal that another requirement states for a reason of its own is no refusal for ownership: for example, refusing a route that requires heap-free copy-route decoding when its wire declares allocation for decoding.
+A decoded type and its once-only destruction are admitted according to its route's declared heap class and any stronger guarantees the route requires.
 
 *What holds whatever a route requires.*
 Nothing selects or waives the following:
 
-* memory safety and the ownership rules: one destruction of each initialized value, no reuse of storage while it is owned, and no reclamation behind a forgotten owner (xref:../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour]; xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]);
-* the functional semantics that a route offers: true arrival, identity, TTL and logical deadlines, the declared overflow policy, and truthful errors, capacity and charges (xref:../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened]; xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]; xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]);
-* the native rule, for every native operation, the work it causes and the work a native route shares (xref:../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]);
-* the duties of element code itself: no panic, bounded work, and waits of its own that take a logical deadline (xref:error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:../up-l1/runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data]; xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]);
+* memory safety and the ownership rules: one destruction of each initialized value, no reuse of storage while it is owned, and no reclamation behind a forgotten owner (xref:../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour]);
+* the functional semantics that a route offers: true arrival, identity, TTL and logical deadlines, the declared overflow policy, and truthful errors, capacity and charges;
+* the native rule: no heap acquisition or release in runtime mode for every native operation, the work it causes and the work a native route shares;
+* the duties of element code itself: no panic, bounded work per call, and waits of its own that take a logical deadline (xref:error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]);
 * a truthful declaration of the heap class and its policy (<<req-ssr-heap-declared,The heap class is declared, with no default>>).
 
 A fault against one of these is a defect on every route.
@@ -520,7 +520,7 @@ Destroying each initialized value that the route can own, and releasing what it 
 No acquisition that the route's declared class admits waits for a lock or other dependency.
 * _Non-waiting release._
 No call, transition or drop that ends a value the route owns waits for that value's release.
-The release cannot wait, or it leaves that path as pending cleanup, isolated as xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] states.
+The release cannot wait, or it leaves that path as pending cleanup, kept charged to its route until completion and transitively isolated from bounded operations, drops, hand-offs, accounting, health observation and unrelated slot returns.
 * _Recoverable exhaustion._
 Exhaustion at every allocation point that the route can reach is returned as that operation's refusal, and cannot panic or end the process.
 
@@ -528,7 +528,7 @@ Each guarantee limits only the operations that its own definition names.
 Non-waiting acquisition limits acquisitions and no release, and non-waiting release limits the calls, transitions and drops that end a value and no acquisition.
 Two apply together only where the route requires both, by naming both or through a claim whose package states that it depends on both.
 
-A finite timing bound and a safety-assurance scope are the claims of xref:../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened], required and admitted as that item states.
+A finite timing bound and a safety-assurance scope are separate route claims, each required explicitly and admitted only where a supported configuration establishes it.
 Non-waiting acquisition, non-waiting release and a finite timing bound remain separately requested guarantees, established or refused by name.
 
 *Assured helper admission.*
@@ -592,7 +592,7 @@ The element *MUST NOT* state, report or rely on a guarantee as held for a route 
 
 *Setup.*
 A guarantee that a route requires covers what setup takes or creates for that route as well.
-How a refusal disposes of it is stated in xref:../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure].
+On a setup refusal, each resource and initialized value that setup acquired or created is left with one stated pre-acquisition disposition—returned untouched to its owner, destroyed once within setup where permitted by any required guarantees, or for startup storage and what is placed in it retained under the configuration's stated retention policy without runtime reclamation—and nothing is handed to a runtime release service or pending-cleanup queue.
 
 *Reporting.*
 The element *MUST* state separately, in its startup report and in each route's report, for each of the four guarantees:
