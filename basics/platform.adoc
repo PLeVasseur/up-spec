@@ -34,7 +34,7 @@ Transport-specific deliberate-idle eligibility and bounded-wait deadline rules a
 
 * Each platform backend of the element *MUST* report a failed clock read instead of panicking or substituting another time base.
 * The element *MUST* treat a monotonic reading earlier than one it already holds as a failed read.
-* The element *MUST* treat a failed clock read as fail-closed so that no operation depending on that clock reading succeeds on an unknown time: any timed operation depending on it fails closed and is counted under its applicable failure cause, while an operation whose contract requires no clock reading is not refused for an unreadable clock.
+* The element *MUST* treat a failed clock read as fail-closed so that no operation depending on that clock reading succeeds on an unknown time: a bounded operation that depends on a failed monotonic clock read ends as expired and is counted, while an operation whose contract requires no clock reading is not refused for an unreadable clock.
 Message-TTL expiry and unreadable-clock refusal causes are specialized by the transport observation rules.
 
 *Prefault.*
@@ -68,7 +68,7 @@ Verification:: gate, test, review
 * *test*
 ** The platform contract test, run inside heap windows, for each backend on the targets that its configuration names.
 ** A fault-injected backend whose wait returns spuriously, interrupted or late: the element rechecks the awaited condition and the time before waiting again or returning.
-** A fault-injected backend whose clock read fails or steps back: a dependent timed operation fails closed and is counted, and an operation that needs no clock reading is not refused.
+** A fault-injected backend whose clock read fails or steps back: a bounded operation that depends on the failed monotonic clock read ends as expired and is counted, and an operation that needs no clock reading is not refused.
 ** Startup memory made resident by the prefault service before anything is placed in it.
 * *review*: each backend's source and its package's stated contracts.
 

@@ -328,7 +328,7 @@ Verification:: test, fault-injection, review
 
 *Rationale.*
 Separating physical envelope checks (which only the binding knows) from metadata decoding and route admission (which only the selected wire and element know) avoids duplicate parsers and guarantees a single refusal cause and a single count.
-Checking presence against the header's payload length ahead of identity, filters and TTL ensures that a malformed frame is refused once where it is met, never rechecked on take and never mistaken for an expiry or filter miss.
+Checking presence against the checked physical payload length supplied by the invoking layout ahead of identity, filters and TTL ensures that a malformed frame is refused once where it is met, never rechecked on take and never mistaken for an expiry or filter miss.
 
 [[req-ssr-binding-loan-sizing]]
 === A lending binding declares whether a transmit loan's payload extent can be shortened

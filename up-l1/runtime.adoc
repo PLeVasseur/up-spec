@@ -639,6 +639,7 @@ The acceptance event is the observation of the awaited state.
 The acceptance event is the element's completion of the call with a response that its wire check accepted (xref:../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
 
 For every logical deadline in the element, a wait's timeout, an RPC call's TTL and a setup bound alike, the deadline decides the outcome.
+If a monotonic clock read required by a bounded operation fails or steps back before the deadline is reached, the element *MUST* end that bounded operation as expired and count it (xref:../basics/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules], "Clock reads"); a message-TTL check of a frame whose TTL is greater than 0 keeps its separate unreadable-clock refusal cause, and a frame whose TTL is 0 needs no clock reading (xref:route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
 
 *Physical timing.*
 A finite bound on when the caller physically resumes, or on when a callback or reaction runs, is a separate timing claim.
@@ -666,6 +667,7 @@ Verification:: test, heap-window, fault-injection, review
 ** A deadline that passes while the caller is not running, reported as its outcome.
 ** A result committed before the deadline and observed after it, kept.
 ** A completion first offered after the deadline, refused, with the expiry reported.
+** A bounded operation whose required monotonic clock read fails or steps back before its deadline passes: ended as expired and counted.
 ** An idle wait woken by the arrival that makes work due.
 ** An operation whose deadline passes while the release of what it ended is pending, reporting its outcome without waiting for that release.
 ** On a route that requires neither non-waiting guarantee, an acquisition and a release that wait inside the declared allocation domain, with the operation's outcome decided by its deadline and the wait shown in the route's report.

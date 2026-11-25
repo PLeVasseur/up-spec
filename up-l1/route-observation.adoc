@@ -53,8 +53,8 @@ The element *MUST* count each such report exactly once on the route, in `+receiv
 The element *MUST NOT* count or report it as a missed arrival, as a sample loss or under any other cause.
 
 *Sending-side connection faults.*
-Where a binding detects a connection fault while sending, what the binding reports of that fault and how it is counted on the sending route are stated by that binding's own contract.
-It is not counted in `+receive_failed+`.
+A connection fault encountered by a send operation is not a receive failure.
+The element *MUST NOT* count it in `+receive_failed+`.
 
 *E2E routes.*
 How the element counts a frame with no E2E header on a receive route that selects the E2E wire is stated in xref:wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once].
@@ -74,6 +74,7 @@ Verification:: test, heap-window
 ** A flow counter that wraps.
 ** A free slot released twice with no take between, counted as a fault.
 ** On a pull binding, each report of a failure to read its own queue, and of a data connection that its middleware drops or fails to set up without an error, counted once on the route in `+receive_failed+`, and under no other cause.
+** A connection fault encountered by a send operation: not counted in `+receive_failed+`.
 * *heap-window*: counters read inside the window.
 ISO 26262:: 6-Annex D.2.4 (part-clause numbers only)
 
@@ -343,7 +344,7 @@ Verification:: test, review
 ** A frame whose TTL is 0, held far beyond every bound above, with an old time in its message ID and with the wall clock unreadable: not refused and not counted as expired, when it reaches its route, when it is taken and before a carrier forwards it.
 ** An RPC request whose TTL is 0: refused at the client before it is sent, with an error that names the TTL; at a server, refused when it reaches its route, never decoded and with no end-to-end state changed, not delivered, and counted once under its own cause and not as expired.
 ** An expired frame and a frame whose TTL is greater than 0 checked while the clock cannot be read, each when it reaches its route, and an RPC request whose TTL is 0 when it reaches a server's route, each with a payload of an encoding that no wire of the route declares and each with no payload, its metadata naming no payload encoding and its layout a payload length of zero: refused before any of those checks of its payload is made, and counted once under that check's cause, with no mismatch, `+missing_payload+` or `+unprotected+` result or count, on a route that does not select the E2E wire and on one that does.
-** The same frames with no payload encoding and a payload length of 1 in their layout, the expired one included: refused at the admission of their metadata as `+payload_presence_extent_mismatch+`, counted once under that cause, and given none of this item's checks or counts.
+** The same frames whose physical checks and first two metadata checks (decoding and required fields) pass, with no payload encoding and a payload length of 1 in their layout, the expired one included: refused at the third check of metadata admission as `+payload_presence_extent_mismatch+`, counted once under that cause, and given none of this item's checks or counts.
 ** The same for an expired frame and a frame whose TTL is greater than 0 checked while the clock cannot be read, each when it is taken after its metadata was admitted when it reached its route, with a payload of an encoding that no wire of the route declares where the element checks the encoding of a payload only when a frame is taken, and with no payload where it checks only then whether an operation that requires a value has one: refused under this item, with its metadata not admitted again and no `+missing_payload+` result or count.
 ** For a binding whose middleware has a lifetime of its own: the mapping that its declaration states, with an absent value, a zero and a positive value in both directions; an external value that means immediate expiry never becoming a TTL of 0; and a TTL of 0 never becoming an external value that means immediate expiry.
 * *review*: the expiry-check paths never refuse or count a frame whose TTL is 0 as expired, and never refuse it because the wall clock cannot be read.
