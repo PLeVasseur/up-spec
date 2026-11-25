@@ -40,7 +40,7 @@ What its integrator owes for its `+unsafe+` code: xref:../../safety/elements/up-
 == Words
 
 * A *native type* is a type that <<req-ssr-native-type,A native payload type holds its whole value in one fixed layout>> admits.
-* A *native route*: xref:README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract], "Native and serialized routes".
+* A *native route*: xref:../../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types], "Shared transport, binding, wire and route vocabulary" (specialized for wires in xref:README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]).
 * A *layout identity*: <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>, "Layout identity".
 * A *native agreement*, or *agreement* on this page: <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>, "Agreed by the deployment".
 * The *Rust-only native domain* is defined in <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>, "Only between binaries that use the element".
