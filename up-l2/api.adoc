@@ -349,7 +349,7 @@ Each received copy of a request is a request of its own here, and an answer to a
 Where a typed operation returns to its caller the result of a refusal of a request, by one of these checks or by a check that comes before them, the element *MUST NOT* give that caller a means to answer the request, whether or not the element answers it.
 
 *Sending the answer.*
-The element *MUST* send the answer as any response on that route is sent, under the route's overflow policy and heap class, including a bounded wait where the route declares one.
+Before handing off the refused request frame's owner, the element *MUST* preserve in fixed reserved state only the reply address, message identity and request tag (where a wire read one) needed for any required answer, and *MUST* hand off that refused request frame's whole owner immediately as the clause "Release" states before sending the answer; the element *MUST* then send any required answer as any response on that route is sent, under the route's overflow policy and heap class, including a bounded wait where the route declares one, so that a full response route or bounded answer wait never retains the refused request frame's owner on the caller path.
 
 *Requests that get no answer.*
 
@@ -376,7 +376,8 @@ Such a request gets only that answer, and is counted as xref:../up-l1/wires/e2e.
 The element *MUST* hand every answer, its own and the application's, to the route's wire with its request's tag, where a wire of the route read one, so that on an E2E route the answer echoes that request (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call]).
 
 *Release.*
-After deciding and counting the refusal (and sending any required answer), the element *MUST* immediately hand off every refused request frame's whole owner once under the route's and binding's pre-reserved return contract (xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../up-l1/bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]), keeping the owner charged until actual return completes.
+Immediately after deciding and counting the refusal (preserving only the reply address, message identity and request tag needed for any required answer in fixed reserved state), and before sending any required answer, the element *MUST* hand off every refused request frame's whole owner once, without allocating, panicking or waiting, into the route's and binding's pre-reserved return path (xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../up-l1/bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]), keeping the owner charged until actual return completes.
+Answer transmission is not a prerequisite for handing off the refused request frame's owner.
 --
 
 [horizontal]
@@ -402,14 +403,14 @@ Each is given to no wire, counted once as `+unprotected+` and under no other cau
 ** On a route that selects the native protection composition, a request that the protected-native preflight refuses, once for its outer extent and once for its writer's layout: no check by the E2E wire, so no CRC read and no E2E state changed; counted once under the native check's cause and not in the E2E counter; not answered.
 ** On a route that selects the native protection composition, a request that the protected-native preflight admits and the E2E wire accepts: given to the application as a view of its value, with no native check made after the wire's and no native refusal.
 ** Two copies of one undecodable request: each answered once and counted once.
-** Such an answer on a response route that is full: sent under the route's overflow policy, with a wait within its bound where the route declares a bounded wait; an answer that the overflow policy discards, counted once, as that discard.
+** Such an answer on a response route that is full: the refused request frame's whole owner handed off immediately to its pre-reserved non-waiting return path before the answer send begins (never retained across a bounded answer wait); the answer sent from fixed reserved reply state under the route's overflow policy, with a wait within its bound where the route declares a bounded wait; an answer that the overflow policy discards, counted once, as that discard.
 ** A request whose header cannot be parsed: not answered; where the element refuses it, counted once on its route, also at a server that returns results to a caller; where its binding's own check refused it, returned or counted once as that binding's item states; its call, still pending at its TTL, ending then.
 ** An answer that cannot be sent: counted once as an event of its own, its request not counted again; its call, still pending at its TTL, ending then.
 ** On a route that selects the E2E wire: a request that the E2E wire finds not corrupt and refuses for a data ID that was not declared: answered `+InvalidArgument+`, counted once in the E2E counter and not again, and sent under the route's overflow policy; one with an undeclared data ID that the wire finds corrupt: not answered; one that the wire refuses and whose inner payload would not decode: given only the wire's answer, counted once in the E2E counter, with no inner decode made.
 ** A request that passes the E2E wire's check and fails the inner decode: answered `+InvalidArgument+`.
 ** On a route that selects the E2E wire, a request that the E2E wire refuses as an identity mismatch: not answered, and counted once in the E2E counter under that name.
 ** Every answer, the element's own and the application's, handed to the route's wire with its request's tag where a wire read one.
-** Every refused request frame's whole owner handed off once under the route's and binding's return contract immediately after the refusal decision and count, staying charged until actual return completes.
+** Every refused request frame's whole owner handed off once, without allocating, panicking or waiting, under the route's and binding's pre-reserved return contract immediately after the refusal decision and count and before any required answer send (including while a full response route enters a bounded overflow wait), staying charged until actual return completes.
 * *heap-window*: producing each answer; on a serialized route, only the route's declared send-side allocation and release.
 
 *Rationale.*
