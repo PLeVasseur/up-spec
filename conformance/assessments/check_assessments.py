@@ -2260,7 +2260,10 @@ Occurrences and anchors
   AsciiDoc attribute entry, flagged target_is_attribute_entry) stop as undecided during
   second-form anchor derivation rather than silently deriving null; direct queries targeting an
   oft-sid directly above an attribute entry also stop as undecided (target_is_attribute_entry),
-  while ordinary unheaded attribute entries remain unchanged. Both version-1 and version-2
+  whereas an unheaded attribute entry outside the list-continuation transitions above is recorded
+  as a non-visible attribute_entry line (creating no occurrence, triggering no
+  target_is_attribute_entry flag, and acting as no preceding-block barrier for second-form
+  section-anchor derivation). Both version-1 and version-2
   resolution use the same .adoc file test. Where a file has a construct that the checker does not
   read (an include, a conditional region, a single-line conditional other than [source,...]
   directly before a ---- listing delimiter, an unterminated block, an underlined section title,
