@@ -1651,7 +1651,7 @@ NOTE: Application (or message payload) translation is the process of converting 
 
 The following section will elaborate only on the translation of *uSubscription* messages to/from *SOME/IP-SD* messages. Subscription state (persistent or not) is handled in the *uSubscription* services and not at the transport layer or this component.
 
-The following section we will elaborate on how Eventgroup Entry types are mapped to xref:../up-l3/usubscription/v4/README.adoc[*uSubscription*] messages for the subscribe
+The following section elaborates on how Eventgroup Entry types are mapped to xref:../up-l3/usubscription/v4/README.adoc[*uSubscription*] messages for the subscribe
 and unsubscribe flows.
 
 ==== Common Fields and Eventgroup Entry Mapping

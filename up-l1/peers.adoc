@@ -193,7 +193,7 @@ Such a peer's participation is the deployment's condition: the peers of a route 
 A serialized route needs no fingerprint, and this item does not affect it.
 
 *Scoped replacement.*
-For the element and each binding that carries native frames between processes across all configurations, revision 3 of this item replaces revision 2 of this item (the retirement of non-element-peer duties from revision 1 remains in effect under "Peers that do not use the element").
+Revision 3 of this item replaces revision 2 of this item for the element and each binding that carries native frames between processes across all configurations; revision 2 of <<req-ssr-native-abi-agreed,A native representation never crosses an ABI>> retired the revision-1 fingerprint-recording and missing-fingerprint-refusal duties on peers that do not use the element or such a binding, and that retirement remains in effect under the clause "Peers that do not use the element" above.
 --
 
 [horizontal]

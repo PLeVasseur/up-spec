@@ -228,7 +228,7 @@ A panic path inside one middleware is stated, with its bounds, in a requirement 
 --
 *Bounded receive.*
 On a route that it serves by pull, a binding *MUST* give up at most the route's bound in each call of its receive, and keep the rest in a bounded queue under the route's QoS.
-While queued traffic, work budget and genuine owner capacity remain, a pull receive call *MUST* make within-bound progress and return its ordinary receive result: the binding *MUST NOT* fabricate a contention, busy, false-empty, invented error, pending or artificial exhaustion result, impose a lower public caller concurrency limit, or defer the required within-bound advance to a later application call.
+While queued traffic, work budget and genuine owner capacity remain, a pull receive call *MUST* make within-bound progress and return its ordinary receive result: the binding *MUST NOT* fabricate a contention, busy, false-empty, invented error, pending or artificial exhaustion result, impose a lower public caller concurrency limit than the route's ordinary public receive contract allows, or defer the required within-bound advance to a later application call.
 
 *Bounded waits.*
 A binding *MUST NOT* let a call of its own wait without a bound, except as the next paragraph allows, or wait for a deferred return to complete.
@@ -241,14 +241,14 @@ Apart from a deliberate idle wait (xref:../runtime.adoc#req-ssr-bound-wait[Every
 
 A binding *MUST* bound its other work, its worker loops, dispatch and wake paths included.
 A binding *MUST NOT* let anything that a binding call, an arrival report or a health report needs wait behind a pending release.
-Neither a short critical section nor splitting work onto a separate worker by itself establishes that isolation: any design in which a pending release contends for a lock, queue, atomic wrapper or execution resource needed by a binding call, arrival report or health report fails this requirement.
+Neither a short critical section nor splitting work onto a separate worker by itself establishes that isolation: any design in which a pending release contends for a lock, queue, lock-backed atomic emulation (or other blocking atomic operation) or execution resource needed by a binding call, arrival report or health report fails this requirement.
 
 *Carrier ingress.*
 At the ingress of a carrier route (xref:../../up-l2/streamer.adoc#req-ssr-carrier-route[A carrier route takes each frame at its ingress and sends it at its egress]), the element *MUST* take pulled or retained frames, and never a borrowed frame whose carriage would need a staged copy.
 
 *Scoped replacement.*
 For each binding across all configurations, revision 6 of this item replaces revision 5 of this item.
-For the element's carrier-ingress duty, revision 6 of this item makes no replacement of revision 5 of this item.
+Revision 6 of this item replaces revision 5 of this item for the element; the carrier-ingress duty is unchanged.
 --
 
 [horizontal]
@@ -262,7 +262,7 @@ Verification:: fault-injection, test, review
 * *test*
 ** No binding call waits for a deferred return; a refused first sample followed by a valid sample with work budget for two and genuine remaining owner capacity delivers the valid sample within the same pull receive call, while genuine owner-capacity exhaustion is refused separately before ownership.
 ** A carrier ingress taking pulled or retained frames, and never a borrowed frame whose carriage would need a staged copy.
-* *review*: transitive lock, worker, atomic and wake isolation between pending release and binding calls, arrival reports and health reports; no short-critical-section or worker-label assumption; any allocation-domain wait limited strictly to admitted Class 2 or Class 3 declarations.
+* *review*: transitive lock, worker, lock-backed atomic emulation and wake isolation between pending release and binding calls, arrival reports and health reports; no short-critical-section or worker-label assumption; any allocation-domain wait limited strictly to admitted Class 2 or Class 3 declarations.
 
 *Rationale.*
 A receive that gave up any number of frames per call could hold its caller for as long as a peer keeps sending.

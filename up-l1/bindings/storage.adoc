@@ -108,7 +108,7 @@ It *MUST NOT* present storage that it copies into or out of as lent (xref:interf
 
 *Scoped replacement.*
 For each lending binding across all configurations, revision 3 of this item replaces revision 2 of this item.
-For the element's uninitialized fresh-loan duty, revision 3 of this item makes no replacement of revision 2 of this item.
+Revision 3 of this item replaces revision 2 of this item for the element; the uninitialized fresh-loan duty is unchanged.
 --
 
 [horizontal]
@@ -271,9 +271,9 @@ An answer that is not established is given as the unfavourable one, as an unknow
 So a binding never gains a cross-level view by leaving the question open.
 
 [[req-ssr-binding-metadata-admission]]
-=== For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order
+=== Where a lending binding's profile invokes shared metadata hand-over, the element admits metadata once in fixed order
 
-[.specitem,oft-sid="req~ssr-binding-metadata-admission~1",oft-title="For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding,SafetyBindingPull"]
+[.specitem,oft-sid="req~ssr-binding-metadata-admission~1",oft-title="Where a lending binding's profile invokes shared metadata hand-over, the element admits metadata once in fixed order",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding,SafetyBindingPull"]
 --
 *Scope and conditional invocation.*
 This item binds the element and each lending binding only where the binding's applicable profile or sample-layout contract explicitly invokes this procedure to separate binding physical checks from element metadata admission.
