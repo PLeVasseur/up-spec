@@ -176,15 +176,15 @@
       "sha256": "ce39af039f1858fcd478eefe309a5c6608bc3c35b30e9ce8cb14864d18952aa3"
     }
   ],
-  "input_content_bytes": 1877861,
-  "identity_verification": "Exact byte length and SHA256 for all19 bundled documentary inputs, plus named field guards; product identities remain historical unqualified strings.",
+  "input_content_bytes": 1878089,
+  "identity_verification": "Exact byte length and SHA256 for all 19 bundled documentary inputs, plus named field guards. Product identity strings are recorded metadata; no product source or artifact identity is verified.",
   "generated_payload_bytes": {
-    "intake.v2.json": 2839242,
-    "index.html": 2086201
+    "intake.v2.json": 2839367,
+    "index.html": 2086554
   },
   "product_tests": 0,
   "source_or_artifact_hashing": false,
   "documentary_input_digests": true,
-  "catalogue_independent_review": "pending root acceptance review",
+  "catalogue_independent_review": "not established by this generation receipt",
   "catalogue_publication": "not performed"
 }

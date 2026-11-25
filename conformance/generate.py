@@ -155,7 +155,7 @@ def build(manifest, sources, sizes, template, manifest_digest=None):
          "source_pins_record": sources["d7-manifest"]["files"]["SOURCE-PINS.json"]["sha256"],
          "frozen_utc": sources["d7-manifest"]["frozen_utc"],
          "source_ref": ref("d7-manifest", "/files/SOURCE-PINS.json"),
-         "limitation": "Classification-2 composition only; previous review repair conditions remain."},
+         "limitation": "Classification-2 composition only. The RI1-ROOT-SLICE-ISIZE and RI1-STATUS-DOC repair and review prerequisites require an exact accepted receipt for closure; this catalogue makes no closure assessment."},
         {"id": "rtos5-helper-private", "kind": "private_unaccepted_component_candidate",
          "helper_derivative": sources["rtos-pins"]["frozen_helper"]["new"],
          "predecessor_helper": sources["rtos-pins"]["frozen_helper"]["old"],
@@ -305,10 +305,10 @@ def build(manifest, sources, sizes, template, manifest_digest=None):
             "unassessed_records": 787, "no_followup_obligations": 328, "current_passes": 0},
         "named_inputs": source_table,
         "input_content_bytes": sum(sizes.values()),
-        "identity_verification": "Exact byte length and SHA256 for all19 bundled documentary inputs, plus named field guards; product identities remain historical unqualified strings.",
+        "identity_verification": "Exact byte length and SHA256 for all 19 bundled documentary inputs, plus named field guards. Product identity strings are recorded metadata; no product source or artifact identity is verified.",
         "generated_payload_bytes": {"intake.v2.json": len(encoded(data)), "index.html": len(page)},
         "product_tests": 0, "source_or_artifact_hashing": False, "documentary_input_digests": True,
-        "catalogue_independent_review": "pending root acceptance review",
+        "catalogue_independent_review": "not established by this generation receipt",
         "catalogue_publication": "not performed",
     }
     outputs = {"intake.v2.json": encoded(data), "index.html": page,
@@ -385,6 +385,14 @@ second matrix. Held maintainer-proposal packets are not included or adopted.
 Reproduce with `python3 -B generate.py --check`. All input bytes are verified in
 the same required read pass before normalization. With absent outputs,
 `python3 -B generate.py` creates them; existing outputs must already match.
+A reviewed presentation-only change preserves the input records and manifest.
+Its execution record identifies the exact prior output hashes before removing
+only `intake.v2.json`, `index.html`, `GENERATION-RECEIPT.json`, `obligations.md`,
+`followups.md`, `cases.md`, `transfers.md`, `identities.md` and `README.md`, then
+recreating them with `python3 -B generate.py` and checking them with
+`python3 -B generate.py --check`. A separately retained presentation-change
+receipt identifies the final source and output hashes; original output and
+receipt identities remain at their Git pins.
 Changed records require a deliberately new version, review and publication.
 The generator reads only this directory, uses the Python standard library, and
 runs no product tests. [Generation receipt](GENERATION-RECEIPT.json).
@@ -432,7 +440,7 @@ def main():
     else:
         for name, data in outputs.items():
             if (HERE / name).exists() and (HERE / name).read_bytes() != data:
-                raise ValueError('Existing version output differs; create a deliberate successor: ' + name)
+                raise ValueError('Existing output differs; use the documented controlled regeneration procedure: ' + name)
         for name, data in outputs.items():
             if not (HERE / name).exists(): (HERE / name).write_bytes(data)
         print(json.dumps({"mode": "generate", "status": "passed", "files": list(outputs),

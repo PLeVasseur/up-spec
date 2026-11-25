@@ -2123,7 +2123,7 @@ Pins
 Fixtures (--fixtures; by default fixtures/ next to this file)
   One directory per case, AS01 to AS19, each with case.json and the files that it names. case.json
   has these members:
-    case          the case's name in the plan's table, AS1 to AS19
+    case          the documentary case identifier, AS1 to AS19 (README.md, "Fixtures and checker")
     subject, required_outcome, decided_by
                   the case as stated, for the reader
     steps         the submissions in the order received. Each step names its submission (the
@@ -2216,10 +2216,9 @@ Occurrences and anchors
   paragraph. List continuation attachment is tracked across continuation markers, single-blank
   continuation transitions, and attached blocks within the same scope without claiming a general
   mixed-list parser; an unresolved non-comment or overridden pending oft-sid head across a list
-  continuation stops as undecided (continuation_after_head). Four additional unresolved
-  list/metadata transitions are detected within their actual parse scope and stop as file-level
-  undecided whenever the queried requirement is relevant to the file, without altering retained
-  list/paragraph/style interpretation: repeated //// comment blocks during an active list
+  continuation stops as undecided (continuation_after_head). The following unresolved
+  list/metadata transitions stop as file-level undecided when the queried requirement
+  is relevant to the file: repeated //// comment blocks during an active list
   continuation (repeated_comment_block_in_list_continuation), immediately adjacent pending block
   metadata or an attribute entry (attribute line, block title, or attribute entry) after an
   attached block followed by + (adjacent_metadata_continuation_after_attached_block; once armed,

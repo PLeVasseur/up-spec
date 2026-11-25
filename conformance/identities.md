@@ -83,7 +83,7 @@ These are historical metadata observations, not current supplier, integrator, su
       "source": "d7-manifest",
       "pointer": "/files/SOURCE-PINS.json"
     },
-    "limitation": "Classification-2 composition only; previous review repair conditions remain."
+    "limitation": "Classification-2 composition only. The RI1-ROOT-SLICE-ISIZE and RI1-STATUS-DOC repair and review prerequisites require an exact accepted receipt for closure; this catalogue makes no closure assessment."
   },
   {
     "id": "rtos5-helper-private",

@@ -37,6 +37,14 @@ second matrix. Held maintainer-proposal packets are not included or adopted.
 Reproduce with `python3 -B generate.py --check`. All input bytes are verified in
 the same required read pass before normalization. With absent outputs,
 `python3 -B generate.py` creates them; existing outputs must already match.
+A reviewed presentation-only change preserves the input records and manifest.
+Its execution record identifies the exact prior output hashes before removing
+only `intake.v2.json`, `index.html`, `GENERATION-RECEIPT.json`, `obligations.md`,
+`followups.md`, `cases.md`, `transfers.md`, `identities.md` and `README.md`, then
+recreating them with `python3 -B generate.py` and checking them with
+`python3 -B generate.py --check`. A separately retained presentation-change
+receipt identifies the final source and output hashes; original output and
+receipt identities remain at their Git pins.
 Changed records require a deliberately new version, review and publication.
 The generator reads only this directory, uses the Python standard library, and
 runs no product tests. [Generation receipt](GENERATION-RECEIPT.json).
