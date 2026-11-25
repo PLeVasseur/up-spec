@@ -321,7 +321,7 @@ An ID made while the sender's wall clock could not be read records the last good
 For a generator that keeps the last good time only to 64 ms, such a frame can be refused by up to 64 ms more (xref:../basics/uuid.adoc#req-ssr-ids-unique[Message IDs are unique]).
 
 *An unreadable clock.*
-If the wall clock cannot be read at the check of a frame whose TTL is greater than 0, the element *MUST* refuse the frame and count it once, under a cause that names the unreadable clock and not as expired.
+If the wall clock cannot be read at the check of a frame whose TTL is greater than 0, the element *MUST* refuse the frame and count it once, under a cause that names the unreadable clock and not as expired (xref:../basics/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules], "Clock reads").
 
 *When expiry is checked.*
 The element *MUST* check expiry when a frame reaches its route, before its wire decodes it, as well as when it is taken.

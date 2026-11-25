@@ -169,12 +169,12 @@ In deciding a refusal, producing its error and counting it, the element *MUST NO
 
 *Native and heap-free routes.*
 On a native route, and on any route whose heap class is none, the element *MUST NOT* acquire or release heap memory in anything that a refusal does.
-Beyond deciding the refusal, producing its error and counting it, the element *MUST* perform for such a refusal only the accounting and the heap-free ownership cleanup required for the route, such as returning a refused frame's slot to its fixed table without acquiring or releasing heap memory.
+Beyond deciding the refusal, producing its error and counting it, the element *MUST* perform for such a refusal only the accounting and the heap-free ownership cleanup required for the route, such as returning a refused frame's slot to its fixed table without acquiring or releasing heap memory (native decoded types run no destructor, and a serialized heap-free route runs a destructor only where its wire's heap-free claim covers it).
 
 *Serialized routes.*
 On a serialized route, some refusals are reached only after the operation acquired heap memory under its declared heap class.
 The element *MUST NOT* acquire a further resource in order to produce or report such a refusal.
-It *MUST* end the ownership already created, and release what that ownership holds—each initialized decoded value and any binding-allocated storage for the frame—exactly once under the route's declared heap class and resource and failure policy (xref:resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
+The element *MUST* decide and record the refusal's logical outcome, message identity and logical deadline before any destruction or lock that it needs starts, and *MUST* end the ownership already created so that each initialized decoded value (destroyed externally with element invariants restored and no element lock held) and any binding-allocated storage for the frame (returned under the binding's frame-return contract) is released exactly once under the route's declared heap class and resource and failure policy (xref:resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 That release is the route's declared heap use, under its own contract, and not part of producing the refusal.
 
 *Exhaustion of a declared allocation.*

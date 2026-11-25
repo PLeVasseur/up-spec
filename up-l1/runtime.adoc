@@ -587,7 +587,7 @@ For every other wait of its own, for a peer, a wake, capacity, a completion or a
 
 * *MUST* give the wait a finite logical deadline and *MUST NOT* intentionally wait beyond it;
 * *MUST* return on a wake, on its deadline, or when the peer it waits for has died;
-* after a spurious wake, an interruption or a late resumption, *MUST* recheck the authoritative state and the time before it waits again or returns.
+* after a spurious wake, an interruption or a late resumption, *MUST* recheck the authoritative state and the time before it waits again or returns (xref:../basics/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules], "Waits").
 
 *Waits inside a declared allocation domain.*
 On a serialized route whose declared heap class admits allocation, an acquisition, a destruction or a release can wait inside the allocation domain that the route's declared policy names, such as behind an allocator's lock (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
