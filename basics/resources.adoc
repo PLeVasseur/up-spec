@@ -27,7 +27,7 @@ Where an SDK's core is not the element, a word that an item of the up-rust SEooC
 * An *SDK*, its *core*, a *layer above the core* and an *owned-frame route*: xref:../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it].
 * A *part* and its *supplier*: xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
 * The *element*: xref:../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code].
-* A *binding* and its *middleware*: xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract].
+* A *binding* and its *middleware*: xref:../up-l1/bindings/interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract].
 * A *wire*: xref:../up-l1/wires/README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
 * A *route*: xref:../up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name].
 * A *transport*, its *initialization mode* and its *runtime mode*: <<req-ssr-mode-two-types,Two modes, as two types>>.
@@ -49,7 +49,7 @@ Mode separation at type level and lifecycle boundaries between initialization an
 *What a transport is.*
 A transport is what the element builds over one binding.
 Routes and roles are declared on it in initialization mode, and the handles that carry traffic are activated from it in runtime mode.
-A lending transport is one whose binding is a lending binding, and a handoff transport one whose binding is a handoff binding (xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]).
+A lending transport is one whose binding is a lending binding, and a handoff transport one whose binding is a handoff binding (xref:../up-l1/bindings/interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]).
 
 *Two types.*
 The element *MUST* give each lending and each handoff transport an initialization mode and a runtime mode, each a distinct non-generic type.
@@ -273,7 +273,7 @@ ISO 26262:: 6-7.4.13 (part-clause numbers only)
 *Rationale.*
 An integrator who places startup memory in a static region or a linker section has to size it before the process starts, and a request that does not fit is refused only at startup.
 So the element provides the computation.
-Each route's reserved storage is reported under xref:../up-l1/bindings.adoc#req-ssr-error-route-report[Each route reports what it got].
+Each route's reserved storage is reported under xref:../up-l1/route-observation.adoc#req-ssr-error-route-report[Each route reports what it got].
 
 _What each figure measures._
 The startup memory is only part of the footprint.
@@ -398,7 +398,7 @@ The element *MUST* refuse at the transition, naming the route and the reason:
 
 The element *MUST* also refuse at setup, naming the route and the reason, any serialized route or composition that offers no non-native, non-shared ending path on which to end an owned value that the route admits (because the ending, destruction, release or wait of an owned value may never run in a native operation, in work it causes, or in work shared with a native route).
 
-The element applies xref:../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] to the runtime transition of a transport with a route whose binding declares allocation inside its middleware under a named permit, a native route included; the waiver's scope is stated in xref:../up-l1/bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
+The element applies xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] to the runtime transition of a transport with a route whose binding declares allocation inside its middleware under a named permit, a native route included; the waiver's scope is stated in xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
 
 A route that requires a stronger guarantee that is not established for it is refused as <<req-ssr-heap-guarantees,A stronger resource guarantee is required by name, and admitted or refused>> states.
 

@@ -38,7 +38,7 @@ The following specification will elaborate on how uProtocol shall be mapped to S
 
 == Transport Layer Translation
 
-xref:README.adoc[Transport & Session Layer (uP-L1)] specifies how xref:../basics/umessage.adoc[uMessages] are sent and received between *uEntities* or between devices. In this section we will cover the SOME/IP service translation and event mapping.
+xref:utransport.adoc[Transport & Session Layer (uP-L1)] specifies how xref:../basics/umessage.adoc[uMessages] are sent and received between *uEntities* or between devices. In this section we will cover the SOME/IP service translation and event mapping.
 
 Mapping of uTransport APIs to SOME/IP specific library *APIs* shall not be covered in this document given there are multiple open source libraries available for SOME/IP.
 
@@ -58,10 +58,10 @@ What the translator promises instead is the directional table of <<common-umessa
 
 * The translator's supplier *MUST* state, in the translator's released documentation, that the translator is a service translator under this chapter, and *MUST* name the tables of this chapter in it.
 The translator *MUST* meet every row and every refusal of the items of this chapter, `+dsn~up-transport-someip-uri-mapping~1+` (<<uri-mapping>>) and `+dsn~up-transport-someip-subscription-mapping~1+` (<<eventgroup-entry-mapping>>) among them.
-* The translator's supplier *MUST NOT* claim `+req~utransport-send-preserve-data~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]) for the conversion.
+* The translator's supplier *MUST NOT* claim `+req~utransport-send-preserve-data~1+` (xref:utransport.adoc[Transport & Session Layer (uP-L1)]) for the conversion.
 That requirement is neither amended nor waived: it binds each UTransport implementation unchanged, the transports that bring a message to the translator and take a reconstructed message away from it included, and it has no subject across the conversion, which is not a transmission.
-* A component that drops or defaults an attribute that the tables of this chapter do not state as lost does not conform by being called a translator: it meets neither `+req~utransport-send-preserve-data~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]) nor this chapter.
-* The translator may be reached through whatever call shape its language library gives a transport, such as xref:README.adoc#send[`send`] and xref:README.adoc#register-listener[`registerListener`], and no second application API is required.
+* A component that drops or defaults an attribute that the tables of this chapter do not state as lost does not conform by being called a translator: it meets neither `+req~utransport-send-preserve-data~1+` (xref:utransport.adoc[Transport & Session Layer (uP-L1)]) nor this chapter.
+* The translator may be reached through whatever call shape its language library gives a transport, such as xref:utransport.adoc#send[`send`] and xref:utransport.adoc#register-listener[`registerListener`], and no second application API is required.
 Which duties of the UTransport call items it owes is stated item by item in <<someip-call-allocation>>: no duty is inferred from a method's name, a method named `send` establishes no UTransport conformance, and it removes no duty of validation, access control or delivery either.
 
 *Who supplies what.*
@@ -82,14 +82,14 @@ A `token` or a `permission_level` is refused or lost as <<common-umessage-attrib
 *Routes onto the translator's fixed service.*
 Where a component forwards uProtocol messages to the translator on a route onto the fixed service that the translator translates, the route ends at that service, whose contract fixes the slots of its methods and events, and the translator is the uProtocol endpoint of each message on it ("Standing").
 As a deployment premise, the deployment declares to the translator every route that forwards uProtocol messages onto the translator's fixed service, so that the setup refusal below covers every such route and is not narrowed to whichever declarations happen to arrive; this premise selects no new API, transport mechanism or payload behaviour.
-A forwarding leg's duty to carry every attribute and payload unchanged (`+req~utransport-send-preserve-data~1+`, xref:README.adoc[Transport & Session Layer (uP-L1)], and xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]) holds up to the hand-over to the translator and makes no claim beyond it; across the conversion, <<common-umessage-attributes>> governs each field and payload state.
+A forwarding leg's duty to carry every attribute and payload unchanged (`+req~utransport-send-preserve-data~1+`, xref:utransport.adoc[Transport & Session Layer (uP-L1)], and xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes]) holds up to the hand-over to the translator and makes no claim beyond it; across the conversion, <<common-umessage-attributes>> governs each field and payload state.
 The translator *MUST* refuse at setup, by name, a route onto its fixed service whose declaration either leaves its payload encoding identifiers unrestricted or names an encoding identifier that no slot of the service admits, or promises unchanged carriage beyond the translator of an attribute that <<common-umessage-attributes>> states as lost, not carried, absent, refused, supplied from context, or projected by the status rules of <<commstatus-error-mapping>> and <<commstatus-inbound>> in the direction in which the route carries it.
 An unrestricted opaque route onto the fixed service, which declares no limit on the encoding identifiers that it carries, is refused at setup under this rule.
 By contrast, a forwarding route whose declaration limits its payload encodings to identifiers that the service's slots admit, and promises unchanged carriage only up to the translator hand-over (making no promise of unchanged carriage beyond the translator), is not refused by this rule: its forwarding leg keeps its unchanged-carriage duty up to the translator, and across the conversion the translator applies <<common-umessage-attributes>>.
 A route that the translator admits does not change how each message on it is judged: a payload whose encoding identifier is not the selected slot's is refused, with no relabelling and no transcoding, as <<common-umessage-attributes>> and row 4 of <<someip-results>> state.
 
 *The call items.*
-Through each operation that it exposes, the translator owes the duty of each call item of xref:README.adoc[Transport & Session Layer (uP-L1)] as <<someip-call-allocation>> states it, read with these boundary terms:
+Through each operation that it exposes, the translator owes the duty of each call item of xref:utransport.adoc[Transport & Session Layer (uP-L1)] as <<someip-call-allocation>> states it, read with these boundary terms:
 
 * a _translated message_ is the SOME/IP message that the tables of this chapter produce from an accepted uProtocol message;
 * an _admitted reconstructed message_ is a uProtocol message that the tables produce from a SOME/IP message that they admit, and a SOME/IP message that a row refuses is never one;
@@ -150,7 +150,7 @@ The deliverable message is the one subject of uProtocol delivery: rows 7, 8, 16,
 
 | 12
 | `+dsn~utransport-registerlistener-error-invalid-parameter~1+`
-| *Retained where push is offered.* The published table of xref:README.adoc#valid-source-sink-filters[valid source and sink filters].
+| *Retained where push is offered.* The published table of xref:utransport.adoc#valid-source-sink-filters[valid source and sink filters].
 
 | 13
 | `+dsn~utransport-registerlistener-number-of-listeners~1+`
@@ -208,7 +208,7 @@ The deliverable message is the one subject of uProtocol delivery: rows 7, 8, 16,
 *The three outcomes of a hand-over.*
 The translator makes hand-overs in both directions: a translated message to SOME/IP delivery, and a reconstructed or generated message to uProtocol delivery.
 Each hand-over ends in exactly one of the three outcomes of <<someip-hand-over>>, and the translator *MUST* give the correlation state the effect that the outcome's row states.
-The published note on xref:README.adoc#send[`send`] already says that an unsuccessful `send` "does not necessarily mean that the given message has not been sent at all"; the three outcomes turn that note into a contract.
+The published note on xref:utransport.adoc#send[`send`] already says that an unsuccessful `send` "does not necessarily mean that the given message has not been sent at all"; the three outcomes turn that note into a contract.
 
 .The outcomes of a hand-over
 [[someip-hand-over]]
@@ -262,7 +262,7 @@ Acceptance is the event at which a deliverable message stops being the correlati
 | That leg's `send` completes successfully, which is its own row 5.
 | The leg's `send` fails, and that transport's contract states that such a failure hands nothing over. A result code alone states no such thing.
 | The leg's `send` fails otherwise.
-| The leg carries the message under `+req~utransport-send-preserve-data~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]), and the translator no longer owns it.
+| The leg carries the message under `+req~utransport-send-preserve-data~1+` (xref:utransport.adoc[Transport & Session Layer (uP-L1)]), and the translator no longer owns it.
 |===
 
 Where the translator offers both push and pull, its released documentation says which of them takes a message, and acceptance is that mechanism's.
@@ -288,7 +288,7 @@ This item replaces, in the form that xref:../contract-generations.adoc#req-ssr-c
 | Part of the replacement | Content
 
 | The rule replaced
-| The classification of the stock SOME/IP mapping as a xref:README.adoc#communication-protocol-binding[communication protocol binding] whose library implements UTransport for the conversion
+| The classification of the stock SOME/IP mapping as a xref:utransport.adoc#communication-protocol-binding[communication protocol binding] whose library implements UTransport for the conversion
 
 | The actors it bound
 | The supplier of a SOME/IP Transport Library, as a UTransport implementation
@@ -300,7 +300,7 @@ This item replaces, in the form that xref:../contract-generations.adoc#req-ssr-c
 | The service translation of this chapter: this item, the tables, correlation and refusal rules of the items that follow it, and the call contracts of <<someip-call-allocation>> for each operation that the translator exposes
 
 | What does not change
-| `+req~utransport-send-preserve-data~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]) and every other UTransport item, for every UTransport implementation: each transmission of a uProtocol message from a sender to receivers, the legs to and from a translator included, and the exact adapter between a classic API and an owned-frame route (xref:payload-paths.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name]). No kind of UTransport implementation is exempt from `+req~utransport-send-preserve-data~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]).
+| `+req~utransport-send-preserve-data~1+` (xref:utransport.adoc[Transport & Session Layer (uP-L1)]) and every other UTransport item, for every UTransport implementation: each transmission of a uProtocol message from a sender to receivers, the legs to and from a translator included, and the exact adapter between a classic API and an owned-frame route (xref:payload-paths.adoc#req-sdk-owned-frame-adapter[An adapter keeps a message whole across a crossing, or refuses it by name]). No kind of UTransport implementation is exempt from `+req~utransport-send-preserve-data~1+` (xref:utransport.adoc[Transport & Session Layer (uP-L1)]).
 |===
 
 The published text of this chapter that the service translation replaces, as the same rule requires each to be named:
@@ -311,7 +311,7 @@ The published text of this chapter that the service translation replaces, as the
 |===
 | Published text | Replaced by
 
-| The place of this chapter among the bindings of the xref:README.adoc#communication-protocol-binding[communication protocol binding] list, the Transport Libraries sentence of xref:../languages.adoc[uProtocol Language Libraries], the introduction of this chapter, and the reading guide for binding and wire implementers on the xref:../README.adoc[root page]
+| The place of this chapter among the bindings of the xref:utransport.adoc#communication-protocol-binding[communication protocol binding] list, the Transport Libraries sentence of xref:../languages.adoc[uProtocol Language Libraries], the introduction of this chapter, and the reading guide for binding and wire implementers on the xref:../README.adoc[root page]
 | The classification of this item: a service translation, and no binding
 
 | The `id` row of "Common UMessage Attributes", which mapped the UUID to the SOME/IP `MessageID`
@@ -1508,7 +1508,7 @@ Rows 1 to 7 are decided before the hand-over, so they are refusals before exposu
 
 | 2
 | The message violates a configured authority of the submitting uEntity, and the translator's means determine that at sending (row 3 of <<someip-call-allocation>>)
-| `UCode.PermissionDenied`. Where the violation cannot be determined then, this row does not apply and the call goes on, as `+req~utransport-send-prevent-address-spoofing~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]) states. The row claims no authentication of any peer.
+| `UCode.PermissionDenied`. Where the violation cannot be determined then, this row does not apply and the call goes on, as `+req~utransport-send-prevent-address-spoofing~1+` (xref:utransport.adoc[Transport & Session Layer (uP-L1)]) states. The row claims no authentication of any peer.
 
 | 3
 | A response that answers no open call here: its `reqid` selects no matchable entry (<<someip-entry>>, "Matchable entries"), or its source or sink disagrees with the entry. A valid response may select an entry that is active in its hand-over.
@@ -1516,7 +1516,7 @@ Rows 1 to 7 are decided before the hand-over, so they are refusals before exposu
 
 | 4
 | The message lies outside the intrinsic domain of the tables and the declared context: an identifier with no image; a service, a method or an event that the service contract does not declare, which has no slot and so no image; a kind that differs from the event's declared kind; a service-side authority or instance that the endpoint and discovery configuration do not bind to the service instance; a Notification sink with no recipient binding; a Publish sink whose authority the contract maps to no endpoint; a client with no entry in the client identity agreement; a token or a permission level whose loss is not declared; a payload that the selected slot does not admit; a message over the unsegmented limit where the stack has no segmentation
-| `UCode.OutOfRange` (`+dsn~utransport-send-error-unrepresentable~1+`, xref:README.adoc[Transport & Session Layer (uP-L1)])
+| `UCode.OutOfRange` (`+dsn~utransport-send-error-unrepresentable~1+`, xref:utransport.adoc[Transport & Session Layer (uP-L1)])
 
 | 5
 | The message's TTL has expired at the translator
@@ -1536,7 +1536,7 @@ Rows 1 to 7 are decided before the hand-over, so they are refusals before exposu
 |===
 
 Only row 4 is `UCode.OutOfRange`.
-Rows 2, 3 and 5 to 8 depend on authority, state, capacity or a peer, which `+dsn~utransport-send-error-unrepresentable~1+` (xref:README.adoc[Transport & Session Layer (uP-L1)]) keeps apart from the intrinsic domain.
+Rows 2, 3 and 5 to 8 depend on authority, state, capacity or a peer, which `+dsn~utransport-send-error-unrepresentable~1+` (xref:utransport.adoc[Transport & Session Layer (uP-L1)]) keeps apart from the intrinsic domain.
 Static and dynamic stay apart in the same way: a service instance that the configuration does not bind has no image (row 4), and one that is bound but not offered at that moment is a peer's state (row 7).
 Every refusal is returned to its caller, and a response that rows 1 to 7 refuse is counted as well (<<someip-counts>>).
 Row 6 is a request's row: a response uses the entry that it answers and needs neither a candidate nor a free entry, so the rows that can refuse a response are 1 to 5 and 7.

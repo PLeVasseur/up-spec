@@ -53,7 +53,7 @@ On a route that does not, it can wait in the step as the route's declared policy
 * Every pending operation that the admitted capacity of its route or call table allows keeps its own notification path.
 Registering, replacing its own registration, completing or abandoning one operation never removes or overwrites another's.
 * Registration storage is part of the admitted capacity (xref:../basics/resources.adoc#req-ssr-memory-computable[Startup storage is computable before start]).
-* A notification is a hint, never an arrival (xref:../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored]), and the operation rechecks its state after every notification.
+* A notification is a hint, never an arrival (xref:../up-l1/route-observation.adoc#req-ssr-qos-deadline[Deadlines are monitored]), and the operation rechecks its state after every notification.
 
 *3. Abandonment and commit.*
 
@@ -93,7 +93,7 @@ Elsewhere a native asynchronous operation is not offered, or the element refuses
 * Using the asynchronous interface adds no service duty to the application.
 * Pending cleanup never runs on, holds or occupies a scheduler context or other execution resource that progress steps, notifications or deadline and expiry accounting need, or that the return of another owner needs whose release does not itself need the dependency that the cleanup waits for (xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else], "Isolation").
 * Where a configuration's scheduler cannot keep pending cleanup off such a resource, the element refuses at setup, by name, an asynchronous composition that needs it (xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
-A composition needs pending cleanup where its route requires non-waiting release over a dependency that can wait, or where its binding defers a retained owner's return (xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+A composition needs pending cleanup where its route requires non-waiting release over a dependency that can wait, or where its binding defers a retained owner's return (xref:../up-l1/bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 * A release that runs inline is not pending cleanup.
 On a route that does not require non-waiting release, a release runs on a path of that route as xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits] states, such as the step or the abandoning path that ends its value, and can wait there under the route's declared policy.
 No composition is refused because that release can wait, or because its configuration has no release service.

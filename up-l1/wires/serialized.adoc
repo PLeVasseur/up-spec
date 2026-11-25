@@ -258,7 +258,7 @@ Each row names the rules that govern a step.
 | <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; <<req-ssr-wire-serialized-format,A serialized wire reads and writes one stated format>>, "One format"
 
 | The route is prepared
-| xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]; xref:../bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Refusal at the transition"; xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>, "Sizing"
+| xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]; xref:../bindings/interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Refusal at the transition"; xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>, "Sizing"
 
 | A value is sent
 | <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>; xref:../payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety]; xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]
@@ -273,13 +273,13 @@ Each row names the rules that govern a step.
 | xref:README.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]; <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>; xref:../payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it], "Receiving"
 
 | The value is used
-| <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>; xref:../bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]
+| <<req-ssr-wire-encode-decode,A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns>>; xref:../bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]
 
 | The value ends
 | xref:../runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]
 
 | The route is reported
-| xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Reporting"; xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], "Reporting"; xref:../bindings.adoc#req-ssr-error-route-report[Each route reports what it got]
+| xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Reporting"; xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], "Reporting"; xref:../route-observation.adoc#req-ssr-error-route-report[Each route reports what it got]
 |===
 
 [[guarantees]]
@@ -292,7 +292,7 @@ The rules are xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap cl
 
 * xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Scope of the permission".
 * xref:../runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "Never in native work".
-* xref:../bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path].
+* xref:../bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path].
 * xref:native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused]; xref:../payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name], "Fixed for the run".
 
 [[failures]]

@@ -250,7 +250,7 @@ Verification:: test, fault-injection, review
 ** An input with every byte of padding changed, in the body and after it, and an input with each other bit of the options set: each decoded to the same value.
 ** An encoding with each count of trailing padding, from zero to three: decoded.
 ** A floating-point field holding a negative zero and a NaN with a payload: decoded with the same bit patterns.
-* *fault-injection*: truncated and malformed frames on a route, each refused as the rules for every wire say (xref:README.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]), and returned as an error or counted as the element's rule on refused frames says (xref:../bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+* *fault-injection*: truncated and malformed frames on a route, each refused as the rules for every wire say (xref:README.adoc#req-ssr-wire-no-panic[Encoding and decoding never panic]), and returned as an error or counted as the element's rule on refused frames says (xref:../route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 * *review*: at source level, that the first five checks come before every read of a field, and that their arithmetic cannot overflow.
 
 *Rationale.*

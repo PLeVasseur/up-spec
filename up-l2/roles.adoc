@@ -29,10 +29,10 @@ Where an SDK's core is not the element, a word that an item of the up-rust SEooC
 * The *Communication Layer APIs*: xref:api.adoc[Communication Layer APIs].
 * The *element*: xref:../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code].
 * A *transport*, *initialization* and *runtime mode*: xref:../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types].
-* A *binding*, its *middleware* and a *test double*: xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract].
+* A *binding*, its *middleware* and a *test double*: xref:../up-l1/bindings/interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract].
 * A *wire*, and a *native* or a *serialized* route: xref:../up-l1/wires/README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
 * A route's *form*: xref:../up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name].
-* A *transmit loan*: xref:../up-l1/bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], "A transmit loan".
+* A *transmit loan*: xref:../up-l1/bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], "A transmit loan".
 * *QoS*: xref:../up-l1/runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup]; an *overflow policy*: xref:../up-l1/runtime.adoc#req-ssr-qos-overflow[Overflow acts as declared].
 * A *heap class*, an *allocation domain* and a route's *declared policy*: xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default].
 * *Non-waiting acquisition*, *non-waiting release* and each other stronger *guarantee*: xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
@@ -151,7 +151,7 @@ The layer *MUST* state in its documentation, with each setting, the other settin
 The layer *MUST NOT* supply a default for a setting that an item requires to be declared (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 
 *Shown.*
-Where the core is the element, what a route got, the QoS in force among it, is in its report: xref:../up-l1/bindings.adoc#req-ssr-error-route-report[Each route reports what it got].
+Where the core is the element, what a route got, the QoS in force among it, is in its report: xref:../up-l1/route-observation.adoc#req-ssr-error-route-report[Each route reports what it got].
 --
 
 [horizontal]
@@ -197,7 +197,7 @@ Where the core is not the element, the layer *MUST* submit or give back each tra
 For the element, xref:execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract] states this.
 
 *Results.*
-The layer *MUST* pass on each result of the core's operation with its meaning: a refusal with its cause, a count with what it covers and whether it is complete, and a loss or a partial delivery as that (xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+The layer *MUST* pass on each result of the core's operation with its meaning: a refusal with its cause, a count with what it covers and whether it is complete, and a loss or a partial delivery as that (xref:../up-l1/route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 The layer *MUST* pass a result that arrives after the operation returned pending to the caller in the operation's completion.
 The layer *MUST NOT* report an unknown or partial delivery as delivered or consumed.
 

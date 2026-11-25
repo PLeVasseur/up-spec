@@ -284,7 +284,7 @@ The windows that remain are:
 
 * a flow counter's wrap: fewer than 2^32^ increments between two reads that are compared (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports]);
 * a fault counter's saturation at 2^32^ − 1, which a read reports as saturated, not as a difference;
-* a deadline count's saturation at the end of its range, which the report states (xref:../up-l1/bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored]);
+* a deadline count's saturation at the end of its range, which the report states (xref:../up-l1/route-observation.adoc#req-ssr-qos-deadline[Deadlines are monitored]);
 * a pool's reuse count and a call slot's generation, whose exhaustion retires that pool for good, after the warning its lifetime policy states, instead of reusing a value;
 * the message-ID generator's period, 2^64^ IDs of one route, stated with its refusal bounds (xref:uuid.adoc#req-ssr-ids-unique[Message IDs are unique]).
 

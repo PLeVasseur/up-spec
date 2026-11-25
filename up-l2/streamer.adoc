@@ -169,7 +169,7 @@ A carrier is a part that forwards frames on a carrier route: the element, in wha
 The word names a role and gives no part a duty: a requirement that binds a carrier names the element, the Streamer or both, each for its own part in the forwarding.
 
 *Kinds of leg.*
-A lending leg is a leg whose transport's binding is a lending binding (xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]), and a lending ingress and a lending egress are such legs.
+A lending leg is a leg whose transport's binding is a lending binding (xref:../up-l1/bindings/interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]), and a lending ingress and a lending egress are such legs.
 A byte-only egress is an egress that has no loan to copy the ingress bytes into.
 
 *A hop.*
@@ -246,7 +246,7 @@ A carrier *MUST NOT* stage already-serialized input:
 * it *MUST* copy the bytes for a lending egress once, into that egress's loan, and nowhere else.
 
 *A native frame at a lending egress.*
-A carrier that forwards a frame whose header names a native representation into a lending egress produces the egress's sample, and the egress payload's extent is its element extent in the sense of xref:../up-l1/bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]; what the carrier owes for that extent is stated here.
+A carrier that forwards a frame whose header names a native representation into a lending egress produces the egress's sample, and the egress payload's extent is its element extent in the sense of xref:../up-l1/bindings/storage.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]; what the carrier owes for that extent is stated here.
 
 * The carrier *MUST* fill that extent with its one payload copy of the frame's outer extent: the value's bytes, or, on a route that selects the native protection composition, the whole protected extent (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition").
 * Where the frame is held, its writer at or above the egress's level, the frame's bytes are stable while it is held, and the carrier *MUST* read them in place (xref:../up-l1/integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "When a view is allowed").
@@ -411,7 +411,7 @@ When a route is set up, the Streamer *MUST* check the QoS of both of the route's
 The Streamer *MUST* report at setup, for each route, whether it has an encoding filter and which identifiers the filter names.
 
 *Per frame.*
-Before each frame is forwarded, the Streamer *MUST* check it against the egress leg's own limits on every forwarding path, and, where the frame's TTL is positive, against its TTL as xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states.
+Before each frame is forwarded, the Streamer *MUST* check it against the egress leg's own limits on every forwarding path, and, where the frame's TTL is positive, against its TTL as xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed] states.
 A leg's limits are:
 
 * the payload size;
@@ -422,7 +422,7 @@ A leg's limits are:
 
 *Counting.*
 The Streamer *MUST* ensure that each frame that a check of this requirement refuses is counted exactly once on its route, under a cause that names the limit.
-Where the element's carrier primitives make a check and count its refusal (xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]), that count is the one count, and the Streamer *MUST NOT* count the frame again.
+Where the element's carrier primitives make a check and count its refusal (xref:../up-l1/route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]), that count is the one count, and the Streamer *MUST NOT* count the frame again.
 The Streamer *MUST* count each refusal that its own check makes.
 
 *A native representation.*
@@ -474,7 +474,7 @@ A limit checked on one forwarding path and not on another lets a frame through o
 
 _What a leg can refuse._
 A leg refuses what it cannot hold or cannot express: a payload longer than its storage, a token longer than its bound, a header that its envelope cannot represent.
-One count per refused frame, under the limit that it met, shows which limit stopped it; where the element's carrier primitives make the check, their count is that one count (xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+One count per refused frame, under the limit that it met, shows which limit stopped it; where the element's carrier primitives make the check, their count is that one count (xref:../up-l1/route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 
 _A native representation._
 A reader borrows a native representation in place, so carrying one is not carrying bytes.
@@ -995,7 +995,7 @@ It is no delivery to the message's receiver, and this requirement states no deli
 *When a message is discarded.*
 The Streamer *MUST* discard a message only in these cases:
 
-* its TTL check refuses it, as xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states: its positive TTL has passed, or its positive TTL cannot be judged because the wall clock cannot be read;
+* its TTL check refuses it, as xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed] states: its positive TTL has passed, or its positive TTL cannot be judged because the wall clock cannot be read;
 * its egress is full (<<req-ssr-streamer-no-ingress-block,An egress never blocks an ingress>>);
 * one of four admission refusals, each stated by its own item:
 ** a gate that is not enabled, at admission or for a frame that its route holds parked (<<req-ssr-streamer-route-gate,Each route has a heap-free gate>>; "Bounded retry" below);
@@ -1004,12 +1004,12 @@ The Streamer *MUST* discard a message only in these cases:
 ** the route's encoding filter (<<req-ssr-streamer-qos-per-leg,Both legs are checked, at setup and per frame>>).
 
 The Streamer *MUST* count each admission refusal under its own cause, apart from expiry and apart from a full egress.
-A refusal of the TTL check is counted as xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states.
+A refusal of the TTL check is counted as xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed] states.
 A malformed frame carries no message: the Streamer refuses it and counts it as a fault on its route (<<req-ssr-streamer-containment,A fault stays on its route>>).
 
 *Bounded retry.*
 The Streamer *MUST NOT* wait for an egress: a carrier egress has no QoS wait (xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
-The Streamer's only retry *MUST* be the resending of a parked frame, within the route's retained budget and until the frame expires (xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
+The Streamer's only retry *MUST* be the resending of a parked frame, within the route's retained budget and until the frame expires (xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
 The Streamer *MUST NOT* resend a parked frame, or forward any other frame, on a route whose gate is not enabled, and *MUST* count each frame that such a route held parked as dropped.
 
 *Overflow.*

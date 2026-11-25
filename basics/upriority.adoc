@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview
 
-uProtocol allows messages to be exchanged between uEntities on the same and/or different devices. The network bandwidth and/or CPU cycles available for performing this task may be limited, though. uProtocol therefore supports priority based message processing at the xref:../up-l1/README.adoc[Transport] and xref:../up-l2/README.adoc[Communication Layer].
+uProtocol allows messages to be exchanged between uEntities on the same and/or different devices. The network bandwidth and/or CPU cycles available for performing this task may be limited, though. uProtocol therefore supports priority based message processing at the xref:../up-l1/utransport.adoc[Transport] and xref:../up-l2/README.adoc[Communication Layer].
 
 For this purpose, each xref:umessage.adoc[UMessage] is assigned exactly one of the following classes:
 

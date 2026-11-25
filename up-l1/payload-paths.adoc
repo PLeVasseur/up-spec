@@ -11,7 +11,7 @@ This page holds payload-path items from two distinct contract families, whose bi
 * `+req~sdk-owned-frame-*+` items belong to the owned-frame SDK contract (`OwnedFrame*` tags, with no ASIL) and bind only parts whose declaration names the owned-frame SDK contract for the offerings they make (xref:../contract-generations.adoc#req-sdk-owned-frame-contract[The owned-frame SDK contract binds the parts that declare it]).
 
 Shared ownership, heap classes and stronger resource guarantees are stated in xref:../basics/ownership.adoc[frame and value ownership] and xref:../basics/resources.adoc[shared resource lifecycle and storage].
-The two kinds of wire are stated in xref:wires/native.adoc[the native wire] and xref:wires/serialized.adoc[serialized wires, and the values they own], and the duties of every binding in xref:bindings.adoc[uP-L1 transport bindings].
+The two kinds of wire are stated in xref:wires/native.adoc[the native wire] and xref:wires/serialized.adoc[serialized wires, and the values they own], and the duties of every binding across xref:bindings/interface.adoc[binding interface], xref:bindings/lifecycle.adoc[binding lifecycle and waivers], xref:bindings/storage.adoc[binding storage and metadata admission] and xref:route-observation.adoc[route observation, deadlines and TTL].
 
 A payload reaches its reader on one of two kinds of route, native or serialized, over one of two kinds of binding, lending or handoff; a component that only carries a payload is a third case and reads nothing.
 Explanatory overviews below cover the combinations of wire and transport (<<independent>>), route admission and refusal examples (<<admission>>), both kinds of route side by side (<<paths>>), ownership lifetimes (<<lifetime>>), and carrying versus reading a payload (<<carriage>>).
@@ -29,17 +29,17 @@ In runtime mode, no part acquires or releases heap memory on a path that a nativ
 
 * element code *MUST NOT* acquire or release heap memory on it;
 * each wire that the native route uses declares a heap class of none in each direction that the route uses, and answers for that claim in all its work there, as xref:wires/README.adoc#req-ssr-wire-heap-claim-tested[A heap-free claim is true, and encoding is repeatable] states;
-* each binding's code keeps the same rule, as xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] states;
-* the element applies the native-route refusal of xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], and, for allocation inside a binding's middleware under a named permit, the transition check of xref:bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
+* each binding's code keeps the same rule, as xref:bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] states;
+* the element applies the native-route refusal of xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], and, for allocation inside a binding's middleware under a named permit, the transition check of xref:bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
 
 What an allocation provider is, is stated in xref:../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing].
 The rule follows the cause, whichever part's code does the work: it reaches the work that the operation causes on another thread or at a later time as well, delayed work, drops, cancellation and release included.
 
 *Named middleware allocation.*
-Allocation inside a binding's middleware is an exception to this item's general native-path prohibition only for the operations and bound of a named permit that a matching named waiver admits, within the scope of xref:bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
-This exception does not apply to a native lease drop, frame return or other native release operation, retirement and deferred release included (xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]); it never becomes a general native-release exception.
+Allocation inside a binding's middleware is an exception to this item's general native-path prohibition only for the operations and bound of a named permit that a matching named waiver admits, within the scope of xref:bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
+This exception does not apply to a native lease drop, frame return or other native release operation, retirement and deferred release included (xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]); it never becomes a general native-release exception.
 It replaces no other requirement on an operation.
-What the binding declares and what a permit establishes are stated in xref:bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path], under "Middleware".
+What the binding declares and what a permit establishes are stated in xref:bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path], under "Middleware".
 
 *Every other path.*
 In runtime mode, element code *MUST NOT* acquire or release heap memory on any other path, except as a serialized route's declared heap class permits and setup admits (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
@@ -166,7 +166,7 @@ The crossing makes only the copies and allocations that the adapter states.
 It changes neither the form, the heap class nor a guarantee of the owned-frame route (<<req-ssr-payload-route-form,A route's form is fixed at setup, by what the route declares and never by a name>>; xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]).
 * _Errors._
 The caller gets, for each outcome, a result that states that outcome.
-A refusal stays a refusal with its cause, and a loss or a partial delivery is not reported as delivery (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+A refusal stays a refusal with its cause, and a loss or a partial delivery is not reported as delivery (xref:route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 
 *Or refused.*
 An adapter *MUST* refuse each of these crossings, with a result that names the adapter's refusal and its reason:
@@ -224,7 +224,7 @@ A refusal by name tells the application which crossing to change, where a weaker
 *Sending.*
 The element *MUST* have a payload written exactly once, directly into the storage that carries its frame:
 
-* on a lending binding, the loan (xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]);
+* on a lending binding, the loan (xref:bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]);
 * on a handoff binding, storage that the route reserved at setup.
 
 That holds for a native payload and for a serialized payload.
@@ -236,14 +236,14 @@ It builds none in a buffer or on the heap first, and it makes no copy of its own
 
 *The copy at a hand-off.*
 At each hand-off, on sending and on receiving, a handoff binding *MUST* copy the payload exactly once, as an operation of its own that it declares with its capability (<<req-ssr-payload-route-form,A route's form is fixed at setup, by what the route declares and never by a name>>), and *MUST NOT* make any other copy of the payload for that hand-off.
-The route's report shows such a route as handed off (xref:bindings.adoc#req-ssr-error-route-report[Each route reports what it got]).
+The route's report shows such a route as handed off (xref:route-observation.adoc#req-ssr-error-route-report[Each route reports what it got]).
 
 *Before it is sent.*
 On a serialized route, the element *MUST* hold the storage that a payload is written into through one owner alone, from the moment it gives that storage out until the payload is sent or the storage is given back.
 The element *MUST* have a send consume that owner, so that nothing writes the storage through it afterwards, and *MUST* have the drop of an unsent owner give the storage back exactly once (xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]).
 Where safe code forgets that owner, the element *MUST* keep the storage charged to its route for the life of the process, and *MUST NOT* reuse it, return it or give it to another owner.
 That no pending operation holds a transmit loan, on a serialized route as on a native one, is stated in xref:../up-l2/execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract].
-What holds for a native payload's storage before it is sent is stated in xref:wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], and what a lending binding keeps for the storage that it lends in xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held].
+What holds for a native payload's storage before it is sent is stated in xref:wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], and what a lending binding keeps for the storage that it lends in xref:bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held].
 
 *Receiving.*
 The element *MUST* read a payload from the storage in which its frame arrived:
@@ -302,7 +302,7 @@ A route is declared with its wire, the bound and the alignment of its payload, i
 The smallest payload of a route is its type's size on a native route.
 On a route that selects the native protection composition, it is the smallest outer extent that the route admits, E on a topic's or a request's route and H on a response route, the route's bound is E, and its payload alignment is the inner type's alignment A (xref:wires/e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition").
 On a serialized route it is, for sending, the smallest encoding that the route's wire states (xref:wires/serialized.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns], "Sizing"), or zero where the wire states none, and, for receiving, zero.
-A binding's capability is what it declares of whether it lends, the payload bound and the alignment that it carries, the smallest payload that it carries where it carries no shorter one, and the counts and the QoS settings that it serves: the binding declares it as xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting] states, and its own heap class as xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
+A binding's capability is what it declares of whether it lends, the payload bound and the alignment that it carries, the smallest payload that it carries where it carries no shorter one, and the counts and the QoS settings that it serves: the binding declares it as xref:bindings/interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting] states, and its own heap class as xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default] states.
 
 *Admission.*
 The element *MUST* admit a declared route wherever both of these hold (xref:runtime.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode]):
@@ -314,7 +314,7 @@ Among them are its envelope, its capacity and the placing of its storage, its he
 *Refusal, with its reason named.*
 The element *MUST* refuse at setup a route that it does not admit, and *MUST* name the route and what is missing in that refusal.
 
-* A binding refuses, in route preparation, a route that needs a capability that the binding does not have, as xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting] states, and it *MUST* name the route and that capability in that refusal.
+* A binding refuses, in route preparation, a route that needs a capability that the binding does not have, as xref:bindings/interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting] states, and it *MUST* name the route and that capability in that refusal.
 The element *MUST* report that refusal with the capability that it names.
 * The element *MUST* refuse a route that fails a setup check of its own, naming the check.
 
@@ -340,7 +340,7 @@ For a composition, as xref:wires/README.adoc#req-ssr-wire-scope[What a wire is, 
 *Requiring lending.*
 The element *MUST* refuse at setup, by name, a route whose declaration requires lending on a binding that declares that it cannot lend.
 A route that does not require it runs handed off there, and its report says so.
-A lending binding's own refusal to lend for a route is stated in xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held].
+A lending binding's own refusal to lend for a route is stated in xref:bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held].
 
 *Fixed for the run.*
 The element *MUST NOT* let an operation in runtime mode change a route's form, for example from native to serialized, from lent to handed off or from a view to a copy.
@@ -349,7 +349,7 @@ Where a route cannot have the form that it declares, the element *MUST* refuse i
 The agreement under which a native route's type is read is fixed with the form (xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]).
 
 *Reported.*
-What the element states of each route's form in its report is specified in xref:bindings.adoc#req-ssr-error-route-report[Each route reports what it got].
+What the element states of each route's form in its report is specified in xref:route-observation.adoc#req-ssr-error-route-report[Each route reports what it got].
 --
 
 [horizontal]
@@ -358,7 +358,7 @@ ASIL:: B
 Allocated to:: the element; each binding, for naming the route and the capability in its refusal in route preparation, for the reasons of that refusal, and for keeping in runtime mode whether it lends or hands off
 Verification:: test, review
 * *test*
-** The native wire and a serialized wire, each on a lending test double and on a handoff test double: four routes, each admitted in its own form, as its report shows it (xref:bindings.adoc#req-ssr-error-route-report[Each route reports what it got]).
+** The native wire and a serialized wire, each on a lending test double and on a handoff test double: four routes, each admitted in its own form, as its report shows it (xref:route-observation.adoc#req-ssr-error-route-report[Each route reports what it got]).
 ** The same two wires on each real binding that the element's evidence covers.
 ** A route that requires lending, on a handoff binding: refused at setup by name.
 ** A route that a binding cannot serve: the refusal names the capability, and no route in another form is prepared.
@@ -404,10 +404,10 @@ The element *MUST* give a received payload only to a wire of the route whose dec
 That holds alike on a route with a serialized wire and on a route with the native wire.
 The element *MUST* make that comparison before it gives the payload to any wire of the route to decode or to verify, the end-to-end protection wire included.
 A wire that decodes the frame's metadata (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]) does not read the payload by doing so.
-A frame that a check made before this comparison refuses, such as the TTL check of xref:bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed], gets neither this comparison nor the check of whether a typed operation that requires a value has one (clause "Present, empty and absent"), and its one count is that check's (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+A frame that a check made before this comparison refuses, such as the TTL check of xref:route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed], gets neither this comparison nor the check of whether a typed operation that requires a value has one (clause "Present, empty and absent"), and its one count is that check's (xref:route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 A comparison of the payload that a frame's metadata states with the payload length that the frame's layout declares belongs to the admission of the frame's metadata, which precedes the frame's reaching its route; it is not the check of whether a typed operation that requires a value has one.
 
-* Where no wire of the route declares the frame's identifier, the element *MUST* refuse the frame and count it once, under a cause that names the mismatch (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+* Where no wire of the route declares the frame's identifier, the element *MUST* refuse the frame and count it once, under a cause that names the mismatch (xref:route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 * The element *MUST NOT* take a payload's encoding from its bytes, and *MUST NOT* try one wire after another.
 * The element *MUST* compare the identifiers as numbers, and `0` as any other.
 A frame that carries `0` reaches only a wire that declares `0`, for an encoding that an applicable contract defines.
@@ -420,7 +420,7 @@ The element *MUST* give the wire the empty input, and the wire's format decides 
 * A message with no payload is no input for a wire.
 The element *MUST NOT* decode an empty input in its place, and *MUST NOT* deliver a value that it made up.
 * Where a typed operation requires a value and its message has no payload, the element *MUST* refuse the message with the result `+missing_payload+`, which says that the payload is absent and is no decoding error.
-The element *MUST* return that result where the operation returns a result to its caller, and otherwise *MUST* count the refusal once under the cause `+missing_payload+` (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+The element *MUST* return that result where the operation returns a result to its caller, and otherwise *MUST* count the refusal once under the cause `+missing_payload+` (xref:route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 Where the declared contract of an operation permits a message with no payload, the element *MUST* report the absence as that contract states.
 * The element *MUST* send a value whose encoding has no bytes as a present payload of length zero, with its identifier.
 
@@ -464,7 +464,7 @@ Verification:: test, fault-injection, review
 ** On a response route that does not select the end-to-end protection wire, a response tied to its call, with commstatus `+Ok+` and admitted by its TTL check, with no payload, to a call whose operation requires a value, and one whose payload names an encoding that no wire of the route declares: each given to no wire, counted once under its own cause, completing nothing and leaving the call open, and a later acceptable copy completing the call.
 ** On a response route that does not select the end-to-end protection wire, a tied response whose commstatus is not `+Ok+` and that its TTL check admitted, one with no payload to a call whose operation requires a value and one whose payload names an encoding that no wire of the route declares: each given to no wire, with none of this item's refusals, results or counts, and the call completed with that commstatus, as xref:../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it] states.
 ** On each of an RPC client's response route, an RPC server's request route, a topic's receive route and a notification's receive route that selects the end-to-end protection wire, a message with no payload, also one to an operation whose declared contract permits that absence, and a message with a payload of another encoding, also one of the inner wire's encoding and one of another declared wire's encoding, also one of length zero, none refused by an earlier check: each refused once as `+unprotected+` and counted once in that counter, with no mismatch or `+missing_payload+` result or count and no absence reported, and no wire given the payload.
-** A frame that a check of its TTL refuses, one with no payload and one whose identifier no wire of the route declares, on a route that selects the end-to-end protection wire and on one that does not: each given to no wire and counted once under that check's cause, with none of this item's refusals, results or counts, as xref:bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states.
+** A frame that a check of its TTL refuses, one with no payload and one whose identifier no wire of the route declares, on a route that selects the end-to-end protection wire and on one that does not: each given to no wire and counted once under that check's cause, with none of this item's refusals, results or counts, as xref:route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed] states.
 ** An RPC request that no earlier check refused, with no payload, to a server whose operation requires a value: on a route that does not select the end-to-end protection wire, answered `+InvalidArgument+`; on a route that selects it, refused before any wire as `+unprotected+`, counted once in that counter, and not answered.
 ** An RPC request that no earlier check refused, with an identifier that the server's route does not declare: on a route that does not select the end-to-end protection wire, answered `+InvalidArgument+`; on a route that selects it, refused before any wire as `+unprotected+`, counted once in that counter, and not answered.
 ** A value that encodes to no bytes: sent with a present payload of length zero and its identifier.
@@ -496,9 +496,9 @@ NOTE: A message's wire, such as the native wire or Protobuf, and a route's trans
 * The native wire, on either kind of binding: xref:wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused].
 * A serialized wire, on either kind of binding: xref:wires/serialized.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns].
 * A payload that is only carried, with no wire: xref:../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes].
-* What a lending binding owes is xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], whatever the wire.
+* What a lending binding owes is xref:bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], whatever the wire.
 * What a handoff binding owes for its one copy is <<req-ssr-payload-written-once,A payload is written once, into the storage that carries it>>, whatever the wire.
-* What the LoLa binding adds is on xref:lola.adoc[the LoLa page] and xref:lola.adoc#lola-sample-layout[the LoLa physical envelope], and what the iceoryx2 binding adds is on xref:iceoryx2.adoc[the iceoryx2 page] and xref:iceoryx2.adoc#iceoryx2-sample-layout[the iceoryx2 physical frame].
+* What the LoLa binding adds is on xref:bindings/lola.adoc[the LoLa page] and xref:bindings/lola.adoc#lola-sample-layout[the LoLa physical envelope], and what the iceoryx2 binding adds is on xref:bindings/iceoryx2.adoc[the iceoryx2 page] and xref:bindings/iceoryx2.adoc#iceoryx2-sample-layout[the iceoryx2 physical frame].
 * The evidence for each combination of a wire and a binding: xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts].
 
 [[admission]]
@@ -544,7 +544,7 @@ In each refused case, the condition named is the one that fails.
 | A serialized route whose payload bound is above what the binding carries
 | The binding, in route preparation
 | The route's bound with the binding's
-| Refused, with the bound named (xref:bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting])
+| Refused, with the bound named (xref:bindings/interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting])
 
 | A serialized route that receives, or whose wire states no smallest encoding, on a binding whose declared smallest payload is above zero
 | The binding, in route preparation
@@ -643,13 +643,13 @@ Each cell names the items that state the rule.
 Each entry names the items that state the rule, for both kinds of route.
 
 * The value at the sender: xref:wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused]; xref:wires/serialized.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns].
-* The storage before it is sent: xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../up-l2/execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]; <<req-ssr-payload-written-once,A payload is written once, into the storage that carries it>>.
-* The frame once it is sent: xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport].
-* The frame at the receiver: xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
+* The storage before it is sent: xref:bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../up-l2/execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]; <<req-ssr-payload-written-once,A payload is written once, into the storage that carries it>>.
+* The frame once it is sent: xref:bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport].
+* The frame at the receiver: xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
 * What the application reads: xref:wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused]; xref:wires/serialized.adoc#req-ssr-wire-encode-decode[A serialized wire encodes once into the storage it is given, and decodes into a value that its slot owns].
-* The end, when the lease is dropped: xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
-* No end, when safe code forgets the lease: xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "No reuse while owned".
-* A peer that dies: xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input].
+* The end, when the lease is dropped: xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
+* No end, when safe code forgets the lease: xref:bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "No reuse while owned".
+* A peer that dies: xref:bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input].
 
 [[carriage]]
 == Carrying and reading a payload

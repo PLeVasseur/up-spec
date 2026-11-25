@@ -143,7 +143,7 @@ The items in this section (`+req~ssr-*+`, `ASIL:: B`, `Safety*` tags) belong to 
 Each item below binds only the actors to which its statement gives a duty (xref:../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
 * *Scope and related reporting.*
 Element boundary and conventions are stated in xref:../safety/elements/up-rust/README.adoc[the up-rust SEooC element] and xref:../safety/README.adoc[the safety overview].
-Binding-facing loss counting and route reporting are stated in xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] and xref:../up-l1/bindings.adoc#req-ssr-error-route-report[Each route reports what it got].
+Binding-facing loss counting and route reporting are stated in xref:../up-l1/route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] and xref:../up-l1/route-observation.adoc#req-ssr-error-route-report[Each route reports what it got].
 ====
 
 [[req-ssr-refuse-before-heap]]
@@ -247,7 +247,7 @@ So a panic reachable in runtime mode is a crash that a peer's bytes or a clock r
 
 A frame whose header or envelope cannot be parsed gives the element nothing it can act on, so it is refused, and the refusal is reported as every loss is.
 
-No waiver can cover a panic: a waiver covers allocation inside middleware only (xref:../up-l1/bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
+No waiver can cover a panic: a waiver covers allocation inside middleware only (xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
 
 Code that runs on a runtime path is not always element code (xref:../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code], "Element code").
 Examples are the destructor of an owned value, an allocator's release or a dependency they reach.

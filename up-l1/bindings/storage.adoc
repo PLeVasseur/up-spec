@@ -1,0 +1,364 @@
+= uP-L1 Binding Storage, Metadata Admission and Loan Sizing
+:toc: preamble
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
+
+[NOTE]
+====
+This page holds lending-binding storage, writer integrity-level reporting, initialized sample extents, shared-state direction, shared metadata admission and transmit loan-sizing requirements of the up-rust SEooC requirement family (`+req~ssr-binding-*+`, `ASIL:: B`, `SafetyBinding`, `SafetyBindingPull` and `SafetyUpRustCore` tags).
+Whom each item binds is stated in xref:../../contract-generations.adoc[Which requirements an implementation follows] (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
+Related shared chapters: xref:interface.adoc[binding interface], xref:lifecycle.adoc[binding lifecycle and waivers], xref:../route-observation.adoc[route observation, deadlines and TTL] and xref:README.adoc#one-binding[what is specific to one binding].
+====
+
+[[sec-binding-storage]]
+== Lending storage, metadata admission and loan sizing
+
+[[req-ssr-binding-integrity-level]]
+=== A lending binding records and reports the writer's level
+
+[.specitem,oft-sid="req~ssr-binding-integrity-level~1",oft-title="A lending binding records and reports the writer's level",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+--
+*Lending bindings.*
+
+* A lending binding *MUST* record each writer's integrity level in the shared definition of its service, where its middleware can.
+* It *MUST* report to the element the level it finds there.
+* The lending binding *MUST* report as unknown a level that it cannot record or read.
+* Where a publisher's level is below the level the service records, the lending binding *MUST* have the publisher refused at the publisher's own setup, by a refusal that names the route and both levels.
+
+*Handoff bindings.*
+The check does not apply to a handoff binding (xref:interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]), and a handoff binding *MUST* say so in its README.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-integrity-level~1+`
+ASIL:: B
+Allocated to:: each lending binding; each handoff binding, for what its README says of the check
+Verification:: test (the binding contract suite), fault-injection (a publisher below the recorded level, with real processes), review (a handoff binding's README, which says that the check does not apply to it)
+
+*Rationale.*
+The element can compare levels only if each binding records them where every process of a service can read them.
+A level nobody can read counts as unknown (xref:../integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level], "An unknown level").
+
+[[req-ssr-binding-lent-storage]]
+=== Lent storage is exclusive, disjoint and stable for as long as it is held
+
+[.specitem,oft-sid="req~ssr-binding-lent-storage~2",oft-title="Lent storage is exclusive, disjoint and stable for as long as it is held",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyUpRustCore"]
+--
+*Scope.*
+This item binds a lending binding, whatever wire a route uses.
+
+*Held.*
+A loan is _held_ from the moment the binding lends it until it is sent or given back.
+A received frame is _held_ from the moment the binding hands it to the element until it is returned.
+A loan or a frame whose lease safe code forgot is never sent, given back or returned, so it is held for the life of the process.
+
+*A transmit loan.*
+For as long as a loan is held, the binding *MUST* keep its storage:
+
+* live, mapped and at one address;
+* valid for writes of at least the size that the route declares, in one piece, at an address with the alignment that the route declares;
+* apart from every other held loan and from every held frame of this process;
+* handed out in this process through that loan alone, with no second way for safe code to read or write it.
+
+The binding *MAY* lend the storage of a fresh loan uninitialized, and promises no value of its bytes.
+The element *MUST NOT* read a fresh loan's storage as a typed value, or make a reference to it as a value, before a value is initialized there (xref:../wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused]; xref:../payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]).
+Which bytes of a sample are initialized before a path that consumes it, and by which part, is stated in <<req-ssr-binding-initialized-extent,A sample's bytes are initialized before a path needs them, each by the part that owns it>>.
+
+*A received frame.*
+For as long as a frame is held, the binding *MUST* keep its storage:
+
+* live, mapped and at one address;
+* valid for reads of the frame's whole length, in one piece, at an address with the route's alignment;
+* unwritten by the binding and by its middleware in this process.
+
+What another process writes there is covered by xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader] and xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport].
+
+*How a loan and a frame end.*
+Three transitions end a held loan or frame.
+The binding *MUST* ensure that each one that happens ends it exactly once:
+
+* a send consumes the loan, so that no safe call can write its storage afterwards;
+* the drop of an unsent loan's lease gives the loan back (xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]);
+* the drop of a frame's lease returns the frame to the middleware, through the frame's destructor or the deferred return that completes it (xref:lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+
+The binding *MUST NOT* end a loan or a frame in any other way.
+
+*A forgotten lease.*
+None of these transitions happens for a loan or a frame whose lease safe code forgot.
+The binding cannot tell a forgotten lease from one that is still in use, and it treats both alike.
+The binding *MUST* keep such a loan or frame charged to its route for the life of the process.
+The binding *MUST NOT* lend or deliver its storage again, give it a second owner, or return or destroy it by another path.
+The binding *MUST* keep each property of this item without relying on a destructor to run.
+
+*Fixed before the transition.*
+The binding *MUST* have sized and mapped the storage that it lends from before its transition returns.
+Where its middleware can enlarge, move or map again such storage after the binding's transition, the binding *MUST* turn that off, or refuse in route preparation every route that would use it.
+
+*An empty payload.*
+The binding *MUST* give a loan or a frame of zero bytes an address that is not null and has the route's alignment.
+
+*How the claim is made.*
+A lending binding *MUST NOT* state these properties to the element other than through the `+unsafe+` interface of the binding contract, and *MUST* keep each site that makes the claim under a reviewed row of its own inventory (xref:../../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]; xref:../../safety/assurance.adoc#req-ssr-binding-unsafe-inventory[A binding inventories its own `unsafe`]).
+A declaration, a capability value or a passed test does not establish them.
+
+*Refusal to lend.*
+A binding that cannot keep these properties for a route *MUST* refuse to lend for it, in route preparation, naming the route and the property.
+It *MUST NOT* present storage that it copies into or out of as lent (xref:interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]).
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-lent-storage~2+`
+ASIL:: B
+Allocated to:: each lending binding; the element, for no typed read of, and no reference as a value to, a fresh loan's storage before a value is initialized there
+Verification:: test, compile-fail, miri, review
+* *test*
+** The binding contract suite: every held loan at its own address, apart from every other held loan and from every held frame, with the declared size and alignment; every held frame at one address, readable for its whole length, with the route's alignment.
+** A loan whose lease is dropped unsent, and a frame whose lease is dropped: the storage goes back once, counted by the suite.
+** A loan and a frame whose leases safe code forgot: each is still charged at the end of the run, its storage is never lent or delivered again, and nothing is returned or destroyed for it.
+** A loan and a frame of zero bytes, each with an aligned address that is not null.
+** A middleware that could enlarge, move or map again its storage after the binding's transition: turned off, or every route that would use it refused in route preparation.
+** A route for which the binding cannot keep these properties: lending refused in route preparation, naming the route and the property.
+* *compile-fail*: a loan sent twice, and a write after a send.
+* *miri*: the lending test double, under the same suite, forgotten leases included, and a fresh loan left uninitialized until a value is written, with no typed read of it and no reference to it as a value before then.
+* *review*: each site of the binding that makes the claim, at source level; each path that ends a loan or returns a frame; that no property rests on a destructor running; and that no storage that the binding copies into or out of is presented as lent.
+
+*Rationale.*
+The element builds a writer on a loan and a typed view on a received frame.
+Both are sound only if the storage is exclusive, disjoint and stable, as the binding says.
+Safe code cannot check that, so the element takes it only through an `+unsafe+` interface with stated obligations (xref:../../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]).
+
+_A forgotten lease._
+A loan or a frame ends once, by the send, the give-back or the return.
+Forgetting a lease is safe code, and it runs no destructor (source: the standard library documentation, Rust 1.98.1, `+std::mem::forget+`, its description and its section "Safety": https://doc.rust-lang.org/1.98.1/std/mem/fn.forget.html#safety[`+std::mem::forget+`]).
+So a forgotten loan or frame never ends, its slot stays charged to its route, and its storage is never handed out again.
+The element's own leases follow the same rule (xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]).
+
+_The source-level argument._
+A suite shows the loans that it took.
+Whether two loans can ever overlap, or a frame's storage can go back twice, is a property of every path of the binding, and it is argued at the source.
+
+_Fixed before the transition._
+Nothing is set up in runtime mode (xref:../../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode]).
+A middleware that grew or moved its storage there would do set-up work on a runtime path, and could move a frame under a view.
+
+[[req-ssr-binding-initialized-extent]]
+=== A sample's bytes are initialized before a path needs them, each by the part that owns it
+
+[.specitem,oft-sid="req~ssr-binding-initialized-extent~1",oft-title="A sample's bytes are initialized before a path needs them, each by the part that owns it",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyUpRustCore"]
+--
+*Scope.*
+This item binds each binding, lending or not, on each route that it serves, and the element for each extent of a sample that a binding gives it to write.
+A carrier that forwards a native frame into a lending egress is one more producer of the egress's sample: what it owes for the extent that it fills is stated in xref:../../up-l2/streamer.adoc#req-ssr-streamer-byte-identity[Carriage keeps the bytes].
+
+*Two declared facts.*
+Each binding *MUST* declare two facts as part of its capability (xref:interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]), each truthfully and for the service type and the configuration that it selects for the route:
+
+* for each path that consumes a sample of the route, the path's _required-initialized extent_: the bytes of the sample that must be initialized before the earliest operation of that path that needs them, which is a precondition on whoever produces the sample;
+* for each receive path of the route, the path's _delivered-initialized extent_: the bytes of a received sample that are initialized for their holder when the binding hands the sample over, with the basis that the binding names for it, such as its middleware's documented receive contract for the selected service type or an operation of the binding's own, which is a guarantee of the receiving binding.
+
+The paths that consume a sample are its send or publish operation, a hand-off copy, a crossing into code outside the element and the binding, and each enabled tracing or inspection path.
+A path that hands the whole range of a sample's object to another component consumes that whole range, unless the binding's configuration excludes the path.
+For a path that has no such extent, the declaration *MUST* say that it has none.
+The binding *MUST NOT* infer either fact from the other: that a path needs bytes initialized does not show that a receive path delivers them, and a required-initialized extent at a sending binding is not a delivered-initialized extent at a receiving one.
+
+*Two classes of byte.*
+Each byte of a required-initialized extent is of exactly one of two classes:
+
+* an _element extent_: a range that the binding gives the element to write;
+* the _binding's complement_: every other byte, such as a header and its reserved bytes, a hint, metadata that the binding writes, padding or a gap between parts, a tail, and the bytes that a shortened payload gives up.
+
+There is no third class: a byte that no part writes is of the binding's complement.
+
+*Each part's bytes.*
+
+* The element *MUST* establish that each byte of each element extent that it is given is initialized: a value's fields by its one in-place write, the bytes that a wire writes by that wire, and every other byte by code that the element controls (xref:../wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], "Sending").
+* The binding *MUST* establish that each byte of its complement is initialized.
+* Each part *MUST* record its own fact, and *MUST NOT* vouch for a byte of the other part's.
+
+*At the hand-off.*
+The binding *MUST* perform an operation of a path that needs initialized storage only once the element's fact and its own both hold for that path's required-initialized extent.
+They hold at that moment, once every write to the storage has been made: a byte that an earlier write left initialized needs no second write.
+Nothing is written to the storage after that operation.
+
+*Refused at setup.*
+
+* The element *MUST* refuse a route at setup, naming the route, where it cannot establish its part for the route's type on the route's binding.
+* A binding *MUST* refuse a route in route preparation, naming the route and the path, where it cannot establish its complement for a path that the route selects.
+* The element and the binding *MUST NOT* serve such a route by a copy, a serialized encoding or a weaker path instead (xref:../wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], "No substitute").
+
+*No precondition on an application.*
+The element *MUST* give an application only safe interfaces, generated or checked, through which to initialize a value, so that no safe caller takes on a precondition of memory safety that nothing checks.
+
+*What this item does not change.*
+A fresh loan is still lent as <<req-ssr-binding-lent-storage,Lent storage is exclusive, disjoint and stable for as long as it is held>> states, and creating it requires no byte to be initialized.
+That padding and a gap carry no meaning is stated in xref:../wires/native.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout], "Padding", and in xref:../wires/e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition".
+That rule of meaning neither forbids carrying those bytes as part of an opaque extent nor makes a receiver write to storage that it receives.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-initialized-extent~1+`
+ASIL:: B
+Allocated to:: each binding; the element, for establishing each byte of each element extent that it is given, for recording its fact, for refusing at setup a route for which it cannot establish its part, for serving no such route in another form, and for the interfaces through which an application initializes a value
+Verification:: test, review
+* *test*
+** On a lending test double whose publish path requires each byte of a sample initialized: a native type with padding, published only once each byte of its element extents is initialized by the element, padding included, and each byte of the complement by the double, with no byte written after the publish.
+** A binding double that declares no required-initialized extent for its selected paths: no duty added, and the same type published as before.
+** A type for which the element cannot establish its part on a binding: the route refused at setup by name, with no copied or serialized route in its place.
+** A binding double that cannot establish its complement for a selected path: the route refused in route preparation, naming the route and the path.
+** A fresh loan: lent uninitialized, with no typed read before a value is written there.
+** A binding double that declares a required-initialized extent for its publish path and none for its receive path: two separate declarations, its receive path declared with no delivered-initialized extent.
+** Two frames of a type with padding that differ only in their padding: the same value to every reader.
+* *review*: each binding's declaration of each path's required-initialized and delivered-initialized extents, with its basis, against its middleware's contract for the selected service type and configuration; and, at source level, the code by which the element establishes each byte of an element extent.
+
+*Rationale.*
+The element knows a native value's padding but does not call the middleware, and a binding calls the middleware but does not know the type.
+A typed write of a value can leave its padding uninitialized, and a middleware can need each byte of a sample initialized before it takes the sample.
+So each part establishes the bytes that it can reach, the operation that needs both waits for both facts, and neither part vouches for the other's.
+
+_Two facts._
+What a path needs is a precondition on the sample's producer, and what a receive path delivers is a guarantee of its binding.
+Neither follows from the other, so each is declared on its own, and a path with none says so.
+
+_No substitute._
+A route that cannot be served this way is refused at setup, as any native route that cannot be prepared is: a copy or an encoding in its place would change its cost and its failure behaviour where no review looked.
+
+_What it does not require._
+The rule is an outcome at the hand-off.
+It prescribes no mechanism, asks for no second pass over bytes that an earlier write left initialized, and leaves a fresh loan uninitialized until a value is written there.
+
+[[req-ssr-binding-shared-state]]
+=== A lending binding says which way its ports write shared state
+
+[.specitem,oft-sid="req~ssr-binding-shared-state~1",oft-title="A lending binding says which way its ports write shared state",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+--
+*The binding's statement.*
+A lending binding *MUST* state, for each kind of port that it opens, whether that port writes shared state that another process of the same service reads.
+
+* A binding on which a receiving port writes such state is a binding whose ports write shared state both ways.
+* The binding *MUST* state it to the element at setup, and *MUST* repeat it in its README (xref:../../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]).
+
+*Where it is not established.*
+Where it is not established which way a kind of port writes, the binding *MUST* state that its ports write both ways.
+
+*What rests on it.*
+The element's refusals for two-way shared state (xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]) and a deployment's rule for such a binding (xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport]) rest on this statement.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-shared-state~1+`
+ASIL:: B
+Allocated to:: each lending binding
+Verification:: test, review
+* *test*
+** The binding contract suite: a binding that states two-way shared state has a port of another level refused at setup, on every port kind.
+** A binding that states one-way shared state: a receiving port of the suite's double that writes shared state fails the suite.
+* *review*
+** The middleware's shared state, by kind of port, at the revision that the binding is built against.
+** Where it is not established which way a kind of port writes, the binding's statement that its ports write both ways.
+** The binding's README, which repeats the statement that the binding makes at setup.
+
+*Rationale.*
+A process that writes shared state which a higher process reads can corrupt that process, whatever the payload rules say.
+The rules for that case are stated for "a binding whose ports write shared state both ways".
+Only the binding knows whether its middleware is one.
+
+An answer that is not established is given as the unfavourable one, as an unknown writer's level is (<<req-ssr-binding-integrity-level,A lending binding records and reports the writer's level>>).
+So a binding never gains a cross-level view by leaving the question open.
+
+[[req-ssr-binding-metadata-admission]]
+=== For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order
+
+[.specitem,oft-sid="req~ssr-binding-metadata-admission~1",oft-title="For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order",oft-needs="impl,utest",oft-tags="SafetyUpRustCore,SafetyBinding,SafetyBindingPull"]
+--
+*Scope.*
+This item binds the element and each lending binding whose sample-layout contract separates the binding's physical envelope or frame checks from the element's admission of the frame's metadata.
+It adds no duty to any other binding, profile or classic protocol actor.
+
+*Physical checks and hand-over.*
+Before forming any range from a received sample's header or envelope, the binding *MUST* make the physical checks that its sample-layout contract states—including, where that contract defines one, comparing the sample's enclosing extent with the receiving route's largest frame—with arithmetic that cannot overflow.
+The binding *MUST NOT* let any part of a sample that its physical checks refuse reach the element, a wire or an application, with the single exception stated for a receive route that takes the copy route (xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Admission on the copy route"): there the element acquires the sample's header and metadata as a bounded raw copy into storage of its own, the binding *MUST* make its physical checks on that acquired header, and a refusal keeps the binding's cause and its one count and ends the sample's admission before its metadata is decoded or its payload is copied.
+Once its physical checks pass, the binding *MUST* hand the element only the frame's metadata extent and the payload length that its header gives, and no byte of its payload.
+That hand-over is not a delivery to an application.
+
+*The element's admission.*
+Within the same receive step and before a frame reaches its route, the element *MUST* make these checks of it, in this order and once, and *MUST* refuse it at the first check that it fails:
+
+. the route's selected wire decodes the frame's metadata in the format that the wire states, at the one version of it fixed at setup (xref:../wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]); a frame whose metadata does not decode in it is refused metadata, and so is a frame whose prefix names a metadata layout that the format does not define;
+. the metadata holds each field that the format requires, each in its range, and names a payload encoding exactly where it says that the frame has a payload;
+. the metadata names a payload encoding, or the payload length that the header gives is zero; a frame whose metadata names no payload encoding while that length is not zero is refused as `+payload_presence_extent_mismatch+`;
+. the wire, the payload family and the metadata layout, one that the format defines, that the decoded metadata names are those that the route admits, on every route;
+. the metadata matches the source and sink filters of a receive of the route.
+
+*Refusals, ordering and accounting.*
+The element *MUST NOT* evaluate a receive's filters for a frame that an earlier check refused, and *MUST NOT* deliver a frame to a receive whose filters its metadata does not match.
+A frame with a present payload of length zero, encoding identifier `0` included, passes the second and the third checks; what its empty input means is decided later, by the wire of its encoding (xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
+The element *MUST* make these checks before any of the frame reaches TTL checks (xref:../route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed]), a wire's decoding of the payload or an application (xref:../wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), and *MUST NOT* make them again for the frame when it is taken.
+
+For each frame that it refuses, the element *MUST* return the refusal or count it once, on the route whose receive step held the sample, under the cause that the refusing check names, as xref:../route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states; a frame that the third check refuses is counted as `+payload_presence_extent_mismatch+` and under no other cause.
+On a route that the binding serves by pull, the element *MUST* count each frame that it refuses once and *MUST NOT* return the refusal as the error of the receive call, and the binding *MUST NOT* return a refused sample as the error of the receive call (whether refused by the binding or by the element), *MUST* count each refused sample as one unit of the receive call's bounded work (xref:lifecycle.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]), and *MUST* take the next sample within that bound.
+
+*Hand-back and sample return.*
+Within the same receive step, the element *MUST* hand its verdict back to the binding, together with the admitted facts that the binding's own contract names for an admitted frame (such as whether the frame has a payload and, where that contract relies on it, the frame's source).
+The binding *MUST* return each sample whose frame the element refuses once, as it returns a frame whose lease is dropped (xref:lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]), *MUST NOT* count it (its one count is the element's), and *MUST NOT* let any part of it reach a wire's decoding of the payload or an application.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-metadata-admission~1+`
+ASIL:: B
+Allocated to:: the element; each lending binding whose sample-layout contract separates binding physical checks from element metadata admission, for making its physical checks before handing over only the metadata extent and header payload length, for returning a refused sample once without counting it, and on a pull route for counting each refused sample as one unit of bounded receive work and advancing to the next sample
+Verification:: test, fault-injection, review
+* *test*
+** A sample that fails one of the binding's physical checks: refused and counted once by the binding, with no part reaching the element, a wire or an application (except the copy route's bounded raw header-and-metadata acquisition, where a physical refusal on the acquired header keeps the binding's cause and count and stops metadata decode and payload copy).
+** A frame whose metadata does not decode, and one whose prefix names an undefined metadata layout: refused once by the element at the first check, as refused metadata, and not counted by the binding.
+** A frame whose metadata names no payload encoding while its header gives a payload length of 1: refused once by the element at the third check as `+payload_presence_extent_mismatch+`, returned once by the binding without counting it, with no filter evaluation, TTL count, payload processing, forwarding or answer—including where the frame is also expired or names an unadmitted wire.
+** A frame with a present payload of length zero and encoding identifier `0`: passes the second and third checks.
+** A frame whose decoded metadata names an unadmitted wire, payload family or defined metadata layout: refused by the element at the fourth check before payload decode.
+** A frame matching one receive's filters and not another's: delivered to the first only; a frame matching no receive's filters: refused and returned or counted once.
+** On a pull route, a refused sample (whether refused by the binding or by the element) followed by a valid sample: counted once by the refusing part, not returned as the receive call's error, returned once by the binding, and the valid sample received within the call's bounded work.
+** A frame admitted to its route and taken later: its metadata not admitted again.
+* *fault-injection*: malformed envelopes, truncated headers, out-of-range lengths and undecodable metadata sent by a faulty peer: each refused at the earliest failing check, counted once by the refusing part, with no panic and no part reaching payload decode or an application.
+* *review*: at source level, overflow-safe arithmetic in binding physical checks before forming ranges; hand-over restricted to metadata extent and header payload length; fixed five-step element admission run once before the frame reaches its route; single sample return without double counting.
+
+*Rationale.*
+Separating physical envelope checks (which only the binding knows) from metadata decoding and route admission (which only the selected wire and element know) avoids duplicate parsers and guarantees a single refusal cause and a single count.
+Checking presence against the header's payload length ahead of identity, filters and TTL ensures that a malformed frame is refused once where it is met, never rechecked on take and never mistaken for an expiry or filter miss.
+
+[[req-ssr-binding-loan-sizing]]
+=== A lending binding declares whether a transmit loan's payload extent can be shortened
+
+[.specitem,oft-sid="req~ssr-binding-loan-sizing~1",oft-title="A lending binding declares whether a transmit loan's payload extent can be shortened",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyUpRustCore"]
+--
+*Scope.*
+This item binds each lending binding and the element when writing a transmit loan on a lending binding.
+It adds no duty to handoff bindings or to classic protocol actors.
+
+*Declared capability.*
+Each lending binding *MUST* declare, as part of its capability (xref:interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]), whether a held transmit loan's payload extent can be shortened before sending, or whether its payload extent is fixed at loan creation.
+
+*Shortenable loans.*
+On a lending binding that declares shortenable transmit loans:
+
+* the payload's extent *MAY* shrink while the loan is held, and only when the element shortens it;
+* when the element shortens a loan's payload extent, the binding *MUST* write the shortened payload length into the frame's header and *MUST* zero every byte that the shortened payload gives up before the sample is sent (<<req-ssr-binding-initialized-extent,A sample's bytes are initialized before a path needs them, each by the part that owns it>>);
+* neither the metadata's extent nor the payload's start may move, and neither extent may grow.
+
+*Fixed-size loans.*
+On a lending binding that declares fixed-size transmit loans:
+
+* the binding *MUST NOT* let the payload's extent move or change its size while the loan is held;
+* the element *MUST* request each transmit loan at the exact target payload length required for the frame that it writes.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-loan-sizing~1+`
+ASIL:: B
+Allocated to:: each lending binding; the element, for shortening a transmit loan only on a lending binding that declares shortenable loans and requesting the exact target length on one that declares fixed-size loans
+Verification:: test, review
+* *test*
+** On a lending binding that declares shortenable transmit loans: a payload shortened before sending has its shortened length written in the header and every surrendered byte zeroed before sending, with metadata extent and payload start unchanged.
+** On a lending binding that declares fixed-size transmit loans: the payload extent cannot move or change size while held, and a shorter frame (such as a header-only response) is requested at its exact target length.
+* *review*: each lending binding's declared loan-sizing capability against its transmit-loan interface and initialized-extent complement; element callers selecting shortening versus exact-length loan request strictly by that capability.
+
+*Rationale.*
+Some lending bindings allow shrinking a held transmit loan's logical payload length before publication while zeroing surrendered bytes, whereas others fix the payload extent when the loan is created.
+Stating both contracts once in the shared binding layer lets shared protocols such as header-only E2E responses adapt solely to the binding's declared capability without naming concrete middlewares.

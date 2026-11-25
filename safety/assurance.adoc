@@ -24,7 +24,7 @@ The "Violation" text of an assumption of use says how a violation of the assumpt
 * *Refused at setup*: the observer detects the violation during initialization and refuses setup.
 The element refuses with the error that xref:../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure] states.
 A build that fails counts as refused at setup.
-* *Counted*: the observer detects the violation in runtime mode, and returns or counts it as xref:../up-l1/bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] and xref:../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap] state.
+* *Counted*: the observer detects the violation in runtime mode, and returns or counts it as xref:../up-l1/route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] and xref:../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap] state.
 * *Undetectable*: the observer cannot observe the violation.
 Only measures of the integrator's own can cover it (xref:elements/up-rust/assumptions-of-use.adoc#aou-seooc-violation-classes[The integrator covers each violation that its observer cannot detect]).
 
@@ -108,7 +108,7 @@ A run that a line places under Miri uses the toolchain that Miri needs, in place
 A result directly shows the path, the platform, the target, the backend, the binding and the configuration that it ran on.
 Using it for another scope rests on an argument of its own, and no such argument replaces a run that a Verification line requires on a named platform, target, backend or configuration.
 A result on a test double is evidence for the code under test, within what the double observes.
-It is no evidence that a real part of that kind meets its requirements (xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]).
+It is no evidence that a real part of that kind meets its requirements (xref:../up-l1/bindings/interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]).
 
 *The evidence.*
 The supplier of each part that a requirement of the up-rust SEooC requirement family binds *MUST* show, in its evidence for the duties that the requirement gives that part, each method that the requirement's "Verification" line names, in the scope that the method has for the requirement, applied to the paths and cases of those duties that the method covers.
@@ -289,7 +289,7 @@ Each binding *MUST* keep a qualification record, versioned with the binding, tha
 
 * each target and configuration for which the binding claims its binding contract;
 * every runtime guarantee that its middleware cannot make, with measured figures where they exist;
-* the permits that it declares, which only a named waiver admits (xref:../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]);
+* the permits that it declares, which only a named waiver admits (xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]);
 * its limits, its deviations and its known failures, each classed as this item defines them;
 * the revision of its middleware, and of every other source that an entry relies on;
 * the evidence of the runs that its entries rest on, each with the target and the configuration that it ran on, and the history of each entry.
@@ -301,7 +301,7 @@ These definitions apply to the qualification record of each part and to each sup
 An entry has one of three classes:
 
 * a _limit_: something that the part or supported composition package does not serve, or serves only within a stated bound, where the requirements of the up-rust SEooC requirement family let it declare what it serves;
-* a _deviation_, which the up-rust SEooC requirement family also calls a _known anomaly_, and once it is accepted an accepted anomaly: a departure from a requirement that binds that part or composition, with an exact scope and exact bounds, which no requirement of the up-rust SEooC requirement family excludes from acceptance, such as a binding's accepted instance of xref:../up-l1/bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input];
+* a _deviation_, which the up-rust SEooC requirement family also calls a _known anomaly_, and once it is accepted an accepted anomaly: a departure from a requirement that binds that part or composition, with an exact scope and exact bounds, which no requirement of the up-rust SEooC requirement family excludes from acceptance, such as a binding's accepted instance of xref:../up-l1/bindings/interface.adoc#req-ssr-binding-no-panic[No panic on any peer input];
 * a _known failure_: any other violation of a requirement that binds that part or composition.
 
 For each deviation the binding *MUST* state in the record an identifier and a revision, its exact scope and bounds, the evidence that it rests on and the date on which it lapses.
@@ -366,7 +366,7 @@ This section is a non-normative pointer index; every obligation stands solely in
 ====
 Related technical obligations outside assurance governance:
 
-* *Binding middleware permits and waiver scope:* xref:../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] and xref:../up-l1/bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
+* *Binding middleware permits and waiver scope:* xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver] and xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else].
 * *Rust memory-safety soundness and safe-binding boundary:* xref:../languages/rust.adoc#req-ssr-unsafe-sound[Safe code cannot cause undefined behaviour] and xref:../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety].
 * *Checked-wire memory safety:* xref:../up-l1/wires/README.adoc#req-ssr-unsafe-wire-untrusted[No wire can break the element's memory safety].
 ====

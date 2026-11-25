@@ -51,7 +51,7 @@ For a route, xref:../up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route
 What a selected part does is stated by its own contract.
 Where the SDK's core is the element, the contracts of a binding, a wire and a platform backend are these:
 
-* a binding: xref:../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract];
+* a binding: xref:../up-l1/bindings/interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract];
 * a wire: xref:../up-l1/wires/README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract];
 * a platform backend of the element, or one that an integrator supplies for the element: xref:platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules], which states the duties of both and says where the integrator's own are stated.
 

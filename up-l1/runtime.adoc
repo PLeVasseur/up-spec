@@ -16,7 +16,7 @@ Whom each item binds, and how the three requirement families meet, is stated in 
   <<sec-route-qos,Route QoS declarations and overflow>>.
 * *Related chapters:*
   Shared two-mode types, startup storage, heap classes and stronger resource guarantees are stated in xref:../basics/resources.adoc[shared resource lifecycle and storage] (including xref:../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types], xref:../basics/resources.adoc#req-ssr-mode-no-setup-at-runtime[Setup is impossible in runtime mode] and xref:../basics/resources.adoc#req-ssr-mode-no-traffic-before-runtime[Traffic is impossible before runtime mode]).
-  Binding-facing loss counting, route reporting, arrival-deadline monitoring, TTL expiry checks and middleware waivers are stated in xref:bindings.adoc[uP-L1 binding observation, deadlines, TTL and waivers].
+  Binding-facing loss counting, route reporting, arrival-deadline monitoring and TTL expiry checks are stated in xref:route-observation.adoc[uP-L1 route observation, deadlines and TTL], and middleware waivers in xref:bindings/lifecycle.adoc[uP-L1 binding lifecycle, waivers and bounds].
 ====
 
 [[sec-mode-transitions]]
@@ -85,8 +85,8 @@ The entry conditions are these, each a requirement of its own:
 * the wall clock read, from a time provider that passed its setup check (<<req-ssr-mode-entry-clock,The wall clock is read before runtime mode>>);
 * no declaration admitted whose traffic would be refused for a reason setup already knows (<<req-ssr-mode-entry-no-latent-refusal,Nothing is refused at runtime for a reason setup already knew>>);
 * every heap class declared and admissible for its route, and every decoded type admitted as its route's class admits (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; <<req-ssr-heap-slot-types,A decoded value is destroyed once, as its route's class admits>>);
-* lazy state forced, in the element and in each binding (xref:../basics/resources.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]; xref:bindings.adoc#req-ssr-binding-lazy-forced[Lazy state is forced, and threads are idle, before running]);
-* a waiver for every permit, complete and approved by someone other than its author (xref:bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]; xref:../safety/assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found]);
+* lazy state forced, in the element and in each binding (xref:../basics/resources.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]; xref:bindings/lifecycle.adoc#req-ssr-binding-lazy-forced[Lazy state is forced, and threads are idle, before running]);
+* a waiver for every permit, complete and approved by someone other than its author (xref:bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]; xref:../safety/assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found]);
 * QoS that can be honored, means something, and agrees between declarations, and every timing or assurance claim that a route requires admitted under its configuration (<<req-ssr-qos-no-downgrade,QoS is honored or refused, never weakened>>; <<req-ssr-qos-invalid-refused,Meaningless QoS is refused at setup>>; <<req-ssr-qos-consistent-declarations,Two declarations of one route agree>>);
 * integrity levels declared, and every crossing they imply admissible (xref:integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]);
 * all runtime storage placed under the startup-memory policy of the configuration (xref:../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]; xref:../safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]): on the ASIL path, from static or caller-provided non-heap memory in a no-helper configuration, or from declared startup backing obtained before the transition by an explicitly selected, admitted startup-provisioning helper—and where that selection is an assured startup-provisioning helper admission, with recoverable exhaustion and panic-free cleanup named explicitly and established across every covered startup-backing acquisition and failure-disposition cleanup operation for every transport and route backed by that helper, native-only transports included, in every strict-mode state (xref:../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]);
@@ -383,16 +383,16 @@ The element *MUST NOT* refuse or change that initialization because the predeces
 *Whole reset domain.*
 Reinitialization after a runtime fault requires the whole-process or whole-partition restart semantics of <<req-ssr-mode-one-way,There is no way back>> and xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it], realized on a bare-metal or multi-participant target as the corresponding reset of the whole reset domain: all relevant users that share ownership of the restarted instance's runtime backing.
 Where a partial reset occurs, such as a producer-only watchdog reset, the element and each binding *MUST NOT* revoke, recycle or overwrite backing storage that is still owned by another core, peer or DMA engine that has not been stopped or quiesced.
-Before reusing or reinitializing shared or cross-participant backing storage after a reset, each binding *MUST* either preserve valid ownership held by every surviving core, peer or DMA engine, or refuse setup by name where those participants have not been stopped or quiesced and the binding cannot establish exclusive recovery (<<req-ssr-mode-init-failure,Initialization failure>>; xref:bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization]).
+Before reusing or reinitializing shared or cross-participant backing storage after a reset, each binding *MUST* either preserve valid ownership held by every surviving core, peer or DMA engine, or refuse setup by name where those participants have not been stopped or quiesced and the binding cannot establish exclusive recovery (<<req-ssr-mode-init-failure,Initialization failure>>; xref:bindings/lifecycle.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization]).
 
 *What a dead predecessor left.*
-What a binding does with what a dead predecessor left in its middleware, and when, is stated in xref:bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization].
+What a binding does with what a dead predecessor left in its middleware, and when, is stated in xref:bindings/lifecycle.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization].
 Where a binding refuses setup because it could not recover or remove what a predecessor left, the element returns that refusal as <<req-ssr-mode-init-failure,Initialization failure>> states, and no transport of that binding enters runtime mode.
 
 *Peers that stayed up.*
 In a restart, the element and each binding *MUST NOT* revoke storage that a peer, core or DMA engine that stayed up still retains.
 In a process, partition or firmware instance that stayed up, the element *MUST NOT* need anything from the restarted instance in order to continue (xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]).
-A surviving binding's recovery, removal or takeover of what a dead predecessor left is governed by xref:bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization]; ordinary release and peer-failure accounting stay as xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input] and <<req-ssr-release-lease-drop,A lease gives back its slot and nothing else>> state.
+A surviving binding's recovery, removal or takeover of what a dead predecessor left is governed by xref:bindings/lifecycle.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization]; ordinary release and peer-failure accounting stay as xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input] and <<req-ssr-release-lease-drop,A lease gives back its slot and nothing else>> state.
 
 *Scoped replacement.*
 This revision replaces revision 3 of this item for the element and each binding across hosted, partitioned and bare-metal targets, clarifying process, partition and firmware-instance restart lifetime and whole-reset-domain ownership preservation—including forbidding revocation, recycling or overwriting of backing still owned by another core, peer or DMA engine after a partial or producer-only watchdog reset—while preserving every restart, predecessor-cleanup and surviving-peer duty of revision 3 of this item.
@@ -615,7 +615,7 @@ A wait inside a declared allocation domain and pending cleanup are the only wait
 They cover none of the following:
 
 * a wait of the element's own, such as a completion or an overflow wait;
-* a wait in a binding or callback call outside the declared allocation domain (xref:bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]);
+* a wait in a binding or callback call outside the declared allocation domain (xref:bindings/lifecycle.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]);
 * a worker loop;
 * a lock or other primitive shared with another process (<<req-ssr-bound-no-cross-process-lock,No lock shared with another process>>).
 
@@ -634,7 +634,7 @@ The element *MUST* state, in the contract of each operation that takes a deadlin
 
 * A wait's timeout and a setup bound are compared with the platform's monotonic clock.
 The acceptance event is the observation of the awaited state.
-* An RPC call's TTL is compared in wall time from the request's creation (xref:bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
+* An RPC call's TTL is compared in wall time from the request's creation (xref:route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
 The acceptance event is the element's completion of the call with a response that its wire check accepted (xref:../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it]).
 
 For every logical deadline in the element, a wait's timeout, an RPC call's TTL and a setup bound alike, the deadline decides the outcome.
@@ -820,7 +820,7 @@ Each for its part, the element and each binding *MUST* create each release servi
 * Each for its part, they *MUST* bound the service's own work for each value, the hand-off, dispatch, bookkeeping and the change of charge, as <<req-ssr-bound-work,Work per call is bounded by setup data>> states.
 
 *Pending cleanup.*
-A value handed to a release service, and a retained owner or the binding's own allocation for a frame handed to a binding's deferred return (xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]), is _pending cleanup_ from its hand-off until its release completes.
+A value handed to a release service, and a retained owner or the binding's own allocation for a frame handed to a binding's deferred return (xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]), is _pending cleanup_ from its hand-off until its release completes.
 Pending cleanup is ownership awaiting release, neither a completed release nor unfinished traffic.
 
 *A wait without a deadline.*
@@ -867,7 +867,7 @@ On a route that requires non-waiting release it never shows as a drop that waits
 The hand-off to a release service or to a binding's deferred return holds ownership awaiting release, not unread traffic, so it is not a second receive queue.
 
 *Bindings.*
-The duties of a binding's frame destructor are stated in xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
+The duties of a binding's frame destructor are stated in xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
 
 *Scoped replacement.*
 This revision replaces revision 6 of this item for the element and each binding across hosted, partitioned and bare-metal or no-OS targets and all configurations, incorporating serialized owned-value runtime adapter release paths strictly within their wire or allocation-provider roles, clarifying inline proven non-waiting release versus an initialization-created autonomous release service whose progress does not depend on the next application call and cannot be satisfied by a generic caller main-loop pump or by merely placing a blocking destructor in a timer interrupt service routine or another execution context, requiring setup refusal by name where a platform or composition cannot establish that autonomous service and transitive isolation while keeping ordinary serialized routes with a disclosed waiting route-specific cleanup path separately admissible, and preserving all ownership, capacity-charge, finite-deadline-evidence, non-duplication, non-revocation and infrastructure-retention duties of revision 6 of this item.
@@ -938,7 +938,7 @@ So its route counts it until then, and a destruction that stalls shows as pressu
 _Deferred return of a retained owner._
 Where a middleware's own release of a retained owner can wait, the return is deferred.
 The drop hands the retained owner over without waiting and returns, and the binding's deferred return completes the release.
-A stalled return shows as counted capacity pressure, never as a drop that waits (xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+A stalled return shows as counted capacity pressure, never as a drop that waits (xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 
 _Completion deadlines._
 Moving a wait off the drop does not bound it, and does not by itself isolate it.
@@ -1102,7 +1102,7 @@ Waiting and panicking are different properties, and neither follows from ownersh
 
 An ordinary allocator's release can take a lock that waits.
 On a route that does not require non-waiting release, that wait is the declared policy's, on a path of that route: the path that ended the value or, where that path is native or shared work, a later operation of the same route.
-A route that requires non-waiting release moves a possibly waiting destruction off that path to an initialization-created autonomous release service, in the same way as a retained owner's deferred return (xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+A route that requires non-waiting release moves a possibly waiting destruction off that path to an initialization-created autonomous release service, in the same way as a retained owner's deferred return (xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 
 That hand-off to the route's release service holds ownership awaiting destruction, not unread traffic, so it is not a second receive queue.
 Deferral does not bound the release.
@@ -1167,7 +1167,7 @@ Priority and TTL stay per message.
 
 * Reliability, overflow and history belong to the route: on one transport, every declaration of one route agrees on them (<<req-ssr-qos-consistent-declarations,Two declarations of one route agree>>).
 * Depth is the capacity of the declaring endpoint's queue: the number of frames that it holds before the overflow policy applies.
-* A deadline is the declaring receive endpoint's monitoring of arrivals (xref:bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored]).
+* A deadline is the declaring receive endpoint's monitoring of arrivals (xref:route-observation.adoc#req-ssr-qos-deadline[Deadlines are monitored]).
 * Whether priority is required is a demand on the capability of the route's binding.
 
 *A deadline or `+event_only()+`.*
@@ -1186,7 +1186,7 @@ A detector route of the E2E wire is a receive route that selects the E2E wire an
 * The element *MUST* refuse at setup, in every state of strict mode and at every integrity level, a detector route of the E2E wire that declares `+event_only()+` or no deadline, naming the route and the setting (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-e2e-protection[The integrator decides which routes need end-to-end protection]).
 * The element *MUST* refuse such a route that gives a deadline together with `+event_only()+`, as it refuses any other.
 * The route's deadline is the timeout of its end-to-end detection.
-The element monitors it as xref:bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] states; that the E2E wire keeps no timeout of its own is stated in xref:wires/e2e.adoc#req-ssr-e2e-detects[The E2E wire detects each fault].
+The element monitors it as xref:route-observation.adoc#req-ssr-qos-deadline[Deadlines are monitored] states; that the E2E wire keeps no timeout of its own is stated in xref:wires/e2e.adoc#req-ssr-e2e-detects[The E2E wire detects each fault].
 * An RPC client's response route is no detector route: the E2E wire keeps no receiving slot for it (xref:wires/e2e.adoc#req-ssr-e2e-receiver-state[E2E receiving state is one fixed slot per declared data ID]), and each call ends by its TTL (xref:../up-l2/api.adoc#req-ssr-peer-rpc-ends[RPC calls always end]).
 The clauses on a deadline or `+event_only()+` apply to it.
 * In strict mode's Enforce and Locked states, the element *MUST* refuse at setup, as a forbidden finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]), at every integrity level, an RPC client's response route that selects the E2E wire and declares neither, naming the route and the setting.
@@ -1245,7 +1245,7 @@ Otherwise the element *MUST* refuse the route at setup, naming the route, the cl
 * Apart from the refusal that the last entry states for strict mode's Enforce and Locked states, the element *MUST NOT* refuse a route that requires only functional QoS for want of an optional timing bound or assurance scope.
 * Where a configuration offers no finite bound for an endpoint, the element *MUST* still operate and report functionally on routes admitted under this item.
 The first and last entries state which routes setup refuses.
-* In strict mode's Enforce and Locked states, the element *MUST* refuse at setup, as a forbidden finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]), a route that declares a deadline and a reaction budget where its detection bound exceeds that budget or no finite detection bound is established for it (xref:bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored]; xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
+* In strict mode's Enforce and Locked states, the element *MUST* refuse at setup, as a forbidden finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-states[Strict mode has four states]), a route that declares a deadline and a reaction budget where its detection bound exceeds that budget or no finite detection bound is established for it (xref:route-observation.adoc#req-ssr-qos-deadline[Deadlines are monitored]; xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-timing-budgets[Timing claims rest on a supported configuration, and the item's budgets are the integrator's]).
 In the Report state, the element *MUST* report such a route as that finding (xref:../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run]) and *MUST NOT* refuse it for that finding.
 A declared reaction budget is by itself no requirement of a finite timing bound in the sense of the first entry.
 
@@ -1307,11 +1307,11 @@ On a serialized route whose declared heap class admits allocation, the policy en
 * a refused newest frame;
 * a waiting sender's frame whose bound ran out.
 
-That ownership is released exactly once as <<req-ssr-heap-slot-types,A decoded value is destroyed once, as its route's class admits>> and xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
+That ownership is released exactly once as <<req-ssr-heap-slot-types,A decoded value is destroyed once, as its route's class admits>> and xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] state.
 The element *MUST* ensure that this release is the only heap use an overflow causes, and that it releases no route, table or other runtime resource.
 
 *Discards the binding cannot observe.*
-If a discard occurs entirely inside middleware and the binding cannot observe it, the element *MUST* explicitly disclose that limitation in the route's report and make no claim there to count it (xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
+If a discard occurs entirely inside middleware and the binding cannot observe it, the element *MUST* explicitly disclose that limitation in the route's report and make no claim there to count it (xref:route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 --
 
 [horizontal]
@@ -1346,7 +1346,7 @@ Six QoS declarations cannot be honored as written, and the element *MUST* refuse
 
 * a zero deadline;
 * a deadline under 1,024 ns;
-* a deadline on a pull route whose binding cannot report arrivals (xref:bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is]);
+* a deadline on a pull route whose binding cannot report arrivals (xref:bindings/interface.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is]);
 * a deadline shorter than the route's binding's declared arrival latency;
 * a wait policy with a zero timeout;
 * history on an RPC route.

@@ -14,7 +14,7 @@ The requirement on this page (`+req~sdk-owned-frame-one-owner~1+`) belongs to th
 The up-rust SEooC requirement family states the element's and its bindings' corresponding ownership and release obligations across:
 ** xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else], xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], xref:../up-l1/runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode], and xref:../languages/rust.adoc#req-ssr-release-inert-drop[Dropping a runtime handle does nothing];
 ** xref:../up-l1/wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused];
-** xref:../up-l1/bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held];
+** xref:../up-l1/bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held];
 ** xref:../up-l1/payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it] and the end-to-end ownership overview in xref:../up-l1/payload-paths.adoc#lifetime[Who owns what, and until when].
 * *Memory-provider ownership.*
 Ownership and validity of blocks and regions supplied by a memory provider are stated in xref:resources.adoc#req-sdk-owned-frame-provider-ownership[Memory from a provider stays valid while it is held, and is disposed of once under its provider's contract].
@@ -30,7 +30,7 @@ On each owned-frame route that it offers, an SDK whose core is not the element *
 While an owner holds such storage or such a value, a forgotten owner included, the SDK *MUST NOT* let another owner reach it, reuse it or end it.
 
 *Where the core is the element.*
-For the element and its bindings, the items that keep this rule are xref:../up-l1/wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], xref:../up-l1/bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], xref:../up-l1/payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it], xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] and xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits].
+For the element and its bindings, the items that keep this rule are xref:../up-l1/wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], xref:../up-l1/bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], xref:../up-l1/payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it], xref:../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else] and xref:../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits].
 --
 
 [horizontal]

@@ -31,7 +31,7 @@ This page holds:
 
 Each item's statement says whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]).
 
-* A binding carries a native route as it carries any other (xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]).
+* A binding carries a native route as it carries any other (xref:../bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]).
 It does not know the type.
 * The choice of a wire and of a transport: xref:../payload-paths.adoc#independent[a wire and a transport are chosen apart].
 * A wire from elsewhere that hands out views of shared memory is not the native wire, and it is no part of the element (xref:README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract], "A separate element").
@@ -75,7 +75,7 @@ A number that names something, such as an index or an identifier, is carried as 
 *Size zero, and unions.*
 The element *MAY* admit as native a type of size zero, and a union where this item admits each of its fields.
 The permission obliges no implementation and no derive to admit every such type, and the element *MUST* state truthfully which of them it admits.
-On a native route that does not select the native protection composition, the frames of a type of size zero are present payloads of length zero (xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), and storage lent for one is lent as storage of zero bytes is (xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], "An empty payload").
+On a native route that does not select the native protection composition, the frames of a type of size zero are present payloads of length zero (xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), and storage lent for one is lent as storage of zero bytes is (xref:../bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], "An empty payload").
 On a route that selects that composition, a value of size zero is a present value inside an outer extent E, which is never zero (xref:e2e.adoc#req-ssr-e2e-wraps-any-wire[The E2E wire wraps any wire and leaves its bytes alone], "The native protection composition").
 Both are native only inside the Rust-only native domain (<<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>, "Only between binaries that use the element").
 
@@ -274,8 +274,8 @@ This item requires the outcome, and <<guidance>> describes one way to reach it.
 On a native route the element *MUST* have the sender initialize the value once, directly in the storage that carries it (xref:../payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]), and *MUST* ensure that:
 
 * nothing is read from a loan before it is written, and a loan is sent only once the whole value has been written into it;
-* each byte of each extent of the sample that the binding gives it to write is initialized before the binding performs an operation that needs it (xref:../bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]): the value's fields by its one in-place write, the bytes that a wire writes by that wire, and every other byte, the value's padding among them, by code that the element controls;
-* sending consumes the loan, and ends the sender's access to the storage (xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]);
+* each byte of each extent of the sample that the binding gives it to write is initialized before the binding performs an operation that needs it (xref:../bindings/storage.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]): the value's fields by its one in-place write, the bytes that a wire writes by that wire, and every other byte, the value's padding among them, by code that the element controls;
+* sending consumes the loan, and ends the sender's access to the storage (xref:../bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]);
 * a loan whose lease is dropped unsent is given back, exactly once (xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]);
 * no pending operation holds a loan (xref:../../up-l2/execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]).
 
@@ -284,13 +284,13 @@ The element *MUST* give a receiver a checked, typed view of the storage in which
 
 * the view does not live longer than the lease of its frame;
 * nothing can be written through it;
-* when that lease is dropped, the frame is given back, exactly once (what the binding's return of it may do: xref:../bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+* when that lease is dropped, the frame is given back, exactly once (what the binding's return of it may do: xref:../bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
 
 *A forgotten lease.*
 Safe code can forget the lease of a loan or of a frame, and then no transition ends it.
 The element *MUST* keep the loan or the frame charged to its route for the life of the process.
 The element *MUST NOT* return its storage, hand it out or deliver it again, or give it a second owner.
-What the binding owes for the storage that it lends is stated apart, in xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], and neither duty rests on the other.
+What the binding owes for the storage that it lends is stated apart, in xref:../bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held], and neither duty rests on the other.
 The element *MUST* meet each rule of this item without relying on a destructor to run.
 
 *The only copies.*
@@ -307,7 +307,7 @@ How such a route is refused at setup, with the route and the missing capability 
 On every path of a native route, success, refusal, cancellation, a peer's failure and a frame's return among them, heap use, panics, work and waits are governed by:
 
 * xref:../payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path];
-* xref:../bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path];
+* xref:../bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path];
 * xref:../../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap];
 * xref:../../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths];
 * xref:../runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data];
@@ -341,7 +341,7 @@ The copy would cost time in proportion to the payload, and a place to build the 
 
 _Each byte of its extents._
 A typed write of a value can leave its padding uninitialized, and a binding cannot tell padding from a field.
-So the element initializes each byte of the extents that it is given, and the binding the rest (xref:../bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]).
+So the element initializes each byte of the extents that it is given, and the binding the rest (xref:../bindings/storage.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]).
 Padding still carries no meaning (<<req-ssr-native-type,A native payload type holds its whole value in one fixed layout>>, "Padding").
 
 _A forgotten lease._
@@ -373,13 +373,13 @@ Each row names the rules that govern a step.
 | <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-deployment-data[Deployment data is in range, verified and protected]
 
 | The route is prepared
-| <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:../peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Refusal at the transition"; xref:../runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "Native routes"; xref:../bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]
+| <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:../peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], "Refusal at the transition"; xref:../runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits], "Native routes"; xref:../bindings/interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]
 
 | The levels are compared
-| xref:../integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]; xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]; xref:../bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level]; xref:../bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state]
+| xref:../integrity.adoc#req-ssr-integrity-declared[Each transport declares one integrity level]; xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]; xref:../bindings/storage.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level]; xref:../bindings/storage.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state]
 
 | A value is sent
-| <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>; xref:../payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]; xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../../up-l2/execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]
+| <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>; xref:../payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:../bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../bindings/storage.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]; xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../../up-l2/execution.adoc#req-ssr-async-seam[The asynchronous interface has a written, executor-independent contract]
 
 | A frame arrives
 | xref:../payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]; <<req-ssr-native-agreement,A native type is read only under its exactly agreed layout>>; xref:../integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]
@@ -388,13 +388,13 @@ Each row names the rules that govern a step.
 | <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>; xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]
 
 | The frame is returned
-| xref:../bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]
+| xref:../bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]
 
 | On every path
-| xref:../payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:../bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; xref:../../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; xref:../../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:../runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data]; xref:../runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]; xref:../peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]
+| xref:../payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:../bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; xref:../../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]; xref:../../basics/error_model.adoc#req-ssr-refuse-no-panic[No panic on runtime paths]; xref:../runtime.adoc#req-ssr-bound-work[Work per call is bounded by setup data]; xref:../runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]; xref:../peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]
 
 | The route is reported
-| xref:../bindings.adoc#req-ssr-error-route-report[Each route reports what it got]; xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]
+| xref:../route-observation.adoc#req-ssr-error-route-report[Each route reports what it got]; xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]
 |===
 
 [[failures]]
@@ -418,11 +418,11 @@ Each row names the rules that govern a step.
 
 | A binding that cannot lend or hand over storage of the type's size and alignment
 | Route preparation
-| xref:../bindings.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]; <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>
+| xref:../bindings/interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]; xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]; <<req-ssr-native-in-place,A native payload is written and read where it is carried, or its route is refused>>
 
 | A type for which the element cannot initialize each byte of the extents that a binding gives it, or a path for which a binding cannot initialize its complement
 | Setup, or route preparation
-| xref:../bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]
+| xref:../bindings/storage.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]
 
 | A wire or an allocation provider that declares allocation in a direction that the route uses, or a binding that declares allocation in its own code in such a direction
 | The transition
@@ -446,7 +446,7 @@ Each row names the rules that govern a step.
 
 | A peer that dies while a view of its frame is held
 | Runtime
-| xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]
+| xref:../bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input]
 
 | A faulty peer that writes wrong contents with the right shape
 | Not detected by the wire
@@ -475,7 +475,7 @@ The table says what establishes each one.
 | xref:../peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]
 
 | Lent storage is exclusive, disjoint, stable, and of the declared size and alignment, for as long as it is held
-| xref:../bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]
+| xref:../bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:../../languages/rust.adoc#req-ssr-unsafe-binding-untrusted[No binding written in safe code can break the element's memory safety]
 
 | The bytes of a frame are a value of the type
 | xref:../integrity.adoc#req-ssr-integrity-any-bits[In-place types accept every bit pattern]; xref:../integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]; xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader]

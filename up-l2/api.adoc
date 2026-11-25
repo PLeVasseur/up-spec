@@ -84,7 +84,7 @@ Each Language Library *MUST* package (group) the <<messaging-apis>> into a folde
 
 [.specitem,oft-sid="dsn~communication-layer-impl-default~1",oft-needs="impl,utest",oft-tags="LanguageLibrary"]
 --
-Each Language Library *MUST* provide a _default_ implementation of the <<messaging-apis>> based on the (abstract) xref:../up-l1/README.adoc[Transport Level API].
+Each Language Library *MUST* provide a _default_ implementation of the <<messaging-apis>> based on the (abstract) xref:../up-l1/utransport.adoc[Transport Level API].
 --
 
 NOTE: Additional information regarding implementation can be found in the respective language-specific uProtocol library documentation.
@@ -110,7 +110,7 @@ Transport peer handling and end-to-end protection are stated in xref:../up-l1/pe
 --
 *The deadline.*
 The element *MUST* give every RPC call a deadline: the TTL of its request, counted from when the request was created.
-An RPC request's TTL is greater than 0 (xref:../basics/uattributes.adoc[UAttributes], `+dsn~up-attributes-request-ttl~1+`), and what the element does with a request whose TTL is 0 is stated in xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] and, for its answer at a server, in <<req-ssr-peer-rpc-undecodable-answered,An undecodable request is answered>>.
+An RPC request's TTL is greater than 0 (xref:../basics/uattributes.adoc[UAttributes], `+dsn~up-attributes-request-ttl~1+`), and what the element does with a request whose TTL is 0 is stated in xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed] and, for its answer at a server, in <<req-ssr-peer-rpc-undecodable-answered,An undecodable request is answered>>.
 So a call whose server has vanished or never answers completes with an error by its TTL.
 A response completes the call only where the element accepts it before that TTL has passed (xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline]).
 
@@ -225,7 +225,7 @@ That refusal's one route count is the undeclared-source count that xref:../up-l1
 An earlier failed peer check or failed tenure tie records nothing in any call.
 
 *Then, the TTL and the admission.*
-After the tie to the call succeeds and any applicable pre-substitution declared-sender membership check above passes, the element *MUST* check the response's TTL as xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states, and then apply xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding] before it gives the response to a wire.
+After the tie to the call succeeds and any applicable pre-substitution declared-sender membership check above passes, the element *MUST* check the response's TTL as xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed] states, and then apply xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding] before it gives the response to a wire.
 A response that one of these checks refuses is a refused response: no later check is made for it, and no wire reads it.
 
 *Then, on the native protection composition, its checks.*
@@ -268,7 +268,7 @@ The element *MUST* record the call's tag before its request is sent, and refuse 
 *Concurrency.*
 
 * The element *MUST* run the arrival checks of one response route one at a time, so a copy is never refused because another copy of the same response is being checked.
-On a response route that a binding serves by push, the binding delivers one response at a time (xref:../up-l1/bindings.adoc#req-ssr-binding-response-delivery[A binding delivers one response route from one thread at a time]), which relaxes none of the element's checks.
+On a response route that a binding serves by push, the binding delivers one response at a time (xref:../up-l1/bindings/interface.adoc#req-ssr-binding-response-delivery[A binding delivers one response route from one thread at a time]), which relaxes none of the element's checks.
 * Where a peer failure finds a call's response being checked, the element *MUST* fail the call at once if that response is refused.
 --
 
@@ -322,26 +322,26 @@ What the refused copy owns is released as xref:../up-l1/runtime.adoc#req-ssr-hea
 *The answer.*
 Where the element's RPC server role receives a request whose header the element can parse, the element *MUST* answer the request once, as a response to its reply address, with commstatus `+InvalidArgument+`, producing the answer without heap, where the check of "The order of the checks" that refuses the request refuses it for one of these causes:
 
-* a TTL of 0, on a route that does not select the E2E wire (xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed], which states the refusal of such a request and its count);
+* a TTL of 0, on a route that does not select the E2E wire (xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed], which states the refusal of such a request and its count);
 * an encoding identifier that no wire of the route declares, or a missing payload where the request's operation requires a value, on a route that does not select the E2E wire (xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]);
 * a payload that the fourth check cannot decode, for a reason other than an end-to-end check.
 
 *The order of the checks.*
 When a request whose header the element can parse reaches the route of its RPC server role, the element *MUST* make these checks of it in this order, and *MUST NOT* make a later one of them for a request that an earlier one refuses:
 
-. its TTL: a TTL of 0, its expiry, and a clock that cannot be read (xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed], which also states that a request that it refuses gets no check of its payload and no other count);
+. its TTL: a TTL of 0, its expiry, and a clock that cannot be read (xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed], which also states that a request that it refuses gets no check of its payload and no other count);
 . its payload, before any wire: on a route that does not select the E2E wire, its encoding and its presence (xref:../up-l1/payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]); on a route that selects it, whether it carries an E2E header (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once]), and then, on a route that selects the native protection composition, the element's protected-native preflight: stable, legal access to the request's outer extent, that extent against the one extent that the route admits for a request, E, and, because a request always takes the value branch, the writer's layout identity and ABI and the actual address of the inner value (xref:../up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]; xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]);
 . on a route that selects the E2E wire, that wire's check (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory]);
 . the decode of its payload, where it has one, with, on a native route that does not select the E2E wire, the check of its agreed layout (xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]); on a route that selects the native protection composition, this check makes no native check of its own: the view of the request's value rests on the protected-native preflight that the second check made for that request, and no native refusal follows the E2E wire's check.
 
 A request with no payload whose operation's declared contract permits that absence passes the second check on a route that does not select the E2E wire, and no wire decodes anything for it.
 
-The element *MUST* make these checks only for a request that the checks which other items state for it have admitted, which come first, in this order: its binding's physical checks of its envelope and the element's admission of its metadata—which checks its form, its fields, the payload that it states against the payload length that the envelope gives, its identity and its filters (xref:../up-l1/bindings.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]); the classification of its peer (xref:../up-l1/peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected]; xref:../up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones]); and, on a route that selects the E2E wire wherever that check applies (an empty received source or an empty configured method fixed sink), the pre-substitution declared-sender membership check (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route], "Pre-substitution declared-sender membership").
+The element *MUST* make these checks only for a request that the checks which other items state for it have admitted, which come first, in this order: its binding's physical checks of its envelope and the element's admission of its metadata—which checks its form, its fields, the payload that it states against the payload length that the envelope gives, its identity and its filters (xref:../up-l1/bindings/storage.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]); the classification of its peer (xref:../up-l1/peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected]; xref:../up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones]); and, on a route that selects the E2E wire wherever that check applies (an empty received source or an empty configured method fixed sink), the pre-substitution declared-sender membership check (xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route], "Pre-substitution declared-sender membership").
 The element *MUST NOT* make one of those after an earlier one has refused the request.
 A request that one of them refuses gets none of these checks, no expected data ID, no E2E payload check and no answer under this item (no wire refusal answer and no `+InvalidArgument+` answer), and its refusal is returned or counted once as the item of that check states (for pre-substitution declared-sender membership, once under the undeclared-source cause and under no later cause).
 
 *The one count.*
-The element *MUST* count each request that one of these checks refuses exactly once on its route, under the cause that the refusing check names, also where a typed operation returns that refusal's result to its caller: a refusal by the first check as xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed] states, a request with no E2E header as xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once] states, a refusal by the protected-native preflight under the cause of the native check that refuses it (xref:../up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]; xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]) and not in the E2E counter, and a refusal by the E2E wire as xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory] states.
+The element *MUST* count each request that one of these checks refuses exactly once on its route, under the cause that the refusing check names, also where a typed operation returns that refusal's result to its caller: a refusal by the first check as xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed] states, a request with no E2E header as xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-counted[End-to-end refusals are named, and counted once] states, a refusal by the protected-native preflight under the cause of the native check that refuses it (xref:../up-l1/integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]; xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]) and not in the E2E counter, and a refusal by the E2E wire as xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory] states.
 The element *MUST NOT* count again under any cause of these four checks a request that a prerequisite check above refused, including a pre-substitution declared-sender membership refusal (whose one route count is the undeclared-source count of xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-data-id[One data ID per sender and route]).
 Each received copy of a request is a request of its own here, and an answer to a request is no second count of it.
 
@@ -363,7 +363,7 @@ The E2E wire has not read such a request, so the request has no tag for an answe
 * The element *MUST* count once an `+InvalidArgument+` answer of this item that it cannot send, as an event of its own and not as a second count of its request; where the route's overflow policy discards the answer, that count is the discard's (xref:../up-l1/runtime.adoc#req-ssr-qos-overflow[Overflow acts as declared]).
 * In each of these cases the client's call gets no answer to that request.
 A call whose request's TTL is greater than 0 then ends as <<req-ssr-peer-rpc-ends,RPC calls always end>> states: at its TTL, where it is still pending then.
-A request whose TTL is 0 is invalid, and the element refuses it at a client before it is sent (xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]); for a peer that sends one, this item states no completion of its call.
+A request whose TTL is 0 is invalid, and the element refuses it at a client before it is sent (xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed]); for a peer that sends one, this item states no completion of its call.
 
 *End-to-end refusals.*
 Which answer the element gives a request that the E2E wire refuses is stated in xref:../up-l1/wires/e2e.adoc#req-ssr-e2e-refusal-answered[A refused request is answered, final or advisory]: none to a request that the wire finds corrupt, whatever data ID it names; `+InvalidArgument+` to one that is not corrupt and whose data ID was not declared; none to one that the wire refuses as an identity mismatch, whose data ID was declared and differs from the request's expected data ID; and the wire's refusal answer, final or advisory, to every other.
@@ -416,7 +416,7 @@ Each is given to no wire, counted once as `+unprotected+` and under no other cau
 A known decoding failure can be reported immediately.
 
 _The order of the checks._
-The TTL check reads only the header, so an invalid or expired request is refused before its payload is looked at (xref:../up-l1/bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]); the payload is admitted before any wire reads it, and the E2E wire runs before the decode.
+The TTL check reads only the header, so an invalid or expired request is refused before its payload is looked at (xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed]); the payload is admitted before any wire reads it, and the E2E wire runs before the decode.
 On a route that selects the native protection composition, the native checks that a view would need come before the E2E wire, so that no native refusal follows a change of the wire's state.
 So the one check that refuses a request names the cause of its one count, and decides its answer.
 
@@ -443,7 +443,7 @@ A serialized route whose binding allocates storage for every frame it sends need
 [.specitem,oft-sid="req~ssr-peer-rpc-no-server~2",oft-title="A call with no server fails at once",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *With an exact receiver count.*
-On a binding that declares an exact receiver count (xref:../up-l1/bindings.adoc#req-ssr-binding-receiver-count[A binding that declares an exact receiver count reports it for each request]), the element *MUST* fail at once a call whose request that binding's report shows to have reached no server, with an error that names the cause, instead of waiting out the call's TTL.
+On a binding that declares an exact receiver count (xref:../up-l1/bindings/interface.adoc#req-ssr-binding-receiver-count[A binding that declares an exact receiver count reports it for each request]), the element *MUST* fail at once a call whose request that binding's report shows to have reached no server, with an error that names the cause, instead of waiting out the call's TTL.
 
 *What is not such a report.*
 A count of notification listeners, a discovery result and a count taken at another time are not that report, and the element *MUST NOT* fail a call at once on any of them.

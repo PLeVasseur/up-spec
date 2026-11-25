@@ -1,0 +1,85 @@
+= uP-L1 Transport Bindings Catalog
+:toc: preamble
+
+NOTE: This page is an informative catalog of shared binding contracts, Classic communication-protocol mappings and up-rust SEooC middleware binding profiles under `up-l1/bindings/`.
+It adds no normative requirements; each item's statement governs whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]; xref:../../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
+
+== Shared binding and route-observation chapters (up-rust SEooC)
+
+These four middleware-neutral chapters carry the shared transport-binding and route-observation contracts:
+
+[cols="3,2,5",options="header"]
+|===
+| Chapter | Tags | Scope
+
+| xref:interface.adoc[`interface.adoc`]
+| `SafetyBinding`, `SafetyBindingPull`
+| What a binding is and the binding contract (xref:interface.adoc#req-ssr-binding-scope[binding scope]), runtime peer-input panic prohibition (xref:interface.adoc#req-ssr-binding-no-panic[no panic on any peer input]), peer identity and rising incarnations, QoS capability declarations, arrival reports, single-thread response delivery and exact receiver count
+
+| xref:lifecycle.adoc[`lifecycle.adoc`]
+| `SafetyUpRustCore`, `SafetyBinding`, `SafetyBindingPull`
+| Middleware allocation permits and waivers (xref:lifecycle.adoc#sec-middleware-waivers[waivers]), binding no-heap and runtime lifecycle rules, forced lazy state, received-frame drop and deferred return, bounded work and waits, and dead-predecessor cleanup. For peer-input panic and termination boundaries alongside runtime allocation and return, read xref:interface.adoc#req-ssr-binding-no-panic[No panic on any peer input].
+
+| xref:storage.adoc[`storage.adoc`]
+| `SafetyBinding`, `SafetyBindingPull`, `SafetyUpRustCore`
+| Writer integrity-level reporting, exclusive/disjoint/stable lent storage, initialized sample extents, shared-state write direction, shared five-step metadata admission and transmit loan-sizing capability
+
+| xref:../route-observation.adoc[`../route-observation.adoc`]
+| `SafetyUpRustCore`, `SafetyBinding`
+| Non-silent loss counting (xref:../route-observation.adoc#sec-loss-reporting[loss counting and route reporting]), per-route reports, arrival-deadline monitoring and message-TTL expiry checks (xref:../route-observation.adoc#sec-deadlines-ttl[deadlines and TTL])
+|===
+
+Related transport runtime, peer, integrity, wire and assurance chapters:
+xref:../runtime.adoc[uP-L1 transport runtime],
+xref:../payload-paths.adoc[uP-L1 payload paths],
+xref:../peers.adoc[uP-L1 peers and fault model],
+xref:../integrity.adoc[uP-L1 integrity levels and copy routes],
+xref:../wires/README.adoc[uP-L1 wires],
+xref:../../basics/resources.adoc[shared resource lifecycle and storage],
+xref:../../safety/assurance.adoc[assurance governance] and
+xref:../README.adoc#transport-deployment-prerequisites[transport deployment prerequisites].
+
+== Concrete middleware chapters
+
+[cols="2,3,5",options="header"]
+|===
+| Middleware | Contract family / release | Chapter and scope
+
+| Eclipse Zenoh
+| Classic `UTransport` protocol mapping (`TransportLayerImpl`)
+| xref:zenoh.adoc[`zenoh.adoc`] — Zenoh protocol version, attribute/payload/type/priority mapping and key expressions
+
+| MQTT 5
+| Classic `UTransport` protocol mapping (`TransportLayerImpl`)
+| xref:mqtt_5.adoc[`mqtt_5.adoc`] — MQTT 5 PUBLISH property/payload mapping, topic names, session config and reconnection
+
+| Eclipse iceoryx2
+| Classic v0.6.1 protocol mapping (`TransportLayerImpl`) AND up-rust SEooC profile for iceoryx2 0.9.3 (`SafetyIceoryx2`, `SafetyUpRustCore`)
+| xref:iceoryx2.adoc[`iceoryx2.adoc`] — Classic xref:iceoryx2.adoc#classic-iceoryx2-v0-6-1[v0.6.1 contract] and distinct SEooC 0.9.3 binding profile with xref:iceoryx2.adoc#iceoryx2-sample-layout[physical sample layout]
+
+| Eclipse S-CORE LoLa
+| up-rust SEooC binding profile (`SafetyLola`, `SafetyUpRustCore`)
+| xref:lola.adoc[`lola.adoc`] — LoLa binding profile, upstream LoLa reference context, xref:lola.adoc#lola-sample-layout[physical envelope] and general-rule index
+|===
+
+NOTE: Two non-binding protocol adapters remain at the `up-l1/` top level because they are not `UTransport` or SEooC middleware bindings:
+xref:../someip.adoc#someip-service-translation[SOME/IP (`../someip.adoc`)] defines a service translation to stock SOME/IP services (`SomeIpTranslator`), and
+xref:../cloudevents.adoc[CloudEvents (`../cloudevents.adoc`)] defines a message and envelope format mapping.
+
+[[one-binding]]
+== What is specific to one binding
+
+The duties of every binding (xref:interface.adoc[binding interface], xref:lifecycle.adoc[binding lifecycle and waivers], xref:storage.adoc[binding storage and metadata admission] and xref:../route-observation.adoc[route observation, deadlines and TTL]) and the transport-wide assumptions of use (xref:../../safety/elements/up-rust/assumptions-of-use.adoc[the element's assumptions of use]; overview in xref:../README.adoc#transport-deployment-prerequisites[transport deployment prerequisites]) name no middleware.
+What only one binding must meet, and what only a deployment on it provides, is stated with that binding, in items that are specific to it: they name no other binding, and one of them can give the element a duty of its own.
+
+[cols="2,3,5",options="header"]
+|===
+| Binding | Items of its own | What that means
+
+| iceoryx2 | Requirements (tag `SafetyIceoryx2`) in xref:iceoryx2.adoc[the iceoryx2 page] and xref:iceoryx2.adoc#iceoryx2-sample-layout[the iceoryx2 physical frame] (one of which, on a frame's metadata, gives the element a duty as well), and deployment assumptions of use in xref:../../safety/elements/up-rust/assumptions-of-use.adoc[the element's assumptions of use] | Its profile, stated for one release of iceoryx2 (xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-profile[The iceoryx2 binding follows one profile, stated for one release of iceoryx2]), its accepted panic path and its named known failures, its static data segments, its service depth, its event IDs, its expired-connection buffer, its arrival reports and its degradation handler are stated in the iceoryx2 page; its separation of integrity levels and deployment limits are stated in xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-iceoryx2-level-separation[On iceoryx2, each integrity level has its own processes, domain and OS user] and xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-iceoryx2-limits[A deployment on iceoryx2 accepts that binding's limits, and no known failure as one]. The frame that the binding places in an iceoryx2 sample, what it checks before any of it is used and what it wipes are stated in the iceoryx2 physical frame
+| LoLa | Requirements (tag `SafetyLola`) in xref:lola.adoc[the LoLa page] and xref:lola.adoc#lola-sample-layout[the LoLa physical envelope] (one of which, on a frame's metadata, gives the element a duty as well), and, for a deployment on it, xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-lola-assumptions-kept[A deployment on LoLa keeps the assumptions of LoLa that the binding names for the integrator] | Both kinds of route, its counts and its storage, the boundary to LoLa's C++ code, the life of a subscription and of what LoLa is given, and LoLa's own assumptions of use are stated there. Its panic paths are treated in xref:lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path]. Its limits, deviations and known failures are those that its qualification record states (xref:../../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures])
+|===
+
+* *Bindings without a page, and bindings on another middleware.* What a binding's contract holds: xref:interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract] and xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
+* *Evidence.*
+What the evidence of one binding shows for another is stated in xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts].

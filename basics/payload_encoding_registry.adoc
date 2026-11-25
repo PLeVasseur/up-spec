@@ -57,7 +57,7 @@ to the maintainers of this registry.
 *MUST* and *SHALL* both retain their BCP14 meaning of an absolute requirement.
 The convention distinguishes the responsible party, not the obligation's strength.
 For example, application-level preservation is an assumption of use here, while
-the Transport Layer's xref:../up-l1/README.adoc#send[Send() contract]
+the Transport Layer's xref:../up-l1/utransport.adoc#send[Send() contract]
 defines preservation requirements for transport implementations.
 
 [#partition]
@@ -74,9 +74,7 @@ partitioned as follows:
 
 |`0x0000`
 |Contract-defined
-|The concrete encoding is defined by an applicable xref:../up-l1/README.adoc#communication-protocol-binding[communication protocol binding], service
-contract, or schema contract rather than by this registry. The identifier is
-present; its meaning is delegated.
+|The concrete encoding is defined by an applicable binding, service contract, or schema contract under xref:#allocation[Allocation and Origination]. The identifier is present; its meaning is delegated.
 
 |`0x0001` to `0xDFFF`
 |Registry assignments

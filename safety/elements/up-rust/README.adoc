@@ -71,7 +71,7 @@ Belonging to the element moves no duty from one part to another.
 *Outside the element.*
 These are separately composed parts of their own outside element code, each with its own boundary, declarations, requirements, source-bound records and evidence, and none is a part of the element:
 
-* each binding, with its middleware (xref:../../../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]);
+* each binding, with its middleware (xref:../../../up-l1/bindings/interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]);
 * each wire other than the native wire and the end-to-end protection wire (xref:../../../up-l1/wires/README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract]);
 * each platform backend not shipped with the element, including a platform backend that an integrator supplies (xref:assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules]);
 * the Streamer and the Streamer binary (xref:../streamer.adoc#req-ssr-streamer-scope[What the Streamer is, and the bounded-runtime Streamer profile]);
@@ -145,9 +145,9 @@ The ordinary contract of an asynchronous layer and of a scheduler integration: x
 
 === Middleware
 
-What a binding and its middleware are: xref:../../../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]; what stands outside the element: <<req-ssr-element-boundary,The parts of the element, and element code>>.
+What a binding and its middleware are: xref:../../../up-l1/bindings/interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]; what stands outside the element: <<req-ssr-element-boundary,The parts of the element, and element code>>.
 
-* Allocation inside middleware: its permit, xref:../../../up-l1/bindings.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; its waiver, xref:../../../up-l1/bindings.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
+* Allocation inside middleware: its permit, xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; its waiver, xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
 * What a binding's middleware cannot guarantee: xref:../../assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures].
 
 === Optional layers and code outside the claimed graph
@@ -164,11 +164,11 @@ What a binding and its middleware are: xref:../../../up-l1/bindings.adoc#req-ssr
 
 == What the element relies on
 
-* *Bindings and wires*: what each is, and whether it is part of the element, xref:../../../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract] and xref:../../../up-l1/wires/README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
+* *Bindings and wires*: what each is, and whether it is part of the element, xref:../../../up-l1/bindings/interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract] and xref:../../../up-l1/wires/README.adoc#req-ssr-wire-scope[What a wire is, and the wire contract].
 Whom an item binds: xref:../../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty].
 Which bindings and wires an integrator uses: xref:assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts].
 * *The derive*: what it is, <<req-ssr-element-boundary,The parts of the element, and element code>>; what holds for the code that it generates, xref:../../assurance.adoc#req-ssr-unsafe-inventory[Every `unsafe` is inventoried and justified]; what it refuses, xref:../../../up-l1/wires/native.adoc#req-ssr-native-type[A native payload type holds its whole value in one fixed layout].
-* *Test tooling and test doubles*: what a test double is, xref:../../../up-l1/bindings.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]; what a result on one shows, xref:../../assurance.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for].
+* *Test tooling and test doubles*: what a test double is, xref:../../../up-l1/bindings/interface.adoc#req-ssr-binding-scope[What a binding is, and the binding contract]; what a result on one shows, xref:../../assurance.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for].
 
 [[claims]]
 == Claims
@@ -201,7 +201,7 @@ A transport has two modes, initialization and runtime, and one transition betwee
 * *The modes and the transition*: xref:../../../basics/resources.adoc#req-ssr-mode-two-types[Two modes, as two types]; xref:../../../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]; xref:../../../up-l1/runtime.adoc#req-ssr-mode-one-way[There is no way back]; xref:../../../up-l1/runtime.adoc#req-ssr-mode-init-failure[Initialization failure].
 What a process in runtime mode is, and the three things for which the term is used, are stated in xref:../../../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation].
 The operations that make the transition are named in xref:../../../up-l1/runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation], clause "One operation".
-* *What initialization prepares*: xref:../../../up-l1/runtime.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode]; xref:../../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]; xref:../../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]; xref:../../../basics/resources.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]; xref:../../../up-l1/bindings.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization].
+* *What initialization prepares*: xref:../../../up-l1/runtime.adoc#req-ssr-mode-entry-admission[Every route is admitted before runtime mode]; xref:../../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided]; xref:../../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed]; xref:../../../basics/resources.adoc#req-ssr-heap-lazy-forced[Lazy state is forced before runtime mode]; xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization].
 * *What runtime mode allows*: xref:../../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]; xref:../../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]; xref:../../../up-l1/runtime.adoc#req-ssr-release-none[Nothing is released in runtime mode]; xref:../../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; xref:../../../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap].
 
 === One-way runtime and external restart
@@ -218,11 +218,11 @@ For the Streamer: xref:../../../up-l2/streamer.adoc#req-ssr-streamer-containment
 
 | Provided to applications
 | L2 handles, the transition, bounded waits, route reports, counters and waiver records
-| xref:../../../basics/resources.adoc[Resources, Startup Memory, Heap Classes and Memory Providers]; xref:../../../basics/configurations.adoc[Configurations and Application-Selectable Parts]; xref:../../../basics/error_model.adoc[Error model]; xref:../../../basics/uuid.adoc[Message identifiers (UUID)]; xref:../../../up-l1/runtime.adoc[uP-L1 transport runtime]; xref:../../../up-l1/payload-paths.adoc[Payload paths]; xref:../../../up-l1/bindings.adoc[uP-L1 Transport Bindings]; xref:../../assurance.adoc[Safety Assurance Governance, Verification and Evidence]; xref:../../../up-l1/integrity.adoc[uP-L1 Integrity Levels and Copy Routes]; xref:../../../up-l1/peers.adoc[uP-L1 Peers and Fault Model]; xref:../../../up-l2/api.adoc[Communication Layer APIs and RPC interaction rules]; xref:../../../up-l2/execution.adoc[Execution and asynchronous seam]; xref:../../../languages/rust.adoc[Rust language mapping]
+| xref:../../../basics/resources.adoc[Resources, Startup Memory, Heap Classes and Memory Providers]; xref:../../../basics/configurations.adoc[Configurations and Application-Selectable Parts]; xref:../../../basics/error_model.adoc[Error model]; xref:../../../basics/uuid.adoc[Message identifiers (UUID)]; xref:../../../up-l1/runtime.adoc[uP-L1 transport runtime]; xref:../../../up-l1/payload-paths.adoc[Payload paths]; xref:../../../up-l1/bindings/interface.adoc[Binding interface]; xref:../../../up-l1/bindings/lifecycle.adoc[Binding lifecycle and waivers]; xref:../../../up-l1/bindings/storage.adoc[Binding storage and metadata admission]; xref:../../../up-l1/route-observation.adoc[Route observation, deadlines and TTL]; xref:../../assurance.adoc[Safety Assurance Governance, Verification and Evidence]; xref:../../../up-l1/integrity.adoc[uP-L1 Integrity Levels and Copy Routes]; xref:../../../up-l1/peers.adoc[uP-L1 Peers and Fault Model]; xref:../../../up-l2/api.adoc[Communication Layer APIs and RPC interaction rules]; xref:../../../up-l2/execution.adoc[Execution and asynchronous seam]; xref:../../../languages/rust.adoc[Rust language mapping]
 
 | Provided to the Streamer
 | Carrier routes, the capacity check, park, the shared signal
-| xref:../../../up-l1/runtime.adoc[uP-L1 transport runtime]; xref:../../../up-l1/bindings.adoc[uP-L1 Transport Bindings]; xref:../../../up-l1/integrity.adoc[uP-L1 Integrity Levels and Copy Routes]; xref:../../../up-l2/streamer.adoc[Streamer]
+| xref:../../../up-l1/runtime.adoc[uP-L1 transport runtime]; xref:../../../up-l1/bindings/interface.adoc[Binding interface]; xref:../../../up-l1/bindings/lifecycle.adoc[Binding lifecycle and waivers]; xref:../../../up-l1/bindings/storage.adoc[Binding storage and metadata admission]; xref:../../../up-l1/route-observation.adoc[Route observation, deadlines and TTL]; xref:../../../up-l1/integrity.adoc[uP-L1 Integrity Levels and Copy Routes]; xref:../../../up-l2/streamer.adoc[Streamer]
 
 | Provided to integrators
 | The end-to-end protection wire; strict mode and its report; the Streamer's boundary, operator interface, mode report, watchdog hook and startup report
@@ -230,7 +230,7 @@ For the Streamer: xref:../../../up-l2/streamer.adoc#req-ssr-streamer-containment
 
 | Required from bindings
 | The lending or handoff contract, and the bindings' duties
-| The items whose statements give a binding a duty, most of them in xref:../../../up-l1/bindings.adoc[uP-L1 Transport Bindings], xref:../../../up-l1/iceoryx2.adoc[iceoryx2], xref:../../../up-l1/iceoryx2.adoc#iceoryx2-sample-layout[The iceoryx2 physical frame], xref:../../../up-l1/lola.adoc[LoLa] and xref:../../../up-l1/lola.adoc#lola-sample-layout[The LoLa physical envelope], alongside xref:../../assurance.adoc[Safety Assurance Governance, Verification and Evidence] and xref:../../../languages/rust.adoc[Rust language mapping]; xref:assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]
+| The items whose statements give a binding a duty, most of them in xref:../../../up-l1/bindings/interface.adoc[Binding interface], xref:../../../up-l1/bindings/lifecycle.adoc[Binding lifecycle and waivers], xref:../../../up-l1/bindings/storage.adoc[Binding storage and metadata admission], xref:../../../up-l1/route-observation.adoc[Route observation, deadlines and TTL], xref:../../../up-l1/bindings/iceoryx2.adoc[iceoryx2], xref:../../../up-l1/bindings/iceoryx2.adoc#iceoryx2-sample-layout[The iceoryx2 physical frame], xref:../../../up-l1/bindings/lola.adoc[LoLa] and xref:../../../up-l1/bindings/lola.adoc#lola-sample-layout[The LoLa physical envelope], alongside xref:../../assurance.adoc[Safety Assurance Governance, Verification and Evidence] and xref:../../../languages/rust.adoc[Rust language mapping]; xref:assumptions-of-use.adoc#aou-seooc-qualified-bindings-and-wires[Bindings and wires pass their contracts]
 
 | Required from wires
 | The wire contract, and the wires' duties

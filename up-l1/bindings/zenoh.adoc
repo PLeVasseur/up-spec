@@ -52,7 +52,7 @@ The value of a Zenoh Resource that is used to convey a uProtocol message *MUST* 
 a| *MUST* be set to a single byte representing the UProtocol major version (`0x01` for major version 1)
 
 | 2
-a| *MUST* be set to the bytes representing the link:../up-core-api/uprotocol/v1/uattributes.proto[protobuf encoding of the UAttributes object]
+a| *MUST* be set to the bytes representing the link:../../up-core-api/uprotocol/v1/uattributes.proto[protobuf encoding of the UAttributes object]
 
 |===
 
@@ -123,7 +123,7 @@ The table below contains the rules for encoding a UUri's fields into a Zenoh key
 |`authority_name`
 a| The segment *MUST* contain the (UTF8) string representation of the 
 
-1. `*` (`U+002A`, Asterisk) character, if the authority name is the xref:../basics/uri.adoc#pattern-matching[wildcard authority].
+1. `*` (`U+002A`, Asterisk) character, if the authority name is the xref:../../basics/uri.adoc#pattern-matching[wildcard authority].
 2. name of the host/authority that the (local) uEntity is running on, if authority name is empty.
 3. authority name, otherwise.
 
@@ -131,28 +131,28 @@ a| The segment *MUST* contain the (UTF8) string representation of the
 |`ue_type_id`
 a| The segment *MUST* contain the (UTF8) string representation of the
 
-1. `*` (`U+002A`, Asterisk) character, if the uEntity type identifier is the xref:../basics/uri.adoc#pattern-matching[wildcard type ID].
+1. `*` (`U+002A`, Asterisk) character, if the uEntity type identifier is the xref:../../basics/uri.adoc#pattern-matching[wildcard type ID].
 2. the upper-case link:https://www.rfc-editor.org/rfc/rfc4648#section-8[base16 encoding] of the uEntity type identifier with all leading `0` characters omitted.
 
 |`ue_instance`
 |`ue_instance_id`
 a| The segment *MUST* contain the (UTF8) string representation of the
 
-1. `*` (`U+002A`, Asterisk) character, if the uEntity instance identifier is the xref:../basics/uri.adoc#pattern-matching[wildcard instance ID].
+1. `*` (`U+002A`, Asterisk) character, if the uEntity instance identifier is the xref:../../basics/uri.adoc#pattern-matching[wildcard instance ID].
 2. the upper-case link:https://www.rfc-editor.org/rfc/rfc4648#section-8[base16 encoding] of the uEntity instance identifier with all leading `0` characters omitted.
 
 |`ue_version`
 |`ue_version_major`
 a| The segment *MUST* contain the (UTF8) string representation of the
 
-1. `*` (`U+002A`, Asterisk) character, if the uEntity major version is the xref:../basics/uri.adoc#pattern-matching[wildcard version].
+1. `*` (`U+002A`, Asterisk) character, if the uEntity major version is the xref:../../basics/uri.adoc#pattern-matching[wildcard version].
 2. the upper-case link:https://www.rfc-editor.org/rfc/rfc4648#section-8[base16 encoding] of the uEntity major version with all leading `0` characters omitted.
 
 |`resource`
 |`resource_id`
 a| The segment *MUST* contain the (UTF8) string representation of the
 
-1. `*` (`U+002A`, Asterisk) character, if the resource identifier is the xref:../basics/uri.adoc#pattern-matching[wildcard resource ID].
+1. `*` (`U+002A`, Asterisk) character, if the resource identifier is the xref:../../basics/uri.adoc#pattern-matching[wildcard resource ID].
 2. the upper-case link:https://www.rfc-editor.org/rfc/rfc4648#section-8[base16 encoding] of the resource identifier with all leading `0` characters omitted.
 
 |===

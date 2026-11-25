@@ -39,7 +39,7 @@ That exclusion is the model's boundary between safety and security: it does not 
 
 *Rules left in force.*
 The model bounds only the safety argument.
-It leaves in force the protocol's security requirements, such as those of xref:README.adoc[uP-L1] against address spoofing and unauthorized access.
+It leaves in force the protocol's security requirements, such as those of xref:utransport.adoc[uP-L1] against address spoofing and unauthorized access.
 It also does not make a lower-assurance process harmless because it runs apart: the rules for lending and copying cover what such a process can write into shared memory.
 
 *The safety manual.*
@@ -108,7 +108,7 @@ The element *MUST NOT* let the failure cause any other heap use there.
 On every route, the element *MUST NOT* let a peer's failure, or the cleanup that follows it, release a route, a role, a table, a startup region or another runtime resource, or revoke an owner, other than what the failure ended.
 
 *Other parts.*
-What a binding owes when a peer fails is stated in xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input], xref:bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits] and xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise].
+What a binding owes when a peer fails is stated in xref:bindings/interface.adoc#req-ssr-binding-no-panic[No panic on any peer input], xref:bindings/lifecycle.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits] and xref:bindings/interface.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise].
 What the integrator provides is stated in xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated] and xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports].
 --
 
@@ -220,7 +220,7 @@ A copy or a conversion made in place of that refusal would hide the mismatch fro
 The element *MUST* recognize a frame from an earlier incarnation of a peer by the frame's full incarnation, refuse it as stale, never treat it as current, and count it.
 
 *Identity and incarnation.*
-A peer's identity is the one that its binding gives it, stable across its restarts (xref:bindings.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise]), and the incarnation the element records for it *MUST* only rise.
+A peer's identity is the one that its binding gives it, stable across its restarts (xref:bindings/interface.adoc#req-ssr-binding-peer-identity[Peer identity is stable, and incarnations rise]), and the incarnation the element records for it *MUST* only rise.
 
 *One exclusive step.*
 The element *MUST* compare a frame's full peer identity and incarnation with the recorded ones, and record a newer incarnation, as one exclusive step of its configuration's mechanism, so that no concurrent classification, restart, loss or restart report can:

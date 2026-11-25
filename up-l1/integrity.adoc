@@ -12,8 +12,8 @@ Scope and element boundary: xref:../safety/elements/up-rust/README.adoc[the up-r
 
 These items say how the element lends or copies shared memory between integrity levels:
 
-* A binding's part, recording and reporting the writer's level, is xref:bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level] in xref:bindings.adoc[uP-L1 transport bindings].
-* A lending binding's statement of which way its ports write shared state is xref:bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state], on the same page.
+* A binding's part, recording and reporting the writer's level, is xref:bindings/storage.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level] in xref:bindings/storage.adoc[uP-L1 binding storage, metadata admission and loan sizing].
+* A lending binding's statement of which way its ports write shared state is xref:bindings/storage.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state], on the same page.
 * The integrator's part, assigning each transport's level, is xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-integrity-levels[Each transport's integrity level is assigned correctly] in xref:../safety/elements/up-rust/assumptions-of-use.adoc[the element's assumptions of use].
 * The integrator's duties for access, for two-way shared state and for a zero-copy writer are xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-peer-access[Only authorized processes reach the transport], on the same page.
 * The integrator's duties for data above ASIL B, and for the element inside a process or partition that holds software at ASIL C or D, are xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-capability-ceiling[Data above ASIL B relies on measures outside the element], on the same page.
@@ -33,7 +33,7 @@ The levels are QM, A, B, C and D, in that order, from the lowest to the highest.
 A level is at or above another where it is the same level or a later one in that order, and below it where it is an earlier one.
 
 *An unknown level.*
-On a route of a lending binding, a writer's level is unknown where the route's binding reports it as unknown, or reports no level for it (xref:bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level]).
+On a route of a lending binding, a writer's level is unknown where the route's binding reports it as unknown, or reports no level for it (xref:bindings/storage.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level]).
 An unknown level is none of the five levels.
 The element *MUST* treat it as below every level, QM included, and *MUST NOT* treat it as at or above any reader's level.
 
@@ -54,7 +54,7 @@ At setup, the element *MUST* refuse a route on which a reader would see shared m
 The element *MUST* name the route and both levels, or the unknown one, in that refusal.
 
 *The writer's level.*
-How a writer's level is recorded and reported is stated in xref:bindings.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level].
+How a writer's level is recorded and reported is stated in xref:bindings/storage.adoc#req-ssr-binding-integrity-level[A lending binding records and reports the writer's level].
 That item replaces, for every binding, the sentence of revision 4 of this item that called recording and reporting the writer's level the binding's duty.
 This item gives no binding a duty.
 --
@@ -95,7 +95,7 @@ The element *MUST NOT* give a reader a view into shared memory unless all of the
 
 * the writer's level is known, and it is at or above the reader's (<<req-ssr-integrity-declared,Each transport declares one integrity level>>);
 * where the ports of the route's binding write shared state both ways, the reader's level is the service's recorded level, as the clause "Refusals at setup" states;
-* the storage's allocation tenure stays live for the whole view (xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]);
+* the storage's allocation tenure stays live for the whole view (xref:bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]);
 * the synchronization that keeps the writer from writing the storage while the view exists is in place;
 * the type's exact ABI, layout, alignment and initialized validity are agreed (xref:peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI]; xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; <<req-ssr-integrity-any-bits,In-place types accept every bit pattern>>).
 
@@ -123,10 +123,10 @@ A mechanism that holds only while the writer keeps a lock or another protocol is
 *Admission on the copy route.*
 On such a route, every value that the admission of a frame takes from the frame's header or metadata comes from the element's acquired copy, in this order:
 
-. the route's lending binding *MUST* give the frame's enclosing extent as its middleware gives it, compared with the receiving route's largest frame where the binding's sample-layout contract defines one (xref:bindings.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]), before anything is formed from that extent;
+. the route's lending binding *MUST* give the frame's enclosing extent as its middleware gives it, compared with the receiving route's largest frame where the binding's sample-layout contract defines one (xref:bindings/storage.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]), before anything is formed from that extent;
 . the element acquires the frame's header and metadata within that extent, as the clause "The copy route" states: a bounded raw copy into storage of its own, which hands on no frame, so that nothing of it is decoded, admitted, delivered or forwarded before the checks of the next step have passed;
-. the binding *MUST* make its physical checks of the frame on the acquired header (xref:bindings.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]), and a refusal keeps the binding's cause and its one count and ends the frame's admission: the element *MUST NOT* decode the acquired metadata of a frame that one of those checks refuses, copy its payload or make a later step of this clause for it;
-. the element *MUST* make its admission of the frame's metadata on the acquired metadata (xref:bindings.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]), and the payload length that it compares with the payload that the metadata states is the acquired header's;
+. the binding *MUST* make its physical checks of the frame on the acquired header (xref:bindings/storage.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]), and a refusal keeps the binding's cause and its one count and ends the frame's admission: the element *MUST NOT* decode the acquired metadata of a frame that one of those checks refuses, copy its payload or make a later step of this clause for it;
+. the element *MUST* make its admission of the frame's metadata on the acquired metadata (xref:bindings/storage.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]), and the payload length that it compares with the payload that the metadata states is the acquired header's;
 . the element takes the payload's place and length for the copy from the acquired header, as the clause "The copy route" states.
 
 After the acquisition, the element and the binding *MUST NOT* read a byte of the shared sample's header or metadata again, and *MUST NOT* take a decision from a value read there.
@@ -134,11 +134,11 @@ After the acquisition, the element and the binding *MUST NOT* read a byte of the
 *Refusals at setup.*
 
 * The element *MUST* refuse at setup a reader that demands zero-copy on a route that crosses upward, or whose writer's level is unknown.
-* The element *MUST* take which way the ports of a binding write shared state from what the binding states at setup (xref:bindings.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state]), and *MUST* treat a lending binding that has stated nothing as one whose ports write shared state both ways.
+* The element *MUST* take which way the ports of a binding write shared state from what the binding states at setup (xref:bindings/storage.adoc#req-ssr-binding-shared-state[A lending binding says which way its ports write shared state]), and *MUST* treat a lending binding that has stated nothing as one whose ports write shared state both ways.
 * The element *MUST* ensure that, on a binding whose ports write shared state both ways, a port whose level differs from the service's recorded level, higher or lower, is refused at setup, on every port kind and on the paired event service.
 
 *Reporting and heap.*
-What the element states in each route's report of the form that the route got, a read of the shared storage or the copy route's copy, is specified in xref:bindings.adoc#req-ssr-error-route-report[Each route reports what it got].
+What the element states in each route's report of the form that the route got, a read of the shared storage or the copy route's copy, is specified in xref:route-observation.adoc#req-ssr-error-route-report[Each route reports what it got].
 The element *MUST* make each view, the acquisition and the copy, their validation and that report without acquiring or releasing heap memory, in its own work and in the work that it invokes for them, the decoding that validates a serialized payload included.
 A route's declared allocation does not reach these operations (xref:payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path], "What a declaration does not reach").
 The element *MUST* refuse at setup a route that needs the copy route where the route's wire declares a heap class that admits allocation for decoding, naming the route and that class.
@@ -168,7 +168,7 @@ Verification:: fault-injection, test, miri, heap-window, review
 ** On a route that selects the native protection composition and takes the copy route: the outer extent copied once into storage aligned to A, and the composition's checks, then the E2E wire's check, made on the copy.
 ** On the copy route, an acquired header that fails one of the binding's physical checks: refused under the binding's cause, counted once, its metadata not decoded and its payload not copied, and nothing of it admitted, delivered or forwarded.
 ** A route that needs the copy route, on a wire that declares allocation for decoding: refused at setup, naming the route and the class.
-** On a receive route of a lending binding, the form that the route got, a read of the shared storage or the copy route's copy, as its report shows it (xref:bindings.adoc#req-ssr-error-route-report[Each route reports what it got]).
+** On a receive route of a lending binding, the form that the route got, a read of the shared storage or the copy route's copy, as its report shows it (xref:route-observation.adoc#req-ssr-error-route-report[Each route reports what it got]).
 * *miri*, under Stacked Borrows, under Tree Borrows and with strict provenance: the copy route's mechanism against a racing writer thread, where Miri can model the mechanism; and, as negative controls, a plain-read copy and an atomic read racing a plain write, each of which Miri reports as a data race.
 A mechanism over memory that another process maps is shown by the review and the fault-injection cases instead.
 * *heap-window*: a view, the copy route's acquisition, copy and validation, the decoding of a serialized payload included, and the report of a route's form.
@@ -181,13 +181,13 @@ So the reader works only on a copy in storage it owns, checked after the copy is
 
 _Admission on the copy route._
 A writer below the reader's level can change the shared header at any moment, so every value that the admission uses, those of the binding's checks included, comes from the one acquired copy, and no later read of the shared sample can contradict it.
-The acquisition is only a raw copy: until the binding's checks have passed on it, nothing of it is decoded or handed on, so a binding's rule that no part of a refused sample reaches the element still holds, with that one exception named (xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]).
+The acquisition is only a raw copy: until the binding's checks have passed on it, nothing of it is decoded or handed on, so a binding's rule that no part of a refused sample reaches the element still holds, with that one exception named (xref:bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-checks[On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used]).
 
 The copy is held in storage reserved at setup, like every other runtime buffer, so it needs no heap (xref:payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
 The middleware of a lending binding can map its payload memory read-only for readers.
 So the copy reads it only through loads that are valid on a read-only mapping.
-Where one middleware does so is described with its binding (xref:iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-wipe[On iceoryx2, the token of a loan that is not sent is wiped, and a sent frame is left as it was written]).
+Where one middleware does so is described with its binding (xref:bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-wipe[On iceoryx2, the token of a loan that is not sent is wiped, and a sent frame is left as it was written]).
 Not every load is valid there: even an atomic load can be undefined on read-only memory, apart from small relaxed loads on the targets that the documentation lists (source: https://doc.rust-lang.org/1.98.1/core/sync/atomic/index.html#atomic-accesses-to-read-only-memory[the core library documentation, Rust 1.98.1, module `+core::sync::atomic+`, section Atomic accesses to read-only memory]).
 
 Two accesses to the same bytes are a data race where one of them writes, nothing orders them and at least one of them is not atomic, and a data race is undefined behaviour (source: https://doc.rust-lang.org/1.98.1/core/sync/atomic/index.html#memory-model-for-atomic-accesses[the core library documentation, Rust 1.98.1, module `+core::sync::atomic+`, section Memory model for atomic accesses]; https://doc.rust-lang.org/1.98.1/reference/behavior-considered-undefined.html#r-undefined.race[the Rust Reference, Rust 1.98.1, chapter Behavior considered undefined, rule undefined.race]).

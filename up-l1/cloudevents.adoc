@@ -312,7 +312,7 @@ Base64 expansion and readability.
 
 ==== Additional Recommendations
 
-CloudEvents *SHOULD* only be serialized when they are about to be sent via the xref:README.adoc#_utransport[UTransport interface]
+CloudEvents *SHOULD* only be serialized when they are about to be sent via the xref:utransport.adoc#_utransport[UTransport interface]
 
 == Examples
 

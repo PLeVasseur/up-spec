@@ -1,0 +1,316 @@
+= uP-L1 Common Binding Interface
+:toc: preamble
+
+The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
+
+[NOTE]
+====
+This page holds middleware-neutral binding interface and peer/observation/panic-containment requirements of the up-rust SEooC requirement family (`+req~ssr-binding-*+`, `ASIL:: B`, `SafetyBinding` and `SafetyBindingPull` tags).
+Whom each item binds is stated in xref:../../contract-generations.adoc[Which requirements an implementation follows] (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
+Related shared chapters: xref:lifecycle.adoc[binding lifecycle, waivers, frame return and bounds] (including xref:lifecycle.adoc#req-ssr-binding-no-heap[binding no-heap], xref:lifecycle.adoc#req-ssr-binding-frame-drop[received-frame drop], xref:lifecycle.adoc#req-ssr-binding-bounded[bounded work and waits] and xref:lifecycle.adoc#sec-middleware-waivers[middleware permits and waivers]), xref:storage.adoc[binding storage and metadata admission], xref:../route-observation.adoc[route observation, deadlines and TTL] and xref:README.adoc#one-binding[what is specific to one binding].
+====
+
+[[sec-common-binding-contract]]
+== Common binding contract
+
+This section defines the common binding scope and contractual obligations shared across uProtocol transport bindings.
+
+[[req-ssr-binding-scope]]
+=== What a binding is, and the binding contract
+
+[.specitem,oft-sid="req~ssr-binding-scope~2",oft-title="What a binding is, and the binding contract",oft-needs="uman",oft-tags="SafetyBinding"]
+--
+*What a binding is.*
+A binding is a uP-L1 transport implementation that adapts the element to one middleware and is written against the element's lending or handoff runtime contract, part E2 of the element (xref:../../safety/elements/up-rust/README.adoc#req-ssr-element-boundary[The parts of the element, and element code]).
+
+*The binding contract.*
+The binding contract of a binding is that runtime contract together with every duty that the statement of a requirement of the up-rust SEooC requirement family gives that binding (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]), wherever the requirement is filed:
+
+* each duty that a statement gives each binding;
+* each duty that a statement gives the bindings of its kind or of its profile, such as each lending binding or each binding on a route that it serves by pull;
+* each duty that a statement gives that binding itself.
+
+A duty that a statement gives another part, such as the element, is not part of a binding's contract, even where the same requirement gives that binding a duty too.
+
+*A requirement that is specific to one binding.*
+A requirement that is specific to one binding names that binding and no other binding.
+It can give another part, such as the element, a duty of its own.
+
+*What is not a binding.*
+A transport implementation that is not written against that runtime contract is not a binding.
+The in-memory bindings that the contract suites run on are test doubles: fixtures for evidence, and not bindings.
+
+*Lending and handoff.*
+A lending binding is one on which a reader can be given shared memory that a writer wrote.
+A handoff binding is one that hands the element a private copy.
+These are the two families of bindings, and a test double belongs to the family whose runtime contract it implements.
+
+*Push and pull.*
+A binding serves each receive route in one of two ways.
+It serves a route by _push_ where it hands each frame to the element in a call that the binding makes, a _delivery_.
+It serves a route by _pull_ where it keeps the frames that arrive in a queue of its own, or of its middleware, under the route's QoS, its overflow policy included, and the element takes each frame that the queue holds in a call that the element makes.
+A push binding, or a pull binding, is a binding on a route that it serves so, and a push route, or a pull route, is such a route.
+One binding can serve some routes by push and others by pull.
+
+*Frames that the element receives.*
+A _pulled_ frame is one that the element took by pull.
+A _retained_ frame is a received frame that the element keeps after the call that gave it, until the frame's lease is dropped: a pulled frame, or a frame that a delivery passes to the element to keep.
+A _borrowed_ frame is one that a delivery lends to the element for the duration of that call only.
+
+*A frame's envelope.*
+A frame's _envelope_ is the form in which a binding carries the frame through its middleware: the parts that make up that form, such as a header, the frame's metadata and its payload, their order and where each lies.
+The envelope of a route, or of a leg, is the envelope in which its binding carries its frames.
+Where a binding's envelope is stated, it is stated with that binding (xref:README.adoc#one-binding[what is specific to one binding]).
+
+*Middleware and binding code.*
+A binding's middleware is the communication software that it adapts the element to.
+Binding code is the binding's own code, and the middleware's code is not binding code.
+
+*A separate element.*
+A binding is not part of the element.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-scope~2+`
+ASIL:: B
+Allocated to:: each binding
+Verification:: review (each statement and allocation that uses a word that this item defines, read with this item)
+
+*Rationale.*
+Whom a duty of a binding binds depends on what a binding is, and of which kind it is.
+The items use these words in their statements and allocations.
+A binding's code runs in the element's process, inside the element's calls and on threads that it starts, but each binding is developed and verified on its own, against the binding contract suite.
+
+_The measure of the contract._
+A binding's contract is read from the statements that give that binding a duty.
+So a duty that an item gives the element, the page on which an item is filed and the repository that holds a binding add nothing to it.
+
+[[req-ssr-binding-no-panic]]
+=== No panic on any peer input
+
+[.specitem,oft-sid="req~ssr-binding-no-panic~9",oft-title="No panic on any peer input",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+--
+*The rule.*
+Binding code *MUST NOT* panic on any frame, length or sequence a peer produces, or when a peer dies or restarts.
+Each binding *MUST* have each panic path inside its middleware made unreachable by a setup check or by sizing, unless the path is an accepted instance.
+
+*Each binding's account.*
+Each binding *MUST* state, in its qualification record (xref:../../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]), its account of the middleware panic paths that it can reach: that it has no accepted panic path, or each accepted instance by name.
+
+*Accepted instances.*
+A middleware panic path is an accepted instance only where all of these hold:
+
+* a requirement of the up-rust SEooC requirement family that is specific to the binding names the instance and states the five parts below;
+* the binding's qualification record discloses the instance as a known anomaly;
+* no frame, length or sequence that a peer produces, no peer's death or restart and no write of a faulty peer into shared memory can reach the path.
+
+The five parts are:
+
+* the operation, or the path inside the middleware, that can panic;
+* the binding, profile or configuration to which it applies;
+* the conditions that can reach it;
+* the exclusions that are relevant to it, among peer input, a peer's death or restart, and the sequences of calls that an application can make through the element;
+* the setup check, sizing, invariant or limit of the target that bounds it or excludes it.
+
+Where one requirement names several instances, each is accepted only with its own scope and its own bounds, which can be verified by themselves.
+An accepted instance is not a waiver, and it accepts no other path and no violation of another requirement.
+
+*Any other path.*
+Any other middleware panic path, including another one that only a broken OS can reach, is a known failure of its binding.
+So is a path whose requirement does not state all five parts, or that its binding's qualification record does not disclose.
+An acknowledgement makes no known failure an accepted instance.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-no-panic~9+`
+ASIL:: B
+Allocated to:: each binding
+Verification:: fault-injection, test, review
+* *fault-injection*: malformed frames; peers killed and restarted; a faulty peer's writes into shared memory.
+* *test*: the binding contract suite.
+* *review*: for each binding, the account in its qualification record: that it says that the binding has no accepted panic path, or names each accepted instance; for each accepted instance, the requirement that accepts it, with all five of its parts, against the source of its middleware in the configuration that the instance names, and that no peer input, death, restart or shared-memory write reaches the path; and the disclosure of each accepted instance in the binding's qualification record.
+
+*Rationale.*
+A heap waiver cannot excuse a panic.
+A peer can produce its input again at any time, and can die or restart at any time, so nothing bounds a path that a peer can reach.
+Such a path is a known failure, whatever is disclosed or acknowledged.
+
+Each binding states its account, so that no binding's silence is read as one.
+The paths of one middleware, and a setup check or a sizing that makes one of them unreachable, are stated with its binding.
+
+[[req-ssr-binding-peer-identity]]
+=== Peer identity is stable, and incarnations rise
+
+[.specitem,oft-sid="req~ssr-binding-peer-identity~1",oft-title="Peer identity is stable, and incarnations rise",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+--
+A binding *MUST* give each frame a peer identity that is stable across that peer's restarts, with an incarnation that starts at 1 and only rises.
+It *MUST* report a peer's loss or restart where its middleware allows.
+
+A binding that cannot identify peers *MUST* say so, and its routes then rely on deadlines only.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-peer-identity~1+`
+ASIL:: B
+Allocated to:: each binding
+Verification:: test (a test double that restarts; a real restart), review (whether the binding can identify peers, and, where it cannot, that it says so)
+
+*Rationale.*
+A stable identity with a rising incarnation lets the element tell a restarted peer from its earlier self, and refuse a frame from the earlier one as stale (xref:../peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected]).
+
+A binding that cannot identify peers cannot report a peer's loss or restart, so only deadlines can show that a peer has gone.
+
+[[req-ssr-binding-qos-capability]]
+=== A binding honors or refuses each declared setting
+
+[.specitem,oft-sid="req~ssr-binding-qos-capability~3",oft-title="A binding honors or refuses each declared setting",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+--
+A binding *MUST* declare its capability (xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name]), its QoS capability among it, truthfully, honor every route setting it admits, and in route preparation refuse any setting it cannot serve: QoS, peer-table size, payload bound, alignment, smallest payload, a count, a requirement to lend or truncation.
+
+It *MUST NOT* replace a declared setting silently.
+
+*What a declaration says.*
+For each count, size or bound that a binding declares, the binding *MUST* state what it measures: the resource, the unit and the scope that it holds for, and whether it is an upper limit or an amount that the binding guarantees to be available.
+A binding *MUST NOT* declare or report an upper limit, or a computed capacity, as guaranteed availability.
+
+*Arrival reports.*
+Whether a binding can report the arrivals of a pull route, and the arrival latency that it declares for one, are part of its QoS capability (<<req-ssr-binding-arrival-reports,A binding reports each arrival within the latency that it declares, and each event as what it is>>).
+
+*Initialized extents.*
+A binding's capability *MUST* state, for each path that consumes a sample of a route that it serves, the path's required-initialized extent, and for each receive path its delivered-initialized extent with its basis, or that the path has none (xref:storage.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]).
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-qos-capability~3+`
+ASIL:: B
+Allocated to:: each binding
+Verification:: test, review
+* *test*
+** The QoS contract suite and the binding contract suite on each binding, observing what an application receives from the documented read call alone.
+** A handoff binding that does not apply the route's policy in its own queue must fail it.
+** A declared upper limit that the binding cannot always make available, declared and reported as a limit and never as guaranteed availability.
+** A binding's capability for a route: each consuming path's required-initialized extent and each receive path's delivered-initialized extent, with its basis, or none, stated apart.
+* *review*: each count, size and bound that the binding declares, against what its declaration says that it measures; and each initialized extent that it declares, with its basis.
+
+*Rationale.*
+The element admits a route on what its binding declares.
+A figure that is read as more than it measures admits a route that the binding cannot serve: an upper limit says how much a route can ever use, and nothing about what is free when the route asks.
+The two initialized extents are a precondition and a guarantee, so the capability states them apart, and setup reads neither as the other.
+
+[[req-ssr-binding-arrival-reports]]
+=== A binding reports each arrival within the latency that it declares, and each event as what it is
+
+[.specitem,oft-sid="req~ssr-binding-arrival-reports~1",oft-title="A binding reports each arrival within the latency that it declares, and each event as what it is",oft-needs="impl,utest",oft-tags="SafetyBinding,SafetyBindingPull"]
+--
+*Scope.*
+The duties of this item on the declared latency, on arrival reports and on failed reads bind a binding on each receive route that it serves by pull (<<req-ssr-binding-scope,What a binding is, and the binding contract>>).
+What the element records on a route that a binding serves by push, and that route's arrival latency, are stated in xref:../route-observation.adoc#req-ssr-qos-deadline[Deadlines are monitored].
+
+*The declared latency.*
+For each pull route on which it can report arrivals, a binding *MUST* declare its arrival latency L, as xref:../route-observation.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines it under "Terms", in its QoS capability, with its unit.
+The binding *MUST* keep that latency on every target and in every configuration that its qualification record claims.
+A binding that cannot report every arrival of a pull route within a declared latency *MUST* declare that it cannot report arrivals on that route.
+
+*Arrival reports.*
+An arrival is what xref:../route-observation.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines under "Terms".
+On a pull route that declares a deadline, the binding *MUST* report every arrival to the element through the runtime port, each within L of the time at which its frame reached the route's queue.
+One report *MAY* stand for several arrivals, where the binding makes it within L of each of them.
+The binding *MUST NOT* report an arrival without evidence that a frame reached the route's queue: that a frame entered it, or that its overflow policy discarded one.
+A wake hint alone is no such evidence, and is not an arrival.
+
+*Failed reads.*
+On every pull route, the binding *MUST* report to the element, through the runtime port's receive-failure report, each failure to read its own queue, and each data connection of the route that its middleware drops or fails to set up without an error.
+It *MUST NOT* report such a failure as an arrival, and *MUST NOT* leave it unreported.
+
+*Each event as what it is.*
+In what it reports to the element and in what it counts, every binding *MUST* keep these events apart: an arrival; a wake hint; a receive failure, which is a failed read of its queue or a data connection that the clause "Failed reads" names; a failure of a call that notifies or wakes a peer; any other fault of a connection to a peer; and the loss of a frame.
+It *MUST NOT* report one of them as another, or infer one from another.
+What a call that notifies a peer returns shows what that call did: it shows neither that a frame arrived, was read or was consumed, nor that one was lost, and an error of the call does not show that no peer was notified.
+
+*The element's side.*
+What the element records, monitors and counts from these reports is stated in xref:../route-observation.adoc#req-ssr-qos-deadline[Deadlines are monitored] and xref:../route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once].
+What setup does with a deadline on a pull route whose binding cannot report arrivals is stated in xref:../runtime.adoc#req-ssr-qos-invalid-refused[Meaningless QoS is refused at setup].
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-arrival-reports~1+`
+ASIL:: B
+Allocated to:: each binding; for the declared latency, or the declaration that it cannot report arrivals, and for the reports of failed reads, on each receive route that it serves by pull; for the arrival reports, on each such route that declares a deadline
+Verification:: test, fault-injection, review
+* *test*
+** The QoS contract suite's deadline checks on a pull route, on a subscriber and on a carrier ingress: an arrival reported for each frame that reaches the queue, one that the overflow policy discards included, each within the declared latency.
+** Several frames that reach the queue close together: each reported within the declared latency, and, on a binding that lets one report stand for several arrivals, that report made within the declared latency of each of them.
+** A wake hint with no frame: no arrival reported, as the negative control.
+* *fault-injection*
+** A failing read of the binding's own queue: reported through the receive-failure report, and not as an arrival.
+** A data connection that the middleware drops, and one that it fails to set up, without an error: each reported through the receive-failure report.
+** A failing call that notifies a peer: no arrival and no lost frame reported or counted for it, and, where the binding reports or counts the failure, reported or counted as that failure.
+* *review*
+** The declared latency against the mechanism by which the binding reports arrivals, on each target and in each configuration that its qualification record claims; a measured delay alone does not establish it.
+** For a binding that cannot report every arrival of a pull route within a declared latency, its declaration that it cannot report arrivals there.
+
+*Rationale.*
+On a pull route the element sees an arrival only when the binding reports it, and it counts a route's deadline from the arrivals that it records.
+A report that is missing, or later than the declared latency, shows a miss that did not happen, and a report without an arrival hides one that did.
+So the binding answers for every arrival, within a latency that it declares and keeps.
+
+A wake hint says that there may be something to read, and not that a frame arrived.
+A failed read is neither an arrival nor a loss that the element can see for itself, so the binding reports it as what it is.
+
+What a call that notifies a peer returns says what that call did.
+Read as an arrival, a delivery or a loss, it would put into a count an event that nobody observed.
+
+[[req-ssr-binding-response-delivery]]
+=== A binding delivers one response route from one thread at a time
+
+[.specitem,oft-sid="req~ssr-binding-response-delivery~1",oft-title="A binding delivers one response route from one thread at a time",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+--
+On a response route that it serves by push, a binding *MUST* make its deliveries one at a time: it *MUST NOT* start a delivery on that route while another delivery on the same route is in progress, on any thread.
+
+The element's checks of an arriving response are stated in xref:../../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it], and this item relaxes none of them.
+On a response route that a binding serves by pull, the element takes each frame itself, and this item gives the binding no duty.
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-response-delivery~1+`
+ASIL:: B
+Allocated to:: each binding, for each response route that it serves by push
+Verification:: test (the binding contract suite: on a response route served by push, responses from several peers at once, with no two deliveries on that route overlapping), review (the binding's delivery path of a response route, for every thread that can deliver on it)
+
+*Rationale.*
+The element runs the arrival checks of one response route one at a time, and on a push route it runs them inside the binding's delivery.
+Two deliveries on one response route at once would put two of those checks side by side.
+On a pull route the element takes the frames itself.
+
+[[req-ssr-binding-receiver-count]]
+=== A binding that declares an exact receiver count reports it for each request
+
+[.specitem,oft-sid="req~ssr-binding-receiver-count~1",oft-title="A binding that declares an exact receiver count reports it for each request",oft-needs="impl,utest",oft-tags="SafetyBinding"]
+--
+*The declaration.*
+A binding declares an exact receiver count where it declares, in its capability, that it reports to the element, for each request that it hands over, the exact number of servers that received the request at that handover.
+A binding *MUST NOT* declare an exact receiver count unless it establishes that number at each handover, on every target and in every configuration that its qualification record claims.
+
+*The report.*
+A binding that declares an exact receiver count *MUST* report that number to the element for each request that it hands over.
+It *MUST NOT* report in its place a count of notification listeners, a discovery result or a count that it took at another time.
+
+*The element's side.*
+What the element does with that report, and on a binding that declares no exact receiver count, is stated in xref:../../up-l2/api.adoc#req-ssr-peer-rpc-no-server[A call with no server fails at once].
+--
+
+[horizontal]
+ID:: `+req~ssr-binding-receiver-count~1+`
+ASIL:: B
+Allocated to:: each binding, for what it declares; each binding that declares an exact receiver count, for its report
+Verification:: test, fault-injection, review
+* *test*: the binding contract suite, on a binding that declares an exact receiver count: a request handed over with no server, with one server and with several, the reported number being that of the servers that received it; a request handed over with listeners present and no server, and one handed over while discovery still lists a server that has left, with no other server to receive it: zero reported for each.
+* *fault-injection*: a server killed before the handover of a request: not counted in the report for that request.
+* *review*: the mechanism by which the binding establishes the number at the handover, on each target and in each configuration that its qualification record claims; for a binding whose middleware gives it only a listener count or a discovery result, that it declares no exact receiver count.
+
+*Rationale.*
+The element fails a call at once only on a report that its request reached no server.
+A count of listeners, or what discovery last found, says who might receive a request, and not who received this one, so a call that failed at once on it could have reached a server.
+So a binding declares the count only where it establishes it at the handover.
+Without that count the element fails no call at once for want of a server, and a call that is still pending at its TTL ends then.
+

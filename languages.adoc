@@ -1,7 +1,7 @@
 = uProtocol Language Library
 :toc:
 :sectnums:
-:up-l1-ref: xref:up-l1/README.adoc[uProtocol Transport Layer API]
+:up-l1-ref: xref:up-l1/utransport.adoc[uProtocol Transport Layer API]
 :up-l2-ref: xref:up-l2/README.adoc[uProtocol Communication Layer API]
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
@@ -30,7 +30,7 @@ uProtocol _Language Libraries_ are written for specific programming languages li
 image::up_libraries.drawio.svg[width=100%]
 ====
 
-uProtocol _Transport Libraries_ are written for specific programming languages to provide the xref:up-l1/README.adoc#communication-protocol-binding[communication protocol bindings] of uProtocol to concrete transport protocols like MQTT or Eclipse Zenoh.
+uProtocol _Transport Libraries_ are written for specific programming languages to provide the xref:up-l1/utransport.adoc#communication-protocol-binding[communication protocol bindings] of uProtocol to concrete transport protocols like MQTT or Eclipse Zenoh.
 A library that connects uProtocol to stock SOME/IP services is a xref:up-l1/someip.adoc#someip-service-translation[service translator], and not a Transport Library that implements the Transport Layer API for that conversion.
 
 == Requirements

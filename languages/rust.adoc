@@ -183,7 +183,7 @@ It puts each claim that memory safety relies on, such as the exclusivity of lent
 ====
 The element's memory safety relies on a binding's claim that lent storage is exclusive, disjoint and stable, so the element takes that claim through an `+unsafe+` trait.
 
-up-spec's iceoryx2 chapter asks the same of a Rust payload's author, through iceoryx2's `+ZeroCopySend+` (xref:../up-l1/iceoryx2.adoc[the iceoryx2 transport]), which iceoryx2 declares as an `+unsafe trait+` (source: the code of iceoryx2, release 0.9.3, https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2-bb/elementary-traits/src/zero_copy_send.rs#L32[`+iceoryx2-bb/elementary-traits/src/zero_copy_send.rs+`, line 32], its declaration of the trait).
+up-spec's iceoryx2 chapter asks the same of a Rust payload's author, through iceoryx2's `+ZeroCopySend+` (xref:../up-l1/bindings/iceoryx2.adoc[the iceoryx2 transport]), which iceoryx2 declares as an `+unsafe trait+` (source: the code of iceoryx2, release 0.9.3, https://github.com/eclipse-iceoryx/iceoryx2/blob/6ef7c55176a8487ae7ca53c2e0649d5df9a1b3b4/iceoryx2-bb/elementary-traits/src/zero_copy_send.rs#L32[`+iceoryx2-bb/elementary-traits/src/zero_copy_send.rs+`, line 32], its declaration of the trait).
 ====
 
 == Rust mechanism navigation
@@ -221,11 +221,11 @@ On native Rust paths, an explicit `derive` or inventoried `+unsafe+` layout decl
   xref:../up-l1/wires/native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused];
   xref:../up-l1/integrity.adoc#req-ssr-integrity-any-bits[In-place types accept every bit pattern];
   xref:../up-l1/peers.adoc#req-ssr-native-abi-agreed[A native representation never crosses an ABI];
-  xref:../up-l1/bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held];
-  xref:../up-l1/bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
+  xref:../up-l1/bindings/storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held];
+  xref:../up-l1/bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
 * *Foreign FFI boundary and callback lifetimes (LoLa):*
-  xref:../up-l1/lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path];
-  xref:../up-l1/lola.adoc#req-ssr-binding-lola-callbacks[What the LoLa binding gives LoLa stays valid for as long as LoLa can use it].
+  xref:../up-l1/bindings/lola.adoc#req-ssr-binding-lola-foreign-boundary[Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path];
+  xref:../up-l1/bindings/lola.adoc#req-ssr-binding-lola-callbacks[What the LoLa binding gives LoLa stays valid for as long as LoLa can use it].
 * *Bounded-runtime Streamer activation lock, synchronous data plane and crate isolation:*
   xref:../up-l2/streamer.adoc#req-ssr-streamer-route-lock[Routes and subscriptions are locked at activation];
   xref:../up-l2/streamer.adoc#req-ssr-streamer-sync-data-plane[The Streamer's data plane is synchronous];

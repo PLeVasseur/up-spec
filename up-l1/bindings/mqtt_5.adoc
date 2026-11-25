@@ -66,41 +66,41 @@ a| The uProtocol version being used
 
 | _id_
 | User Property [key: _1_]
-a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a| Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the lower-case https://www.rfc-editor.org/rfc/rfc9562#section-4[hyphenated string representation] of the UUID (source: RFC 9562, section 4 UUID Format).
 
 | _type_
 | User Property [key: _2_]
-a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a| Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the value of the _uprotocol.ce_name_ option defined for the
-link:../up-core-api/uprotocol/v1/uattributes.proto[UMessageType enum].
+link:../../up-core-api/uprotocol/v1/uattributes.proto[UMessageType enum].
 
 | _source_
 | User Property [key: _3_]
-a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a| Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
-* *MUST* be set to the xref:../basics/uri.adoc#uri-definition[string serialization of the UUri]
+* *MUST* be set to the xref:../../basics/uri.adoc#uri-definition[string serialization of the UUri]
 
 | _sink_
 | User Property [key: _4_]
-a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a| Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
-* *MUST* be set to the xref:../basics/uri.adoc#uri-definition[string serialization of the UUri]
+* *MUST* be set to the xref:../../basics/uri.adoc#uri-definition[string serialization of the UUri]
 
 | _priority_
 | User Property [key: _5_]
-a| The message's priority class as defined in xref:../basics/upriority.adoc[Message Priority]
+a| The message's priority class as defined in xref:../../basics/upriority.adoc[Message Priority]
 
 * *MUST* be set to the value of the _uprotocol.ce_name_ option defined for the
-link:../up-core-api/uprotocol/v1/uattributes.proto[UPriority enum].
+link:../../up-core-api/uprotocol/v1/uattributes.proto[UPriority enum].
 
 | _ttl_
 | User Property [key: _6_] +
 _Message Expiry Interval_
 
-a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a| Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 If _ttl_ is `0`, the message has no expiration. The _Message Expiry Interval_
 and TTL User Property *MUST NOT* be set in this case. MQTT applies no expiry to
@@ -129,38 +129,38 @@ lifetime from a finite expiry interval.
 
 | _permissionLevel_
 | User Property [key: _7_]
-a| The service consumer's permission level as defined in xref:../basics/permissions.adoc#_code_based_access_permissions_caps[Code-Based Access Permissions (CAPs)]
+a| The service consumer's permission level as defined in xref:../../basics/permissions.adoc#_code_based_access_permissions_caps[Code-Based Access Permissions (CAPs)]
 
-* *MUST* be set to the xref:../basics/permissions.adoc#_code_based_access_permissions_caps[CAP] value's decimal string representation. 
+* *MUST* be set to the xref:../../basics/permissions.adoc#_code_based_access_permissions_caps[CAP] value's decimal string representation. 
 
 | _commStatus_
 | User Property [key: _8_]
-a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a| Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
-* *MUST* be set to the link:../up-core-api/uprotocol/v1/ucode.proto[UCode enum] integer value's decimal string representation.
+* *MUST* be set to the link:../../up-core-api/uprotocol/v1/ucode.proto[UCode enum] integer value's decimal string representation.
 
 | _reqId_
 | _Correlation Data_
-a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a| Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the UUID's 16 byte representation in big endian order.
 
 | _token_
 | User Property [key: _10_]
-a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a| Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the token value.
 
 | _traceparent_
 | User Property [key: _11_]
-a| Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a| Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the traceparent value.
 
 | _payload_encoding_id_
 | _Content Type_
 a| The identifier defined in the
-xref:../basics/payload_encoding_registry.adoc[payload-encoding registry]
+xref:../../basics/payload_encoding_registry.adoc[payload-encoding registry]
 
 * _Content Type_ *MUST* be present if and only if the UMessage `payload` field
   is present, including a present zero-length payload.
@@ -373,7 +373,7 @@ The table below contains the rules for encoding a UUri's fields into an MQTT top
 |`authority_name`
 a| The segment *MUST* contain the (UTF8) string representation of the 
 
-1. `+` (`U+002B`, Plus Sign) character, if the authority name is the xref:../basics/uri.adoc#pattern-matching[wildcard authority].
+1. `+` (`U+002B`, Plus Sign) character, if the authority name is the xref:../../basics/uri.adoc#pattern-matching[wildcard authority].
 2. name of the host/authority that the (local) uEntity is running on, if authority name is empty.
 3. authority name, otherwise.
 
@@ -381,28 +381,28 @@ a| The segment *MUST* contain the (UTF8) string representation of the
 |`ue_type_id`
 a| The segment *MUST* contain the (UTF8) string representation of the
 
-1. `+` (`U+002B`, Plus Sign) character, if the uEntity type identifier is the xref:../basics/uri.adoc#pattern-matching[wildcard type ID].
+1. `+` (`U+002B`, Plus Sign) character, if the uEntity type identifier is the xref:../../basics/uri.adoc#pattern-matching[wildcard type ID].
 2. the upper-case https://www.rfc-editor.org/rfc/rfc4648#section-8[base16 encoding] of the uEntity type identifier with all leading `0` characters omitted.
 
 |`ue_instance`
 |`ue_instance_id`
 a| The segment *MUST* contain the (UTF8) string representation of the
 
-1. `+` (`U+002B`, Plus Sign) character, if the uEntity instance identifier is the xref:../basics/uri.adoc#pattern-matching[wildcard instance ID].
+1. `+` (`U+002B`, Plus Sign) character, if the uEntity instance identifier is the xref:../../basics/uri.adoc#pattern-matching[wildcard instance ID].
 2. the upper-case https://www.rfc-editor.org/rfc/rfc4648#section-8[base16 encoding] of the uEntity instance identifier with all leading `0` characters omitted.
 
 |`ue_version`
 |`ue_version_major`
 a| The segment *MUST* contain the (UTF8) string representation of the
 
-1. `+` (`U+002B`, Plus Sign) character, if the uEntity major version is the xref:../basics/uri.adoc#pattern-matching[wildcard version].
+1. `+` (`U+002B`, Plus Sign) character, if the uEntity major version is the xref:../../basics/uri.adoc#pattern-matching[wildcard version].
 2. the upper-case https://www.rfc-editor.org/rfc/rfc4648#section-8[base16 encoding] of the uEntity major version with all leading `0` characters omitted.
 
 |`resource`
 |`resource_id`
 a| The segment *MUST* contain the (UTF8) string representation of the
 
-1. `+` (`U+002B`, Plus Sign) character, if the resource identifier is the xref:../basics/uri.adoc#pattern-matching[wildcard resource ID].
+1. `+` (`U+002B`, Plus Sign) character, if the resource identifier is the xref:../../basics/uri.adoc#pattern-matching[wildcard resource ID].
 2. the upper-case https://www.rfc-editor.org/rfc/rfc4648#section-8[base16 encoding] of the resource identifier with all leading `0` characters omitted.
 
 |===

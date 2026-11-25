@@ -446,7 +446,7 @@ Every item of the owned-frame SDK contract carries a tag of this legend, and no 
 [.specitem,oft-sid="req~sdk-owned-frame-classic-apis~1",oft-title="The classic APIs keep their contract beside owned-frame routes",oft-needs="impl,utest",oft-tags="OwnedFrameSdk"]
 --
 *The classic APIs.*
-The classic APIs are the Transport Layer API of xref:up-l1/README.adoc[uP-L1], which sends and receives a xref:basics/umessage.adoc[`UMessage`], and the Communication Layer APIs of xref:up-l2/api.adoc[uP-L2], with their default implementation over it.
+The classic APIs are the Transport Layer API of xref:up-l1/utransport.adoc[uP-L1], which sends and receives a xref:basics/umessage.adoc[`UMessage`], and the Communication Layer APIs of xref:up-l2/api.adoc[uP-L2], with their default implementation over it.
 
 *Their contract.*
 The classic protocol-chapter rules that state them stay their contract, each key word with the strength that its chapter gives it.
@@ -503,7 +503,7 @@ ISO 26262:: 6-7.4.8 (part-clause numbers only)
 
 *Rationale.*
 A classic route is declared and admitted by no two-mode setup, so nothing checks it or places its storage before traffic, and its contract states no heap class.
-A waiver covers allocation inside a binding's middleware only (xref:up-l1/bindings.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
+A waiver covers allocation inside a binding's middleware only (xref:up-l1/bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
 So no waiver can admit a classic route.
 
 A two-mode type is not a classic route, whichever crate re-exports it.

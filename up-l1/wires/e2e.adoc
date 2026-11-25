@@ -102,7 +102,7 @@ N stays the type's size wherever a native type's size is declared or reported (x
 * *Alignment.* The route's declared payload alignment is A, so that its binding places the outer payload at a multiple of A in every mapping: the element *MUST* refuse at setup, naming the route, a route that selects the composition and declares another payload alignment. For a value, the element also checks the inner value's actual address (xref:../integrity.adoc#req-ssr-integrity-checked-at-admission[In-place frames are checked once, at admission]).
 * *The gap.* In a value-carrying frame (a topic or request frame, or a Value response, each of outer extent E), the inner alignment gap — the bytes from H to I — exists only where A does not divide H; an H-only Control or Failed response has outer extent H and contains no inner alignment gap.
 For each value-carrying frame that contains this gap, the element *MUST* initialize the bytes from H to I before sending (xref:native.adoc#req-ssr-native-in-place[A native payload is written and read where it is carried, or its route is refused], "Sending"); the CRC excludes them, and they carry no meaning.
-Any remaining bytes of the physical sample outside a frame's outer extent (such as a binding complement, tail, or bytes relinquished when a loan is shortened to H) stay the binding's to initialize (xref:../bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]).
+Any remaining bytes of the physical sample outside a frame's outer extent (such as a binding complement, tail, or bytes relinquished when a loan is shortened to H) stay the binding's to initialize (xref:../bindings/storage.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]).
 * *A value of size zero.* Where N is 0, E is I: the outer payload is present, and its extent is never zero.
 A view of a value of size zero still needs an address that is not null and is a multiple of A.
 * *The admitted set.* The outer extents that a route admits are E on a topic's or a request's route, and E and H on a response route.
@@ -237,7 +237,7 @@ Under the native protection composition, no inner decode and no native check fol
 
 *No timeout of its own.*
 The E2E wire *MUST NOT* keep a timeout of its own: it judges only the frames that it is given.
-How the element requires a detector route's deadline at setup, and monitors it as the timeout of end-to-end detection, is stated in xref:../runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup] and xref:../bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored].
+How the element requires a detector route's deadline at setup, and monitors it as the timeout of end-to-end detection, is stated in xref:../runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup] and xref:../route-observation.adoc#req-ssr-qos-deadline[Deadlines are monitored].
 --
 
 [horizontal]
@@ -518,7 +518,7 @@ Other compositions keep their detail behaviour.
 * *Detail inside the value is a Value.* A service that wants typed outcome detail on this composition carries it as fields of the value and answers `+Ok+`: that is a Value, and not a Failed response; a service that needs a response other than `+Ok+` with detail selects a serialized inner wire.
 * *A value of size zero.* Where N is 0 and I is H, a Value and a header-only response have the same extent, and the shape selector gives the branch: a verified `+normal+` with `+Ok+` is a present value of size zero, a Control or a Failed response is no value, and an absent outer payload has no E2E header (<<req-ssr-e2e-refusal-counted,End-to-end refusals are named, and counted once>>).
 * *Requests and topics* have the Value shape only; a method with no request value uses a type of size zero.
-* *Writing a header-only response.* On a binding whose loan can be shortened, the element *MUST* shorten the payload of a Control or a Failed response to H, and the binding zeroes the bytes given up; on a binding whose loan cannot change size, the element *MUST* ask for the loan at length H (xref:../bindings.adoc#req-ssr-binding-loan-sizing[A lending binding declares whether a transmit loan's payload extent can be shortened]).
+* *Writing a header-only response.* On a binding whose loan can be shortened, the element *MUST* shorten the payload of a Control or a Failed response to H, and the binding zeroes the bytes given up; on a binding whose loan cannot change size, the element *MUST* ask for the loan at length H (xref:../bindings/storage.adoc#req-ssr-binding-loan-sizing[A lending binding declares whether a transmit loan's payload extent can be shortened]).
 * *Echo and state are unchanged.* Every answer echoes its request's tag; the wire classes final and advisory; and the element sends the class unchanged, tries a refusal answer once and counts one that it cannot send (<<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>).
 
 *One response wire per method.*
@@ -648,7 +648,7 @@ This clause gives a sending role no receiver-roster duty; its local declaration 
 
 *Pre-substitution declared-sender membership.*
 All locality declarations above are setup data, and no name is looked up at runtime.
-After the binding's envelope checks, the element's metadata admission (including its filters) and existing peer classification (xref:../peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected]; xref:../peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones]) have admitted a frame — and, for a Response, after the element has also successfully tied the response to the current tenure of its call as xref:../../up-l2/api.adoc#req-ssr-peer-rpc-correlation[A response reaches only its own call] requires — the element *MUST* make the applicable pre-substitution declared-sender membership check below before its TTL check (xref:../bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]), before its payload encoding, unprotected and protected-native preflight checks, before substituting any locality context into a received derivation input, and before deriving an expected data ID.
+After the binding's envelope checks, the element's metadata admission (including its filters) and existing peer classification (xref:../peers.adoc#req-ssr-peer-stale-rejected[Stale peers are rejected]; xref:../peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones]) have admitted a frame — and, for a Response, after the element has also successfully tied the response to the current tenure of its call as xref:../../up-l2/api.adoc#req-ssr-peer-rpc-correlation[A response reaches only its own call] requires — the element *MUST* make the applicable pre-substitution declared-sender membership check below before its TTL check (xref:../route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed]), before its payload encoding, unprotected and protected-native preflight checks, before substituting any locality context into a received derivation input, and before deriving an expected data ID.
 A frame refused by an earlier envelope, metadata, existing peer or Response correlation check gets no check under this clause.
 This additional gate is distinct from ordinary early peer classification: it neither relaxes any restriction of xref:../peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones] nor permits a peer-table entry that that item forbids, and it neither requires a per-method receive route nor permits an unprotected call-slot lookup before protected Response correlation.
 
@@ -905,7 +905,7 @@ For such a frame, these rules replace that item's refusal, result and count for 
 * The element *MUST* release a refused frame at once.
 * What a refused response does to its call is stated in xref:../../up-l2/api.adoc#req-ssr-rpc-check-at-arrival[A response completes its call only once its wire accepts it].
 * Which refused requests are answered is stated in <<req-ssr-e2e-refusal-answered,A refused request is answered, final or advisory>>; whether a request with no E2E header is answered, in xref:../../up-l2/api.adoc#req-ssr-peer-rpc-undecodable-answered[An undecodable request is answered].
-* Which check counts a response, a request or a frame on a topic's or a notification's receive route with no E2E header that a check of its TTL also refuses is stated in xref:../bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed].
+* Which check counts a response, a request or a frame on a topic's or a notification's receive route with no E2E header that a check of its TTL also refuses is stated in xref:../route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed].
 --
 
 [horizontal]
@@ -920,7 +920,7 @@ Verification:: test, heap-window
 ** On each of a topic's and a notification's receive routes that selects the E2E wire, a frame with no payload to an operation that requires a value, one with no payload to an operation whose declared contract permits a message with no payload, one whose payload names an encoding that no wire of the route declares, one whose payload names the inner wire's encoding, and one whose payload names the encoding of another wire of the route, also one of length zero, none refused by an earlier check: each given to no wire, not delivered, refused, and counted once as `+unprotected+` in its own counter, not in the E2E counter and under no other cause, with no `+missing_payload+` result and no absence reported.
 ** On those routes, a present-empty payload bearing the E2E wire's encoding identifier and admitted by the preceding checks reaches that wire and is refused by its header check, counted in the E2E counter and not as `+unprotected+`; on a route that selects the native protection composition, such a payload, an outer extent of zero, is not admitted by the element's checks of the composition: it is refused under the native shape cause, counted once in the route's counter, and not given to the wire.
 ** The same unprotected frames refused by an earlier TTL check: only that check's count, with no wire called and no `+unprotected+` count.
-** A frame that reached the route's queue and is then refused as `+unprotected+` remains an arrival for the deadline monitor, as xref:../bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines it.
+** A frame that reached the route's queue and is then refused as `+unprotected+` remains an arrival for the deadline monitor, as xref:../route-observation.adoc#req-ssr-qos-deadline[Deadlines are monitored] defines it.
 ** A refused request's frame released at once.
 
 *Rationale.*

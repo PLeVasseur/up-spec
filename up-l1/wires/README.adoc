@@ -20,6 +20,32 @@ Each kind of wire has a page of its own: xref:native.adoc[the native wire], xref
 The concrete E2E records are xref:e2e-profile-v1.adoc[E2E Protection Profile Records 1].
 ====
 
+== Wire family, format profile and composition selector
+
+NOTE: Wire selection is independent of middleware binding choice (xref:../bindings/README.adoc[uP-L1 Transport Bindings Catalog]).
+A serialized wire can run over either a lending or a handoff binding; each wire keeps its own contract.
+
+[cols="2,2,5",options="header"]
+|===
+| Kind | Chapter | Role
+
+| Wire family (native)
+| xref:native.adoc[`native.adoc`]
+| In-place fixed-layout Rust representation (`SafetyWire`, `SafetyUpRustCore`)
+
+| Wire family (serialized)
+| xref:serialized.adoc[`serialized.adoc`]
+| Format-neutral serialized encoding/decoding and owned-value rules (`SafetyWire`, `SafetyWireSerialized`)
+
+| Concrete format profile
+| xref:xcdrv2.adoc[`xcdrv2.adoc`]
+| XCDR2 little-endian appendable wire profile (`SafetyXcdr2`)
+
+| Protection composition
+| xref:e2e.adoc[`e2e.adoc`] & xref:e2e-profile-v1.adoc[`e2e-profile-v1.adoc`]
+| End-to-end protection wrapping another wire and Profile 1 concrete records (`SafetyE2eWire`)
+|===
+
 [[req-ssr-wire-scope]]
 == What a wire is, and the wire contract
 
