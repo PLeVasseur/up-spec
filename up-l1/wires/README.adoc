@@ -219,7 +219,7 @@ The exact grammar of a frame's metadata is the wire's stated format at its fixed
 The wire *MUST* establish that grammar before it decodes any field whose meaning depends on it, from fixed setup context or from a selector that it reads without that grammar.
 It *MUST NOT* choose a grammar by trying decoders and keeping one that succeeds, and *MUST NOT* choose one from a package name, a payload encoding identifier or an envelope's version: a decoding that succeeds selects no grammar, and a range check is no detector of one.
 The element *MUST NOT* have a frame's metadata decoded under another grammar where the selected wire reports that the metadata does not decode.
-This revision adds this clause, and replaces no duty of revision 1 of this item.
+Revision 2 of this item replaces no duty of revision 1 of this item; the clause "Grammar before fields" applies alongside all duties of revision 1 for each wire that a route selects to decode frame metadata and for the element.
 --
 
 [horizontal]

@@ -55,7 +55,7 @@ The element *MUST NOT* let a waiver admit:
 Allocation that a serialized route declares for its wire, its binding or its allocation provider (xref:../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing] states what an allocation provider is) is admitted by that route's heap class (xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]), and by no waiver; Class 2 allocation inside middleware under a permit needs a waiver on every route, as <<req-ssr-waiver-required,Middleware heap needs a named waiver>> states.
 
 *Scoped replacement.*
-For the element across all configurations, this revision replaces revision 1 of this item by admitting only the exact Class 2 middleware lifecycle resource effects and narrow permitted allocator-exhaustion outcome of the matching permit, while explicitly excluding own-code allocation, own-code panics, unsafe foreign unwinds, all non-exhaustion middleware known failures and any conflict with an overlapping required guarantee or process-survival claim.
+For the element across all configurations, revision 2 of this item replaces revision 1 of this item.
 --
 
 [horizontal]
@@ -97,7 +97,7 @@ The heap class that a binding states for a route covers the middleware work that
 These rules bind the binding's transport from its own transition.
 
 *Scoped replacement.*
-For each binding across all configurations, this revision replaces revision 3 of this item by requiring full Class 2 permit enumeration of middleware lifecycle operations, triggers, allocation domains, finite envelopes, five-part policies and actor attribution, while keeping binding code strictly heap-free on native paths.
+For each binding across all configurations, revision 4 of this item replaces revision 3 of this item.
 --
 
 [horizontal]
@@ -136,7 +136,7 @@ Intrinsic first use of a lock or primitive belonging strictly to a named runtime
 This exception never excuses unforced binding locks, pre-existing middleware locks, unready initialization workers, reconnect sleeps or stop-timeout termination.
 
 *Scoped replacement.*
-For each binding across all configurations, this revision replaces revision 2 of this item by mirroring the narrow intrinsic first-use exception for explicitly enumerated runtime-created middleware objects under Class 2 policy while keeping all own-lock, pre-existing middleware-lock and worker-readiness duties in force.
+For each binding across all configurations, revision 3 of this item replaces revision 2 of this item.
 --
 
 [horizontal]
@@ -197,7 +197,7 @@ Any other middleware panic or termination path that the drop or that return can 
 An accepted instance is never a waiver, and covers no other middleware panic path, no owned value's destructor and no allocator or provider failure.
 
 *Scoped replacement.*
-For each binding across all configurations, this revision replaces revision 10 of this item by separating own-code non-allocating drop/handoff from separately permitted Class 2 middleware deferred lifecycle work, requiring pre-reserved whole-owner hand-off distinct from actual physical completion, and applying the narrow Class 2 allocator-exhaustion resource-policy classification solely to actual reached permitted allocation operations while preserving all non-blocking, isolation, non-revocation and non-exhaustion known-failure duties.
+For each binding across all configurations, revision 11 of this item replaces revision 10 of this item.
 --
 
 [horizontal]
@@ -269,8 +269,8 @@ Neither a short critical section nor splitting work onto a separate worker by it
 At the ingress of a carrier route (xref:../../up-l2/streamer.adoc#req-ssr-carrier-route[A carrier route takes each frame at its ingress and sends it at its egress]), the element *MUST* take pulled or retained frames, and never a borrowed frame whose carriage would need a staged copy.
 
 *Scoped replacement.*
-For each binding across all configurations, this revision replaces revision 5 of this item by extending the allocation-domain wait allowance solely to exact enumerated Class 2 permitted middleware operations while preserving no caller, arrival or health wait behind pending release, ordinary caller results, within-bound receive progress with genuine capacity and mechanism-neutral isolation rules.
-The element's carrier-ingress duty remains unchanged.
+For each binding across all configurations, revision 6 of this item replaces revision 5 of this item.
+For the element's carrier-ingress duty, revision 6 of this item makes no replacement of revision 5 of this item.
 --
 
 [horizontal]
@@ -322,7 +322,7 @@ Bounded retirement in a surviving process of the binding's own separately charge
 What a surviving process releases of its own, and how it accounts for the peer's failure, are stated in xref:../peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input] and xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
 
 *Scoped replacement.*
-For each binding across all configurations, this revision replaces revision 2 of this item by distinguishing bounded local retirement of the binding's own local connection/view/handle resources after local dependencies end from recovering, taking over or removing peer-owned predecessor backing, while keeping all initialization-recovery and surviving-process prohibitions in force.
+For each binding across all configurations, revision 3 of this item replaces revision 2 of this item.
 --
 
 [horizontal]

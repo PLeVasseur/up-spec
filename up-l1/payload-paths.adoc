@@ -94,7 +94,7 @@ It admits the route's ordinary ownership, and it establishes nothing more:
 These rules bind each transport from its own transition.
 
 *Scoped replacement.*
-For the element, each wire and each allocation provider across all configurations, this revision replaces revision 5 of this item by permitting explicitly enumerated Class 2 middleware lifecycle acquisition, resize and release (including deferred middleware lifecycle and local connection/view retirement under a complete permit and matching waiver) while preserving own-code causal no-heap duties, unconditional integrity exclusions, non-release of live backing or permanent infrastructure and serialized owned-value runtime adapter exclusions.
+For the element, each wire and each allocation provider across all configurations, revision 6 of this item replaces revision 5 of this item.
 --
 
 [horizontal]

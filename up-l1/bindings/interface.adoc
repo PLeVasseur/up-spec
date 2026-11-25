@@ -129,7 +129,7 @@ So is a path whose requirement does not state all five parts, or that its bindin
 An acknowledgement or waiver makes no known failure an accepted instance.
 
 *Scoped replacement.*
-For each binding across all configurations, this revision replaces revision 9 of this item by placing exhaustion solely at exact declared permitted Class 2 middleware acquisition or resize operations under the declared resource and failure policy ahead of accepted-instance and known-failure classification, while keeping own-code no-panic, five-part accepted instances and all non-exhaustion known-failure classifications in force.
+For each binding across all configurations, revision 10 of this item replaces revision 9 of this item.
 --
 
 [horizontal]

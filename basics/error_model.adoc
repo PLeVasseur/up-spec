@@ -183,7 +183,7 @@ On a route with an admitted Class 2 middleware permit or Class 3 serialized allo
 The element *MUST* return it as an error where that policy returns one, or where the covered scope requires recoverable exhaustion (xref:resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]); elsewhere what exhaustion does is the declared failure policy's.
 
 *Scoped replacement.*
-For the element across all configurations, this revision replaces revision 4 of this item by separating immediate no-heap/no-panic refusal decisions and pre-reserved owner hand-off from separately permitted Class 2 middleware deferred ownership completion and declared Class 2 allocator-exhaustion policy, while keeping all refusal-before-heap, single-count and serialized ownership-ending duties in force.
+For the element across all configurations, revision 5 of this item replaces revision 4 of this item.
 --
 
 [horizontal]

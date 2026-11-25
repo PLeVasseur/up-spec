@@ -113,7 +113,7 @@ What a binding owes when a peer fails is stated in xref:bindings/interface.adoc#
 What the integrator provides is stated in xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-process-isolation[Processes or partitions are isolated] and xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports].
 
 *Scoped replacement.*
-For the element across all configurations, this revision replaces revision 4 of this item by distinguishing separately charged local middleware connection/view lifecycle from peer-backing reclamation while keeping own-code no-panic/no-heap/no-unbounded-wait, survivor accounting, pending-cleanup isolation and the same-dependency owner-return limit in force.
+For the element across all configurations, revision 5 of this item replaces revision 4 of this item.
 --
 
 [horizontal]
@@ -193,7 +193,7 @@ Such a peer's participation is the deployment's condition: the peers of a route 
 A serialized route needs no fingerprint, and this item does not affect it.
 
 *Scoped replacement.*
-For the element and each binding that carries native frames between processes, this revision replaces revision 2 of this item by distinguishing an absent setup-declared peer from an observed fingerprintless peer while requiring current-incarnation ABI verification before any native payload exposure from a later-appearing peer incarnation; setup refusals for observed mismatched or missing fingerprints and retirement of non-element-peer duties from revision 1 remain in force.
+For the element and each binding that carries native frames between processes across all configurations, revision 3 of this item replaces revision 2 of this item (the retirement of non-element-peer duties from revision 1 remains in effect under "Peers that do not use the element").
 --
 
 [horizontal]
@@ -280,7 +280,7 @@ On a route with a declared list of peers, the element *MUST* refuse and count a 
 * The element *MUST NOT* let that return make a later peer's frames be refused as stale, whatever frames of the lost peer are in flight at that moment.
 
 *Scoped replacement.*
-For the element across all configurations, this revision replaces revision 2 of this item by placing peer-table capacity computation from declared worst-case load directly here under xref:../basics/resources.adoc#req-ssr-memory-computable[Startup storage is computable before start], while preserving pre-runtime capacity refusal and all runtime peer-entry rules.
+For the element across all configurations, revision 3 of this item replaces revision 2 of this item.
 --
 
 [horizontal]

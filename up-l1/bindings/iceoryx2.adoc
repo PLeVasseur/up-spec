@@ -597,7 +597,7 @@ Splitting sample return away from subscriber receive and connection management i
 The iceoryx2 binding *MUST NOT* claim conformance to this item for a build or configuration unless exact build and design evidence establishes every retirement, reporting, capacity and unimplemented independent-return protocol obligation above (including native lock-free target atomics, sole completion production, SPSC exclusivity, `Kc >= N` sender/receiver compatibility, valid ownership, report/wake isolation and reached failure behavior). Neither a middleware resource permit, `E >= 2H` sizing alone, a raw offset or reused key, last-owner `+Arc+` teardown, continuation theft nor isolated replacement of stock `+Sample::drop+` supplies that evidence.
 
 *Scoped replacement.*
-This revision replaces revision 2 of this item for the iceoryx2 binding's receive-route and subscriber retirement configurations: it retains the `E >= 2H` setup minimum under receiver-wide aggregate `H` and adds the incarnation-identity, unique-membership, preflight/reclaim-before-construct, completion-envelope, borrowed-backing, normal-drainage, single-counted dropped-connection reporting and evidence duties above.
+For the iceoryx2 binding's receive-route and subscriber retirement configurations, revision 3 of this item replaces revision 2 of this item; no actor is relieved of the `E >= 2H` setup minimum under receiver-wide aggregate `H`.
 --
 
 [horizontal]

@@ -107,8 +107,8 @@ A binding that cannot keep these properties for a route *MUST* refuse to lend fo
 It *MUST NOT* present storage that it copies into or out of as lent (xref:interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]).
 
 *Scoped replacement.*
-For each lending binding across all configurations, this revision replaces revision 2 of this item by permitting bounded local mapping/view attachment of a later-appearing setup-declared peer's fixed static backing within a declared finite envelope before frame exposure, while preserving fixed sizing, alignment, address stability, exclusivity, disjointness, forgotten-owner persistence, no dynamic payload growth and no remapping or moving of held storage.
-The element's uninitialized fresh-loan duty remains unchanged.
+For each lending binding across all configurations, revision 3 of this item replaces revision 2 of this item.
+For the element's uninitialized fresh-loan duty, revision 3 of this item makes no replacement of revision 2 of this item.
 --
 
 [horizontal]
