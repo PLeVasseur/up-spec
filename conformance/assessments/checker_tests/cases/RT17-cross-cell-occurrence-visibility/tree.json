@@ -1,0 +1,13 @@
+{
+  "files": {
+    "example/hidden-first.adoc": "= Probe\n\n[cols=\"1,1\"]\n|===\na|\n[comment]\nHidden. a|[.specitem,oft-sid=\"req~rt17-single~1\"]\nVisible.\n|===\n",
+    "example/hidden-first-ordinal.adoc": "= Probe\n\n[cols=\"1,1\"]\n|===\na|\n[comment]\nHidden. a|[.specitem,oft-sid=\"req~rt17-dup~1\"]\nVisible.\n|===\n\n[.specitem,oft-sid=\"req~rt17-dup~1\"]\nLater different clause.\n",
+    "example/visible-first.adoc": "= Probe\n\n[cols=\"1,1\"]\n|===\na|\n[.specitem,oft-sid=\"req~rt17-rev~1\"]\nVisible first. a|[comment]\n[.specitem,oft-sid=\"req~rt17-rev~1\"]\nHidden second.\n|===\n",
+    "example/shared-anchor.adoc": "= Probe\n\n[cols=\"1,1\"]\n|===\na|\n[comment]\nHidden. a|[[cell-a]]\n[.specitem,oft-sid=\"req~rt17-anchor~1\"]\nAnchored visible.\n|===\n",
+    "example/open-slash-shared.adoc": "= Probe\n\n[cols=\"1,1\"]\n|===\na|[comment]\n--\nHidden open.\n-- a|[.specitem,oft-sid=\"req~rt17-delim~1\"]\nAfter open.\na|////\nHidden slash.\n//// a|[.specitem,oft-sid=\"req~rt17-delim~1\"]\nAfter slash.\n|===\n",
+    "example/nested-cell.adoc": "= Probe\n\n[cols=\"1,1\"]\n|===\na|\n[cols=\"1,1\"]\n!===\na!\n[comment]\nInner hidden. a![.specitem,oft-sid=\"req~rt17-nested~1\"]\nInner visible.\n!===\na|[.specitem,oft-sid=\"req~rt17-nested~1\"]\nOuter visible.\n|===\n",
+    "example/three-col-sandwich.adoc": "= Probe\n\n[cols=\"1,1,1\"]\n|===\na|[comment]\nHidden 1. a|[.specitem,oft-sid=\"req~rt17-mid~1\"]\nVisible mid. a|[comment]\nHidden 2.\n|===\n",
+    "example/hidden-sid-then-visible-sid.adoc": "= Probe\n\n[cols=\"1,1\"]\n|===\na|[comment,oft-sid=\"req~rt17-hv~1\"]\nHidden first. a|[.specitem,oft-sid=\"req~rt17-hv~1\"]\nVisible second.\n|===\n",
+    "example/both-visible.adoc": "= Probe\n\n[cols=\"1,1\"]\n|===\na|[.specitem,oft-sid=\"req~rt17-both~1\"]\nFirst visible. a|[.specitem,oft-sid=\"req~rt17-both~1\"]\nSecond visible.\n|===\n"
+  }
+}

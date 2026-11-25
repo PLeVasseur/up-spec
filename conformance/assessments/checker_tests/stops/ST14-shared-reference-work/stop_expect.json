@@ -1,0 +1,6 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "unsupported:",
+  "expected_substring": "100000 evaluation steps",
+  "assessments_dir": "assessments"
+}

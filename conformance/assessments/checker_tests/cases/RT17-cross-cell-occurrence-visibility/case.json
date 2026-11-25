@@ -1,0 +1,281 @@
+{
+  "case": "RT17",
+  "subject": "CKR2-1 occurrence-scoped comment visibility across shared-line AsciiDoc table cells, order variants, anchors, nested cells, and v1/v2 identity",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 7,
+        "statement": [
+          "Visible."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 7,
+        "statement": [
+          "Visible."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 11,
+        "statement": [
+          "Later different clause."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-4.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ambiguous"
+        ],
+        "occurrences": [
+          {
+            "source_path": "example/hidden-first-ordinal.adoc",
+            "ordinal": 1,
+            "line": 7
+          },
+          {
+            "source_path": "example/hidden-first-ordinal.adoc",
+            "ordinal": 2,
+            "line": 11
+          }
+        ]
+      }
+    },
+    {
+      "submission": "submission-5.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 6,
+        "statement": [
+          "Visible first."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-6.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 8,
+        "statement": [
+          "Anchored visible."
+        ],
+        "derived_anchor": "cell-a",
+        "anchor_form": "first"
+      }
+    },
+    {
+      "submission": "submission-7.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 8,
+        "statement": [
+          "After open."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-8.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 12,
+        "statement": [
+          "After slash."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-9.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 10,
+        "statement": [
+          "Inner visible."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-10.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 13,
+        "statement": [
+          "Outer visible."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-11.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ambiguous"
+        ],
+        "occurrences": [
+          {
+            "source_path": "example/nested-cell.adoc",
+            "ordinal": 1,
+            "line": 10
+          },
+          {
+            "source_path": "example/nested-cell.adoc",
+            "ordinal": 2,
+            "line": 13
+          }
+        ]
+      }
+    },
+    {
+      "submission": "submission-12.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 6,
+        "statement": [
+          "Visible mid."
+        ],
+        "anchor_form": null,
+        "derived_occurrence": {
+          "source_path": "example/three-col-sandwich.adoc",
+          "ordinal": 1,
+          "anchor": null,
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-13.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 6,
+        "statement": [
+          "Visible second."
+        ],
+        "anchor_form": null,
+        "derived_occurrence": {
+          "source_path": "example/hidden-sid-then-visible-sid.adoc",
+          "ordinal": 1,
+          "anchor": null,
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-14.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 5,
+        "statement": [
+          "First visible."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-15.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 6,
+        "statement": [
+          "Second visible."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-16.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ambiguous"
+        ],
+        "occurrences": [
+          {
+            "source_path": "example/both-visible.adoc",
+            "ordinal": 1,
+            "line": 5
+          },
+          {
+            "source_path": "example/both-visible.adoc",
+            "ordinal": 2,
+            "line": 6
+          }
+        ]
+      }
+    }
+  ]
+}

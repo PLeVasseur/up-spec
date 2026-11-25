@@ -1,0 +1,13 @@
+{
+  "case": "ST22q",
+  "subject": "RF-5: earlier sole item second-form query in anchored section holding dangling attribute-entry SID (v2 sec)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

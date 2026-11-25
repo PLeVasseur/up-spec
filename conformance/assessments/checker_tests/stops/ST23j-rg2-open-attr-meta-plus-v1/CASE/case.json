@@ -1,0 +1,13 @@
+{
+  "case": "ST23j",
+  "subject": "RG2: immediately adjacent attribute entry + [comment] + + after attached open block (I4, v1)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "case": "ST22l",
+  "subject": "RF-3: leading blank, pending [discrete], following blank before direct SID floating title (v1)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

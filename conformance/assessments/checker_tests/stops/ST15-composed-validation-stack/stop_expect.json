@@ -1,0 +1,6 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "unsupported:",
+  "expected_substring": "host stack resources",
+  "assessments_dir": "assessments"
+}

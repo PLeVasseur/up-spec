@@ -1,0 +1,87 @@
+{
+  "case": "RT16",
+  "subject": "Comment target visibility and ordinal accounting across attached heads and ignored line comments",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-4.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-5.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-6.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-7.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-8.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2
+      }
+    }
+  ]
+}

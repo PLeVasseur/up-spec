@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/probe.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~probe~1\"]\n////\ncomment block\n////\nVisible paragraph.\n"
+  }
+}

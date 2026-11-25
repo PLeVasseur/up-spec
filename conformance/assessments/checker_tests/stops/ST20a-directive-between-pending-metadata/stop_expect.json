@@ -1,0 +1,5 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "undecided:",
+  "expected_substring": "a preprocessor directive stands between the section title and the item"
+}

@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/st23m.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n[.unused]\n\n\n[.specitem,oft-sid=\"req~f2b~1\"]\n+\n"
+  }
+}

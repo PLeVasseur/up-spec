@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/st21e.adoc": "= P\n\n[[sec]]\n== Section\n\n[literal]\n+\n[.specitem,oft-sid=\"req~lit~1\"]\nIn literal.\n"
+  }
+}

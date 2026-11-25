@@ -1,0 +1,13 @@
+{
+  "case": "ST23e",
+  "subject": "RG1: prior pending [comment] + 1 blank + [.role] + 1 blank with later live sentinel (v2 ordinal 1 live)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

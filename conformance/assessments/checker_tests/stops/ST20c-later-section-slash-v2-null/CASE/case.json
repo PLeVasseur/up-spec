@@ -1,0 +1,12 @@
+{
+  "case": "ST20c-later-section-slash-v2-null",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

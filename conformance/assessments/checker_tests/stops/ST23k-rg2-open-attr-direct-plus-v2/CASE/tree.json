@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/st23k.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n:foo: bar\n+\n[comment,oft-sid=\"req~rf2adp~1\"]\n+\n\n[.specitem,oft-sid=\"req~rf2adp~1\"]\nCandidate.\n\n[[live]]\n[.specitem,oft-sid=\"req~rf2adp~1\"]\nLive.\n"
+  }
+}

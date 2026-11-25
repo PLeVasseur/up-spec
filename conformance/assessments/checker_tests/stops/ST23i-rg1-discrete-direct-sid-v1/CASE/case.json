@@ -1,0 +1,13 @@
+{
+  "case": "ST23i",
+  "subject": "RG1: prior pending [discrete] + 1 blank + [.role] + 1 blank before direct-SID floating title (v1)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

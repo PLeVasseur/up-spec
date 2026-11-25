@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/probe.adoc": "= P\n\n[[sec]]\n== Section\n\n[comment]\n\\ifdef::x[]\n[\"\"]\n[.specitem,oft-sid=\"req~pc1-dir~1\"]\n--\nBody.\n--\n"
+  }
+}

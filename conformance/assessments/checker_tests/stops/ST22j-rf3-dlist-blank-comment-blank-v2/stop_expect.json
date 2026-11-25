@@ -1,0 +1,5 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "undecided:",
+  "expected_substring": "separated_blanks_around_continuation_metadata"
+}

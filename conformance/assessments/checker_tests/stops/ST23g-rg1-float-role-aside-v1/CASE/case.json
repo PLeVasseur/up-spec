@@ -1,0 +1,13 @@
+{
+  "case": "ST23g",
+  "subject": "RG1: prior pending [float] + 1 blank + [.role] + 1 blank before anchored floating title (v1)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "files": {
+    "example/ac1-ul-cont.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~ac1-ul~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-ul~1\"]\nSelected later clause.\n",
+    "example/ac1-ul-blank-cont.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n\n+\n[comment,oft-sid=\"req~ac1-ulb~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-ulb~1\"]\nSelected later clause.\n",
+    "example/ac1-ul-cont-blank.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\n\n[comment,oft-sid=\"req~ac1-ulcb~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-ulcb~1\"]\nSelected later clause.\n",
+    "example/ac1-dlist-cont.adoc": "= Probe\n\n[[sec]]\n== Section\n\nterm:: description\n+\n[comment,oft-sid=\"req~ac1-dl~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-dl~1\"]\nSelected later clause.\n",
+    "example/ac1-dlist-blank-cont.adoc": "= Probe\n\n[[sec]]\n== Section\n\nterm:: description\n\n+\n[comment,oft-sid=\"req~ac1-dlb~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-dlb~1\"]\nSelected later clause.\n",
+    "example/ac1-olist-cont.adoc": "= Probe\n\n[[sec]]\n== Section\n\n. Item\n+\n[comment,oft-sid=\"req~ac1-ol~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-ol~1\"]\nSelected later clause.\n",
+    "example/ac1-attached-para-cont.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\nAttached para.\n+\n[comment,oft-sid=\"req~ac1-ap~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-ap~1\"]\nSelected later clause.\n",
+    "example/ac1-attached-open-cont.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached open.\n--\n+\n[comment,oft-sid=\"req~ac1-ao~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-ao~1\"]\nSelected later clause.\n",
+    "example/ac1-two-blanks-before-2nd-plus.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~ac1-2bp~1\"]\n\n\n+\n\n[.specitem,oft-sid=\"req~ac1-2bp~1\"]\nHidden after two blanks before plus.\n",
+    "example/ac1-two-blanks-break.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~ac1-2bb~1\"]\n+\n\n\n[.specitem,oft-sid=\"req~ac1-2bb~1\"]\nVisible after two blanks.\n",
+    "example/ac1-triple-plus-freeze.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~ac1-3p~1\"]\n+\n+\n\n[.specitem,oft-sid=\"req~ac1-3p~1\"]\nVisible after frozen plus.\n",
+    "example/ac1-standalone-control.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment,oft-sid=\"req~ac1-st~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-st~1\"]\nStandalone visible.\n",
+    "example/ac1-ul-blank-noncont.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n\n[comment,oft-sid=\"req~ac1-ulnc~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-ulnc~1\"]\nVisible after blank list.\n",
+    "example/ac1-dlist-direct-noncont.adoc": "= Probe\n\n[[sec]]\n== Section\n\nterm:: description\n[comment,oft-sid=\"req~ac1-dlnc~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-dlnc~1\"]\nVisible after direct dlist.\n",
+    "example/ac1-cell-isolation.adoc": "= Probe\n\n[[sec]]\n== Section\n\n|===\na|* Item\n+\n[comment,oft-sid=\"req~ac1-cell~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-cell~1\"]\nHidden in cell.\na|[.specitem,oft-sid=\"req~ac1-cell~1\"]\nLive in peer cell.\n|===\n",
+    "example/ac1-section-isolation.adoc": "= Probe\n\n[[sec1]]\n== Section 1\n\n* Item\n+\n[comment,oft-sid=\"req~ac1-sec~1\"]\n+\n\n[.specitem,oft-sid=\"req~ac1-sec~1\"]\nHidden in sec1.\n\n[[sec2]]\n== Section 2\n\n[.specitem,oft-sid=\"req~ac1-sec~1\"]\nLive in sec2.\n"
+  }
+}

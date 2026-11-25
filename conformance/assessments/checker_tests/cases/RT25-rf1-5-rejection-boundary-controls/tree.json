@@ -1,0 +1,22 @@
+{
+  "files": {
+    "example/rf1-one-slash-before-plus.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~rf1-sb~1\"]\n////\nc\n////\n+\n\n[.specitem,oft-sid=\"req~rf1-sb~1\"]\nCandidate clause.\n\n\n[[live]]\n[.specitem,oft-sid=\"req~rf1-sb~1\"]\nDefinitely live.\n",
+    "example/rf1-one-slash-after-plus.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~rf1-sa~1\"]\n+\n////\nc\n////\n[.specitem,oft-sid=\"req~rf1-sa~1\"]\nCandidate clause.\n\n\n[[live]]\n[.specitem,oft-sid=\"req~rf1-sa~1\"]\nDefinitely live.\n",
+    "example/rf1-two-linecomments-before-plus.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~rf1-lc~1\"]\n// c\n// d\n+\n\n[.specitem,oft-sid=\"req~rf1-lc~1\"]\nCandidate clause.\n\n\n[[live]]\n[.specitem,oft-sid=\"req~rf1-lc~1\"]\nDefinitely live.\n",
+    "example/rf2-open-metadata-1blank.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n\n[comment,oft-sid=\"req~rf2-o1~1\"]\n+\n\n[.specitem,oft-sid=\"req~rf2-o1~1\"]\nCandidate clause.\n\n\n[[live]]\n[.specitem,oft-sid=\"req~rf2-o1~1\"]\nDefinitely live.\n",
+    "example/rf2-open-metadata-2blanks.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n\n\n[comment,oft-sid=\"req~rf2-o2~1\"]\n+\n\n[.specitem,oft-sid=\"req~rf2-o2~1\"]\nCandidate clause.\n\n\n[[live]]\n[.specitem,oft-sid=\"req~rf2-o2~1\"]\nDefinitely live.\n",
+    "example/rf2-para-metadata-1blank.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\nAttached.\n\n[comment,oft-sid=\"req~rf2-p1~1\"]\n+\n\n[.specitem,oft-sid=\"req~rf2-p1~1\"]\nCandidate clause.\n\n\n[[live]]\n[.specitem,oft-sid=\"req~rf2-p1~1\"]\nDefinitely live.\n",
+    "example/rf2-para-metadata-2blanks.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\nAttached.\n\n\n[comment,oft-sid=\"req~rf2-p2~1\"]\n+\n\n[.specitem,oft-sid=\"req~rf2-p2~1\"]\nCandidate clause.\n\n\n[[live]]\n[.specitem,oft-sid=\"req~rf2-p2~1\"]\nDefinitely live.\n",
+    "example/rf2-attached-para-normal-meta.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* Item\n+\nAttached.\n[.specitem,oft-sid=\"req~rf2-nm~1\"]\nNormal clause.\n",
+    "example/rf3-2blanks-before-comment-1after.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n\n\n[comment,oft-sid=\"req~rf3-b1~1\"]\n\n[.specitem,oft-sid=\"req~rf3-b1~1\"]\nText.\n",
+    "example/rf3-1blank-before-comment-2after.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n\n[comment,oft-sid=\"req~rf3-b2~1\"]\n\n\n[.specitem,oft-sid=\"req~rf3-b2~1\"]\nText.\n",
+    "example/rf3-1blank-before-discrete-2after.adoc": "= P\n\n== Section 1\n\n* Item\n+\n\n[discrete]\n\n\n[[aside]]\n== Heading\n\n[.specitem,oft-sid=\"req~rf3-b8~1\"]\nClause.\n",
+    "example/rf3-linecomment-before-comment-1blank.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n// note\n[comment,oft-sid=\"req~rf3-lc~1\"]\n\n[.specitem,oft-sid=\"req~rf3-lc~1\"]\nVisible clause.\n",
+    "example/rf3-slash-before-comment-1blank.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n////\nc\n////\n[comment,oft-sid=\"req~rf3-sl~1\"]\n\n[.specitem,oft-sid=\"req~rf3-sl~1\"]\nVisible clause.\n",
+    "example/rf4-inline-comment-open-list.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n// sep\n+\n[comment,oft-sid=\"req~rf4-b4~1\"]\n+\n\n[.specitem,oft-sid=\"req~rf4-b4~1\"]\nLater.\n",
+    "example/rf4-list-comment-normal-para.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n\n// sep\n\n[.specitem,oft-sid=\"req~rf4-np~1\"]\nNormal after comment.\n",
+    "example/rf4-list-slash-new-item-cont.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n\n////\nsep\n////\n\n* Item 2\n+\n[comment,oft-sid=\"req~rf4-ni~1\"]\n+\n\n[.specitem,oft-sid=\"req~rf4-ni~1\"]\nHidden in item 2.\n",
+    "example/rf5-unheaded-attr-entry-controls.adoc": "= P\n\n[[sec]]\n== Section 1\n\n:foo: bar\n\n[.specitem,oft-sid=\"req~rf5-u1~1\"]\nFirst sole.\n\n[[sec2]]\n== Section 2\n\n[.specitem,oft-sid=\"req~rf5-u2~1\"]\nSecond sole.\n\n:bar: baz\n",
+    "example/rf5-first-form-and-independent-section.adoc": "= P\n\n[[sec1]]\n== Section 1\n\n[[direct]]\n[.specitem,oft-sid=\"req~rf5-ff~1\"]\nDirect item.\n\n[.specitem,oft-sid=\"req~rf5-dang~1\"]\n:foo: bar\n\n[[sec2]]\n== Section 2\n\n[.specitem,oft-sid=\"req~rf5-iso~1\"]\nIsolated sole.\n"
+  }
+}

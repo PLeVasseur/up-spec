@@ -1,0 +1,6 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "unsupported:",
+  "expected_substring": "JSON container depth",
+  "assessments_dir": "assessments"
+}

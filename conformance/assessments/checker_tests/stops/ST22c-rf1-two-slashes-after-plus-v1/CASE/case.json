@@ -1,0 +1,13 @@
+{
+  "case": "ST22c",
+  "subject": "RF-1: repeated //// blocks after second + during active list continuation (v1, with later same-SID sentinel)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

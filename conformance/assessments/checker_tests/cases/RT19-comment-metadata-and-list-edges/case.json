@@ -1,0 +1,241 @@
+{
+  "case": "RT19",
+  "subject": "CKR2-3 and CKR2-4 comment metadata survival across blanks and //// blocks, empty-style overrides, uncontinued list open-block boundaries, and safe //// overwrite/EOF controls",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 15,
+        "statement": [
+          "Visible after H1a."
+        ],
+        "derived_anchor": "sec",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 15,
+        "statement": [
+          "Visible after H1a."
+        ],
+        "anchor_form": "second",
+        "derived_occurrence": {
+          "source_path": "example/h1a-followed.adoc",
+          "ordinal": 1,
+          "anchor": "sec",
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-4.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-5.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 11,
+        "statement": [
+          "Visible after H2a."
+        ],
+        "derived_anchor": "sec",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-6.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 8,
+        "statement": [
+          "Body dq."
+        ],
+        "derived_anchor": "sec",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-7.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 7,
+        "statement": [
+          "Body sq."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-8.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 14,
+        "statement": [
+          "Body comma."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-9.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-10.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-11.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 9,
+        "statement": [
+          "Visible ulist."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-12.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-13.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-14.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-15.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-16.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 10,
+        "statement": [
+          "Live after overwrite."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-17.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    }
+  ]
+}

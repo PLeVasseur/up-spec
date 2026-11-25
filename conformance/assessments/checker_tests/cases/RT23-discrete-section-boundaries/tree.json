@@ -1,0 +1,18 @@
+{
+  "files": {
+    "example/ac2-discrete-blank.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac2-db1~1\"]\nFirst.\n\n[discrete]\n\n== Discrete Heading\n\n[.specitem,oft-sid=\"req~ac2-db2~1\"]\nSecond.\n",
+    "example/ac2-discrete-slash.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac2-ds1~1\"]\nFirst.\n\n[discrete]\n////\nc\n////\n== Discrete Heading\n\n[.specitem,oft-sid=\"req~ac2-ds2~1\"]\nSecond.\n",
+    "example/ac2-discrete-linecomment.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac2-dc1~1\"]\nFirst.\n\n[discrete]\n// comment\n== Discrete Heading\n\n[.specitem,oft-sid=\"req~ac2-dc2~1\"]\nSecond.\n",
+    "example/ac2-float-blank.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac2-fb1~1\"]\nFirst.\n\n[float]\n\n== Float Heading\n\n[.specitem,oft-sid=\"req~ac2-fb2~1\"]\nSecond.\n",
+    "example/ac2-float-slash.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac2-fs1~1\"]\nFirst.\n\n[float]\n////\nc\n////\n== Float Heading\n\n[.specitem,oft-sid=\"req~ac2-fs2~1\"]\nSecond.\n",
+    "example/ac2-override-dq.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac2-odq~1\"]\nSole in S1.\n\n[discrete]\n[\"\"]\n== Section 2\n\n[.specitem,oft-sid=\"req~ac2-odq2~1\"]\nItem in S2.\n",
+    "example/ac2-override-sq.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac2-osq~1\"]\nSole in S1.\n\n[discrete]\n['']\n== Section 2\n\n[.specitem,oft-sid=\"req~ac2-osq2~1\"]\nItem in S2.\n",
+    "example/ac2-override-open.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac2-oop~1\"]\nSole in S1.\n\n[discrete]\n[open]\n== Section 2\n\n[.specitem,oft-sid=\"req~ac2-oop2~1\"]\nItem in S2.\n",
+    "example/ac2-override-comment.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac2-ocm~1\"]\nSole in S1.\n\n[discrete]\n[comment]\n== Section 2\n\n[.specitem,oft-sid=\"req~ac2-ocm2~1\"]\nItem in S2.\n",
+    "example/ac2-override-comma-role.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac2-ocr~1\"]\nSole in S1.\n\n[discrete]\n[,role=foo]\n== Section 2\n\n[.specitem,oft-sid=\"req~ac2-ocr2~1\"]\nItem in S2.\n",
+    "example/ac2-earlier-before-sid-discrete-slash.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac2-eds~1\"]\nFirst.\n\n[discrete]\n[.specitem,oft-sid=\"req~ac2-eds-d~1\"]\n////\nc\n////\n== Discrete Heading\n",
+    "example/ac2-earlier-before-sid-discrete-blank.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac2-edb~1\"]\nFirst.\n\n[discrete]\n[.specitem,oft-sid=\"req~ac2-edb-d~1\"]\n\n== Discrete Heading\n",
+    "example/ac2-prior-discrete-barrier.adoc": "= P\n\n[[sec]]\n== Section\n\n[discrete]\n////\nc\n////\n== Aside\n\n[.specitem,oft-sid=\"req~ac2-bar~1\"]\nAfter discrete.\n",
+    "example/ac2-first-form-and-cell.adoc": "= P\n\n[[sec]]\n== Section\n\n[[direct]]\n[.specitem,oft-sid=\"req~ac2-ff~1\"]\nFirst form.\n\n|===\na|[.specitem,oft-sid=\"req~ac2-cell~1\"]\nCell item.\n|===\n\n[discrete]\n[open]\n[.specitem,oft-sid=\"req~ac2-other~1\"]\n////\nc\n////\n== Section 2\n"
+  }
+}

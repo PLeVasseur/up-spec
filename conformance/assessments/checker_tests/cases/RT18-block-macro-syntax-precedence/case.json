@@ -1,0 +1,135 @@
+{
+  "case": "RT18",
+  "subject": "CKR2-2 supported media and toc block macro syntax and precedence over description-list recognition",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 9,
+        "statement": [
+          "Visible after invalid image."
+        ],
+        "derived_anchor": "sec",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-4.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 6,
+        "statement": [
+          "toc::[levels=2]"
+        ],
+        "derived_anchor": "sec",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-5.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 6,
+        "statement": [
+          "image::my file.png[]"
+        ],
+        "derived_anchor": "sec",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-6.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "occurrences_in_file": 0,
+        "reasons": [
+          "ordinal_absent"
+        ]
+      }
+    },
+    {
+      "submission": "submission-7.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 7,
+        "statement": [
+          "Visible."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-8.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 6,
+        "statement": [
+          "video::my clip.mp4[k:: v]"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-9.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 9,
+        "statement": [
+          "audio::my track.mp3[]"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    }
+  ]
+}

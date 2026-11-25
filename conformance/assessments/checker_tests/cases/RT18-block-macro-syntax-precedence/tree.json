@@ -1,0 +1,12 @@
+{
+  "files": {
+    "example/h3a-only.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment,oft-sid=\"req~rt18-h3a-only~1\"]\nimage::[]\n",
+    "example/h3a-followed.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment,oft-sid=\"req~rt18-h3a-next~1\"]\nimage::[]\n\n[.specitem,oft-sid=\"req~rt18-h3a-next~1\"]\n--\nVisible after invalid image.\n--\n",
+    "example/h3b-toc-target.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment,oft-sid=\"req~rt18-h3b~1\"]\ntoc::foo[]\n",
+    "example/toc-valid.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment,oft-sid=\"req~rt18-toc~1\"]\ntoc::[levels=2]\n",
+    "example/h3c-space-image.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment,oft-sid=\"req~rt18-h3c~1\"]\nimage::my file.png[]\n",
+    "example/media-trail-space.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment,oft-sid=\"req~rt18-trail~1\"]\nimage::file.png []\n",
+    "example/h3d-dlist-in-macro.adoc": "= Probe\n\n[[sec]]\n== Section\n\nimage::a.png[k:: v]\n[.specitem,oft-sid=\"req~rt18-h3d~1\"]\nVisible.\n",
+    "example/video-audio-space.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment,oft-sid=\"req~rt18-va~1\"]\nvideo::my clip.mp4[k:: v]\n\n[comment,oft-sid=\"req~rt18-va~1\"]\naudio::my track.mp3[]\n"
+  }
+}

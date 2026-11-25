@@ -1,0 +1,15 @@
+{
+  "files": {
+    "example/h1a-alone.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment]\n////\ncomment block\n////\n[.specitem,oft-sid=\"req~rt19-h1a-only~1\"]\n--\nBody.\n--\n",
+    "example/h1a-followed.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment]\n////\ncomment block\n////\n[.specitem,oft-sid=\"req~rt19-h1a-next~1\"]\n--\nHidden.\n--\n\n[.specitem,oft-sid=\"req~rt19-h1a-next~1\"]\n--\nVisible after H1a.\n--\n",
+    "example/h2a-alone.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment]\n\n[.specitem,oft-sid=\"req~rt19-h2a-only~1\"]\n--\nBody.\n--\n",
+    "example/h2a-followed.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment]\n\n[.specitem,oft-sid=\"req~rt19-h2a-next~1\"]\nHidden para.\n\n[.specitem,oft-sid=\"req~rt19-h2a-next~1\"]\n--\nVisible after H2a.\n--\n",
+    "example/h5-dq.adoc": "= Probe\n\n[[sec]]\n== Section\n\n[comment]\n[\"\"]\n[.specitem,oft-sid=\"req~rt19-h5-dq~1\"]\n--\nBody dq.\n--\n",
+    "example/h5-controls.adoc": "= Probe\n\n== Section\n\n[comment]\n['']\n[.specitem,oft-sid=\"req~rt19-h5-sq~1\"]\n--\nBody sq.\n--\n\n[comment]\n[,role=foo]\n[.specitem,oft-sid=\"req~rt19-h5-comma~1\"]\n--\nBody comma.\n--\n\n[comment]\n[]\n[.specitem,oft-sid=\"req~rt19-h5-empty~1\"]\n--\nHidden empty.\n--\n\n[comment]\n[\".specitem\",oft-sid=\"req~rt19-h5-dot~1\"]\n--\nHidden dot.\n--\n",
+    "example/h4a2-ulist.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* List item\n[comment]\n--\n[.specitem,oft-sid=\"req~rt19-h4a2-ul~1\"]\nVisible ulist.\n--\n",
+    "example/h4a2-continued.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* List item\n+\n[comment]\n--\n[.specitem,oft-sid=\"req~rt19-h4a2-cont~1\"]\nHidden continued.\n--\n",
+    "example/h4a2-dlist.adoc": "= Probe\n\n[[sec]]\n== Section\n\nterm:: desc\n[comment]\n--\n[.specitem,oft-sid=\"req~rt19-h4a2-dl~1\"]\nHidden dlist.\n--\n",
+    "example/h4a2-preplus.adoc": "= Probe\n\n[[sec]]\n== Section\n\n* List item\n[comment]\n+\n--\n[.specitem,oft-sid=\"req~rt19-h4a2-preplus~1\"]\nHidden preplus.\n--\n",
+    "example/h1b-safe-controls.adoc": "= Probe\n\n== Section\n\n[.specitem,oft-sid=\"req~rt19-slash-overwritten~1\"]\n////\nc\n////\n\n[.specitem,oft-sid=\"req~rt19-slash-live~1\"]\nLive after overwrite.\n\n[.specitem,oft-sid=\"req~rt19-slash-eof~1\"]\n////\nc\n////\n"
+  }
+}

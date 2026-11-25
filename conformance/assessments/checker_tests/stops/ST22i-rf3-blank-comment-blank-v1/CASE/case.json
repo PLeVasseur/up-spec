@@ -1,0 +1,13 @@
+{
+  "case": "ST22i",
+  "subject": "RF-3: leading blank, pending [comment], following blank ambiguity (v1)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "catalogue_kind": "separately_identified_conformance_assessments",
+  "notes": "Documentary fixture AS1: not an assessment, and it qualifies nothing.",
+  "historical_intake_provenance": {
+    "input_manifest": "../INPUT-MANIFEST.v2.json",
+    "intake_catalogue": "../intake.v2.json",
+    "intake_readme": "../README.md",
+    "baseline_spec_revision": "f18913c6ed062dc6d6c3d7a73dec7a33433b39e4",
+    "reorganized_spec_baseline_commit": "1bb360852a2922bfdb0309b71e2069ac3e50716e",
+    "counts_are_overlapping_documentary_categories": true,
+    "historical_counts": {
+      "obligations": 504,
+      "historical_followups": 271,
+      "observation_cases": 12,
+      "pending_destinations": 90,
+      "pending_entries": 84,
+      "unassessed_implementation_evidence_slots": 787
+    }
+  },
+  "records": [
+    {
+      "subject": {
+        "subject_kind": "component_release",
+        "spec_commit": "0000000000000000000000000000000000000000",
+        "requirement_id": "req~ac1-cell",
+        "requirement_revision": 1,
+        "actor_duty": "documentary fixture duty",
+        "contract_family": "classic_protocol",
+        "component_identities": [
+          {
+            "name": "fixture-component-a",
+            "version": "0.0.0-fixture",
+            "source_locator": "fixture:source-a",
+            "build_identity": "fixture:build-a",
+            "artifact_digest": "fixture:artifact-a"
+          }
+        ],
+        "target": "documentary-fixture-target",
+        "configuration_digest": "fixture:no-configuration",
+        "selected_functions": [
+          "none"
+        ],
+        "wire_direction_type_provider": null,
+        "assurance_scope": null
+      },
+      "assessment": {
+        "assessment_id": "rt22-24",
+        "assessment_revision": 1,
+        "producer_authority": "documentary fixture producer",
+        "assessor_review_identity": "documentary fixture reviewer",
+        "observation_boundary_date": "2026-11-24",
+        "scope_label": "documentary fixture AS1; not an assessment",
+        "supersedes_or_revises": null
+      },
+      "status": {
+        "applicability": "unknown",
+        "applicability_reason": null,
+        "implementation_fulfillment": "unassessed",
+        "evidence_sufficiency": "unassessed",
+        "offering_support_status": "unknown",
+        "formal_claim_status": "none",
+        "publication_transfer_status": "draft",
+        "behavior_gaps": [],
+        "evidence_gaps": [
+          "documentary fixture: no evidence is assessed"
+        ]
+      },
+      "evidence": [],
+      "historical_intake_links": []
+    }
+  ]
+}

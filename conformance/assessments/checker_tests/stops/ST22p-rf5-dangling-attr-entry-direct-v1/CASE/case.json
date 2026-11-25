@@ -1,0 +1,13 @@
+{
+  "case": "ST22p",
+  "subject": "RF-5: direct query on pending SID whose apparent target is an AsciiDoc attribute entry (v1)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

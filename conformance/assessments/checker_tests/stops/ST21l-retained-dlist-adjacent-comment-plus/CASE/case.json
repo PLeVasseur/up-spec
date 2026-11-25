@@ -1,0 +1,12 @@
+{
+  "case": "ST21l-retained-dlist-adjacent-comment-plus",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

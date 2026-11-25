@@ -1,0 +1,7 @@
+{
+  "expected_exit": 2,
+  "expected_prefix": "unsupported:",
+  "expected_substring": "lazy or possessive quantifier",
+  "assessments_dir": "assessments",
+  "before_repair_failure": "accepted lazy brace quantifier outside restricted greedy subset with exit 0"
+}

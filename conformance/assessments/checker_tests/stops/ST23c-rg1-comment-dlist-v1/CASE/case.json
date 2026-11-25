@@ -1,0 +1,13 @@
+{
+  "case": "ST23c",
+  "subject": "RG1: dlist prior pending [comment] + 1 blank + [.role] + 1 blank bypass (v1)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

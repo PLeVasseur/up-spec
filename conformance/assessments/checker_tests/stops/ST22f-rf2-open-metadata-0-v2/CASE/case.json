@@ -1,0 +1,13 @@
+{
+  "case": "ST22f",
+  "subject": "RF-2: immediately adjacent pending metadata + continuation after attached open block (v2 ordinal 1 live)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

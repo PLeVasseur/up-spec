@@ -1,0 +1,400 @@
+{
+  "case": "RT22",
+  "subject": "AC-1 actual list continuation attachment, comment style retention, non-continuation controls, and cell/section isolation",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-4.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-5.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-6.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-7.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-8.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-9.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-10.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-11.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-12.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-13.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-14.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 12,
+        "statement": [
+          "Visible after two blanks."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-15.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "occurrences_in_file": 1,
+        "located_line": 12,
+        "statement": [
+          "Visible after two blanks."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-16.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 12,
+        "statement": [
+          "Visible after two blanks."
+        ],
+        "anchor_form": null,
+        "derived_occurrence": {
+          "source_path": "example/ac1-two-blanks-break.adoc",
+          "ordinal": 1,
+          "anchor": null,
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-17.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 12,
+        "statement": [
+          "Visible after frozen plus."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-18.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 9,
+        "statement": [
+          "Standalone visible."
+        ],
+        "derived_anchor": "sec",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-19.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "occurrences_in_file": 1,
+        "located_line": 9,
+        "statement": [
+          "Standalone visible."
+        ],
+        "derived_anchor": "sec",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-20.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 9,
+        "statement": [
+          "Standalone visible."
+        ],
+        "anchor_form": "second",
+        "derived_occurrence": {
+          "source_path": "example/ac1-standalone-control.adoc",
+          "ordinal": 1,
+          "anchor": "sec",
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-21.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 11,
+        "statement": [
+          "Visible after blank list."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-22.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 10,
+        "statement": [
+          "Visible after direct dlist."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-23.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 14,
+        "statement": [
+          "Live in peer cell."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-24.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 14,
+        "statement": [
+          "Live in peer cell."
+        ],
+        "anchor_form": null,
+        "derived_occurrence": {
+          "source_path": "example/ac1-cell-isolation.adoc",
+          "ordinal": 1,
+          "anchor": null,
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-25.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 17,
+        "statement": [
+          "Live in sec2."
+        ],
+        "derived_anchor": "sec2",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-26.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "occurrences_in_file": 1,
+        "located_line": 17,
+        "statement": [
+          "Live in sec2."
+        ],
+        "derived_anchor": "sec2",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-27.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 17,
+        "statement": [
+          "Live in sec2."
+        ],
+        "anchor_form": "second",
+        "derived_occurrence": {
+          "source_path": "example/ac1-section-isolation.adoc",
+          "ordinal": 1,
+          "anchor": "sec2",
+          "service_version": null
+        }
+      }
+    }
+  ]
+}

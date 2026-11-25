@@ -1,0 +1,17 @@
+{
+  "files": {
+    "example/ac3-vis-plus-alone.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac3-vpa~1\"]\n+\n",
+    "example/ac3-vis-plus-multiline.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac3-vpm~1\"]\n+\nSecond line.\n",
+    "example/ac3-vis-plus-heading.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac3-vph~1\"]\n+\n== Not a section?\n\n[.specitem,oft-sid=\"req~ac3-vph2~1\"]\nSecond.\n",
+    "example/ac3-vis-plus-repeated.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac3-vpr~1\"]\n+\n+\n\n[.specitem,oft-sid=\"req~ac3-vpr2~1\"]\nSecond.\n",
+    "example/ac3-literal-line-plus.adoc": "= P\n\n[[sec]]\n== Section\n\n[literal]\nFirst.\n+\n[.specitem,oft-sid=\"req~ac3-llp~1\"]\nIn literal.\n",
+    "example/ac3-comment-plus-plus.adoc": "= P\n\n[[sec]]\n== Section\n\n[comment]\n+\n+\n[.specitem,oft-sid=\"req~ac3-cpp~1\"]\nAfter double plus.\n",
+    "example/ac3-comment-para-plus-heading.adoc": "= P\n\n[[sec]]\n== Section\n\n[comment]\nLine1.\n+\n== Heading?\n\n[.specitem,oft-sid=\"req~ac3-cph~1\"]\nAfter break heading.\n",
+    "example/ac3-comment-plus-hidden-heading.adoc": "= P\n\n[[sec]]\n== Section\n\n[comment]\n+\n== Hidden heading?\n\n[.specitem,oft-sid=\"req~ac3-chh~1\"]\nSole after hidden heading.\n",
+    "example/ac4-slash-overwrite-blank.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac4-old~1\"]\n\n////\nc\n////\n[.specitem,oft-sid=\"req~ac4-new~1\"]\nOverwritten via slash.\n",
+    "example/ac4-grouped-non-sid-blank.adoc": "= P\n\n[[sec]]\n== Section\n\n.Grouped title\n[.role]\n\n[.specitem,oft-sid=\"req~ac4-grp~1\"]\nGrouped body.\n",
+    "example/ac4-first-form-precedence.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~ac4-ffa~1\"]\n\n[[direct]]\n[.specitem,oft-sid=\"req~ac4-ffb~1\"]\nFirst form body.\n",
+    "example/ac4-prior-para-barrier.adoc": "= P\n\n[[sec]]\n== Section\n\nPrior.\n\n[.specitem,oft-sid=\"req~ac4-pa~1\"]\n\n[.specitem,oft-sid=\"req~ac4-pb~1\"]\nAfter prior.\n",
+    "example/ac4-cell-and-section-iso.adoc": "= P\n\n[[sec1]]\n== Section 1\n\n[.specitem,oft-sid=\"req~ac4-s1~1\"]\nSole in S1.\n\n[[sec2]]\n== Section 2\n\n[.specitem,oft-sid=\"req~ac4-s2a~1\"]\n\n[.specitem,oft-sid=\"req~ac4-s2b~1\"]\nBody in S2.\n\n|===\na|[.specitem,oft-sid=\"req~ac4-cell~1\"]\nCell in S2.\n|===\n"
+  }
+}

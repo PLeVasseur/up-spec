@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/st23e.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~rf3m4~1\"]\n\n[.role]\n\n[.specitem,oft-sid=\"req~rf3m4~1\"]\nHidden.\n\n[[live]]\n[.specitem,oft-sid=\"req~rf3m4~1\"]\nLive.\n"
+  }
+}

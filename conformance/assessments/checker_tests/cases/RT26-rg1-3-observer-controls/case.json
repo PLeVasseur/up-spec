@@ -1,0 +1,448 @@
+{
+  "case": "RT26",
+  "subject": "RG1-3 matched controls (exact I7 one-blank attribute entry, RG1 consecutive-blank and inline-comment controls, RG2 non-+ and one-blank direct-+ controls, and RG3 actual observer reset points)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ambiguous"
+        ],
+        "occurrences": [
+          {
+            "source_path": "example/rg2-i7-open-1blank-attr-meta-plus.adoc",
+            "ordinal": 1,
+            "line": 16
+          },
+          {
+            "source_path": "example/rg2-i7-open-1blank-attr-meta-plus.adoc",
+            "ordinal": 2,
+            "line": 20
+          }
+        ]
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 16,
+        "statement": [
+          "Candidate."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "occurrences_in_file": 2,
+        "located_line": 16,
+        "statement": [
+          "Candidate."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-4.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 20,
+        "statement": [
+          "Live."
+        ],
+        "derived_anchor": "live",
+        "anchor_form": "first"
+      }
+    },
+    {
+      "submission": "submission-5.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 13,
+        "statement": [
+          "Text."
+        ],
+        "anchor_form": null,
+        "derived_occurrence": {
+          "source_path": "example/rg1-meta-2blanks-role-1blank.adoc",
+          "ordinal": 1,
+          "anchor": null,
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-6.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 13,
+        "statement": [
+          "Text."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-7.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 13,
+        "statement": [
+          "Text."
+        ],
+        "anchor_form": null,
+        "derived_occurrence": {
+          "source_path": "example/rg1-meta-1blank-role-2blanks.adoc",
+          "ordinal": 1,
+          "anchor": null,
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-8.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 13,
+        "statement": [
+          "Text."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-9.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 13,
+        "statement": [
+          "Text."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-10.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 13,
+        "statement": [
+          "Text."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-11.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 13,
+        "statement": [
+          "Text."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-12.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 13,
+        "statement": [
+          "Text."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-13.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 15,
+        "statement": [
+          "Clause."
+        ],
+        "anchor_form": "second",
+        "derived_occurrence": {
+          "source_path": "example/rg1-discrete-1blank-role-2blanks.adoc",
+          "ordinal": 1,
+          "anchor": "aside",
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-14.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 15,
+        "statement": [
+          "Clause."
+        ],
+        "derived_anchor": "aside",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-15.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "occurrences_in_file": 1,
+        "located_line": 15,
+        "statement": [
+          "Clause."
+        ],
+        "derived_anchor": "aside",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-16.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ambiguous"
+        ],
+        "occurrences": [
+          {
+            "source_path": "example/rg2-open-1blank-attr-direct-plus.adoc",
+            "ordinal": 1,
+            "line": 17
+          },
+          {
+            "source_path": "example/rg2-open-1blank-attr-direct-plus.adoc",
+            "ordinal": 2,
+            "line": 21
+          }
+        ]
+      }
+    },
+    {
+      "submission": "submission-17.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 17,
+        "statement": [
+          "Candidate."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-18.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 21,
+        "statement": [
+          "Live."
+        ],
+        "derived_anchor": "live",
+        "anchor_form": "first"
+      }
+    },
+    {
+      "submission": "submission-19.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 12,
+        "statement": [
+          "Normal."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-20.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 15,
+        "statement": [
+          "+"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-21.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 16,
+        "statement": [
+          "+"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-22.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 17,
+        "statement": [
+          "+"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-23.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 16,
+        "statement": [
+          "+"
+        ],
+        "derived_anchor": "sec2",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-24.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 14,
+        "statement": [
+          "+"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-25.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 15,
+        "statement": [
+          "+"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-26.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 15,
+        "statement": [
+          "+"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-27.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 13,
+        "statement": [
+          "+"
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    }
+  ]
+}

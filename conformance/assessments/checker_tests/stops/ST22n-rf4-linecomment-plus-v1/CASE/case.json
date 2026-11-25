@@ -1,0 +1,13 @@
+{
+  "case": "ST22n",
+  "subject": "RF-4: stale-list-context + transition after terminating // line comment with no active continuation (v1)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

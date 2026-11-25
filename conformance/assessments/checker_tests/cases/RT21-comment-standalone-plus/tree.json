@@ -1,0 +1,15 @@
+{
+  "files": {
+    "example/pc3-alone.adoc": "= P\n\n[[sec]]\n== Section\n\n[comment,oft-sid=\"req~pc3-alone~1\"]\n+\n",
+    "example/pc3-followed-same-sid.adoc": "= P\n\n[[sec]]\n== Section\n\n[comment,oft-sid=\"req~pc3-follow~1\"]\n+\n\n[.specitem,oft-sid=\"req~pc3-follow~1\"]\nVisible later clause.\n",
+    "example/pc3-multiline-plus.adoc": "= P\n\n[[sec]]\n== Section\n\n[comment,oft-sid=\"req~pc3-multi~1\"]\n+\nSecond hidden line.\n\n[.specitem,oft-sid=\"req~pc3-multi~1\"]\nAfter multiline comment plus.\n",
+    "example/pc3-list-cont-visible.adoc": "= P\n\n[[sec]]\n== Section\n\n* List item\n+\n[.specitem,oft-sid=\"req~pc3-cont-vis~1\"]\nContinued visible.\n",
+    "example/pc3-list-cont-comment.adoc": "= P\n\n[[sec]]\n== Section\n\n* List item\n[comment]\n+\n--\n[.specitem,oft-sid=\"req~pc3-cont-hid~1\"]\nHidden continued.\n--\n",
+    "example/pc3-list-post-comment-plus.adoc": "= P\n\n[[sec]]\n== Section\n\n* List item\n+\n[comment,oft-sid=\"req~pc3-post-plus~1\"]\n+\n",
+    "example/pc3-plain-plus-barrier.adoc": "= P\n\n[[sec]]\n== Section\n\n+\n\n[.specitem,oft-sid=\"req~pc3-after-plus~1\"]\nAfter plain plus.\n",
+    "example/pc3-visible-sid-plus.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~pc3-vis-plus~1\"]\n+\n",
+    "example/pc3-cell-isolation.adoc": "= P\n\n|===\na|[comment,oft-sid=\"req~pc3-cell~1\"]\n+ a|[.specitem,oft-sid=\"req~pc3-cell~1\"]\nVisible cell clause.\n|===\n",
+    "example/pc3-dlist-comment-plus-open.adoc": "= P\n\n[[sec]]\n== Section\n\nterm:: desc\n[comment]\n+\n--\n[.specitem,oft-sid=\"req~pc3-dlist-open~1\"]\nVisible dlist open.\n--\n",
+    "example/pc3-v1-ambiguity.adoc": "= P\n\n[[sec]]\n== Section\n\n[comment,oft-sid=\"req~pc3-ambig~1\"]\n+\n\n[.specitem,oft-sid=\"req~pc3-ambig~1\"]\nFirst visible after plus.\n\n[.specitem,oft-sid=\"req~pc3-ambig~1\"]\nSecond visible after plus.\n"
+  }
+}

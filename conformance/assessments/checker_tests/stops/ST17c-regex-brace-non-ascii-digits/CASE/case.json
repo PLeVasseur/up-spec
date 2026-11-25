@@ -1,0 +1,12 @@
+{
+  "case": "ST17c-regex-brace-non-ascii-digits",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

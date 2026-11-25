@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/st22q.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~first~1\"]\nFirst.\n\n[.specitem,oft-sid=\"req~dangling~1\"]\n:foo: bar\n"
+  }
+}

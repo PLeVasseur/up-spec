@@ -1,0 +1,21 @@
+{
+  "files": {
+    "example/pc1-overwrite-diff.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~pc1-old~1\"]\n////\nc\n////\n[.specitem,oft-sid=\"req~pc1-new~1\"]\nLive after overwrite.\n",
+    "example/pc1-overwrite-same.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~pc1-same~1\"]\n////\nIgnored.\n////\n\n[.specitem,oft-sid=\"req~pc1-same~1\"]\nLive after same-SID overwrite.\n",
+    "example/pc1-grouped-meta.adoc": "= P\n\n[[sec]]\n== Section\n\n.Old title\n[.role1]\n[.specitem,oft-sid=\"req~pc1-grp-old~1\"]\n////\nc\n////\n[.role2]\n[.specitem,oft-sid=\"req~pc1-grp-new~1\"]\nGrouped live.\n",
+    "example/pc1-comment-slash-open.adoc": "= P\n\n[[sec]]\n== Section\n\n[comment]\n////\nc\n////\n[open]\n[.specitem,oft-sid=\"req~pc1-open~1\"]\n--\nVisible open.\n--\n",
+    "example/pc1-comment-slash-list.adoc": "= P\n\n[[sec]]\n== Section\n\n[comment]\n////\nc\n////\n[.specitem,oft-sid=\"req~pc1-list~1\"]\n* Visible list.\n",
+    "example/pc1-role-slash.adoc": "= P\n\n[[sec]]\n== Section\n\n[.role]\n////\nc\n////\n[.specitem,oft-sid=\"req~pc1-role~1\"]\nVisible role.\n",
+    "example/pc1-comment-blank-dq.adoc": "= P\n\n[[sec]]\n== Section\n\n[comment]\n\n[\"\"]\n[.specitem,oft-sid=\"req~pc1-blank-dq~1\"]\n--\nVisible blank dq.\n--\n",
+    "example/pc1-first-form-precedence.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~pc1-ff-old~1\"]\n////\nc\n////\n[[item-anchor]]\n[.specitem,oft-sid=\"req~pc1-ff-live~1\"]\nFirst form wins.\n",
+    "example/pc1-prior-block-barrier.adoc": "= P\n\n[[sec]]\n== Section\n\n[comment]\n\n[\"\"]\n--\nPrior visible block.\n--\n\n[.specitem,oft-sid=\"req~pc1-after-block~1\"]\nSecond block.\n",
+    "example/pc1-cell-isolation.adoc": "= P\n\n[[sec]]\n== Section\n\n|===\na|[.specitem,oft-sid=\"req~pc1-cell-old~1\"]\n////\nc\n////\n[.specitem,oft-sid=\"req~pc1-cell-vis~1\"]\nCell one. a|[.specitem,oft-sid=\"req~pc1-cell-peer~1\"]\nCell two.\n|===\n",
+    "example/pc1-cell-shared-comment-head.adoc": "= P\n\n[[sec]]\n== Section\n\n|===\na|[comment] a|[.specitem,oft-sid=\"req~pc1-sh-vis~1\"]\nVisible peer.\n|===\n",
+    "example/pc1-v1-ambiguity.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~pc1-ambig~1\"]\n////\nc\n////\n[.specitem,oft-sid=\"req~pc1-ambig~1\"]\nFirst live clause.\n\n[.specitem,oft-sid=\"req~pc1-ambig~1\"]\nSecond live clause.\n",
+    "example/pc2-positive-no-head.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~pc2-pos~1\"]\nSole item.\n\n////\nc\n////\n== Next Section\n",
+    "example/pc2-first-form.adoc": "= P\n\n[[sec]]\n== Section\n\n[[mine-first]]\n[.specitem,oft-sid=\"req~pc2-ff~1\"]\nFirst form sole.\n\n[.specitem,oft-sid=\"req~pc2-ff-other~1\"]\n////\nc\n////\n== Next Section\n",
+    "example/pc2-eof-control.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~pc2-eof~1\"]\nSole before EOF slash.\n\n[.specitem,oft-sid=\"req~pc2-eof-other~1\"]\n////\nc\n////\n",
+    "example/pc2-hidden-target-control.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~pc2-hid~1\"]\nSole before hidden slash.\n\n[.specitem,oft-sid=\"req~pc2-hid-other~1\"]\n////\nc\n////\n[comment]\n--\nHidden.\n--\n",
+    "example/pc2-cell-isolation.adoc": "= P\n\n[[sec]]\n== Section\n\n|===\na|[.specitem,oft-sid=\"req~pc2-cell~1\"]\nIndependent cell.\n|===\n\n[.specitem,oft-sid=\"req~pc2-cell-other~1\"]\n////\nc\n////\n== Next Section\n"
+  }
+}

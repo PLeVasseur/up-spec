@@ -1,0 +1,22 @@
+{
+  "files": {
+    "example/rg2-i7-open-1blank-attr-meta-plus.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n\n:foo: bar\n[comment,oft-sid=\"req~rf2a1b~1\"]\n+\n\n[.specitem,oft-sid=\"req~rf2a1b~1\"]\nCandidate.\n\n[[live]]\n[.specitem,oft-sid=\"req~rf2a1b~1\"]\nLive.\n",
+    "example/rg1-meta-2blanks-role-1blank.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~rg1c1~1\"]\n\n\n[.role]\n\n[.specitem,oft-sid=\"req~rg1c1~1\"]\nText.\n",
+    "example/rg1-meta-1blank-role-2blanks.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~rg1c2~1\"]\n\n[.role]\n\n\n[.specitem,oft-sid=\"req~rg1c2~1\"]\nText.\n",
+    "example/rg1-meta-1blank-attr-2blanks.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~rg1c3~1\"]\n\n:k: v\n\n\n[.specitem,oft-sid=\"req~rg1c3~1\"]\nText.\n",
+    "example/rg1-meta-2blanks-attr-1blank.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~rg1c4~1\"]\n\n\n:k: v\n\n[.specitem,oft-sid=\"req~rg1c4~1\"]\nText.\n",
+    "example/rg1-meta-linecomment-1blank-role-1blank.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~rg1c5~1\"]\n// note\n\n[.role]\n\n[.specitem,oft-sid=\"req~rg1c5~1\"]\nText.\n",
+    "example/rg1-meta-1blank-linecomment-role-1blank.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n[comment,oft-sid=\"req~rg1c6~1\"]\n\n// note\n[.role]\n\n[.specitem,oft-sid=\"req~rg1c6~1\"]\nText.\n",
+    "example/rg1-discrete-1blank-role-2blanks.adoc": "= P\n\n== Section 1\n\n* Item\n+\n[discrete]\n\n[.role]\n\n\n[[aside]]\n== Heading\n\n[.specitem,oft-sid=\"req~rg1c7~1\"]\nClause.\n",
+    "example/rg2-open-1blank-attr-direct-plus.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n\n:foo: bar\n+\n[comment,oft-sid=\"req~rg2c1~1\"]\n+\n\n[.specitem,oft-sid=\"req~rg2c1~1\"]\nCandidate.\n\n[[live]]\n[.specitem,oft-sid=\"req~rg2c1~1\"]\nLive.\n",
+    "example/rg2-open-adj-attr-normal-para.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n:foo: bar\n[.specitem,oft-sid=\"req~rg2c2~1\"]\nNormal.\n",
+    "example/rg3-reset-para.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n[.unused]\n\nReset paragraph.\n\n[.specitem,oft-sid=\"req~rg3rp~1\"]\n+\n",
+    "example/rg3-reset-list-item.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n[.unused]\n\n* Next item\n\n\n[.specitem,oft-sid=\"req~rg3rl~1\"]\n+\n",
+    "example/rg3-reset-delim-block.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n[.unused]\n\n====\nExample.\n====\n\n[.specitem,oft-sid=\"req~rg3rd~1\"]\n+\n",
+    "example/rg3-reset-section-heading.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n[.unused]\n\n[[sec2]]\n== Section 2\n\n[.specitem,oft-sid=\"req~rg3rh~1\"]\n+\n",
+    "example/rg3-reset-discrete-heading.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n[discrete]\n== Float\n\n[.specitem,oft-sid=\"req~rg3rf~1\"]\n+\n",
+    "example/rg3-reset-break.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n[.unused]\n\n'''\n\n[.specitem,oft-sid=\"req~rg3rb~1\"]\n+\n",
+    "example/rg3-reset-macro.adoc": "= P\n\n[[sec]]\n== Section\n\n* Item\n+\n--\nAttached.\n--\n[.unused]\n\nimage::pic.png[]\n\n[.specitem,oft-sid=\"req~rg3rm~1\"]\n+\n",
+    "example/rg3-reset-cell-scope.adoc": "= P\n\n[[sec]]\n== Section\n\n|===\na|* Item\n+\n--\nAttached.\n--\n[.unused]\na|[.specitem,oft-sid=\"req~rg3rc~1\"]\n+\n|===\n"
+  }
+}

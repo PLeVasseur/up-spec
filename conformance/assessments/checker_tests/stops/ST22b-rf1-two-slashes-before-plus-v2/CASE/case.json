@@ -1,0 +1,13 @@
+{
+  "case": "ST22b",
+  "subject": "RF-1: repeated //// blocks before second + during active list continuation (v2 ordinal 1 null)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

@@ -17,6 +17,9 @@ JSON_TYPES = ("null", "boolean", "object", "array", "number", "string", "integer
 SCHEMA_FILES = {1: "schema.json", 2: "schema.v2.json"}
 MAX_REF_DEPTH = 64
 MAX_SCHEMA_DEPTH = 128
+MAX_JSON_DEPTH = 384
+MAX_VALIDATION_STEPS = 100000
+MAX_ASCIIDOC_DEPTH = 128
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 DELIMITERS = {"----": "listing", "....": "literal", "====": "example", "****": "sidebar",
@@ -35,8 +38,9 @@ SECTION_TITLE = re.compile(r"(=={0,5}|#{1,6})[ \t]+(.+?)(?:[ \t]+\1)?")
 ATTRIBUTE_ENTRY = re.compile(r":!?\w[^:]*:(?:[ \t]+.*)?")
 DIRECTIVE = re.compile(r"\\?(?:ifdef|ifndef|ifeval|endif|include)::.*")
 CONDITIONAL = re.compile(r"(\\)?(ifdef|ifndef|ifeval|endif)::(\S*?(?:[,+]\S*?)?)\[(.+)?\]")
-BLOCK_MACRO = re.compile(r"(?:image|video|audio|toc)::\S*\[.*\]")
+BLOCK_MACRO = re.compile(r"(?:(?:image|video|audio)::(?:\S|\S.*?\S)|toc::)\[.*\]")
 BREAK = re.compile(r"'{3,}|<{3,}| {0,3}([-*_])( *)\1\2\1")
+NON_DLIST_ITEM = re.compile(r"(?:[ \t]*(?:-|\*+|\.+|•|\d+\.|[a-zA-Z]\.|[IVXivx]+\))[ \t]|<(?:\d+|\.)>[ \t])")
 LIST_ITEM = re.compile(r"(?:[ \t]*(?:-|\*+|\.+|•|\d+\.|[a-zA-Z]\.|[IVXivx]+\))[ \t]"
                        r"|(?!//[^/])[ \t]*[^ \t].*?(?::{2,4}|;;)(?:$|[ \t])|<(?:\d+|\.)>[ \t])")
 CELL_SPEC = (r"(?:(?:\d+(?:\.\d*)?|(?:\d*\.)?\d+)[*+])?"
@@ -49,13 +53,20 @@ SERVICE_VERSION = re.compile(r"up-l3/([^/]+)/(v[0-9]+)/")
 COMMIT = re.compile(r"[0-9a-f]{40}")
 ZERO_PIN = "0" * 40
 NUM_RE = re.compile(r"(-)?(0|[1-9][0-9]*)(?:\.([0-9]+))?(?:[eE]([+-]?[0-9]+))?")
+BRACE_QUANTIFIER = re.compile(r"\{([0-9]+)(,([0-9]*))?\}")
 INERT_SOURCE_STYLE = re.compile(r"\[source(?:,[^\]\[=\"']*)?\]")
 STRUCTURAL_NOTES = ("include_directive", "conditional_region", "single_line_conditional",
-                    "unterminated_block", "setext_title", "heading_in_block", "unmatched_endif")
+                    "unterminated_block", "setext_title", "heading_in_block", "unmatched_endif",
+                    "repeated_comment_block_in_list_continuation",
+                    "adjacent_metadata_continuation_after_attached_block",
+                    "separated_blanks_around_continuation_metadata",
+                    "list_continuation_after_terminating_comment")
 CELL_NOTES = ("cell_style_from_columns", "oft_sid_in_delimited_data_table", "text_before_first_cell")
 DOUBTFUL_FLAGS = ("unreadable_attribute_list", "multiple_oft_sid", "single_quoted",
                   "attribute_reference", "attribute_line_in_list_item", "in_verbatim_paragraph",
-                  "conditional", "head_detached_by_blank", "no_target", "target_is_comment")
+                  "conditional", "head_detached_by_blank", "no_target", "target_is_comment",
+                  "target_is_attribute_entry", "head_before_comment_block",
+                  "discrete_heading_target", "continuation_after_head")
 
 
 class Unsupported(Exception):
@@ -194,18 +205,25 @@ def dump_json(value, indent=None, level=0):
 
 
 def finite_and_encodable(value):
-    if isinstance(value, float):
-        return math.isfinite(value)
-    if isinstance(value, str):
-        try:
-            value.encode("utf-8")
-        except UnicodeEncodeError:
+    pending = [(value, 0)]
+    while pending:
+        current, depth = pending.pop()
+        if isinstance(current, (list, dict)):
+            if depth > MAX_JSON_DEPTH:
+                raise Unsupported("JSON container depth exceeds %d" % MAX_JSON_DEPTH)
+            if isinstance(current, dict):
+                for key, item in current.items():
+                    pending.append((key, depth + 1))
+                    pending.append((item, depth + 1))
+            else:
+                pending.extend((item, depth + 1) for item in current)
+        elif isinstance(current, float) and not math.isfinite(current):
             return False
-        return True
-    if isinstance(value, list):
-        return all(finite_and_encodable(v) for v in value)
-    if isinstance(value, dict):
-        return all(finite_and_encodable(k) and finite_and_encodable(v) for k, v in value.items())
+        elif isinstance(current, str):
+            try:
+                current.encode("utf-8")
+            except UnicodeEncodeError:
+                return False
     return True
 
 
@@ -221,8 +239,11 @@ def strict_json(data):
     def constant(name):
         raise ValueError("%s is not JSON" % name)
 
-    value = json.loads(data.decode("utf-8"), object_pairs_hook=pairs, parse_constant=constant,
-                       parse_float=JsonNumber, parse_int=JsonNumber)
+    try:
+        value = json.loads(data.decode("utf-8"), object_pairs_hook=pairs, parse_constant=constant,
+                           parse_float=JsonNumber, parse_int=JsonNumber)
+    except RecursionError:
+        raise Unsupported("JSON representation exceeds the host decoder's depth resources")
     if not finite_and_encodable(value):
         raise ValueError("a number that is not finite, or a string that is not Unicode text")
     return value
@@ -344,11 +365,13 @@ def translate_pattern(pattern):
             out.append(c)
             i += 1
         elif c == "{":
-            m = re.match(r"\{(\d+)(,(\d*))?\}", pattern[i:])
+            m = BRACE_QUANTIFIER.match(pattern, i)
             if not m:
                 raise Unsupported("a { that is not a quantifier")
             out.append(m.group(0))
-            i += len(m.group(0))
+            i = m.end()
+            if pattern[i:i + 1] in ("?", "+"):
+                raise Unsupported("a lazy or possessive quantifier")
         elif c == "^":
             out.append("^")
             i += 1
@@ -368,7 +391,7 @@ def translate_pattern(pattern):
         return re.compile("".join(out))
     except re.error as exc:
         raise Unsupported("an invalid pattern: %s" % exc)
-    except (OverflowError, RecursionError) as exc:
+    except (OverflowError, RecursionError, ValueError) as exc:
         raise Unsupported("a pattern exceeds the host regex compiler's supported resources: %s" % exc)
 
 
@@ -380,6 +403,7 @@ class Schema:
             self.root = strict_json(raw)
         except ValueError as exc:
             raise Unsupported("%s: not a JSON document: %s" % (name, exc))
+        self.validation_steps = 0
         self.compiled = {}
         self.keywords = set()
         if not isinstance(self.root, dict):
@@ -552,8 +576,12 @@ class Schema:
                     self.fail(here, "a $ref to a missing definition")
 
     def validate(self, value):
+        self.validation_steps = 0
         errors = []
-        self.check(value, self.root, "", errors)
+        try:
+            self.check(value, self.root, "", errors)
+        except RecursionError:
+            raise Unsupported("schema validation exceeds the host stack resources")
         return errors
 
     def errors_of(self, value, schema, at):
@@ -562,6 +590,9 @@ class Schema:
         return errors
 
     def check(self, value, schema, at, errors):
+        self.validation_steps += 1
+        if self.validation_steps > MAX_VALIDATION_STEPS:
+            raise Unsupported("schema validation exceeds %d evaluation steps" % MAX_VALIDATION_STEPS)
         where = at or "/"
         if "$ref" in schema:
             self.check(value, self.root["$defs"][schema["$ref"][8:]], at, errors)
@@ -692,8 +723,12 @@ def block_style(line):
         return None
     if quote is None:
         val = val.strip()
-    if not val or val[0] in ".#%":
+        if not val:
+            return "" if len(entries) > 1 else None
+    if val and val[0] in ".#%":
         return None
+    if not val:
+        return ""
     return re.split(r"[.#%]", val, maxsplit=1)[0]
 
 
@@ -740,8 +775,16 @@ class Scan:
         self.inert = []
         self.notes = []
         self.conditional = set()
+        self._hidden = set()
+        self._occ_lines = {}
+        self._occ_head_lines = {}
         self.preprocess()
         self.parse([(k + 1, line) for k, line in enumerate(self.lines)], "top")
+        for occurrence in self.occurrences:
+            if id(occurrence) in self._hidden:
+                self.inert.append((occurrence["line"], "in_comment"))
+        self.occurrences = [occurrence for occurrence in self.occurrences
+                            if id(occurrence) not in self._hidden]
         self.occurrences.sort(key=lambda o: o["line"])
         self.titles.sort(key=lambda t: t.line)
 
@@ -773,39 +816,122 @@ class Scan:
     def mark(self, no, ctx, kind):
         self.kinds[no] = (ctx, kind)
 
-    def head_start(self, items, i):
+    def head_start(self, items, i, local_kinds=None):
         k = i
-        while k > 0 and items[k - 1][0] == items[k][0] - 1 and self.kinds.get(items[k - 1][0], (None, None))[1] == "head":
-            k -= 1
+        if local_kinds is None:
+            while k > 0 and items[k - 1][0] == items[k][0] - 1 and self.kinds.get(items[k - 1][0], (None, None))[1] == "head":
+                k -= 1
+        else:
+            while k > 0 and items[k - 1][0] == items[k][0] - 1 and local_kinds.get(k - 1) == "head":
+                k -= 1
         return k
 
-    def discrete(self, items, i):
-        return any(block_style(text) in ("discrete", "float") for _, text in items[self.head_start(items, i):i])
+    def head_text(self, items, i, local_kinds=None):
+        return "".join(text for _, text in items[self.head_start(items, i, local_kinds):i])
 
-    def head_text(self, items, i):
-        return "".join(text for _, text in items[self.head_start(items, i):i])
-
-    def parse(self, items, ctx):
+    def parse(self, items, ctx, depth=0):
+        if depth > MAX_ASCIIDOC_DEPTH:
+            raise Unsupported("AsciiDoc block/cell traversal depth exceeds %d" % MAX_ASCIIDOC_DEPTH)
+        local_kinds = {}
         para = None
+        in_list = False
+        list_cont = 0
+        prev_plus = False
+        list_is_dlist = False
+        list_style = None
         style = None
         head_lines = []
+        head_occs = []
+        slash_occs = []
+        cont_slash = False
+        attached_adj = False
+        adj_meta_after_attached = False
+        cont_lead_blank = False
+        cont_lead_meta = False
+        cont_after_meta_blanks = 0
+        list_term_comment = False
+
+        def mark_local(idx, line_no, kind):
+            local_kinds[idx] = kind
+            self.mark(line_no, ctx, kind)
+
+        def hide_head(extra_lines):
+            for occ in head_occs:
+                self._hidden.add(id(occ))
+            for occ in slash_occs:
+                self._hidden.add(id(occ))
+            if ctx == "top":
+                self.comment_lines.update(head_lines)
+                self.comment_lines.update(extra_lines)
+
+        def attach_head():
+            if ctx == "top" and head_lines and head_occs:
+                owned = frozenset(head_lines)
+                for occ in head_occs:
+                    self._occ_head_lines[id(occ)] = owned
+
+        def resolve_slash_visible(target_kind=None):
+            for occ in slash_occs:
+                if "head_before_comment_block" not in occ["flags"]:
+                    occ["flags"].append("head_before_comment_block")
+                if target_kind is not None:
+                    occ["target_kind"] = target_kind
+
         i = 0
         n = len(items)
         while i < n:
             no, line = items[i]
             if line == "":
-                self.mark(no, ctx, "blank")
+                mark_local(i, no, "blank")
                 para = None
-                style = None
-                head_lines = []
+                prev_plus = False
+                list_is_dlist = False
+                list_style = None
+                attached_adj = False
+                if list_cont == 1:
+                    cont_lead_blank = True
+                    list_cont = 2
+                elif list_cont == 2:
+                    if cont_lead_meta:
+                        cont_after_meta_blanks = 1
+                    else:
+                        cont_lead_blank = False
+                    list_cont = 3
+                elif list_cont == 3 and cont_lead_meta:
+                    cont_after_meta_blanks += 1
                 i += 1
                 continue
+            if list_cont == 3 and line != "+":
+                if cont_lead_meta and cont_after_meta_blanks == 1:
+                    self.notes.append((no, "separated_blanks_around_continuation_metadata"))
+                list_cont = 0
+                in_list = False
+                cont_slash = False
+                cont_lead_blank = False
+                cont_lead_meta = False
+                cont_after_meta_blanks = 0
+                list_term_comment = False
+                if style == "comment":
+                    hide_head([])
+                else:
+                    resolve_slash_visible()
+                style = None
+                head_lines = []
+                head_occs = []
+                slash_occs = []
+            if line != "+":
+                prev_plus = False
             if DIRECTIVE.fullmatch(line):
-                self.mark(no, ctx, "directive")
+                mark_local(i, no, "directive")
                 i += 1
                 continue
             if LINE_COMMENT.match(line):
-                self.mark(no, ctx, "comment")
+                mark_local(i, no, "comment")
+                if list_cont == 0 and in_list and para is None and not attached_adj:
+                    list_term_comment = True
+                if list_cont == 1:
+                    list_cont = 2
+                cont_lead_blank = False
                 i += 1
                 continue
             kind = delimiter(line)
@@ -817,44 +943,120 @@ class Scan:
                 if j >= n:
                     self.notes.append((no, "unterminated_block"))
                 inner = items[i + 1:j]
-                head = self.head_text(items, i)
-                self.mark(no, ctx, "delimiter")
+                head = self.head_text(items, i, local_kinds)
+                mark_local(i, no, "delimiter")
                 if j < n:
-                    self.mark(items[j][0], ctx, "delimiter")
-                if kind == "comment" or (kind == "open" and style == "comment"):
-                    self.comment_lines.update(head_lines)
-                    self.comment_lines.add(no)
-                    for no2, _ in inner:
-                        self.comment_lines.add(no2)
-                    if j < n:
-                        self.comment_lines.add(items[j][0])
+                    mark_local(j, items[j][0], "delimiter")
+                if kind == "comment":
+                    slash_occs.extend(head_occs)
+                    head_occs = []
+                    if ctx == "top":
+                        self.comment_lines.add(no)
+                        for no2, _ in inner:
+                            self.comment_lines.add(no2)
+                        if j < n:
+                            self.comment_lines.add(items[j][0])
+                    for idx2 in range(i + 1, j):
+                        no2, text = items[idx2]
+                        mark_local(idx2, no2, "verbatim")
+                        if "oft-sid" in text:
+                            self.inert.append((no2, "in_comment"))
+                    if list_cont > 0:
+                        if cont_slash:
+                            self.notes.append((no, "repeated_comment_block_in_list_continuation"))
+                        else:
+                            cont_slash = True
+                    elif in_list:
+                        list_term_comment = True
+                    if list_cont == 1:
+                        list_cont = 2
+                    attached_adj = False
+                    cont_lead_blank = False
+                    para = None
+                    list_is_dlist = False
+                    list_style = None
+                    i = j + 1
+                    continue
+                if kind == "open" and style == "comment":
+                    extra = [no] + [no2 for no2, _ in inner] + ([items[j][0]] if j < n else [])
+                    hide_head(extra)
+                else:
+                    resolve_slash_visible()
+                    attach_head()
                 verbatim = (kind in VERBATIM_BLOCKS or (kind == "open" and style in VERBATIM_STYLES)
                             or (kind == "quote" and style == "verse"))
                 if verbatim:
-                    for no2, text in inner:
-                        self.mark(no2, ctx, "verbatim")
+                    for idx2 in range(i + 1, j):
+                        no2, text = items[idx2]
+                        mark_local(idx2, no2, "verbatim")
                         if "oft-sid" in text:
-                            self.inert.append((no2, "in_comment" if kind == "comment" or style == "comment" else "in_verbatim"))
+                            self.inert.append((no2, "in_comment" if style == "comment" else "in_verbatim"))
                 elif kind == "table":
-                    self.table(inner, line, head, ctx)
+                    self.table(inner, line, head, ctx, depth)
                 else:
-                    for no2, _ in inner:
-                        self.mark(no2, ctx, "nested")
-                    self.parse(inner, "cell" if ctx == "cell" else "block")
+                    for idx2 in range(i + 1, j):
+                        mark_local(idx2, items[idx2][0], "nested")
+                    self.parse(inner, "cell" if ctx == "cell" else "block", depth + 1)
+                attached_adj = list_cont > 0
+                adj_meta_after_attached = False
+                cont_slash = False
+                cont_lead_blank = False
+                cont_lead_meta = False
+                cont_after_meta_blanks = 0
+                list_term_comment = False
+                in_list = list_cont > 0
+                list_cont = 0
                 para = None
+                list_is_dlist = False
+                list_style = None
                 style = None
                 head_lines = []
+                head_occs = []
+                slash_occs = []
                 i = j + 1
                 continue
             if ATTRIBUTE_LINE.fullmatch(line):
                 before = para
+                if before == "list" and not list_is_dlist:
+                    mark_local(i, no, "head")
+                    if "oft-sid" in line:
+                        self.item(items, i, ctx, before, local_kinds)
+                    s = block_style(line)
+                    if s is not None:
+                        list_style = s
+                    i += 1
+                    continue
                 if before is not None:
                     head_lines = []
+                    head_occs = []
+                    slash_occs = []
+                if list_cont == 0:
+                    if attached_adj:
+                        adj_meta_after_attached = True
+                    in_list = False
+                    list_term_comment = False
+                elif cont_lead_blank:
+                    cont_lead_meta = True
+                    cont_lead_blank = False
+                    cont_after_meta_blanks = 0
+                attached_adj = False
                 para = None
-                self.mark(no, ctx, "head")
+                list_is_dlist = False
+                list_style = None
+                mark_local(i, no, "head")
                 head_lines.append(no)
+                occ = None
                 if "oft-sid" in line:
-                    self.item(items, i, ctx, before)
+                    occ = self.item(items, i, ctx, before, local_kinds)
+                if occ is not None:
+                    if occ["sid"] is not None:
+                        for prev_occ in slash_occs:
+                            self._hidden.add(id(prev_occ))
+                        slash_occs = []
+                        for prev_occ in head_occs:
+                            if prev_occ["sid"] is not None and "multiple_oft_sid" not in prev_occ["flags"]:
+                                prev_occ["flags"].append("multiple_oft_sid")
+                    head_occs.append(occ)
                 s = block_style(line)
                 if s is not None:
                     style = s
@@ -862,73 +1064,278 @@ class Scan:
                 continue
             if para is None:
                 if BLOCK_TITLE.fullmatch(line):
-                    self.mark(no, ctx, "head")
+                    if list_cont == 0:
+                        if attached_adj:
+                            adj_meta_after_attached = True
+                        in_list = False
+                        list_term_comment = False
+                    elif cont_lead_blank:
+                        cont_lead_meta = True
+                        cont_lead_blank = False
+                        cont_after_meta_blanks = 0
+                    attached_adj = False
+                    mark_local(i, no, "head")
                     head_lines.append(no)
                     i += 1
                     continue
                 m = SECTION_TITLE.fullmatch(line)
-                if m and ctx == "top" and self.discrete(items, i):
-                    self.mark(no, ctx, "discrete_heading")
+                if m and ctx == "top" and style in ("discrete", "float"):
+                    resolve_slash_visible("discrete_heading")
+                    for occ in head_occs:
+                        occ["target_kind"] = "discrete_heading"
+                        if "discrete_heading_target" not in occ["flags"]:
+                            occ["flags"].append("discrete_heading_target")
+                    for occ in slash_occs:
+                        if "discrete_heading_target" not in occ["flags"]:
+                            occ["flags"].append("discrete_heading_target")
+                    attach_head()
+                    mark_local(i, no, "discrete_heading")
+                    attached_adj = list_cont > 0
+                    adj_meta_after_attached = False
+                    cont_slash = False
+                    cont_lead_blank = False
+                    cont_lead_meta = False
+                    cont_after_meta_blanks = 0
+                    list_term_comment = False
+                    in_list = list_cont > 0
+                    list_cont = 0
                     style = None
                     head_lines = []
+                    head_occs = []
+                    slash_occs = []
                     i += 1
                     continue
                 if m and ctx == "top":
+                    resolve_slash_visible("section")
+                    for occ in head_occs:
+                        occ["target_kind"] = "section"
                     above = items[i - 1][1] if i > 0 and items[i - 1][0] == no - 1 else None
                     self.titles.append(Title(no, len(m.group(1)) - 1, m.group(2), above))
-                    self.mark(no, ctx, "title")
+                    mark_local(i, no, "title")
+                    attached_adj = False
+                    adj_meta_after_attached = False
+                    cont_slash = False
+                    cont_lead_blank = False
+                    cont_lead_meta = False
+                    cont_after_meta_blanks = 0
+                    list_term_comment = False
+                    in_list = False
+                    list_cont = 0
                     style = None
                     head_lines = []
+                    head_occs = []
+                    slash_occs = []
                     i += 1
                     continue
                 if m:
                     self.notes.append((no, "heading_in_block"))
                 if ATTRIBUTE_ENTRY.fullmatch(line):
-                    self.mark(no, ctx, "attribute_entry")
+                    if list_cont == 0:
+                        if attached_adj:
+                            adj_meta_after_attached = True
+                        in_list = False
+                        list_term_comment = False
+                    elif cont_lead_blank:
+                        cont_lead_meta = True
+                        cont_lead_blank = False
+                        cont_after_meta_blanks = 0
+                    attached_adj = False
+                    mark_local(i, no, "attribute_entry")
                     i += 1
                     continue
                 if BREAK.fullmatch(line):
-                    self.mark(no, ctx, "break")
+                    resolve_slash_visible()
+                    attach_head()
+                    mark_local(i, no, "break")
+                    attached_adj = list_cont > 0
+                    adj_meta_after_attached = False
+                    cont_slash = False
+                    cont_lead_blank = False
+                    cont_lead_meta = False
+                    cont_after_meta_blanks = 0
+                    list_term_comment = False
+                    in_list = list_cont > 0
+                    list_cont = 0
                     style = None
                     head_lines = []
+                    head_occs = []
+                    slash_occs = []
                     i += 1
                     continue
                 if i + 1 < n and items[i + 1][0] == no + 1 and setext(line, items[i + 1][1]):
                     self.notes.append((no, "setext_title"))
             if line == "+":
-                self.mark(no, ctx, "continuation")
-                para = None
-                style = None
-                head_lines = []
-                i += 1
-                continue
+                if para == "list":
+                    mark_local(i, no, "continuation")
+                    if not list_is_dlist and list_style is not None:
+                        style = list_style
+                        head_lines = []
+                        head_occs = []
+                        slash_occs = []
+                    else:
+                        resolve_slash_visible()
+                        attach_head()
+                        style = None
+                        head_lines = []
+                        head_occs = []
+                        slash_occs = []
+                    para = None
+                    list_is_dlist = False
+                    list_style = None
+                    in_list = True
+                    list_cont = 1
+                    prev_plus = True
+                    attached_adj = False
+                    adj_meta_after_attached = False
+                    cont_slash = False
+                    cont_lead_blank = False
+                    cont_lead_meta = False
+                    cont_after_meta_blanks = 0
+                    list_term_comment = False
+                    i += 1
+                    continue
+                if para is not None and in_list:
+                    mark_local(i, no, "continuation")
+                    para = None
+                    list_is_dlist = False
+                    list_style = None
+                    list_cont = 1
+                    prev_plus = True
+                    attached_adj = False
+                    adj_meta_after_attached = False
+                    cont_slash = False
+                    cont_lead_blank = False
+                    cont_lead_meta = False
+                    cont_after_meta_blanks = 0
+                    list_term_comment = False
+                    i += 1
+                    continue
+                if para is None and list_cont > 0:
+                    mark_local(i, no, "continuation")
+                    for occ in head_occs:
+                        if "continuation_after_head" not in occ["flags"]:
+                            occ["flags"].append("continuation_after_head")
+                    for occ in slash_occs:
+                        if "continuation_after_head" not in occ["flags"]:
+                            occ["flags"].append("continuation_after_head")
+                    list_cont = 2 if prev_plus else 1
+                    prev_plus = True
+                    attached_adj = False
+                    adj_meta_after_attached = False
+                    cont_lead_blank = False
+                    cont_lead_meta = False
+                    cont_after_meta_blanks = 0
+                    list_term_comment = False
+                    i += 1
+                    continue
+                if para is None and in_list and not head_lines and style is None:
+                    if list_term_comment:
+                        self.notes.append((no, "list_continuation_after_terminating_comment"))
+                    mark_local(i, no, "continuation")
+                    list_cont = 1
+                    prev_plus = True
+                    attached_adj = False
+                    adj_meta_after_attached = False
+                    cont_slash = False
+                    cont_lead_blank = False
+                    cont_lead_meta = False
+                    cont_after_meta_blanks = 0
+                    list_term_comment = False
+                    i += 1
+                    continue
+                if para is not None:
+                    mark_local(i, no, "text")
+                    para = "paragraph"
+                    style = None
+                    head_lines = []
+                    head_occs = []
+                    slash_occs = []
+                    attached_adj = False
+                    adj_meta_after_attached = False
+                    cont_slash = False
+                    cont_lead_blank = False
+                    cont_lead_meta = False
+                    cont_after_meta_blanks = 0
+                    list_term_comment = False
+                    i += 1
+                    continue
+                if adj_meta_after_attached:
+                    self.notes.append((no, "adjacent_metadata_continuation_after_attached_block"))
+                    adj_meta_after_attached = False
             if "oft-sid" in line:
                 self.inert.append((no, "in_list_item_text" if para == "list" else "mention"))
             if para is None:
-                if style == "comment" and not LIST_ITEM.match(line) and not BLOCK_MACRO.fullmatch(line):
-                    self.comment_lines.update(head_lines)
-                    self.comment_lines.add(no)
+                if style == "comment" and not BLOCK_MACRO.fullmatch(line) and not LIST_ITEM.match(line):
+                    hide_head([no])
                     para = "comment_para"
+                    attached_adj = list_cont > 0
+                    in_list = list_cont > 0
+                    list_cont = 0
                 elif (style in VERBATIM_STYLES and style != "comment") or (line[0] in " \t" and not LIST_ITEM.match(line)):
+                    resolve_slash_visible()
+                    attach_head()
                     para = "verbatim"
-                elif LIST_ITEM.match(line):
-                    para = "list"
+                    attached_adj = list_cont > 0
+                    in_list = list_cont > 0
+                    list_cont = 0
                 elif BLOCK_MACRO.fullmatch(line):
-                    self.mark(no, ctx, "macro")
+                    resolve_slash_visible()
+                    attach_head()
+                    mark_local(i, no, "macro")
+                    attached_adj = list_cont > 0
+                    adj_meta_after_attached = False
+                    cont_slash = False
+                    cont_lead_blank = False
+                    cont_lead_meta = False
+                    cont_after_meta_blanks = 0
+                    list_term_comment = False
+                    in_list = list_cont > 0
+                    list_cont = 0
                     style = None
                     head_lines = []
+                    head_occs = []
+                    slash_occs = []
                     i += 1
                     continue
+                elif LIST_ITEM.match(line):
+                    resolve_slash_visible()
+                    attach_head()
+                    para = "list"
+                    attached_adj = False
+                    in_list = True
+                    list_cont = 0
+                    list_is_dlist = not bool(NON_DLIST_ITEM.match(line))
+                    list_style = None
                 else:
+                    resolve_slash_visible()
+                    attach_head()
                     para = "paragraph"
+                    attached_adj = list_cont > 0
+                    in_list = list_cont > 0
+                    list_cont = 0
+                adj_meta_after_attached = False
+                cont_slash = False
+                cont_lead_blank = False
+                cont_lead_meta = False
+                cont_after_meta_blanks = 0
+                list_term_comment = False
                 head_lines = []
+                head_occs = []
+                slash_occs = []
             elif para == "comment_para":
-                self.comment_lines.add(no)
-            self.mark(no, ctx, "text")
+                if ctx == "top":
+                    self.comment_lines.add(no)
+            elif para == "list":
+                list_style = None
+            mark_local(i, no, "text")
             style = None
             i += 1
+        for occ in slash_occs:
+            self._hidden.add(id(occ))
+        if style == "comment":
+            hide_head([])
 
-    def table(self, inner, opener, head, ctx):
+    def table(self, inner, opener, head, ctx, depth):
         for no, _ in inner:
             self.mark(no, ctx, "nested")
         if opener[0] in ",:":
@@ -973,7 +1380,7 @@ class Scan:
             if style == "a":
                 if content and content[0][0] == opened:
                     content = cell_lstrip(content)
-                self.parse(content, "cell")
+                self.parse(content, "cell", depth + 1)
                 continue
             for no, text in content:
                 if "oft-sid" in text:
@@ -982,7 +1389,7 @@ class Scan:
                     else:
                         self.inert.append((no, "in_plain_table_cell"))
 
-    def item(self, items, i, ctx, before):
+    def item(self, items, i, ctx, before, local_kinds=None):
         no, line = items[i]
         n = len(items)
         flags = []
@@ -994,7 +1401,7 @@ class Scan:
         sids = [] if entries is None else [(v, q) for k, v, q in entries if k == "oft-sid"]
         if entries is not None and not sids:
             self.inert.append((no, "mention"))
-            return
+            return None
         if len(sids) > 1:
             flags.append("multiple_oft_sid")
         sid, quote = sids[0] if sids else (None, None)
@@ -1008,17 +1415,11 @@ class Scan:
             flags.append("in_verbatim_paragraph")
         if no in self.conditional:
             flags.append("conditional")
-        k = self.head_start(items, i)
+        k = self.head_start(items, i, local_kinds)
         t = i + 1
         while (t < n and items[t][0] == items[t - 1][0] + 1
                and (ATTRIBUTE_LINE.fullmatch(items[t][1]) or BLOCK_TITLE.fullmatch(items[t][1]))):
             t += 1
-        head_style = None
-        for _, hline in items[k:t]:
-            if ATTRIBUTE_LINE.fullmatch(hline):
-                hs = block_style(hline)
-                if hs is not None:
-                    head_style = hs
         target = None
         target_kind = None
         statement = None
@@ -1036,6 +1437,9 @@ class Scan:
             elif LINE_COMMENT.match(text):
                 flags.append("target_is_comment")
                 target_kind = "comment"
+            elif ATTRIBUTE_ENTRY.fullmatch(text):
+                flags.append("target_is_attribute_entry")
+                target_kind = "attribute_entry"
             elif kind:
                 target_kind = "delimited:" + kind
                 close = "```" if kind == "fenced" else text
@@ -1043,25 +1447,26 @@ class Scan:
                 while e < n and items[e][1] != close:
                     e += 1
                 statement = items[t + 1:e]
+            elif BLOCK_MACRO.fullmatch(text):
+                target_kind = "macro"
+                statement = [items[t]]
             else:
-                target_kind = "paragraph"
+                target_kind = "list" if LIST_ITEM.match(text) else "paragraph"
                 e = t
-                while (e < n and items[e][1] not in ("", "+")
-                       and (e == t or not (delimiter(items[e][1]) or ATTRIBUTE_LINE.fullmatch(items[e][1])))):
+                while (e < n and items[e][1] != ""
+                       and (e == t or (items[e][1] != "+" and not (delimiter(items[e][1]) or ATTRIBUTE_LINE.fullmatch(items[e][1]))))):
                     e += 1
                 statement = items[t:e]
-        if (entries is not None and before not in ("list", "verbatim", "comment_para")
-                and (target_kind == "delimited:comment"
-                     or (head_style == "comment" and target_kind in ("delimited:open", "paragraph")))):
-            self.inert.append((no, "in_comment"))
-            return
         above = items[i - 1][1] if i > 0 and items[i - 1][0] == no - 1 else None
-        self.occurrences.append({
+        occ = {
             "sid": sid, "line": no, "head_start": items[k][0], "target": target,
             "target_kind": target_kind, "context": ctx, "flags": flags, "above": above,
             "statement": None if statement is None else [text for _, text in statement],
             "statement_lines": None if not statement else [statement[0][0], statement[-1][0]],
-        })
+        }
+        self._occ_lines[id(occ)] = line
+        self.occurrences.append(occ)
+        return occ
 
 
 def anchor_value(line):
@@ -1093,7 +1498,8 @@ def scan_doubts(scan, sid):
               if code == "single_line_conditional" or (code in STRUCTURAL_NOTES and relevant)]
     for o in scan.occurrences:
         if any(f in DOUBTFUL_FLAGS for f in o["flags"]):
-            if o in unsure or o["sid"] == sid or sid in scan.lines[o["line"] - 1]:
+            raw_line = scan._occ_lines.get(id(o), scan.lines[o["line"] - 1])
+            if o in unsure or o["sid"] == sid or sid in raw_line:
                 doubts.append("line %d: an occurrence with %s" % (o["line"], ",".join(o["flags"])))
     for no, code in scan.notes:
         if code in CELL_NOTES and sid in scan.lines[no - 1]:
@@ -1102,6 +1508,8 @@ def scan_doubts(scan, sid):
 
 
 def derive_anchor(scan, occ):
+    if occ["target_kind"] == "discrete_heading":
+        raise Undecided("an item whose attribute line heads a discrete or floating title is not supported")
     lines = scan.lines
     above = occ["above"]
     value = anchor_value(above)
@@ -1118,19 +1526,25 @@ def derive_anchor(scan, occ):
     value = anchor_value(title.above)
     if value is None:
         return None, None
+    owned_head = scan._occ_head_lines.get(id(occ), ())
     for no in range(title.line + 1, occ["head_start"]):
         ctx, kind = scan.kinds.get(no, (None, None))
         if kind == "directive":
             raise Undecided("a preprocessor directive stands between the section title and the item")
-        if kind in ("blank", "comment", "attribute_entry") or no in scan.comment_lines:
+        if kind in ("blank", "comment", "attribute_entry") or no in scan.comment_lines or no in owned_head:
             continue
         return None, None
     later = [t for t in scan.titles if t.line > title.line]
     end = later[0].line if later else len(lines) + 1
     body = [o for o in scan.occurrences if title.line < o["line"] < end]
-    if any(o is not occ and o["target_kind"] == "section" for o in body):
+    other = [o for o in body if o is not occ]
+    if any(o["target_kind"] == "section" for o in other):
         raise Undecided("an item that heads a later section stands in this section's own body")
-    if len(body) != 1:
+    if any(o["line"] in owned_head for o in other):
+        raise Undecided("an unresolved pending oft-sid head precedes this item in the same block metadata")
+    if other and all(o["target_kind"] in ("blank", "comment", "attribute_entry", None) for o in other):
+        raise Undecided("an unresolved detached oft-sid head stands in this section's own body")
+    if other:
         return None, None
     return value, "second"
 
@@ -1763,10 +2177,19 @@ Schema keywords
   counting nested subschemas and reference steps together; a schema with any other keyword,
   another form of these, non-object $defs, an invalid pattern, a cyclic $ref, or deeper graph
   structure is refused as unsupported before any case runs. Patterns exceeding the host regex
-  compiler's repetition or recursion resources also stop as unsupported before any case runs.
+  compiler's repetition, numeric-conversion or recursion resources also stop as unsupported before any case runs.
+  JSON container depth is limited to 384 (the root is depth 0); a deeper parsed document or host
+  decoder depth exhaustion stops unsupported, rather than being classified as malformed. Schema
+  validation permits at most 100000 schema/value evaluations per document, counting repeated
+  shared references and conditional branches; exhaustion stops unsupported rather than passing
+  or failing the document. Composed validation that exhausts host stack resources also stops
+  unsupported. AsciiDoc recursive block/cell traversal is limited to depth 128 (the top level is 0).
+  These are tool support and resource limits, not new assessment schema constraints.
   A pattern is ECMA-262 restricted to literals,
-  character classes, \\d, groups, alternation, the quantifiers ? * + {n} {n,} {n,m} and the anchors
-  ^ and $, and is searched for, not anchored; other pattern syntax is refused. Numbers are parsed
+  character classes, \\d, groups, alternation, the greedy quantifiers ? * + {n} {n,} {n,m} (with
+  ASCII digits only and no lazy or possessive ?/+ suffix) and the anchors ^ and $, and is searched
+  for, not anchored; other pattern syntax (including lazy quantifiers valid in full ECMA-262) is
+  refused as unsupported. Numbers are parsed
   as exact decimal values (no binary floating-point rounding): a number is an integer only when its
   exact fractional part is zero, equality is exact JSON equality, minLength counts code points, and
   a document with a duplicate object member is unparseable. Where host integer-string conversion
@@ -1780,23 +2203,80 @@ Schema keywords
 Occurrences and anchors
   An occurrence is a block attribute line of an AsciiDoc file (a name ending in .adoc) whose
   oft-sid attribute has exactly the value <requirement_id>~<requirement_revision>, outside
-  verbatim, passthrough and comment blocks (including comment-styled open blocks and paragraphs
-  headed by [comment], ["comment"], ['comment'], or [comment.specitem,...], and //// targets)
-  and outside plain table cells.
+  verbatim, passthrough and comment blocks (including comment-styled open blocks, paragraphs,
+  and standalone + lines outside a list continuation headed by [comment], ["comment"], ['comment'],
+  or [comment.specitem,...], including [comment] metadata continuing across blank lines, ////
+  comment blocks, or an active list continuation + unless overridden by a later style such as
+  [open], [""], [''], or [,role=...], and //// targets overwritten by a later oft-sid head or
+  reaching no visible target) and outside plain table cells. Outside a list continuation, a
+  visible standalone + begins a real paragraph (contributing + and following paragraph lines,
+  including heading-shaped text kept in that paragraph), a literal/verbatim-styled standalone +
+  retains verbatim paragraph context, and a standalone + inside an already-open non-list
+  paragraph (including a comment or literal paragraph) ends that paragraph and starts a visible +
+  paragraph. List continuation attachment is tracked across continuation markers, single-blank
+  continuation transitions, and attached blocks within the same scope without claiming a general
+  mixed-list parser; an unresolved non-comment or overridden pending oft-sid head across a list
+  continuation stops as undecided (continuation_after_head). Four additional unresolved
+  list/metadata transitions are detected within their actual parse scope and stop as file-level
+  undecided whenever the queried requirement is relevant to the file, without altering retained
+  list/paragraph/style interpretation: repeated //// comment blocks during an active list
+  continuation (repeated_comment_block_in_list_continuation), immediately adjacent pending block
+  metadata or an attribute entry (attribute line, block title, or attribute entry) after an
+  attached block followed by + (adjacent_metadata_continuation_after_attached_block; once armed,
+  this conservative observer persists across intervening blank lines, // line comments, ////
+  comment blocks, directives, and further metadata or attribute-entry lines until reset by a
+  non-+ paragraph, list item, non-comment delimited block, heading, break, block macro, or scope
+  exit, so a later standalone +, including a renderer-visible + paragraph, can still be refused),
+  a single leading blank during an active list continuation (with or without already-pending
+  metadata/style), followed by pending continuation metadata or an attribute entry, and a single
+  following blank before a non-+ line (separated_blanks_around_continuation_metadata), and a
+  stale-list-context + transition after a terminating // line comment or //// comment block with
+  no active continuation (list_continuation_after_terminating_comment).
+  Visibility is tracked per parsed occurrence within each recursive block or AsciiDoc table cell
+  scope rather than by global physical line number, so a hidden comment in one cell does not
+  suppress a visible occurrence sharing that physical line in an adjacent cell. Supported media
+  (image/video/audio with a non-empty non-edge-whitespace target) and toc::[] block macros take
+  precedence over list-item recognition and remain visible under [comment]; uncontinued delimited
+  blocks break non-description lists without inheriting an uncontinued list-embedded [comment].
   Block attribute lists accept ASCII spaces and horizontal tabs around commas, =, and entry
   boundaries. The checker reads the
   block structure itself: delimited blocks to their first closing line, AsciiDoc table cells,
-  paragraphs that a block attribute line ends, line comments and atx section titles. The anchor
+  paragraphs that a block attribute line ends, line comments and atx section titles. Top-level
+  headings are classified as discrete/floating titles versus real section titles using the
+  effective pending block style (discrete or float, surviving blanks, line comments, and ////
+  blocks unless overridden by a later style); a direct oft-sid head on a discrete/floating title
+  stops conservatively as undecided (discrete_heading_target). The anchor
   derivation reads the line directly above the attribute line within the same block or AsciiDoc
   table cell (first form; never across a cell boundary), else the line directly above the section
   title (level 1 or deeper, ==..====== / ##..######; a level-0 document title is not a section
-  title) whose own body holds the item (second form). Both version-1 and version-2 resolution use
-  the same .adoc file test. Where a file has a construct that the checker does not read (an
-  include, a conditional region, a single-line conditional other than [source,...] directly before
-  a ---- listing delimiter, an unterminated block, an underlined section title, an oft-sid that is
-  single-quoted, holds an attribute reference or stands in list item text, or an identifier written
-  in a form that the anchor derivation does not name, such as [id=x], [id="x"] or [#id.role]), it
-  reports the case as undecided instead of deciding it.
+  title) whose own body holds the item (second form). Pending top-level metadata belonging to the
+  item's own block (including overwritten pre-//// heads and overridden pending metadata across
+  //// or blank lines) is not counted as a preceding visible block, while directives and real
+  preceding visible blocks remain barriers; a pending oft-sid head reaching a later section title
+  (including across ////, blank lines or line comments) retains section-target classification so
+  the later-section undecided guard applies to an earlier sole item in the preceding section.
+  Unresolved multiple pending oft-sid heads sharing a block's pending metadata (such as blank- or
+  line-comment-separated oft-sid heads without //// overwrite) or an unresolved detached oft-sid
+  head in an anchored section's own body (including a pending oft-sid whose apparent target is an
+  AsciiDoc attribute entry, flagged target_is_attribute_entry) stop as undecided during
+  second-form anchor derivation rather than silently deriving null; direct queries targeting an
+  oft-sid directly above an attribute entry also stop as undecided (target_is_attribute_entry),
+  while ordinary unheaded attribute entries remain unchanged. Both version-1 and version-2
+  resolution use the same .adoc file test. Where a file has a construct that the checker does not
+  read (an include, a conditional region, a single-line conditional other than [source,...]
+  directly before a ---- listing delimiter, an unterminated block, an underlined section title,
+  repeated //// comment blocks in an active list continuation, immediately adjacent pending
+  metadata or attribute entry after an attached block followed by + (including across intervening
+  blanks or comments before a resetting block, heading, break, list item, macro, or non-+
+  paragraph), separated single blanks around continuation metadata/style or an attribute entry,
+  a stale-list-context + after a terminating line/slash comment, an oft-sid head
+  before a //// comment block that is neither hidden nor overwritten before a visible target, a
+  direct oft-sid on a discrete/floating title, an oft-sid whose apparent target is an attribute
+  entry, an unresolved oft-sid head across a list continuation or blank/comment-separated pending
+  metadata, an oft-sid immediately adjacent to a comment-styled or verbatim standalone + paragraph
+  without a blank line, an oft-sid that is single-quoted, holds an attribute reference or stands
+  in list item text, or an identifier written in a form that the anchor derivation does not name,
+  such as [id=x], [id="x"] or [#id.role]), it reports the case as undecided instead of deciding it.
 
 Exit status
   0 every case is as stated; 1 a case differs; 2 an unsupported schema, pin or construct, a case

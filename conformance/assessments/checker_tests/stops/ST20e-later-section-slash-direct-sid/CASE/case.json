@@ -1,0 +1,12 @@
+{
+  "case": "ST20e-later-section-slash-direct-sid",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

@@ -1,0 +1,550 @@
+{
+  "case": "RT25",
+  "subject": "RF1-5 matched positive controls (single-slash, blank-separated metadata, consecutive-blank, inline-comment open-list, unheaded attribute entries, first-form and section isolation)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission-1.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 19,
+        "statement": [
+          "Definitely live."
+        ],
+        "anchor_form": "first",
+        "derived_occurrence": {
+          "source_path": "example/rf1-one-slash-before-plus.adoc",
+          "ordinal": 1,
+          "anchor": "live",
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-2.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 19,
+        "statement": [
+          "Definitely live."
+        ],
+        "derived_anchor": "live",
+        "anchor_form": "first"
+      }
+    },
+    {
+      "submission": "submission-3.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "occurrences_in_file": 1,
+        "located_line": 19,
+        "statement": [
+          "Definitely live."
+        ],
+        "derived_anchor": "live",
+        "anchor_form": "first"
+      }
+    },
+    {
+      "submission": "submission-4.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 1
+      }
+    },
+    {
+      "submission": "submission-5.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 18,
+        "statement": [
+          "Definitely live."
+        ],
+        "anchor_form": "first",
+        "derived_occurrence": {
+          "source_path": "example/rf1-one-slash-after-plus.adoc",
+          "ordinal": 1,
+          "anchor": "live",
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-6.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 18,
+        "statement": [
+          "Definitely live."
+        ],
+        "derived_anchor": "live",
+        "anchor_form": "first"
+      }
+    },
+    {
+      "submission": "submission-7.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 18,
+        "statement": [
+          "Definitely live."
+        ],
+        "anchor_form": "first",
+        "derived_occurrence": {
+          "source_path": "example/rf1-two-linecomments-before-plus.adoc",
+          "ordinal": 1,
+          "anchor": "live",
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-8.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ambiguous"
+        ],
+        "occurrences": [
+          {
+            "source_path": "example/rf2-open-metadata-1blank.adoc",
+            "ordinal": 1,
+            "line": 15
+          },
+          {
+            "source_path": "example/rf2-open-metadata-1blank.adoc",
+            "ordinal": 2,
+            "line": 20
+          }
+        ]
+      }
+    },
+    {
+      "submission": "submission-9.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 15,
+        "statement": [
+          "Candidate clause."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-10.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 20,
+        "statement": [
+          "Definitely live."
+        ],
+        "derived_anchor": "live",
+        "anchor_form": "first"
+      }
+    },
+    {
+      "submission": "submission-11.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 16,
+        "statement": [
+          "Candidate clause."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-12.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ambiguous"
+        ],
+        "occurrences": [
+          {
+            "source_path": "example/rf2-para-metadata-1blank.adoc",
+            "ordinal": 1,
+            "line": 13
+          },
+          {
+            "source_path": "example/rf2-para-metadata-1blank.adoc",
+            "ordinal": 2,
+            "line": 18
+          }
+        ]
+      }
+    },
+    {
+      "submission": "submission-13.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 13,
+        "statement": [
+          "Candidate clause."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-14.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 2,
+        "located_line": 14,
+        "statement": [
+          "Candidate clause."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-15.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 9,
+        "statement": [
+          "Normal clause."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-16.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-17.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-18.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 12,
+        "statement": [
+          "Text."
+        ],
+        "anchor_form": null,
+        "derived_occurrence": {
+          "source_path": "example/rf3-1blank-before-comment-2after.adoc",
+          "ordinal": 1,
+          "anchor": null,
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-19.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 12,
+        "statement": [
+          "Text."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-20.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 14,
+        "statement": [
+          "Clause."
+        ],
+        "anchor_form": "second",
+        "derived_occurrence": {
+          "source_path": "example/rf3-1blank-before-discrete-2after.adoc",
+          "ordinal": 1,
+          "anchor": "aside",
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-21.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 14,
+        "statement": [
+          "Clause."
+        ],
+        "derived_anchor": "aside",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-22.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "occurrences_in_file": 1,
+        "located_line": 14,
+        "statement": [
+          "Clause."
+        ],
+        "derived_anchor": "aside",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-23.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 11,
+        "statement": [
+          "Visible clause."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-24.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 13,
+        "statement": [
+          "Visible clause."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-25.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-26.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "ordinal_absent"
+        ],
+        "occurrences_in_file": 0
+      }
+    },
+    {
+      "submission": "submission-27.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 10,
+        "statement": [
+          "Normal after comment."
+        ],
+        "derived_anchor": null,
+        "anchor_form": null
+      }
+    },
+    {
+      "submission": "submission-28.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "unresolvable"
+        ],
+        "occurrences": []
+      }
+    },
+    {
+      "submission": "submission-29.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "located_line": 8,
+        "statement": [
+          "First sole."
+        ],
+        "anchor_form": "second",
+        "derived_occurrence": {
+          "source_path": "example/rf5-unheaded-attr-entry-controls.adoc",
+          "ordinal": 1,
+          "anchor": "sec",
+          "service_version": null
+        }
+      }
+    },
+    {
+      "submission": "submission-30.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 8,
+        "statement": [
+          "First sole."
+        ],
+        "derived_anchor": "sec",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-31.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "fail",
+        "outcome": "refused",
+        "reasons": [
+          "anchor_mismatch"
+        ],
+        "occurrences_in_file": 1,
+        "located_line": 8,
+        "statement": [
+          "First sole."
+        ],
+        "derived_anchor": "sec",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-32.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 14,
+        "statement": [
+          "Second sole."
+        ],
+        "derived_anchor": "sec2",
+        "anchor_form": "second"
+      }
+    },
+    {
+      "submission": "submission-33.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 7,
+        "statement": [
+          "Direct item."
+        ],
+        "derived_anchor": "direct",
+        "anchor_form": "first"
+      }
+    },
+    {
+      "submission": "submission-34.json",
+      "expect": {
+        "shape": "pass",
+        "resolution": "pass",
+        "outcome": "admitted",
+        "occurrences_in_file": 1,
+        "located_line": 16,
+        "statement": [
+          "Isolated sole."
+        ],
+        "derived_anchor": "sec2",
+        "anchor_form": "second"
+      }
+    }
+  ]
+}

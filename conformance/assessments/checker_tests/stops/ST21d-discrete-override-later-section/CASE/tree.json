@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/st21d.adoc": "= P\n\n[[sec]]\n== Section\n\n[.specitem,oft-sid=\"req~mine~1\"]\nFirst.\n\n[discrete]\n[open]\n[.specitem,oft-sid=\"req~other~1\"]\n////\nc\n////\n== Section 2\n"
+  }
+}

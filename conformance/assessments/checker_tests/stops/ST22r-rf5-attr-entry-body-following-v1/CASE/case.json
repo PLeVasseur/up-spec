@@ -1,0 +1,13 @@
+{
+  "case": "ST22r",
+  "subject": "RF-5: pending SID directly above attribute entry followed by paragraph body (v1)",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

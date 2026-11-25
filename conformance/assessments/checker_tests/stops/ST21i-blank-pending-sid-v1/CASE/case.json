@@ -1,0 +1,12 @@
+{
+  "case": "ST21i-blank-pending-sid-v1",
+  "trees": {
+    "0000000000000000000000000000000000000000": "tree.json"
+  },
+  "steps": [
+    {
+      "submission": "submission.json",
+      "expect": {}
+    }
+  ]
+}

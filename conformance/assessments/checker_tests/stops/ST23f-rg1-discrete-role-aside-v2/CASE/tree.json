@@ -1,0 +1,5 @@
+{
+  "files": {
+    "example/st23f.adoc": "= P\n\n== Section 1\n\n* Item\n+\n[discrete]\n\n[.role]\n\n[[aside]]\n== Heading\n\n[.specitem,oft-sid=\"req~rf3d1~1\"]\nClause.\n"
+  }
+}
