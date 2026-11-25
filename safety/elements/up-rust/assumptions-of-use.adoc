@@ -406,17 +406,21 @@ So its failure is handled, fail-closed.
 [[aou-seooc-waiver-approval]]
 == Waivers are approved with an interference argument
 
-[.specitem,oft-sid="aou~seooc-waiver-approval~5",oft-title="Waivers are approved with an interference argument",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-waiver-approval~6",oft-title="Waivers are approved with an interference argument",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
-For each permit a binding ships, the integrator *SHALL* have the deployment's owner review the allocation it covers, file a waiver record approved by someone other than its author, and argue how interference from that allocation is excluded: by partition, by qualification, or by analysis.
-What a binding declares as a permit, and what the element requires of a transport whose binding declares one, is stated in xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] and xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
+For each permit a binding ships, the integrator *SHALL* have the deployment's owner review the full permit—its covered operations, triggers, allocation domains, finite simultaneously-live resource envelope, five-part exhaustion, wait and progress policy, scoped claims and process-wide consequences—file a waiver record approved by someone other than its author, and argue how interference from that allocation and its disclosed exhaustion outcome is excluded: by partition, by qualification, or by analysis.
+Where allocator exhaustion under the permit may terminate the process, the review and interference argument *SHALL* cover every co-resident route in that process; a waiver cannot promise that another route survives termination of the same process.
+What a binding declares as a permit, and what the element requires of a transport whose binding declares one, is stated in xref:../../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] and xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
 
-* *Review again.* The integrator *SHALL* have the waiver reviewed again when the middleware version or the deployment changes.
-* *Heap sizing.* The integrator *SHALL* size the heap that the permit draws on for the bound that the permit states.
+* *Review again.* The integrator *SHALL* have the waiver reviewed again when the middleware version, build, patch or deployment changes.
+* *Heap sizing and limits.* The integrator *SHALL* size the heap that the permit draws on for the bounded envelope that the permit states; sizing does not by itself establish host memory availability, freedom from fragmentation, recovery or timing bounds.
 Which permit a binding ships, and what a failed allocation under it does, is stated with that binding (xref:../../../up-l1/bindings/README.adoc#one-binding[what is specific to one binding]).
-* *What a waiver is not.* The integrator *SHALL NOT* file a waiver for a known anomaly or a known failure of a binding or of its middleware, or for anything else outside what a permit names (xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
+* *What a waiver is not.* The integrator *SHALL NOT* file a waiver for a known anomaly or a non-allocator known failure of a binding or of its middleware, or for anything else outside what a permit names (xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]).
 * *Strict states.* In the Report, Enforce and Locked states, the integrator *SHALL* name, in each waiver record, its interference argument's kind and a reference.
 What the element reports of each active waiver, what the Report state records and what the Enforce and Locked states refuse of a record without them, is stated in xref:../../assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found].
+
+*Scoped replacement.*
+This revision replaces revision 5 of this item for the integrator claiming the element's safety-assurance scope: it extends waiver review and interference coverage to process-wide termination exposure, scoped claims and the non-equivalence of sizing with host availability or recovery while preserving independent approval, re-review, strict-state fields and the prohibition on waiving known anomalies or non-allocator known failures.
 --
 
 *Violation:*
@@ -428,7 +432,7 @@ What the element reports of each active waiver, what the Report state records an
 What that failure then does is stated with the binding that ships the permit.
 
 [horizontal]
-ID:: `+aou~seooc-waiver-approval~5+`
+ID:: `+aou~seooc-waiver-approval~6+`
 ASIL:: B
 ISO 26262:: 6-7.4.7, 8-12, 9-7 (part-clause numbers only)
 
@@ -445,24 +449,24 @@ Which permit a binding ships, and what a failed allocation under it does, are th
 [[aou-seooc-resource-guarantees]]
 == A resource guarantee the item relies on is required by name
 
-[.specitem,oft-sid="aou~seooc-resource-guarantees~3",oft-title="A resource guarantee the item relies on is required by name",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
+[.specitem,oft-sid="aou~seooc-resource-guarantees~4",oft-title="A resource guarantee the item relies on is required by name",oft-needs="uman",oft-tags="SafetyManual,SafetyGateUpRust"]
 --
-*Owning wires and serialized ending paths.*
-Where a serialized route declares its allocation (xref:../../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]) together with a non-native, non-shared ending path on which to end owned values (xref:../../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]), and uses no assured helper or adapter admission that brings claim dependencies, ordinary serialized ownership—including a disclosed waiting route-specific cleanup path—needs no unrequested stronger resource guarantee (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
-That declaration admits allocation on that route only: what holds on a native route is stated in xref:../../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path].
+*Ordinary serialized and permitted-middleware native routes.*
+Where a serialized route declares its allocation (xref:../../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]) together with a non-native, non-shared ending path on which to end owned values (xref:../../../up-l1/runtime.adoc#req-ssr-heap-slot-types[A decoded value is destroyed once, as its route's class admits]), or where an ordinary native route uses a complete declared middleware permit and matching waiver without a conflicting required claim or assured helper dependency, neither route needs an unrequested stronger resource guarantee (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../../../up-l1/payload-paths.adoc#req-ssr-heap-none[No heap in runtime mode on a native path]).
 
-*Requiring a guarantee.*
-Where the item, in ISO 26262's sense, relies on panic-free cleanup, non-waiting acquisition, non-waiting release or recoverable exhaustion on a route, the integrator *SHALL* require that guarantee in the route's declaration, and *SHALL* use a supported configuration whose package establishes it with evidence bound across every covered transitive operation for the exact message type, wires, directions, binding, allocation provider—any admitted serialized owned-value runtime adapter included—setup-created values, reached dependencies, build and covered execution contexts (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; what a memory provider and an allocation provider are, is stated in xref:../../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing]).
+*Requiring a guarantee and guarantee scopes.*
+Where the item, in ISO 26262's sense, relies on panic-free cleanup, non-waiting acquisition, non-waiting release or recoverable exhaustion, the integrator *SHALL* require that guarantee in the route or composition declaration with its explicit scope—helper-local, route-scoped or process-wide—and *SHALL* use a supported configuration whose package establishes it with evidence bound across every covered transitive operation for the exact message type, wires, directions, binding, allocation provider—any admitted serialized owned-value runtime adapter included—setup-created values, reached dependencies, build and covered execution contexts (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; what a memory provider and an allocation provider are, is stated in xref:../../../basics/resources.adoc#req-sdk-owned-frame-provider-selection[The selected memory provider is the only one used, and selecting it claims nothing]).
+Where any route or middleware permit in the same process discloses possible process termination on allocator exhaustion, the integrator *SHALL* verify that no co-resident route or composition claim requires process survival, recovery or panic-free cleanup across that termination cause (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused], "Guarantee scopes and composition conflicts").
 
 *Assured helper admissions.*
-Where an ASIL-path configuration selects an assured startup-provisioning helper or an assured serialized owned-value runtime adapter (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]), the integrator *SHALL* validate that recoverable exhaustion and panic-free cleanup are named explicitly as claim dependencies in the composition assurance contract and in each affected transport, route and supported composition package (for an assured startup-provisioning helper, every transport and route backed by that helper's startup regions, native-only transports included) and established by bound evidence across every covered transitive operation—startup-backing acquisition, failure-disposition cleanup, runtime acquisition, resize and owned-value cleanup, setup-created values and all reached dependencies included—without inferring either guarantee from an ASIL label or accepting a fallible wrapper over an allocator whose stated contract may abort (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+Where an ASIL-path configuration selects an assured startup-provisioning helper or an assured serialized owned-value runtime adapter (xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]), the integrator *SHALL* validate that recoverable exhaustion and panic-free cleanup are named explicitly as claim dependencies in the composition assurance contract and in each affected transport, route and supported composition package (for an assured startup-provisioning helper, its helper-local startup-backing acquisition, failure-disposition cleanup and reached dependencies across every transport and route backed by its startup regions, native-only transports included, without imposing an unrelated runtime middleware recovery obligation solely from shared startup backing) and established by bound evidence across every covered transitive operation—without inferring either guarantee from an ASIL label or accepting a fallible wrapper over an allocator whose stated contract may abort (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 Non-waiting acquisition, non-waiting release and a finite timing bound remain separately requested guarantees: an assured helper admission neither imposes nor establishes any of them by default, and the integrator *SHALL* require and validate them separately where the item relies on them.
 
 *A guarantee that is not required.*
 What a route that does not require a guarantee is promised, and what its report shows of that guarantee, is stated in xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
 
 *Scoped replacement.*
-For the integrator that claims the element's safety-assurance scope, this revision replaces revision 2 of this item, qualifying ordinary serialized ownership with the mandatory non-native, non-shared ending path requirement, integrating assured-helper claim-dependency validation (explicit naming and transitive evidence for recoverable exhaustion and panic-free cleanup on assured startup-provisioning helper and serialized owned-value runtime adapter admissions, native-only transports backed by an assured startup-provisioning helper included), and expanding evidence scope to admitted serialized owned-value runtime adapters, directions, setup-created values, reached dependencies, build and covered execution contexts while leaving ordinary serialized routes free of unrequested stronger guarantees.
+This revision replaces revision 3 of this item for the integrator claiming the element's safety-assurance scope: it adds explicit guarantee-scope (helper-local, route-scoped and process-wide) and process-wide conflict validation and clarifies that ordinary native routes with a middleware permit require no unrequested stronger guarantees, while preserving all serialized ending-path, assured-helper and bound-evidence duties of revision 3.
 --
 
 *Violation:*
@@ -473,7 +477,7 @@ That is *undetectable* by the element, whose report shows the guarantee as not r
 * Reliance on an ASIL label or on a fallible wrapper over an aborting allocator without covered transitive evidence for an unrequested deployment property is *undetectable* beyond the setup checks named above, and is *refused at setup* where the helper or composition contract declares that gap.
 
 [horizontal]
-ID:: `+aou~seooc-resource-guarantees~3+`
+ID:: `+aou~seooc-resource-guarantees~4+`
 ASIL:: B
 
 *Rationale.*
@@ -1184,7 +1188,7 @@ So on iceoryx2 the levels are kept apart by what the OS enforces.
 [[aou-seooc-iceoryx2-limits]]
 == A deployment on iceoryx2 accepts that binding's limits, and no known failure as one
 
-[.specitem,oft-sid="aou~seooc-iceoryx2-limits~4",oft-title="A deployment on iceoryx2 accepts that binding's limits, and no known failure as one",oft-needs="uman",oft-tags="SafetyManual"]
+[.specitem,oft-sid="aou~seooc-iceoryx2-limits~5",oft-title="A deployment on iceoryx2 accepts that binding's limits, and no known failure as one",oft-needs="uman",oft-tags="SafetyManual"]
 --
 *The target.*
 The integrator *SHALL NOT* use the iceoryx2 binding on a 32-bit target: the binding's profile is claimed for none (xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-profile[The iceoryx2 binding follows one profile, stated for one release of iceoryx2]).
@@ -1192,34 +1196,42 @@ The integrator *SHALL NOT* use the iceoryx2 binding on a 32-bit target: the bind
 *Static data segments.*
 On each service that the iceoryx2 binding uses for a route, the integrator *SHALL* deploy only programs that create every publisher with a static data segment, and *SHALL* declare that in the service's deployment data (xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-static-segments[On iceoryx2, every publisher has a static data segment]).
 
-*The permit.*
-The permit that the iceoryx2 binding declares for allocation inside iceoryx2 on a peer's join or restart (xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path], "Middleware") needs the waiver, and the heap for its bound, that <<aou-seooc-waiver-approval,Waivers are approved with an interference argument>> states.
+*The permit and resource policy.*
+The permit that the iceoryx2 binding declares for bounded connection-bookkeeping and local-view lifecycle allocation inside iceoryx2 on a peer's join or restart (xref:../../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path], "Middleware") needs the matching compiled-in waiver, bounded sizing and process-wide interference review that <<aou-seooc-waiver-approval,Waivers are approved with an interference argument>> states.
+Disclosed process termination caused exclusively by allocator exhaustion at those exact declared permitted operations is classified as resource policy—subject to <<aou-seooc-resource-guarantees,A resource guarantee the item relies on is required by name>>—and remains distinct from the non-allocator known failures below.
 
 *Limits and deviations.*
 The integrator accepts the limits and the deviations of the iceoryx2 binding, and takes no known failure of it for either, as <<aou-seooc-qualified-bindings-and-wires,Bindings and wires pass their contracts>> states for every binding under "Limits, deviations and known failures".
 The binding's one accepted panic path is a deviation only as xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-panic-paths[iceoryx2's allowed panic paths are named, bounded and disclosed] states it.
 
-*What setup refuses, and what a route reports.*
+*What setup refuses, what retirement requires, and what a route reports.*
 The service depths are part of the deployment data that <<aou-seooc-deployment-data,Deployment data is in range, verified and protected>> covers.
-What the binding refuses at setup for a service's depth, for the expired-connection buffer and for a route's data ID is stated in xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-depth-from-deployment[iceoryx2's service depth comes from deployment data], xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-expired-buffer[On iceoryx2, a receive route's retained budget fits twice in the expired-connection buffer] and xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-event-ids[iceoryx2's event IDs come from the event service's static config].
-What the binding reports of a route's arrivals, and what it counts of a failed notification call, is stated in xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-arrival-reports[iceoryx2's arrivals are reported from its receive thread, and a failed notification is counted].
+What the binding refuses at setup for a service's depth, for the expanded finite connection-retirement contract (receiver-wide aggregate `H`, `E >= 2H`, unique incarnation membership, exact sweep indexing, preflight and reclaim-complete-before-construct scheduling, completion-queue sizing, preserved borrowed backing, single-counted dropped-connection reporting and actual-return evidence) and for a route's data ID is stated in xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-depth-from-deployment[iceoryx2's service depth comes from deployment data], xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-expired-buffer[On iceoryx2, a receive route's retained budget fits twice in the expired-connection buffer] and xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-event-ids[iceoryx2's event IDs come from the event service's static config].
+The integrator *SHALL* deploy an explicitly declared and evidenced retirement, identity, reporting and actual-return mechanism rather than relying on `E >= 2H` sizing or a middleware permit alone.
+What the binding reports of a route's arrivals (or declares unavailable when no finite arrival latency `L` is established), and what it counts of a failed notification call, is stated in xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-arrival-reports[iceoryx2's arrivals are reported from its receive thread, and a failed notification is counted].
 What a route reports while one of its data connections has failed is stated, for the receive side, in xref:../../../up-l1/route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once], "Pull bindings", and for the sending side in xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-degradation-handler[On iceoryx2, each port has a degradation handler], which states what the binding reports on both sides.
 What the application does with a route's reports is stated in <<aou-seooc-application-reacts,The application reacts to what the element reports>>.
 
 *No known failure taken for a limit or a deviation.*
-The known failures of the iceoryx2 binding, listed apart from its limits and its deviations, are:
+The known failures of the iceoryx2 binding, listed apart from its limits, its deviations and its narrow declared allocator-exhaustion resource policy, are:
 
-* a frame drop that waits for iceoryx2's port mutex, which xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] forbids;
-* each middleware panic path that xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-panic-paths[iceoryx2's allowed panic paths are named, bounded and disclosed] names as a known failure, and every other one that it neither accepts nor excludes by a setup check, which xref:../../../up-l1/bindings/interface.adoc#req-ssr-binding-no-panic[No panic on any peer input] forbids;
+* stock inline frame return that waits for iceoryx2's port mutex violates xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do], and moving that stock return to an autonomous worker does not establish xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits] or pending-release isolation (xref:../../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]) and remains an affected known failure; a separately evidenced, unimplemented port-mutex-free independent return endpoint (or another mechanism that actually satisfies xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do], xref:../../../up-l1/bindings/lifecycle.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits] and xref:../../../up-l1/runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]) is distinct and is not present in stock iceoryx2 0.9.3;
+* unaddressed retirement identity, duplicate-membership, nonzero-index-sweep, dropped-connection-reporting and actual-return-completion defects under xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-expired-buffer[On iceoryx2, a receive route's retained budget fits twice in the expired-connection buffer] and xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-frame-lifetime[On iceoryx2, a loan exposes only its metadata and its payload, and a receive view lives within its sample];
+* each non-allocator middleware panic or failure path that xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-panic-paths[iceoryx2's allowed panic paths are named, bounded and disclosed] names as a known failure, and every other one that it neither accepts, excludes by a setup check nor classifies under a valid middleware allocator-exhaustion policy, which xref:../../../up-l1/bindings/interface.adoc#req-ssr-binding-no-panic[No panic on any peer input] forbids;
 * each further one that the binding's qualification record states (xref:../../assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]).
 
 *Strict mode.*
 What strict mode refuses for a known failure, route by route, is stated in xref:strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision].
+Strict mode's Off and Report states do not make a build with an affecting known failure conform.
+
+*Scoped replacement.*
+This revision replaces revision 4 of this item for the integrator claiming the element's safety-assurance scope: it separates the narrow declared middleware allocator-exhaustion resource policy from non-allocator known failures, rejects deferred stock port-mutex waiting as a cure for return isolation while distinguishing an unimplemented port-mutex-free independent return endpoint, and points to the expanded connection-retirement, identity, reporting and actual-return obligations while preserving static-segment, target, deviation and Enforce/Locked known-failure duties of revision 4.
 --
 
 *Violation:*
 
-* A service whose depth differs from the deployment's, a receive route whose retained budget does not fit twice in the expired-connection buffer, and a route whose lifecycle events share its data ID or whose data ID is above the service's range are *refused at setup*.
+* A service whose depth differs from the deployment's, a receive route whose subscriber receiver fails the `E >= 2H` setup minimum or lacks the required retirement evidence, a deadline on a route with unavailable arrival capability, and a route whose lifecycle events share its data ID or whose data ID is above the service's range are *refused at setup*.
+* Satisfying `E >= 2H` alone does not establish retirement identity, sweep, reporting or actual-return correctness; deploying an unverified retirement or stock port-mutex return path is *refused at setup* in strict mode's Enforce and Locked states as an affecting known failure and is otherwise *undetectable* at runtime until a fault occurs.
 * On a 32-bit target, a service that keeps history is *refused at setup* (xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-panic-paths[iceoryx2's allowed panic paths are named, bounded and disclosed]); no requirement has the element or the binding check the target otherwise.
 * A program on such a service that adds a publisher with a data segment that is not static after the route's setup is *undetectable* by the element and the binding; one present at setup is *refused at setup*.
 * A route on a service whose deployment data does not declare that every program on the service creates its publishers with a static data segment is *refused at setup* by the iceoryx2 binding, naming the service (xref:../../../up-l1/bindings/iceoryx2.adoc#req-ssr-binding-iceoryx2-static-segments[On iceoryx2, every publisher has a static data segment]).
@@ -1228,7 +1240,7 @@ What strict mode refuses for a known failure, route by route, is stated in xref:
 * In strict mode's Enforce state, and in its Locked state, each route that a known failure affects is *refused at setup* (xref:strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision]).
 
 [horizontal]
-ID:: `+aou~seooc-iceoryx2-limits~4+`
+ID:: `+aou~seooc-iceoryx2-limits~5+`
 ASIL:: B
 
 *Rationale.*

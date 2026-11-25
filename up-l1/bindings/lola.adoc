@@ -125,7 +125,7 @@ LoLa's assumptions of use speak of a producer that holds the storage of an event
 [[req-ssr-binding-lola-profiles]]
 == The LoLa binding carries native and serialized routes, each as itself
 
-[.specitem,oft-sid="req~ssr-binding-lola-profiles~3",oft-title="The LoLa binding carries native and serialized routes, each as itself",oft-needs="impl,utest",oft-tags="SafetyLola"]
+[.specitem,oft-sid="req~ssr-binding-lola-profiles~4",oft-title="The LoLa binding carries native and serialized routes, each as itself",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
 *Two kinds of route.*
 The LoLa binding *MUST* be able to carry both kinds of route, and it *MUST* lend LoLa's storage for both:
@@ -139,15 +139,15 @@ For each declared route the binding *MUST* compare what the route declares with 
 * Where its capability serves all of it, the binding *MUST* prepare the route as it is declared.
 What the element then admits is stated in xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name].
 * The heap class that the binding states for the route, and the element's comparison of it with what the route declares, are stated in xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default].
-* The binding *MUST* declare the class none for a route only where accepted evidence in its qualification record covers both the binding's and LoLa's runtime paths that the route uses, and shows that neither acquires or releases heap memory on them (xref:../../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]).
-That evidence covers the first locks and the lazy primitives of LoLa that those paths can reach.
-Without that evidence the binding *MUST* declare allocation inside LoLa under a named permit.
+* The binding *MUST* declare the class none for a route only where accepted evidence in its qualification record covers both the binding's and LoLa's actual runtime lifecycle paths that the route uses—including peer discovery, reconnect, connection bookkeeping, enabled notification paths and first-use paths—and shows that neither acquires or releases heap memory on them (xref:../../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]).
+Without that evidence the binding *MUST* declare allocation inside LoLa under a named permit with the five-part domain, bounded envelope, exhaustion, wait and progress policy that xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default] and xref:lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] require.
+In a polling-only native-event configuration that does not select `+SetReceiveHandler+`, the binding *MUST NOT* attribute optional notification-handler task-posting, task-freeing or stop-state allocation to every send; where an optional notification-handler path is selected, its task, stop-state and lifecycle allocations are declared explicitly under the named permit alongside discovery, reconnect and connection bookkeeping.
 The waiver that then admits the route is stated in xref:lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver].
 A permit changes neither xref:lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path] nor the allocation that a serialized route declares and that setup admits, and it establishes no stronger guarantee (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 * Where the route needs a capability that the binding or LoLa does not have, the binding *MUST* refuse the route in route preparation, naming the route and that capability.
 
 *LoLa's first locks and lazy state.*
-The first locks and the lazy primitives of LoLa that a runtime path of the binding can reach are taken and forced, on every route, as xref:lifecycle.adoc#req-ssr-binding-lazy-forced[Lazy state is forced, and threads are idle, before running] requires.
+The binding *MUST* force all pre-existing reachable first locks and lazy primitives of the binding and of LoLa before the transition returns, while allowing intrinsic first use only of specifically declared runtime-created LoLa connection or proxy objects governed by the declared lifecycle policy, as xref:lifecycle.adoc#req-ssr-binding-lazy-forced[Lazy state is forced, and threads are idle, before running] requires.
 
 *What is a reason to refuse.*
 A reason is always something that the route declares and that the binding, or LoLa, does not have.
@@ -180,10 +180,13 @@ The binding *MUST NOT* let what a serialized route allocates reach a native rout
 
 *What each route got.*
 What each route's report states is stated in xref:../route-observation.adoc#req-ssr-error-route-report[Each route reports what it got], and how a refusal is reported in xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name] and xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader].
+
+*Scoped replacement.*
+This revision replaces revision 3 of this item for the LoLa binding across native and serialized routes: it invokes the narrowed first-use rule for declared runtime-created LoLa objects, ties class-none declarations to evidence across actual runtime lifecycle paths, and distinguishes polling-only native configurations from optional notification-handler allocations while preserving all native/serialized route, capability-refusal and isolation duties of revision 3.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-lola-profiles~3+`
+ID:: `+req~ssr-binding-lola-profiles~4+`
 ASIL:: B
 Allocated to:: the LoLa binding
 Verification:: test, heap-window, review
@@ -194,7 +197,7 @@ Verification:: test, heap-window, review
 ** A serialized route whose wire declares allocation, which the route declares too: prepared, and not refused for it.
 ** A second wire with the same declarations under another name: prepared in the same way.
 ** A native route and a serialized route with no accepted evidence about LoLa's allocation: each declared by the binding with allocation inside LoLa under a named permit, and neither declared with the class none.
-** A route declared with the class none: only where the record holds the evidence for the binding and for LoLa, LoLa's first locks and lazy primitives included.
+** A route declared with the class none: only where the record holds accepted evidence across the binding's and LoLa's actual runtime lifecycle paths, discovery, reconnect, connection bookkeeping and first-use paths included; a polling-only native configuration declaring discovery and connection bookkeeping under a named permit without falsely claiming per-send notification-handler allocation.
 ** An operation of LoLa, and one of the operating system, that route preparation needs, each made to fail: reported as a failure of setup, with the route and the operation named, and not as a capability.
 * *heap-window*, on each target and configuration that the binding's qualification record claims: native traffic on LoLa, its first traffic included, with errors, cancellation and returns, while a serialized route on the same transport allocates (xref:lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]).
 * *review*: no path on which a native route's payload is encoded, staged or copied by the binding, and no branch on the name of a wire or of an encoding.
@@ -218,7 +221,7 @@ Its resource behaviour would differ, and a deployment that relies on a route bei
 [[req-ssr-binding-lola-capacity]]
 == On LoLa, a route's counts are declared and its storage is established at setup
 
-[.specitem,oft-sid="req~ssr-binding-lola-capacity~2",oft-title="On LoLa, a route's counts are declared and its storage is established at setup",oft-needs="impl,utest",oft-tags="SafetyLola"]
+[.specitem,oft-sid="req~ssr-binding-lola-capacity~3",oft-title="On LoLa, a route's counts are declared and its storage is established at setup",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
 *The counts.*
 For each route that it prepares, the LoLa binding *MUST* declare to the element, each as what it is:
@@ -242,14 +245,18 @@ A limit that an assumption of use of LoLa sets on a count, such as the number of
 
 *In runtime mode.*
 
-* The binding *MUST NOT* obtain more storage from LoLa.
+* The binding *MUST NOT* obtain additional payload or sample storage from LoLa beyond what setup established for the route, and *MUST* reserve its own owner and return representation before taking sample ownership.
+Separately declared, bounded LoLa connection and local-view bookkeeping under a named middleware permit (xref:lifecycle.adoc#req-ssr-binding-no-heap[Binding code allocates nothing in runtime mode on a native path]; xref:storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]) neither expands established payload or sample storage capacity nor relaxes this rule.
 * The binding *MUST* return an error for a request beyond a route's count, and *MUST* decide it from its own count, without asking LoLa for the storage (xref:../../basics/error_model.adoc#req-ssr-refuse-before-heap[Refuse before touching the heap]).
 * What a full route does with a new frame is its declared overflow policy.
 The binding honors that policy, or it refused the route at setup (xref:../runtime.adoc#req-ssr-qos-overflow[Overflow acts as declared]; xref:interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]).
+
+*Scoped replacement.*
+This revision replaces revision 2 of this item for the LoLa binding across all routes: it preserves setup-fixed payload and sample capacity and count-based refusal while requiring pre-acquisition owner and return reservation and distinguishing separately permitted bounded connection and local-view bookkeeping from sample-storage expansion.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-lola-capacity~2+`
+ID:: `+req~ssr-binding-lola-capacity~3+`
 ASIL:: B
 Allocated to:: the LoLa binding
 Verification:: test, review
@@ -283,7 +290,7 @@ So a route that is merely full is refused from the binding's own count, and the 
 [[req-ssr-binding-lola-foreign-boundary]]
 == Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path
 
-[.specitem,oft-sid="req~ssr-binding-lola-foreign-boundary~3",oft-title="Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path",oft-needs="impl,utest",oft-tags="SafetyLola"]
+[.specitem,oft-sid="req~ssr-binding-lola-foreign-boundary~4",oft-title="Nothing unwinds across the LoLa binding's boundary, and a termination path is a panic path",oft-needs="impl,utest",oft-tags="SafetyLola"]
 --
 *The boundary.*
 LoLa is {cpp} code, and the LoLa binding calls it, and is called back by it, across a language boundary.
@@ -304,18 +311,23 @@ It *MUST* state in its qualification record which refusal or counter each result
 
 *Termination.*
 A path on which LoLa, or the binding's own {cpp} code, ends the process is a panic path under xref:interface.adoc#req-ssr-binding-no-panic[No panic on any peer input] and xref:lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]: a call that ends the process, such as one to terminate, to abort or to exit, and an exception that nothing catches.
+Solely where a route admits a complete middleware permit and matching compiled-in waiver under xref:../../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default], xref:lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else] and xref:interface.adoc#req-ssr-binding-no-panic[No panic on any peer input], process termination caused exclusively by allocator exhaustion at an exact declared permitted LoLa acquisition or resize operation is classified under the route's selected resource policy rather than as a known failure of the binding, unless a required recoverable-exhaustion, panic-free-cleanup or process-survival claim conflicts with it (xref:../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
+That narrow resource-policy classification never permits unwinding across the foreign boundary in either direction, never applies to the binding's own {cpp} or Rust code, and never reclassifies any non-allocator termination path of LoLa—including PID-registry or rollback termination, reconnect or stop-timeout termination, callback failures or any other reachable abort or terminate path.
 The LoLa binding has no accepted panic path: no requirement of the up-rust SEooC requirement family accepts one for it.
-Each such path that a peer's input, death or restart can reach is a known failure of the binding.
+Every other termination path of LoLa or of the binding's own {cpp} code that a peer's input, death or restart can reach remains a known failure of the binding.
 Where a known failure is stated, and which routes strict mode refuses for it, are stated in xref:../../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures] and xref:../../safety/elements/up-rust/strict-mode.adoc#req-ssr-strict-ack-revision[An acknowledgement names a deviation by ID and revision].
 
 *Where it holds.*
 The binding *MUST* state in its qualification record the builds of its {cpp} code, and the ways of loading it, for which the first two clauses are established (xref:../../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]).
 It *MUST* state them as target profiles, each with the operating system and the means by which LoLa's processes notify one another on it, the C library and the {cpp} standard library, the compilers and whether the {cpp} code is built with exceptions, the way the binding's {cpp} code is linked and loaded into the process, and the width of pointers and of atomics.
 The binding *MUST NOT* claim either clause for a build, a way of loading or a target that the record does not state, and *MUST NOT* claim a target by the name of an operating system alone.
+
+*Scoped replacement.*
+This revision replaces revision 3 of this item for the LoLa binding across all routes: it applies the narrow middleware allocator-exhaustion resource-policy classification exclusively to exact declared permitted LoLa allocator operations while preserving the no-unwinding boundary, own-code duties, target-profile disclosures and known-failure classification of all non-allocator LoLa termination paths.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-lola-foreign-boundary~3+`
+ID:: `+req~ssr-binding-lola-foreign-boundary~4+`
 ASIL:: B
 Allocated to:: the LoLa binding
 Verification:: test, fault-injection, review
@@ -653,7 +665,7 @@ The binding *MUST NOT* let any part of a sample that it refuses reach the elemen
 *What a refusal becomes.*
 For each sample that it refuses, the binding *MUST* either return the refusal as the error of the call that met the sample, or count it exactly once on the receiving route.
 The binding *MUST* name the cause in that error or that counter: a refused envelope (xref:../route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
-The binding *MUST* return each refused sample to LoLa as it returns a frame whose lease is dropped, so that a refused sample does not stay charged to the route (xref:lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]).
+When the binding refuses a sample—or receives the element's refusal after metadata hand-over—it *MUST* complete the refusal decision and its single count immediately without allocating or waiting, and *MUST* return the whole refused sample to LoLa inline if non-waiting or hand the whole sample immediately into its already pre-reserved return representation under xref:lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] and xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]; the refused sample remains charged to the route until actual return to LoLa completes.
 On a route that it serves by pull, the binding *MUST NOT* return a refused sample as the error of the receive call, whether it refused the sample itself or the element refused the sample's frame, and *MUST* then take the next sample, within the work that the receive call is allowed (xref:lifecycle.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]); each refused sample is one unit of that work, whichever part refused it.
 There the binding *MUST* count each refusal of its own once; a sample whose frame the element refuses is counted by the element alone (<<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>>, "The element's admission").
 A refused sample is peer input, and xref:interface.adoc#req-ssr-binding-no-panic[No panic on any peer input] holds for it.
@@ -793,7 +805,8 @@ This revision retires, for sending and for receiving, the reading of whether a f
 *The hand-over.*
 Once a received sample has passed the checks of <<req-ssr-binding-lola-envelope-checks,On LoLa, a sample that is not a well-formed envelope is refused before any of it is used>>, the LoLa binding *MUST* hand the element the frame's metadata extent and the payload length that its header gives, and no byte of its payload.
 Within the same receive step, the element *MUST* admit or refuse the frame as the clause "The element's admission" states, and *MUST* hand its verdict back to the binding, with whether the frame has a payload for a frame that it admits.
-The binding *MUST* return each sample whose frame the element refuses to LoLa once, as it returns a frame whose lease is dropped (xref:lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]), and *MUST NOT* count it: its one count is the element's.
+The binding *MUST* return each sample whose frame the element refuses to LoLa once—inline where non-waiting, or by immediate non-waiting hand-off of the whole sample into its already pre-reserved return representation under xref:lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] and xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]—keeping the sample charged until actual return completes, and *MUST NOT* count it: its one count is the element's.
+The same-step verdict, single count and ownership hand-off do not await physical return completion.
 The hand-over is not a delivery to an application.
 
 *The element's admission.*
@@ -856,6 +869,7 @@ Where the binding declares no required-initialized extent for its selected paths
 *Receive.*
 The binding *MUST* make each view that it gives of a received payload cover exactly the payload's extent.
 The binding *MUST NOT* let a view outlive the sample that holds it, and releasing the sample ends every view of it (<<req-ssr-binding-lola-sample-lifetime,On LoLa, no subscription ends while one of its samples is held>>; xref:storage.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]).
+Hand-off into a pending return representation is not physical return: a received sample remains charged and held until actual return to LoLa completes, and every held, pending or forgotten sample retains its subscription and backing under <<req-ssr-binding-lola-sample-lifetime,On LoLa, no subscription ends while one of its samples is held>>, xref:lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do] and xref:../runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else].
 --
 
 [horizontal]

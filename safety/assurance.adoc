@@ -240,12 +240,12 @@ A binding may keep its unsafe-site inventory in its repository and run the inven
 [[req-ssr-waiver-record]]
 == Waivers are recorded and can be found
 
-[.specitem,oft-sid="req~ssr-waiver-record~3",oft-title="Waivers are recorded and can be found",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-waiver-record~4",oft-title="Waivers are recorded and can be found",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
-The element *MUST* hold each waiver as a record compiled into the program, with a name and a scope, and for each waiver *MUST*:
+The element *MUST* hold each waiver as a record compiled into the program, with a name and a scope naming the exact middleware permit identity, covered operations, triggers and allocation domains, the justified finite (symbolic or bounded) simultaneously-live resource envelope, the five-part exhaustion, wait and progress policy, any process-wide termination exposure and the interference-argument reference (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-scope[A waiver covers middleware and nothing else]), and for each waiver *MUST*:
 
-* apply it only where it can be found in the code;
-* record it at the transition, and, where deployment data selects it and the transition admits it, report it there as active, with its name and its scope, in the element's startup report (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]);
+* apply it only where it can be found in the code and matches the binding's declared permit identity and policy;
+* record it at the transition, and, where deployment data selects it and the transition admits it, report it there as active, with its name, scope, permit policy and process-wide exposure, in the element's startup report (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]);
 * keep it readable in runtime mode without heap;
 * refuse it by name at the transition, unless it names an approver other than its author.
 
@@ -259,10 +259,13 @@ A report that lists a waiver records it; it is not the waiver's approval.
 
 *Deployment data.*
 The element *MUST NOT* let deployment data create a waiver: deployment data selects a waiver compiled into the program by its id, and nothing more.
+
+*Scoped replacement.*
+This revision replaces revision 3 of this item for the element across all configurations: it requires each compiled-in waiver record to carry the permit identity, covered operations and domains, finite resource envelope, five-part resource and failure policy and process-wide exposure alongside the interference-argument reference while preserving all compiled-in matching, non-author approver, no-heap readability and strict-state checks of revision 3.
 --
 
 [horizontal]
-ID:: `+req~ssr-waiver-record~3+`
+ID:: `+req~ssr-waiver-record~4+`
 ASIL:: B
 Allocated to:: the element
 Verification:: test (the runtime lists the waiver; a record that names its author as approver is refused; in the Enforce and Locked states, a waiver that does not name its interference argument's kind and a reference is refused, and in the Report state it is admitted with a finding; the element's startup report lists each waiver that deployment data selects and the transition admits, as active, and does not report as active a selected waiver that the transition refuses, for its author named as approver and, in the Enforce and Locked states, for a missing interference argument, and a compiled-in waiver that deployment data does not select is recorded at the transition and not reported as active; deployment data that names an id that no compiled-in waiver has creates no waiver), review (findable)
@@ -282,16 +285,16 @@ The element can check that the argument is named, but not that it holds.
 [[req-ssr-binding-readme]]
 == A binding's qualification record states its limits and its failures
 
-[.specitem,oft-sid="req~ssr-binding-readme~4",oft-title="A binding's qualification record states its limits and its failures",oft-needs="uman",oft-tags="SafetyBinding"]
+[.specitem,oft-sid="req~ssr-binding-readme~5",oft-title="A binding's qualification record states its limits and its failures",oft-needs="uman",oft-tags="SafetyBinding"]
 --
 *The record.*
 Each binding *MUST* keep a qualification record, versioned with the binding, that states for each revision of the binding:
 
 * each target and configuration for which the binding claims its binding contract;
 * every runtime guarantee that its middleware cannot make, with measured figures where they exist;
-* the permits that it declares, which only a named waiver admits (xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]);
+* each middleware permit that it declares—with its exact covered operations, triggers, allocation domains, finite simultaneously-live resource envelope, five-part exhaustion, wait and progress policy and process-wide exposure—recorded separately from limits, deviations and known failures (xref:../basics/resources.adoc#req-ssr-heap-declared[The heap class is declared, with no default]; xref:../up-l1/bindings/lifecycle.adoc#req-ssr-waiver-required[Middleware heap needs a named waiver]);
 * its limits, its deviations and its known failures, each classed as this item defines them;
-* the revision of its middleware, and of every other source that an entry relies on;
+* the exact pin, release, build settings, patch identity and configuration of its middleware, dependencies and binding, and of every other source that an entry relies on, without inferring stock-build qualification or equating distinct releases or patched builds;
 * the evidence of the runs that its entries rest on, each with the target and the configuration that it ran on, and the history of each entry.
 
 The record is the authoritative statement of each of these.
@@ -326,11 +329,11 @@ The binding's README is a concise profile and index of the binding, and the bind
 Where the README speaks of a matter that the record states, the record governs.
 
 *Scoped replacement.*
-This revision replaces revision 3 of this item for each binding, each part and each supported composition package, extending the definitions of _limit_, _deviation_ and _known failure_ and the non-acceptance of known failures to supported composition packages while cross-referencing xref:profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations] for the composition-package releaser's deviation-field and separation duties and preserving all binding qualification-record and README duties of revision 3 of this item unchanged.
+This revision replaces revision 4 of this item for each binding, each part and each supported composition package: it requires binding qualification records to record permitted middleware resource policies separately from limits, deviations and known failures and to state exact middleware, dependency, build, patch and configuration identities without inferring stock-build qualification, while preserving all limit, deviation, known-failure, composition-package and README duties of revision 4.
 --
 
 [horizontal]
-ID:: `+req~ssr-binding-readme~4+`
+ID:: `+req~ssr-binding-readme~5+`
 ASIL:: B
 Allocated to:: each binding, for its record and README; each part and each supported composition package, as the subjects of the definitions of limit, deviation and known failure
 Verification:: review (every binding's record: the targets and configurations that it claims; each entry and its class; the identifier, revision, scope, bounds, evidence and lapse date of each deviation; the cause and the exact source of each limit, deviation and known failure; what its README says of the matters that the record states; and the definitions applied to entries of a binding, a wire, the element and a supported composition package, each against the requirements that bind that part or composition)
