@@ -584,7 +584,7 @@ It is neither a component conformance claim nor a deployment conformance claim, 
 The Streamer *MUST NOT* present the startup report, or any startup-provisioning entry in it, as a safety qualification, a conformance claim or a discharge of an assumption of use.
 
 *Replacement.*
-For the Streamer under the bounded-runtime Streamer profile, this revision replaces revision 4 of this item for the content of the startup report and the refused-startup report, adding the reporting of startup-provisioning helper selection, declared route-table startup storage, retention and failure-disposition policy, named startup-provisioning refusals, and explicit observation limits, while keeping every reporting field, fixed-size no-heap constraint, digest rule and refusal cause of revision 4 in force.
+For the Streamer under the bounded-runtime Streamer profile, revision 5 of this item replaces revision 4 of this item for the content of the startup report and the refused-startup report.
 --
 
 [horizontal]

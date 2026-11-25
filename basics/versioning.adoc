@@ -18,7 +18,7 @@ SPDX-FileType: DOCUMENTATION
 SPDX-License-Identifier: Apache-2.0
 ----
 
-NOTE: Built into the protocol will be a mechanism to version different parts of the protocol and system. Since different components need to be versioned by different mechanisms and at different frequency, we will discuss the types in this section.
+NOTE: This section specifies the versioning rules for protocol artifacts and components.
 
 == Format
 

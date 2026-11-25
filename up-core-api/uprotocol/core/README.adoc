@@ -19,7 +19,7 @@ Core uProtocol services interfaces are defined using asyncapi, with pointers to 
 
 ---
 
-NOTE: Not all core services are implemented using asyncapi specifications. Some services use the legacy format, where protobuf is used to define the entire API surface.
+NOTE: Some core service APIs are defined entirely in Protobuf; others use AsyncAPI specifications with separate message definitions.
 
 ---
 

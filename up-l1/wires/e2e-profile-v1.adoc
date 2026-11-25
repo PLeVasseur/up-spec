@@ -102,7 +102,7 @@ This table governs method-header fields only; it sets no serialized inner extent
 |===
 
 The numerical mapping is that of xref:../../up-core-api/uprotocol/v1/ucode.proto[UCode].
-This profile defines status values 0 through 16 only; a future UCode addition is not silently admitted to profile 1.
+Profile 1 admits only status values 0 through 16. A UCode value outside that range is not part of profile 1.
 The response's outer commstatus is still compared as xref:e2e.adoc#req-ssr-e2e-rpc-echo[An E2E response answers exactly its call] requires.
 
 .Refusal kinds

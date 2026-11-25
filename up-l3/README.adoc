@@ -84,7 +84,7 @@ The following section defines sub-ranges of the 16 bit service type address spac
 
 | *`0x0000 - 0x00FF`* | Eclipse uProtocol services
 | *`0x0100 - 0x0FFF`* |  link:https://covesa.global/project/uservices/[COVESA uServices]
-| *`0x1000 - 0x7FFF`* | Future use
+| *`0x1000 - 0x7FFF`* | Reserved for service-type allocation
 | *`0x8000 - 0xFFFE`* | Vendor specific services
 | *`0xFFFF`* | Reserved
 

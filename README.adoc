@@ -62,10 +62,11 @@ The owned-frame contract has its separate declaration and offering conditions (x
 
 == Conformance records
 
-The link:conformance/README.md[conformance intake catalogue] preserves the
-immutable historical baseline intake against an exact specification revision.
-Separately identified exact-subject assessments follow the successor documentary
-format in link:conformance/assessments/README.md[conformance assessments].
+The link:conformance/README.md[conformance intake catalogue] records the
+immutable baseline intake for specification revision
+`f18913c6ed062dc6d6c3d7a73dec7a33433b39e4`.
+The format and rules for separately identified exact-subject assessments are in
+link:conformance/assessments/README.md[conformance assessments].
 These non-normative records neither add nor waive requirements.
 
 == Tracing Requirements

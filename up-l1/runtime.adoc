@@ -238,7 +238,7 @@ Startup memory that is sealed admits no new setup, so a later initialization nee
 A fault of a transport in runtime mode is recovered by a restart of the whole process, partition or bare-metal firmware-instance reset domain, which a supervisor outside it makes (xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-supervisor-restart[A supervisor outside the process restarts it]), and the restarted instance initializes as <<req-ssr-mode-restart,A restart is an initialization>> states.
 
 *Scoped replacement.*
-This revision replaces the process- and partition-only runtime-lifetime and restart wording of revision 4 of this item for the element, each binding and the Streamer, extending runtime-mode end, fresh-initialization and external recovery scope consistently to bare-metal firmware instances and whole reset domains while preserving all one-way mode, no-rollback and non-reuse duties of revision 4 of this item.
+Revision 5 of this item replaces revision 4 of this item for the element, each binding and the Streamer across processes, partitions and bare-metal firmware-instance whole reset domains.
 --
 
 [horizontal]
@@ -395,7 +395,7 @@ In a process, partition or firmware instance that stayed up, the element *MUST N
 A surviving binding's recovery, removal or takeover of what a dead predecessor left is governed by xref:bindings/lifecycle.adoc#req-ssr-binding-predecessor-cleanup[A binding cleans up after a dead predecessor, in initialization]; ordinary release and peer-failure accounting stay as xref:peers.adoc#req-ssr-peer-failure-normal[Peer failure is normal input] and <<req-ssr-release-lease-drop,A lease gives back its slot and nothing else>> state.
 
 *Scoped replacement.*
-This revision replaces revision 3 of this item for the element and each binding across hosted, partitioned and bare-metal targets, clarifying process, partition and firmware-instance restart lifetime and whole-reset-domain ownership preservation—including forbidding revocation, recycling or overwriting of backing still owned by another core, peer or DMA engine after a partial or producer-only watchdog reset—while preserving every restart, predecessor-cleanup and surviving-peer duty of revision 3 of this item.
+Revision 4 of this item replaces revision 3 of this item for the element and each binding across hosted, partitioned and bare-metal targets.
 --
 
 [horizontal]
@@ -438,7 +438,7 @@ The element *MUST NOT* react to such an event by stopping or suspending another 
 What a gate of the Streamer does on one of its routes is stated in xref:../up-l2/streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate] and xref:../up-l2/streamer.adoc#req-ssr-streamer-containment[A fault stays on its route].
 
 *Scoped replacement.*
-This revision replaces the process-only termination wording of revision 2 of this item for the element, extending runtime-mode end and unchanged-rule scope to processes, partitions and bare-metal firmware instances while preserving all no-shutdown, destructor-independence and no-degraded-mode duties of revision 2 of this item.
+Revision 3 of this item replaces revision 2 of this item for the element across processes, partitions and bare-metal firmware instances.
 --
 
 [horizontal]
@@ -485,7 +485,7 @@ Each binding that refuses a route whose peer is missing *MUST* refuse it by name
 In runtime mode, the element *MUST* treat a route's missing peer as silence, under the route's deadline.
 
 *Scoped replacement.*
-This revision replaces revision 3 of this item for the element and extends its logical startup-wait bound and expiry-refusal duties to each startup-provisioning helper admitted on the ASIL path, establishing the logical setup-wait bound source for admitted startup-provisioning helpers invoked under <<req-ssr-mode-init-failure,Initialization failure>> while preserving all missing-peer and declared-allocation-domain wait duties of revision 3 of this item unchanged.
+Revision 4 of this item replaces revision 3 of this item for the element and extends its logical startup-wait bound and expiry-refusal duties to each startup-provisioning helper admitted on the ASIL path.
 --
 
 [horizontal]
@@ -652,7 +652,7 @@ The element *MUST* refuse it at setup where the route's binding cannot bound it,
 The element *MUST NOT* let idle waiters wake each other.
 
 *Scoped replacement.*
-For the element across all configurations, this revision replaces revision 4 of this item by explicitly owning deliberate-idle expected-value rechecks over xref:../basics/platform.adoc#req-ssr-platform-contract[Every platform backend of the element keeps the platform's rules] and extending the declared allocation-domain wait allowance solely to exact enumerated Class 2 permitted middleware acquisition and lifecycle operations, while preserving own finite logical deadlines, no held element locks and all non-allocator wait prohibitions.
+Revision 5 of this item replaces revision 4 of this item for the element across all configurations.
 --
 
 [horizontal]
@@ -758,7 +758,7 @@ As a narrow exception to permanent attachment of binding resources, a binding *M
 What the Streamer's routes and gates, and the workers of the Streamer binary, keep in runtime mode is stated with the Streamer (xref:../up-l2/streamer.adoc#req-ssr-streamer-route-lock[Routes and subscriptions are locked at activation]; xref:../up-l2/streamer.adoc#req-ssr-streamer-route-gate[Each route has a heap-free gate]; xref:../up-l2/streamer.adoc#req-ssr-streamer-workers[Workers are fixed at initialization]).
 
 *Scoped replacement.*
-For the element and each binding across hosted, partitioned and bare-metal targets, this revision replaces revision 4 of this item by carving out solely separately charged finite-lifetime local middleware connection, local-view and descriptor retirement after ended local dependencies under an admitted Class 2 policy, while preserving process-, partition- or firmware-instance-lifetime retention of all permanent infrastructure and non-joining of initialization workers.
+Revision 5 of this item replaces revision 4 of this item for the element and each binding across hosted, partitioned and bare-metal targets.
 --
 
 [horizontal]
@@ -882,7 +882,7 @@ The hand-off to a release service or to a binding's deferred return holds owners
 The duties of a binding's frame destructor are stated in xref:bindings/lifecycle.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do].
 
 *Scoped replacement.*
-For the element and each binding across hosted, partitioned and bare-metal or no-OS targets and all configurations, this revision replaces revision 7 of this item by separating own-code non-allocating drop/handoff from separately admitted Class 2 middleware deferred lifecycle work, requiring pre-reserved whole-owner return representation over aggregate capacity distinct from finite connection charge, separating hand-off from actual completion credit restoration, and requiring transitive isolation across locks, atomics, wakes, reports and execution resources without stealing or replaying paused continuations.
+Revision 8 of this item replaces revision 7 of this item for the element and each binding across hosted, partitioned and bare-metal or no-OS targets and all configurations.
 --
 
 [horizontal]
@@ -1048,7 +1048,7 @@ The element *MUST NOT* reuse a slot while its value is still owned:
 * The element *MUST NOT* let a destruction that stalls or fails make a slot reusable early.
 
 *Scoped replacement.*
-For the element across all configurations, this revision replaces revision 5 of this item by distinguishing helper-transitive versus route-wide cleanup guarantee scopes and separating fixed element slot/infrastructure retention from declared external value or sample cleanup and separately charged finite local middleware connection resources, while keeping native destructor prohibition, non-native/non-shared serialized ending, logical-before-cleanup ordering and actual-completion charging in force.
+Revision 6 of this item replaces revision 5 of this item for the element across all configurations.
 --
 
 [horizontal]
@@ -1327,7 +1327,7 @@ The element *MUST* ensure that this release is the only heap use an overflow cau
 If a discard occurs entirely inside middleware and the binding cannot observe it, the element *MUST* explicitly disclose that limitation in the route's report and make no claim there to count it (xref:route-observation.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once]).
 
 *Scoped replacement.*
-For the element across all configurations, this revision replaces revision 3 of this item by reconciling native and heap-free overflow disposition with immediate decision/count, pre-reserved whole-owner return hand-off, actual-completion charging and separately admitted Class 2 middleware lifecycle boundaries, while preserving overflow policies, single counting and unobservable-discard disclosure.
+Revision 4 of this item replaces revision 3 of this item for the element across all configurations.
 --
 
 [horizontal]

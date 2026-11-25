@@ -56,8 +56,7 @@ Each such backend *MUST* keep the rules that this item gives a platform backend 
 The integrator's duties for such a backend, its qualification and the evidence that it keeps these rules, are stated in xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules].
 
 *Scoped replacement.*
-For the element, this revision replaces revision 4 of this item for wait-recheck and failed-clock-read wording: common backend wait and fail-closed clock duties remain here, while transport-specific deliberate-idle rechecks live in xref:../up-l1/runtime.adoc#req-ssr-bound-wait[Every bounded wait has a logical deadline] and message-TTL expiry/unreadable-clock specialization lives in xref:../up-l1/route-observation.adoc#req-ssr-qos-ttl[Expired messages are not processed].
-All platform-backend rules, prefault duties, stated-contract duties and custom-platform rules remain in force.
+Revision 5 of this item replaces revision 4 of this item for each platform backend and for the element across all configurations; transport-specific deliberate-idle wait rechecks and message-TTL expiry rules are governed by their transport-layer items.
 --
 
 [horizontal]

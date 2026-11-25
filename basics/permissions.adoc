@@ -58,11 +58,9 @@ IMPORTANT: The runtime enforcement of CAPs is implementation specific and not co
 
 CAP uses the caller's securely determined uPL as an input to its permission comparison. This comparison does not prescribe how an implementation establishes that input. Runtime enforcement of CAP remains implementation-specific and is not specified here.
 
-NOTE: The importance of permissions will vary between implementations. The key initially will be a robust solution for CAPs covering clients residing in-vehicle devices (i.e. Android & Linux implementations). We do not expect CAPs to be applicable to less dynamic and more controlled environments such as mechatronic, Mobile or Cloud implementations.
-
 === CAPs vs Android AOSP Permissions
 
-While inspired by Android’s permission, CAPs under the current proposal are different in several aspects. The differences include:
+While inspired by Android permissions, uProtocol CAPs differ in several aspects:
 
 * Android permissions are always explicitly defined. uPerms are associated with uPA Uris, thus derived implicitly from service definitions
 
@@ -70,7 +68,7 @@ While inspired by Android’s permission, CAPs under the current proposal are di
 
 * Android does not support explicit permission levels. Its concept of meta-attributed (normal, dangerous, signature etc) is also somewhat hierarchical, so can be considered as being similar to that of levels to some extent. But it is also much more elaborate, reflecting the challenges and complexities of a completely open, un-curated programmatic ecosystem
 
-* In Android application of permissions can be affected by specifics of client’s and server’s signatures. No such consideration is proposed for uPerms at this point in time
+* In Android, permission enforcement can depend on client and server signatures. uProtocol CAPs do not specify signature-based permission rules.
 
 === Service Declaration of uPLs
 
@@ -106,7 +104,7 @@ uEntities that do not have proto defintions (i.e. applications),  claimed uPLs u
 
 ==== Example using Android
 
-For Android we will use the AOSP-standard manifest extension mechanism of <meta-data> to describe the permission level. We’ll use the name of `uprotocol.permissionLevel` and the value of the actual level, 0 to 5. The default value of 5 will be assigned implicitly when `uprotocol.entity.permissionLevel`` is not declared.
+In this Android example, AOSP-standard `<meta-data>` elements describe permission claims. The `uprotocol.entity.permissionLevel` element holds a level from 0 to 5; omitting that element selects the example's default level 5.
 
 Another metadata element with the name of `uprotocol.entity.permissions` will explicitly list (claim) all used uPAs with levels equal or less than 2 (explicit claim threshold), to improve visibility of sensitive claims. The resource attribute of this element points to an array of strings listing the URIs of the uPAs.
 
@@ -127,7 +125,7 @@ A manifest fragment for an app accessing the BodyAccess service could look as fo
     android:value="1" />
   <meta-data
     android:name="uprotocol.entity.permissions"
-    android:resource="@array/uPerms"
+    android:resource="@array/uPerms" />
 </application>
 ```
 
@@ -136,7 +134,7 @@ In the string resources directory of the APK we may then have a file with the fo
 [code,xml]
 ```
 <resources>
-  <string-array name="uPerm">
+  <string-array name="uPerms">
     <item>/body.access/1/rpc.ExecuteSunroofCommand</item>
     <item>/body.access/1/rpc.ExecuteWindowCommand</item>
   </string-array>

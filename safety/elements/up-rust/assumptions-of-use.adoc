@@ -169,7 +169,7 @@ The integrator *SHALL NOT* let a partial or producer-only watchdog reset revoke,
 What the compliance report shows of the restart path, declared or not, is stated in xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
 
 *Scoped replacement.*
-For the integrator that claims the element's safety-assurance scope, this revision replaces the process- and partition-only restart wording of revision 6 of this item, extending supervisor restart, crash-abort policy, fresh-initialization and whole-domain recovery duties to bare-metal firmware instances and whole reset domains and forbidding partial or producer-only watchdog resets from revoking or recycling backing still owned by unquiesced cores, peers or DMA participants, while preserving all other restart, startup-timeout, reaction-time and strict-state duties of revision 6 of this item.
+For the integrator claiming the element's safety-assurance scope, revision 7 of this item replaces revision 6 of this item across processes, partitions and bare-metal firmware-instance whole reset domains.
 --
 
 *Violation:*
@@ -333,7 +333,7 @@ What setup admits and refuses for a route with neither, for a route with both, a
 What setup admits and refuses for timing, and what the compliance report lists of it, is stated in xref:../../../up-l1/runtime.adoc#req-ssr-qos-declared[QoS is declared per route at setup], xref:../../../up-l1/route-observation.adoc#req-ssr-qos-deadline[Deadlines are monitored], xref:../../../up-l1/runtime.adoc#req-ssr-qos-no-downgrade[QoS is honored or refused, never weakened] and xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
 
 *Scoped replacement.*
-For the integrator that claims the element's safety-assurance scope, this revision replaces the element-supplier-only timing-analysis attribution of revision 9 of this item so that a supported configuration's timing analysis is provided by the supported composition package's releaser (the element's supplier for an element-supported configuration package, or the explicit extension composer for an explicit extension package), while preserving all interval allocation, reaction-budget, deadline, monitor and watchdog duties of revision 9 of this item unchanged.
+For the integrator claiming the element's safety-assurance scope, revision 10 of this item replaces revision 9 of this item.
 --
 
 *Violation:*
@@ -420,7 +420,7 @@ Which permit a binding ships, and what a failed allocation under it does, is sta
 What the element reports of each active waiver, what the Report state records and what the Enforce and Locked states refuse of a record without them, is stated in xref:../../assurance.adoc#req-ssr-waiver-record[Waivers are recorded and can be found].
 
 *Scoped replacement.*
-This revision replaces revision 5 of this item for the integrator claiming the element's safety-assurance scope: it extends waiver review and interference coverage to process-wide termination exposure, scoped claims and the non-equivalence of sizing with host availability or recovery while preserving independent approval, re-review, strict-state fields and the prohibition on waiving known anomalies or non-allocator known failures.
+For the integrator claiming the element's safety-assurance scope, revision 6 of this item replaces revision 5 of this item.
 --
 
 *Violation:*
@@ -466,7 +466,7 @@ Non-waiting acquisition, non-waiting release and a finite timing bound remain se
 What a route that does not require a guarantee is promised, and what its report shows of that guarantee, is stated in xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused].
 
 *Scoped replacement.*
-This revision replaces revision 3 of this item for the integrator claiming the element's safety-assurance scope: it adds explicit guarantee-scope (helper-local, route-scoped and process-wide) and process-wide conflict validation and clarifies that ordinary native routes with a middleware permit require no unrequested stronger guarantees, while preserving all serialized ending-path, assured-helper and bound-evidence duties of revision 3.
+For the integrator claiming the element's safety-assurance scope, revision 4 of this item replaces revision 3 of this item.
 --
 
 *Violation:*
@@ -602,7 +602,7 @@ An integrity level or a strict state is not such a requirement.
 What the Enforce and Locked states check for every configuration, with or without an assurance package, and what the compliance report lists of the coherence and stack-sizing duties, is stated in xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks] and xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
 
 *Scoped replacement.*
-For the integrator that claims the element's safety-assurance scope, this revision replaces the element-supplier-only target-verification attribution and process-only residency wording of revision 6 of this item so that target verification and condition evidence in a supported configuration package are supplied by the package's releaser (the element's supplier for an element-supported configuration package, or the explicit extension composer for an explicit extension package) and startup-memory residency spans the whole lifetime of the process, partition or firmware instance, while preserving all profile, atomic, multi-core, ABI, interrupt-mask, custom-platform, stack and required-assurance-scope duties of revision 6 of this item unchanged.
+For the integrator claiming the element's safety-assurance scope, revision 7 of this item replaces revision 6 of this item.
 --
 
 *Violation:*
@@ -701,7 +701,7 @@ What the declared-graph check takes as its inputs and observes, what its observa
 What the Enforce and Locked states refuse of a process that runs an ASIL binary built with unwinding, and what the compliance report lists of the build, is stated in xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks] and xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
 
 *Scoped replacement.*
-For the integrator that claims the element's safety-assurance scope, this revision replaces revision 8 of this item for ASIL binaries and configurations on the ASIL path, requiring complete-image and claimed-graph accounting for exact selected startup-provisioning helpers and serialized owned-value runtime adapters, their generated code, transitive dependencies and retained state, distinguishing Cargo's ASIL build profile, strict-mode states, complete-image classification, selected assurance scope and actual qualification, limiting certified operating systems and dependencies to their exact covered scope, and confirming that reusable supplier or composition-package evidence assists validation without discharging any applicable assumption of use, while preserving all complete-image, member-information, toolchain, ASIL-profile (`+panic = "abort"+`, `+overflow-checks = true+`) and test-hook duties of revision 8 of this item.
+For the integrator claiming the element's safety-assurance scope, revision 9 of this item replaces revision 8 of this item for ASIL binaries and configurations on the ASIL path.
 --
 
 *Violation:*
@@ -851,7 +851,7 @@ Under <<aou-seooc-assumptions-bind,An assumption of use binds the integrator who
 What the element and the Streamer check of each region, and how they place from it, own it and seal it, is stated in xref:../../../basics/resources.adoc#req-ssr-memory-static[ASIL-path storage is static or caller-provided] and xref:../../../basics/resources.adoc#req-ssr-memory-sealed[Startup memory is sealed].
 
 *Replacement.*
-For the integrator that claims the element's safety-assurance scope, this revision replaces revision 1 of this item for configurations on the ASIL path with or without an explicitly selected startup-provisioning helper, including bare-metal firmware-instance reset domains and multi-core or DMA deployments, preserving the integrator's caller-storage duties on the minimal no-helper path while extending integrator validation to helper-supplied startup backing, its retained state, dependencies, release code and reset-domain lifetime.
+For the integrator claiming the element's safety-assurance scope, revision 2 of this item replaces revision 1 of this item for configurations on the ASIL path with or without an explicitly selected startup-provisioning helper.
 --
 
 *Violation:*
@@ -938,7 +938,7 @@ In the Report, Enforce and Locked states, the integrator *SHALL* name the custom
 What the Enforce and Locked states refuse without it, and what the compliance report lists of the entropy duty and the platform contract test, is stated in xref:strict-mode.adoc#req-ssr-strict-rules[The rules that strict mode checks] and xref:strict-mode.adoc#req-ssr-strict-report[Strict mode reports on every run].
 
 *Scoped replacement.*
-For the integrator that claims the element's safety-assurance scope, this revision replaces the element-supplier-only platform-backend attribution of revision 6 of this item so that a supported configuration's platform backend is provided by the supported composition package's releaser (the element's supplier for an element-supported configuration package, or the explicit extension composer for an explicit extension package), while preserving all custom-platform backend, contract-test, declaration, qualification and strict-state duties of revision 6 of this item unchanged.
+For the integrator claiming the element's safety-assurance scope, revision 7 of this item replaces revision 6 of this item.
 --
 
 *Violation:*
@@ -1225,7 +1225,7 @@ What strict mode refuses for a known failure, route by route, is stated in xref:
 Strict mode's Off and Report states do not make a build with an affecting known failure conform.
 
 *Scoped replacement.*
-This revision replaces revision 4 of this item for the integrator claiming the element's safety-assurance scope: it separates the narrow declared middleware allocator-exhaustion resource policy from non-allocator known failures, rejects deferred stock port-mutex waiting as a cure for return isolation while distinguishing an unimplemented port-mutex-free independent return endpoint, and points to the expanded connection-retirement, identity, reporting and actual-return obligations while preserving static-segment, target, deviation and Enforce/Locked known-failure duties of revision 4.
+For the integrator claiming the element's safety-assurance scope, revision 5 of this item replaces revision 4 of this item.
 --
 
 *Violation:*

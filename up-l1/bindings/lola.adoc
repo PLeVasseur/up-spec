@@ -182,7 +182,7 @@ The binding *MUST NOT* let what a serialized route allocates reach a native rout
 What each route's report states is stated in xref:../route-observation.adoc#req-ssr-error-route-report[Each route reports what it got], and how a refusal is reported in xref:../payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name] and xref:../integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader].
 
 *Scoped replacement.*
-This revision replaces revision 3 of this item for the LoLa binding across native and serialized routes: it invokes the narrowed first-use rule for declared runtime-created LoLa objects, ties class-none declarations to evidence across actual runtime lifecycle paths, and distinguishes polling-only native configurations from optional notification-handler allocations while preserving all native/serialized route, capability-refusal and isolation duties of revision 3.
+Revision 4 of this item replaces revision 3 of this item for the LoLa binding across native and serialized routes.
 --
 
 [horizontal]
@@ -252,7 +252,7 @@ Separately declared, bounded LoLa connection and local-view bookkeeping under a 
 The binding honors that policy, or it refused the route at setup (xref:../runtime.adoc#req-ssr-qos-overflow[Overflow acts as declared]; xref:interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]).
 
 *Scoped replacement.*
-This revision replaces revision 2 of this item for the LoLa binding across all routes: it preserves setup-fixed payload and sample capacity and count-based refusal while requiring pre-acquisition owner and return reservation and distinguishing separately permitted bounded connection and local-view bookkeeping from sample-storage expansion.
+Revision 3 of this item replaces revision 2 of this item for the LoLa binding across all routes.
 --
 
 [horizontal]
@@ -323,7 +323,7 @@ It *MUST* state them as target profiles, each with the operating system and the 
 The binding *MUST NOT* claim either clause for a build, a way of loading or a target that the record does not state, and *MUST NOT* claim a target by the name of an operating system alone.
 
 *Scoped replacement.*
-This revision replaces revision 3 of this item for the LoLa binding across all routes: it applies the narrow middleware allocator-exhaustion resource-policy classification exclusively to exact declared permitted LoLa allocator operations while preserving the no-unwinding boundary, own-code duties, target-profile disclosures and known-failure classification of all non-allocator LoLa termination paths.
+Revision 4 of this item replaces revision 3 of this item for the LoLa binding across all routes.
 --
 
 [horizontal]
@@ -673,7 +673,7 @@ A refused sample is peer input, and xref:interface.adoc#req-ssr-binding-no-panic
 *What the element checks.*
 The LoLa binding adopts the shared physical-check and metadata hand-over contract of xref:storage.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order].
 Whether a frame has a payload, and whether that agrees with the payload length that its header gives, is checked by the element, in its admission of the frame's metadata, after the checks of this item have passed (<<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>>, "The element's admission").
-This revision gives the element the refusal that revision 2 of this item gave the LoLa binding: of a sample from whose metadata the binding could not read whether the frame has a payload, and of one whose metadata said that the frame has no payload while its payload length was not zero.
+Revision 3 of this item transfers to the element the refusal duties that revision 2 of this item assigned to the LoLa binding for a sample whose metadata cannot be read for payload presence or states no payload while the header's payload length is nonzero.
 The transfer takes effect, and a composition of an element and a LoLa binding that stand on different sides of it is refused, as <<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>> states in "Element and binding generations".
 --
 
@@ -716,7 +716,7 @@ The binding *MUST* carry unchanged the metadata of a frame whose payload the ele
 The binding *MUST* refuse, before it sends, payload bytes for a frame that the element's request for the loan states has no payload, and so no payload encoding.
 
 *Replacement.*
-This revision replaces revision 1 of this item for the LoLa binding: the binding takes the facts above from the element's request for the loan and from its hand-back, where revision 1 of this item had it read them from the frame's metadata.
+Revision 2 of this item replaces revision 1 of this item for the LoLa binding's sending and receiving duties for absent and present-empty payloads.
 It takes effect in the composition that <<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>> names in "Element and binding generations".
 --
 
@@ -800,7 +800,7 @@ The envelope gives its place and its length, and the LoLa binding *MUST* carry i
 The LoLa binding *MUST* read nothing from the metadata.
 When it sends a frame, it *MUST* take whether the frame has a payload, and the payload's length, from the element's request for the loan; when it receives a frame, it *MUST* take whether the frame has a payload from the element's hand-back (<<req-ssr-binding-lola-envelope-presence,On LoLa, an absent payload and a present empty payload stay apart>>).
 The binding *MUST NOT* decide anything from the wire, the payload family, the layout, the source or the sink that the metadata names.
-This revision retires, for sending and for receiving, the reading of whether a frame has a payload that revision 2 of this item let the LoLa binding make from the metadata.
+Revision 3 of this item retires the LoLa binding's revision-2 permission to read payload presence from frame metadata when sending or receiving.
 
 *The hand-over.*
 Once a received sample has passed the checks of <<req-ssr-binding-lola-envelope-checks,On LoLa, a sample that is not a well-formed envelope is refused before any of it is used>>, the LoLa binding *MUST* hand the element the frame's metadata extent and the payload length that its header gives, and no byte of its payload.

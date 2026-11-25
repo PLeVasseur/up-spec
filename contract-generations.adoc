@@ -163,7 +163,7 @@ Each part that a requirement of the up-rust SEooC requirement family binds, its 
 *The supplier.*
 The supplier of each such part *MUST* release the part's declaration, and each component conformance claim made for the part, with the part.
 The supplier *MUST* keep a record of where the part implements each item of the up-rust SEooC requirement family that binds it, and of who made each entry of that record.
-For an SDK, this duty of its supplier replaces the earlier convention of the up-rust SEooC requirement family that an SDK which implements an item keeps its own record of where it does so.
+For an SDK, this duty of its supplier replaces the requirement-family rule under which an implementing SDK kept its own record of where it implements each item.
 The record is kept with the part, outside the specification, and it is no statement of the up-rust SEooC requirement family.
 What the supplier shows as the evidence of a claim is stated in xref:safety/assurance.adoc#req-ssr-verification-methods[The verification methods, and what a Verification line asks for].
 
@@ -226,7 +226,7 @@ It *MUST NOT* claim conformance to the classic protocol-chapter rule for that be
 * Where the two texts do not settle whether one implementation can meet both, a claim of conformance to one is no claim about the other, and the part *MUST NOT* rest a claim on an answer to that question.
 
 *Scoped replacement.*
-This revision replaces revision 2 of this item for each part that a requirement of the up-rust SEooC requirement family binds, the supplier of each such part, the releaser of a supported composition package (including the element's supplier for each element-supported configuration package that it provides) and each explicit extension composer, preserving all declaration, claim, dependency-closure, replacement and classic-rule interaction rules of revision 2 while explicitly separating the two partial-claim grammars, distinguishing formal conformance claims, composition-package function admission selections, assurance-scope selections and scoped assessment observations, codifying that reusable supplier or composition-package evidence never discharges an applicable assumption of use, and incorporating the composition-package releaser and explicit-extension-composer responsibilities stated in xref:safety/profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations].
+Revision 3 of this item replaces revision 2 of this item for each part that a requirement of the up-rust SEooC requirement family binds, the supplier of each such part, each releaser of a supported composition package (including the element's supplier for each element-supported configuration package that it provides) and each explicit extension composer.
 --
 
 [horizontal]

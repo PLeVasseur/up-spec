@@ -80,7 +80,7 @@ Once a transport is in runtime mode, the element *MUST NOT* make it possible to 
 The element *MUST NOT* offer such an operation in its API, and *MUST NOT* let a use of one compile.
 
 *Scoped replacement.*
-For the element across all configurations, this revision replaces revision 2 of this item by stating the common setup-fixed freeze rule without importing transport-layer payload-form or native-agreement clauses; payload-form freeze is owned by xref:../up-l1/payload-paths.adoc#req-ssr-payload-route-form[A route's form is fixed at setup, by what the route declares and never by a name] and native-agreement freeze by xref:../up-l1/wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout].
+Revision 3 of this item replaces revision 2 of this item for the element across all configurations; transport-layer payload-form and native-agreement freeze duties are governed by their transport-layer items.
 --
 
 [horizontal]
@@ -211,7 +211,7 @@ Where a configuration's stated retention policy permits retaining startup backin
 When `+enter_runtime_all+` returns, the element *MUST* report each setup that is still alive on that memory and has not entered runtime mode.
 
 *Scoped replacement.*
-This revision replaces revision 3 of this item for the element across all configurations, incorporating declared startup backing obtained by an explicitly selected startup-provisioning helper into the sealing, partial-group-success survival and non-reclamation duties while preserving every sealing and reporting duty of revision 3 of this item for static, caller-provided and non-ASIL startup memory.
+Revision 4 of this item replaces revision 3 of this item for the element across all configurations.
 --
 
 [horizontal]
@@ -260,7 +260,7 @@ A capacity that the element computes is not the QoS depth that a route declares 
 Where a figure depends on anything that the configuration does not bound, such as allocator overhead, scheduler storage, a thread's stack, concurrency or growth history, the element *MUST* report it as not established instead of stating a bound.
 
 *Scoped replacement.*
-For the element across all configurations, this revision replaces revision 5 of this item by keeping common load-to-capacity computation here while peer-table sizing specialization is owned by xref:../up-l1/peers.adoc#req-ssr-peer-admission[Undeclared peers cannot lock out declared ones].
+Revision 6 of this item replaces revision 5 of this item for the element across all configurations; transport-layer peer-table sizing is governed by its transport-layer peer-admission item.
 --
 
 [horizontal]
@@ -313,7 +313,7 @@ Intrinsic first use of a primitive inside a named runtime-created middleware obj
 This narrow exception never covers element-owned primitives, pre-existing locks or state, callbacks, thread-local state, caches, message ID state, wake infrastructure, or unenumerated middleware paths.
 
 *Scoped replacement.*
-For the element across all configurations, this revision replaces revision 1 of this item by permitting intrinsic first use solely inside explicitly enumerated runtime-created middleware objects admitted under Class 2 middleware lifecycle policy, while keeping all element-owned and pre-existing lazy-primitive forcing duties in force.
+Revision 2 of this item replaces revision 1 of this item for the element across all configurations.
 --
 
 [horizontal]
@@ -439,8 +439,7 @@ The element *MUST* show in it each route's admitted heap class, naming which of 
 In each route's report, the element *MUST* show the declared policy of the route's binding where the binding or its middleware allocates on the route—including Class 2 middleware lifecycle operations and the release of a received frame's storage—whatever the route requires.
 
 *Scoped replacement.*
-For the element, each wire, each binding and each allocation provider across all configurations, this revision replaces revision 5 of this item by extending the five-part allocation-domain, finite resource-envelope and resource-and-failure policy declaration, conservative possible-termination disclosure, admission checks and reporting duties to Class 2 (`allocation inside middleware under a named permit`) and stating the common Class 2 named-waiver gate directly here.
-All serialized owned-value runtime adapter accounting, non-native/non-shared ending-path refusal, ordinary declaration and reporting duties remain in force.
+Revision 6 of this item replaces revision 5 of this item for the element, each wire, each binding and each allocation provider across all configurations.
 --
 
 [horizontal]
@@ -640,7 +639,7 @@ The element *MUST* report a guarantee that is established and not required as es
 The element *MUST* report a guarantee as not established only where its evidence is absent or insufficient, and never because the route does not require it.
 
 *Scoped replacement.*
-For the element, each assured helper admitted on the ASIL path and each releaser of a supported composition package across all configurations, this revision replaces revision 3 of this item by reconciling the native-path summary with named Class 2 middleware lifecycle permits, retaining exactly the four named guarantees, scoping helper-transitive versus route-scoped versus process-wide guarantee claims, adding all-state setup refusal of terminating policies overlapping required recovery, panic-free-cleanup or process-survival claims (preserving already-entered transports), and adding guarantee-scope and process-exposure reporting.
+Revision 4 of this item replaces revision 3 of this item for the element, each assured helper admitted on the ASIL path and each releaser of a supported composition package across all configurations.
 --
 
 [horizontal]

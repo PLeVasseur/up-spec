@@ -181,7 +181,7 @@ Strict-mode locking and its declared-graph check enumerate nothing beyond the cr
 * strict-mode locking does not discharge any assumption of use (xref:assumptions-of-use.adoc#aou-seooc-assumptions-bind[An assumption of use binds the integrator who claims the scope, and replaces no requirement]).
 
 *Scoped replacement.*
-For the element's strict mode, this revision replaces revision 3 of this item across all configurations, reconciling strict-build and declared-graph gating with the two explicitly admitted ASIL-path functional selections (a named startup-provisioning helper and a named serialized owned-value runtime adapter confined strictly to an existing wire or allocation-provider role), continuing to refuse unadmitted optional layers, generic collection crates, arbitrary application helpers, executors, optional asynchronous or application-role layers and whole `+std+` or `+alloc+` crates, and stating explicitly strict-mode locking's observation limits, while preserving the Locked state, the admission of crates accounted for outside the claimed graph and all other duties of revision 3 of this item.
+Revision 4 of this item replaces revision 3 of this item for the element's strict mode across all configurations.
 --
 
 [horizontal]
@@ -266,7 +266,7 @@ Strict mode's rule checks judge only the declarations, setup facts, supplied mem
 * the Off, Report, Enforce and Locked states never manufacture stronger resource guarantees and never substitute for complete-image classification, Cargo's ASIL build profile, a selected assurance scope or actual qualification (xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]; xref:../../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]).
 
 *Scoped replacement.*
-This revision replaces revision 3 of this item for the element's strict mode across all configurations: it adds scope and composition conflict checks between terminating resource policies and required recovery, panic-free-cleanup or process-survival claims, states non-refusal of ordinary conforming permitted-middleware native routes, and confirms that Report never overrides core all-state setup refusals, while preserving all helper, adapter, deviation, known-failure, unwinding and observation-limit duties of revision 3.
+Revision 4 of this item replaces revision 3 of this item for the element's strict mode across all configurations.
 --
 
 [horizontal]
@@ -324,7 +324,7 @@ What this clause states for the Enforce state holds in the Locked state (<<req-s
 * In the Report state, strict mode *MUST NOT* refuse for either; what it reports of them is stated in <<req-ssr-strict-report,Strict mode reports on every run>>.
 
 *Scoped replacement.*
-This revision replaces revision 3 of this item for the element's strict mode across all configurations, authorizing and requiring strict mode to read deviations, known failures and their stated scopes from supported composition package records (element-supported configuration packages and explicit extension packages) as well as part qualification records, while preserving all revision-3 acknowledgement-form, stale-revision, known-failure refusal and per-state duties unchanged.
+Revision 4 of this item replaces revision 3 of this item for the element's strict mode across all configurations.
 --
 
 [horizontal]
@@ -433,7 +433,7 @@ Strict mode *MUST* state in the report that:
 * the Off, Report, Enforce and Locked states remain separate from complete-image classification, Cargo's ASIL build profile, a selected assurance scope and actual qualification, and never manufacture stronger resource guarantees (xref:assumptions-of-use.adoc#aou-seooc-build-configuration[The ASIL binary is built from its claimed graph, with the ASIL profile]; xref:../../../basics/resources.adoc#req-ssr-heap-guarantees[A stronger resource guarantee is required by name, and admitted or refused]).
 
 *Scoped replacement.*
-This revision replaces revision 5 of this item for the element's strict mode across all configurations: it adds per-route middleware permit and resource-policy reporting, explicit guarantee scopes (helper-local, route-scoped and process-wide) and process-wide termination exposure and conflict fields separately from known-failure records while retaining strictly the four registered guarantee names and all reporting duties of revision 5.
+Revision 6 of this item replaces revision 5 of this item for the element's strict mode across all configurations.
 --
 
 [horizontal]

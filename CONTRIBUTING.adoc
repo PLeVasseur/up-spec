@@ -174,6 +174,15 @@ A verbatim quotation, a copied table, a comparison of sources, a measurement and
 No text of the standard is quoted or closely paraphrased, and no table maps it.
 * Decisions, reviews, evidence results, delivery status and an item's history are kept outside the specification.
 
+=== Reader-facing wording
+
+* Reader-facing prose across the entire repository—normative statements, rationales, overviews, guides, notes, tables, captions, Markdown documentation and tool `--help` text—*MUST* state the applicable contract, operation, format, version, compatibility condition and evidence limit directly.
+* Reader-facing prose *MUST NOT* contain developmental narration, making-of lineage, forecasts of future document structure, edit summaries or comparisons to unnamed earlier document states (such as calling a format a "successor documentary format", recounting what an edit "incorporates" or "clarifies", or predicting future additions).
+There is no general "history" exemption in reader-facing prose; how a document evolved belongs in Git history or a changelog.
+* Factual version and schema identifiers, operational or protocol time intervals (such as a previous arrival report or a restarted successor process), and exact replacement sentences naming the replaced item, revision, actors, behaviour and scope under <<safety-area,Revisions and replacements>> remain permitted and required where the contract depends on them.
+* Immutable audit, intake and review records stay byte-identical and are never rewritten for style; current explanatory wrappers, templates and generator-authored text that present them remain subject to this wording rule.
+* Meaning-preserving wording cleanup keeps an item's name and revision; where semantic equivalence cannot be established, apply the normal revision and replacement rules above.
+
 === The owned-frame SDK contract
 
 Items of the owned-frame SDK contract (xref:contract-generations.adoc#owned-frame-conventions[Owned-frame SDK conventions and tags]) are filed by responsibility across `basics/`, `up-l1/` and `up-l2/` and follow the same rules for statements, allocation, verification lines, revisions, replacements, links, sources and rationales, with the differences that those conventions state: its items are requirements only, carry no ASIL line and use the tags `OwnedFrameSdk`, `OwnedFrameProvider` and `OwnedFrameScheduler`.

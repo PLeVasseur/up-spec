@@ -110,7 +110,7 @@ The application code around generated code is not element code.
 Test tooling, such as heap observers, contract suites and test doubles, is no part of the element.
 
 *Scoped replacement.*
-This revision replaces revision 2 of this item for the element and for each component producer (supplier of a part composed with the element), preserving parts E1 to E7 and element code unchanged while explicitly classifying selected startup-provisioning helpers, serialized owned-value runtime adapters, memory and allocation providers and non-shipped platform backends as separately composed parts outside element code and establishing component-producer accountability and element boundary separation (with composition-package-releaser and explicit-extension-composer obligations kept canonically in xref:../../profiles/up-rust-asil-b.adoc#req-ssr-element-configurations[The ASIL path and supported configurations]).
+Revision 3 of this item replaces revision 2 of this item for the element and for each component producer (supplier of a part composed with the element).
 --
 
 [horizontal]

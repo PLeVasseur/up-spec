@@ -447,7 +447,7 @@ Every other middleware panic path that the binding can reach is a known failure 
 The binding's qualification record states its known failures (xref:../../safety/assurance.adoc#req-ssr-binding-readme[A binding's qualification record states its limits and its failures]), and what a deployment does with them is stated in xref:../../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-iceoryx2-limits[A deployment on iceoryx2 accepts that binding's limits, and no known failure as one].
 
 *Scoped replacement.*
-This revision replaces revision 4 of this item for the iceoryx2 binding across all routes: it moves allocator exhaustion exclusively at exact declared permitted middleware acquisition or resize operations into the selected resource policy while keeping every non-allocator panic, mutex, refcount, clock, socket, `+close()+`, `+munmap()+` and stock `+Sample::drop+` return/logger failure path classified as a known failure and preserving the accepted history-index instance and setup checks of revision 4.
+Revision 5 of this item replaces revision 4 of this item for the iceoryx2 binding across all routes.
 --
 
 [horizontal]
@@ -665,7 +665,7 @@ When the call returns the number of listeners that it notified, and an attempt o
 Where the binding cannot establish whether the queue holds samples on a route, it *MUST NOT* declare this count for that route, and the route is admitted or refused as its declared settings require (xref:interface.adoc#req-ssr-binding-qos-capability[A binding honors or refuses each declared setting]).
 
 *Scoped replacement.*
-This revision replaces revision 2 of this item for the iceoryx2 binding across all receive routes: it makes every-arrival and period-plus-pass-bound reporting conditional on declared established arrival capability, forbids deriving a finite `L` from an unbounded allocator pass, wake hint, stale snapshot or independent return split alone, and states the exact deadline and `+event_only+` admission outcomes under unavailable arrival capability while keeping all observable failure and notification-error reports in force.
+Revision 3 of this item replaces revision 2 of this item for the iceoryx2 binding across all receive routes.
 --
 
 [horizontal]
@@ -868,8 +868,7 @@ That acquisition is a bounded raw copy within the frame's extent, and nothing of
 A refusal by one of those checks keeps its cause and its one count, and ends the sample's admission before its metadata is decoded.
 Once the first seven checks have passed, the binding adopts the shared hand-over contract of xref:storage.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order] and hands on only the metadata's extent and the payload length that the header gives, for the element's admission of the metadata (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>); that hand-over admits no frame.
 It *MUST NOT* let any part of a sample whose frame the element refuses reach a wire's decoding of the payload or an application.
-For a sample that the eighth check refuses, this replaces the iceoryx2 binding's duty in revision 1 of this item to let no part of it reach the element or a wire: only its metadata's extent, and the payload length that its header gives, reach the element, for its admission.
-This revision gives the element the count of a sample that the eighth check refuses, which revision 2 of this item gave the iceoryx2 binding; the transfer takes effect, and a composition of an element and an iceoryx2 binding that stand on different sides of it is refused, as <<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>> states in "Element and binding generations".
+For a sample that the eighth check refuses, revision 3 of this item replaces the iceoryx2 binding's revision-1 duty to let no part of it reach the element or a wire (handing on only the metadata's extent and header payload length for element admission) and transfers to the element the refusal count that revision 2 of this item assigned to the iceoryx2 binding; the transfer takes effect, and a composition of an element and an iceoryx2 binding that stand on different sides of it is refused, as <<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>> states in "Element and binding generations".
 That a refusal causes no panic is stated in xref:interface.adoc#req-ssr-binding-no-panic[No panic on any peer input].
 --
 
@@ -917,7 +916,7 @@ The header's payload length gives only the length.
 The iceoryx2 binding *MUST* write a payload length of zero for a frame that the element sends without a payload, and *MUST NOT* give the element a payload extent to write for it.
 The binding *MUST* report a received frame that the element admits, and that has no payload encoding, as a frame with no payload, never as a payload of length zero, and *MUST NOT* deliver bytes for it.
 A received frame that has no payload encoding while its header gives a payload length other than zero is refused by the element before it is reported (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>).
-This revision retires, for such a frame, the iceoryx2 binding's duty in revision 1 of this item to report it as a frame with no payload; it takes effect in the composition that <<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>> names in "Element and binding generations".
+Revision 2 of this item retires the iceoryx2 binding's revision-1 duty to report such a frame as a frame with no payload; it takes effect in the composition that <<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>> names in "Element and binding generations".
 
 *A present empty payload.*
 The binding *MUST* write a payload length of zero for a frame whose payload is present and empty, and *MUST* report it as a present payload of length zero.
@@ -961,7 +960,7 @@ For a frame that the element refuses, the binding *MUST* immediately transfer th
 
 *The element's admission.*
 Before a frame reaches its route, the element *MUST* perform the five-step common metadata admission, ordering, pull-route accounting and non-repetition duties of xref:storage.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order], where the first step (metadata decode) is the eighth check of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>>.
-This revision gives the element two duties that the iceoryx2 binding had: the count of a frame whose metadata does not decode, which revision 2 of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>> gave the binding; and, for a frame that has no payload encoding while its header gives a payload length other than zero, a refusal and its count in place of the report of a frame with no payload that revision 1 of <<req-ssr-binding-iceoryx2-frame-presence,On iceoryx2, an absent payload and a present empty payload stay apart>> gave the binding.
+Revision 3 of this item transfers to the element two duties of the iceoryx2 binding: the count of a frame whose metadata does not decode (revision 2 of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>>); and, for a frame with no payload encoding and a nonzero header payload length, refusal and counting in place of reporting a frame with no payload (revision 1 of <<req-ssr-binding-iceoryx2-frame-presence,On iceoryx2, an absent payload and a present empty payload stay apart>>).
 
 *What the binding takes from it.*
 From the element's hand-back the binding *MUST* take nothing but whether the frame has a payload (<<req-ssr-binding-iceoryx2-frame-presence,On iceoryx2, an absent payload and a present empty payload stay apart>>) and the frame's source.

@@ -261,7 +261,7 @@ A report that lists a waiver records it; it is not the waiver's approval.
 The element *MUST NOT* let deployment data create a waiver: deployment data selects a waiver compiled into the program by its id, and nothing more.
 
 *Scoped replacement.*
-This revision replaces revision 3 of this item for the element across all configurations: it requires each compiled-in waiver record to carry the permit identity, covered operations and domains, finite resource envelope, five-part resource and failure policy and process-wide exposure alongside the interference-argument reference while preserving all compiled-in matching, non-author approver, no-heap readability and strict-state checks of revision 3.
+Revision 4 of this item replaces revision 3 of this item for the element across all configurations.
 --
 
 [horizontal]
@@ -329,7 +329,7 @@ The binding's README is a concise profile and index of the binding, and the bind
 Where the README speaks of a matter that the record states, the record governs.
 
 *Scoped replacement.*
-This revision replaces revision 4 of this item for each binding, each part and each supported composition package: it requires binding qualification records to record permitted middleware resource policies separately from limits, deviations and known failures and to state exact middleware, dependency, build, patch and configuration identities without inferring stock-build qualification, while preserving all limit, deviation, known-failure, composition-package and README duties of revision 4.
+Revision 5 of this item replaces revision 4 of this item for each binding, each part and each supported composition package.
 --
 
 [horizontal]
