@@ -659,6 +659,7 @@ There the binding *MUST* count each refusal of its own once; a sample whose fram
 A refused sample is peer input, and xref:bindings.adoc#req-ssr-binding-no-panic[No panic on any peer input] holds for it.
 
 *What the element checks.*
+The LoLa binding adopts the shared physical-check and metadata hand-over contract of xref:bindings.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order].
 Whether a frame has a payload, and whether that agrees with the payload length that its header gives, is checked by the element, in its admission of the frame's metadata, after the checks of this item have passed (<<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>>, "The element's admission").
 This revision gives the element the refusal that revision 2 of this item gave the LoLa binding: of a sample from whose metadata the binding could not read whether the frame has a payload, and of one whose metadata said that the frame has no payload while its payload length was not zero.
 The transfer takes effect, and a composition of an element and a LoLa binding that stand on different sides of it is refused, as <<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>> states in "Element and binding generations".
@@ -796,20 +797,8 @@ The binding *MUST* return each sample whose frame the element refuses to LoLa on
 The hand-over is not a delivery to an application.
 
 *The element's admission.*
-Before a frame reaches its route, the element *MUST* make these checks of it, in this order and once, and *MUST* refuse it at the first check that it fails:
-
-. the selected wire decodes the frame's metadata in the format that the wire states, at the one version of it fixed at setup (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]); a frame whose metadata does not decode in it is refused metadata, and so is a frame whose prefix names a metadata layout that the format does not define;
-. the metadata holds each field that the format requires, each in its range, and names a payload encoding exactly where it says that the frame has a payload;
-. the metadata names a payload encoding, or the payload length that the header gives is zero; a frame whose metadata names no payload encoding while that length is not zero is refused as `+payload_presence_extent_mismatch+`;
-. the wire, the payload family and the metadata layout, one that the format defines, that the decoded metadata names are those that the route admits, on every route;
-. the metadata matches the source and sink filters of a receive of the route.
-
-The element *MUST NOT* evaluate a receive's filters for a frame that an earlier check refused, and *MUST NOT* deliver a frame to a receive whose filters its metadata does not match.
-For each frame that it refuses, the element *MUST* return the refusal or count it once, on the route whose receive step held the sample, under the cause that the refusing check names, as xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states.
-On a route that the binding serves by pull, the element *MUST* count each frame that it refuses once, and *MUST NOT* return the refusal as the error of the receive call, so that the call goes on to the next sample (<<req-ssr-binding-lola-envelope-checks,On LoLa, a sample that is not a well-formed envelope is refused before any of it is used>>, "What a refusal becomes").
-A frame that the third check refuses is counted as `+payload_presence_extent_mismatch+` and under no other cause, also where a routing hint brought it to that receive step: it is not counted as matching no receive, and it is not kept for a later one (<<req-ssr-binding-lola-envelope-routing-hint,On LoLa, the routing hint is untrusted, and the metadata decides>>).
-A frame with a present payload of length zero, encoding identifier `0` included, passes the second and the third checks; what its empty input means is decided later, by the wire of its encoding (xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
-The element *MUST* make these checks before any of the frame reaches a wire's decoding of the payload or an application (xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), and *MUST NOT* make them again for the frame when it is taken (xref:bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
+Before a frame reaches its route, the element *MUST* perform the five-step common metadata admission, ordering, pull-route accounting and non-repetition duties of xref:bindings.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order].
+On LoLa, a frame that the third check refuses is counted as `+payload_presence_extent_mismatch+` and under no other cause, also where a routing hint brought it to that receive step: it is not counted as matching no receive, and it is not kept for a later one (<<req-ssr-binding-lola-envelope-routing-hint,On LoLa, the routing hint is untrusted, and the metadata decides>>).
 These duties of the element replace two duties of the LoLa binding: in revision 1 of this item, that a frame whose metadata does not decode, or whose identity is not the route's, reach neither a wire's decoding of the payload nor an application; and in revision 1 of <<req-ssr-binding-lola-envelope-routing-hint,On LoLa, the routing hint is untrusted, and the metadata decides>>, that a frame reach a receive only once its metadata has been decoded and the receive's source and sink filters have been matched against it.
 
 *Element and binding generations.*
@@ -849,7 +838,7 @@ Both parts of one process have to agree on which of them checks, so a compositio
 --
 *Transmit.*
 The LoLa binding *MUST* fix the metadata and the payload's offset when it creates a loan, and write the header, the hints, the metadata and the padding itself.
-What the binding gives a sender to write *MUST* be the payload's extent alone, and the binding *MUST NOT* let that extent move or change its size while the loan is held.
+What the binding gives a sender to write *MUST* be the payload's extent alone, and the binding *MUST NOT* let that extent move or change its size while the loan is held (fixed-size transmit loans under xref:bindings.adoc#req-ssr-binding-loan-sizing[A lending binding declares whether a transmit loan's payload extent can be shortened]).
 
 *Initialized extents.*
 The LoLa binding *MUST* declare, for each path that its configuration selects, the path's required-initialized extent and, for each receive path, its delivered-initialized extent with its basis, or that the path has none (xref:bindings.adoc#req-ssr-binding-initialized-extent[A sample's bytes are initialized before a path needs them, each by the part that owns it]).
@@ -914,10 +903,10 @@ It states nothing itself.
 | xref:runtime.adoc#req-ssr-mode-entry[Entering runtime mode is one all-or-nothing operation]; xref:runtime.adoc#req-ssr-mode-init-failure[Initialization failure]
 
 | Runtime: a frame is sent
-| xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; <<req-ssr-binding-lola-envelope-lifetime,On LoLa, a loan exposes only its payload, and a receive view lives within its sample>>
+| xref:payload-paths.adoc#req-ssr-payload-written-once[A payload is written once, into the storage that carries it]; xref:bindings.adoc#req-ssr-binding-lent-storage[Lent storage is exclusive, disjoint and stable for as long as it is held]; xref:bindings.adoc#req-ssr-binding-loan-sizing[A lending binding declares whether a transmit loan's payload extent can be shortened]; <<req-ssr-binding-lola-envelope-lifetime,On LoLa, a loan exposes only its payload, and a receive view lives within its sample>>
 
 | Runtime: frames are received
-| xref:bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]; xref:bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is]; xref:bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored]; <<req-ssr-binding-lola-envelope-checks,On LoLa, a sample that is not a well-formed envelope is refused before any of it is used>>; <<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>>
+| xref:bindings.adoc#req-ssr-binding-bounded[A binding bounds its own work and its waits]; xref:bindings.adoc#req-ssr-binding-arrival-reports[A binding reports each arrival within the latency that it declares, and each event as what it is]; xref:bindings.adoc#req-ssr-qos-deadline[Deadlines are monitored]; xref:bindings.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]; <<req-ssr-binding-lola-envelope-checks,On LoLa, a sample that is not a well-formed envelope is refused before any of it is used>>; <<req-ssr-binding-lola-envelope-metadata,On LoLa, the metadata is the selected wire's, and is checked before delivery>>
 
 | Runtime: a frame is returned
 | xref:bindings.adoc#req-ssr-binding-frame-drop[What a received frame's destructor may do]; xref:runtime.adoc#req-ssr-release-lease-drop[A lease gives back its slot and nothing else]

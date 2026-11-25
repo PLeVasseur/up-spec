@@ -631,7 +631,7 @@ That report replaces no arrival report: <<req-ssr-binding-iceoryx2-arrival-repor
 The binding *MUST* count, once for each failure and on the sending route, under a counter that names the cause, each failure of the route's publisher to set up a data connection to a subscriber.
 
 *A send that finds a connection corrupted.*
-When a send operation finds its retained connection to a recipient corrupted, the binding *MUST* apply the configured degradation policy to it and *MUST* emit one `+corrupted_connection+` event on the sending route, keyed by the send operation, the recipient and the generation of the connection.
+When a send operation finds its retained connection to a recipient corrupted, the binding *MUST* apply the configured degradation policy to it and *MUST* emit one `+corrupted_connection+` event on the sending route, keyed by the send operation, the recipient and the generation of the connection (not counted in `+receive_failed+`, as xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once], "Sending-side connection faults", states).
 A connection's generation changes each time the connection to that recipient is set up again.
 
 * The binding *MUST* emit one event for one key, however often the operation observes the corruption.
@@ -784,7 +784,7 @@ It *MUST NOT* let any part of a sample that one of the first seven checks refuse
 On a receive route that takes the copy route, one thing is excepted from that rule: the element's acquisition of the sample's header and metadata into storage of its own, before the first seven checks, as xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Admission on the copy route", states.
 That acquisition is a bounded raw copy within the frame's extent, and nothing of it is decoded, admitted, delivered or forwarded before the first seven checks have passed on the acquired header.
 A refusal by one of those checks keeps its cause and its one count, and ends the sample's admission before its metadata is decoded.
-Once the first seven checks have passed, the binding hands on only the metadata's extent and the payload length that the header gives, for the element's admission of the metadata (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>); that hand-over admits no frame.
+Once the first seven checks have passed, the binding adopts the shared hand-over contract of xref:bindings.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order] and hands on only the metadata's extent and the payload length that the header gives, for the element's admission of the metadata (<<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>>); that hand-over admits no frame.
 It *MUST NOT* let any part of a sample whose frame the element refuses reach a wire's decoding of the payload or an application.
 For a sample that the eighth check refuses, this replaces the iceoryx2 binding's duty in revision 1 of this item to let no part of it reach the element or a wire: only its metadata's extent, and the payload length that its header gives, reach the element, for its admission.
 This revision gives the element the count of a sample that the eighth check refuses, which revision 2 of this item gave the iceoryx2 binding; the transfer takes effect, and a composition of an element and an iceoryx2 binding that stand on different sides of it is refused, as <<req-ssr-binding-iceoryx2-frame-metadata,On iceoryx2, the binding carries the metadata unchanged, and its identity is the element's to check>> states in "Element and binding generations".
@@ -877,19 +877,7 @@ The hand-over is not a delivery to an application, and that its metadata decodes
 Within the same receive step, the element *MUST* admit or refuse the frame as the clause "The element's admission" states, and *MUST* hand its verdict back to the binding, with, for a frame that it admits, whether the frame has a payload and the frame's source.
 
 *The element's admission.*
-Before a frame reaches its route, the element *MUST* make these checks of it, in this order and once, and *MUST* refuse it at the first check that it fails:
-
-. the route's selected wire decodes the frame's metadata in the format that the wire states, at the one version of it fixed at setup (xref:wires/README.adoc#req-ssr-wire-metadata-format[A wire states the format of its frame metadata, and decodes it]); a frame whose metadata does not decode in it is refused metadata, the eighth check of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>>, and so is a frame whose prefix names a metadata layout that the format does not define;
-. the metadata holds each field that the format requires, each in its range, and names a payload encoding exactly where it says that the frame has a payload;
-. the metadata names a payload encoding, or the payload length that the header gives is zero; a frame whose metadata names no payload encoding while that length is not zero is refused as `+payload_presence_extent_mismatch+`;
-. the wire, the payload family and the metadata layout, one that the format defines, that the decoded metadata names are those that the route admits;
-. the metadata matches the source and sink filters of a receive of the route.
-
-The element *MUST NOT* evaluate a receive's filters for a frame that an earlier check refused, and *MUST NOT* deliver a frame to a receive whose filters its metadata does not match.
-For each frame that it refuses, the element *MUST* return the refusal or count it once, on the route, under the cause that the refusing check names, as xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once] states.
-On a route that the binding serves by pull, the element *MUST* count each frame that it refuses once, and *MUST NOT* return the refusal as the error of the receive call, so that the call goes on to the next sample (<<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>>, "What a refusal becomes").
-A frame with a present payload of length zero, encoding identifier `0` included, passes the second and the third checks; what its empty input means is decided later, by the wire of its encoding (xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]).
-The element *MUST* make these checks before any of the frame reaches a wire's decoding of the payload or an application (xref:wires/native.adoc#req-ssr-native-agreement[A native type is read only under its exactly agreed layout]; xref:payload-paths.adoc#req-ssr-wire-encoding-checked[A wire is given only a payload of its own encoding]), and *MUST NOT* make them again for the frame when it is taken (xref:bindings.adoc#req-ssr-qos-ttl[Expired messages are not processed]).
+Before a frame reaches its route, the element *MUST* perform the five-step common metadata admission, ordering, pull-route accounting and non-repetition duties of xref:bindings.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order], where the first step (metadata decode) is the eighth check of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>>.
 This revision gives the element two duties that the iceoryx2 binding had: the count of a frame whose metadata does not decode, which revision 2 of <<req-ssr-binding-iceoryx2-frame-checks,On iceoryx2, a sample that is not a well-formed frame is refused before any of it is used>> gave the binding; and, for a frame that has no payload encoding while its header gives a payload length other than zero, a refusal and its count in place of the report of a frame with no payload that revision 1 of <<req-ssr-binding-iceoryx2-frame-presence,On iceoryx2, an absent payload and a present empty payload stay apart>> gave the binding.
 
 *What the binding takes from it.*
@@ -938,7 +926,7 @@ A loan is a sample that the iceoryx2 binding holds from a publisher, to be writt
 The iceoryx2 binding *MUST* fix the metadata's length, the payload's offset, the payload's length and the alignment when it creates a loan, and *MUST* write the header itself.
 What it gives the element to write *MUST* be the metadata's extent and, for a frame with a payload, the payload's extent, and nothing else.
 The two extents *MUST NOT* move or grow while the loan is held, and the metadata's extent *MUST NOT* shrink.
-The payload's extent *MAY* shrink, and only when the element shortens it.
+The payload's extent *MAY* shrink, and only when the element shortens it (shortenable transmit loans under xref:bindings.adoc#req-ssr-binding-loan-sizing[A lending binding declares whether a transmit loan's payload extent can be shortened]).
 The binding *MUST* then write the payload's new length into the header (<<req-ssr-binding-iceoryx2-frame-wipe,On iceoryx2, the token of a loan that is not sent is wiped, and a sent frame is left as it was written>>).
 
 *Publishing.*
@@ -1063,7 +1051,9 @@ This section links those to read for iceoryx2.
 | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Refusals at setup"
 | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "The copy route"
 | xref:integrity.adoc#req-ssr-integrity-zero-copy[Zero-copy only from a writer at or above the reader], "Admission on the copy route"
-| xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once], "Pull bindings"
+| xref:bindings.adoc#req-ssr-binding-metadata-admission[For lending bindings that separate physical checks from metadata hand-over, the element admits metadata once in fixed order]
+| xref:bindings.adoc#req-ssr-binding-loan-sizing[A lending binding declares whether a transmit loan's payload extent can be shortened]
+| xref:bindings.adoc#req-ssr-error-no-silent-loss[No silent loss, and each loss counted once], "Pull bindings" and "Sending-side connection faults"
 | xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-application-reacts[The application reacts to what the element reports], "What the element reports"
 |===
 
