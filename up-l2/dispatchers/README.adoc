@@ -29,7 +29,7 @@ A UMessage contains data (the payload) as well as meta data describing the natur
 To be able to forward/dispatch/route UMessages through the network, we must define specific purpose built uEntities to perform these tasks (ex. Ethernet switches, IP routers, etc...). Platform uEntities that are responsible for event dispatching and implementing the communication layer are described in the sections below. We will elaborate on these specific uEntities in the Platform uEntities section below.
 
 .Types of Dispatchers
-[#dispatcher-types,width=100%",cols="30%,70%"]
+[#dispatcher-types,width="100%",cols="30%,70%"]
 |===
 |Dispatcher uEntities | Description
 
@@ -37,7 +37,7 @@ To be able to forward/dispatch/route UMessages through the network, we must defi
 |Message bus that dispatches UMessages between uEntities over a common transport. It provides multicast and forwarding functionality (works like a network switch)
 
 |*uStreamer*
-|Provides Device-2-Device UMessage routing either using the same or different transport protocols , i.e. when events need to move form one transport to the next it flows through the streamer (can be equated to an IP router)
+|Provides Device-2-Device UMessage routing either using the same or different transport protocols, i.e. when events need to move from one transport to the next it flows through the streamer (can be equated to an IP router)
 
 |*Cloud Gateway*
 |A uEntity that sits at the edge of the cloud to connect non-cloud devices (ex. vehicles, phones, etc...) to the cloud
