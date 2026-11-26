@@ -143,7 +143,7 @@ channels:
         payload:
           schemaFormat: "application/vnd.google.protobuf;version=3"
           schema:
-            $ref: "./usubscription.proto#/uprotocol.core.usubscription.v4.NotificationsRequest"
+            $ref: "./usubscription.proto#/uprotocol.core.usubscription.v4.ResetRequest"
   resetResponses:
     summary: Responses to subscription tracking data and custom notification configuration reset.
     messages:
@@ -152,7 +152,7 @@ channels:
         payload:
           schemaFormat: "application/vnd.google.protobuf;version=3"
           schema:
-            $ref: "./usubscription.proto#/uprotocol.core.usubscription.v4.NotificationsResponse"
+            $ref: "./usubscription.proto#/uprotocol.core.usubscription.v4.ResetResponse"
 
 operations:
   Notify:
@@ -164,7 +164,7 @@ operations:
       description: uSubscription specification
       $ref: "../../../../../up-l3/usubscription/v4/README.adoc#subscription-change-notifications"
     channel:
-      $ref: "#/channels/subscriptionChange"
+      $ref: "#/channels/subscriptionChangeNotices"
     action: send
   Subscribe:
     summary: Subscribe to a topic.
@@ -233,7 +233,7 @@ operations:
     action: receive
     reply:
       channel:
-        $ref: "#/channels/registerForNotificationsResponse"
+        $ref: "#/channels/registerForNotificationsResponses"
     bindings:
       x-uprotocol:
         # [dsn->req~usubscription-register-notifications-method_id~1]
@@ -251,7 +251,7 @@ operations:
     action: receive
     reply:
       channel:
-        $ref: "#/channels/unregisterForNotificationsResponse"
+        $ref: "#/channels/unregisterForNotificationsResponses"
     bindings:
       x-uprotocol:
         # [dsn->req~usubscription-unregister-notifications-method_id~1]
@@ -269,7 +269,7 @@ operations:
     action: receive
     reply:
       channel:
-        $ref: "#/channels/resetResponse"
+        $ref: "#/channels/resetResponses"
     bindings:
       x-uprotocol:
         # [dsn->req~usubscription-reset-method_id~1]
