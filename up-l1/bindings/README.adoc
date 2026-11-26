@@ -1,7 +1,7 @@
 = uP-L1 Transport Bindings Catalog
 :toc: preamble
 
-NOTE: This page is an informative catalog of shared binding contracts, Classic communication-protocol mappings and up-rust SEooC middleware binding profiles under `up-l1/bindings/`.
+NOTE: This page is an informative catalog of shared binding contracts, Classic communication-protocol mappings, up-rust SEooC middleware binding profiles, and colocated service translation and envelope mapping chapters under `up-l1/bindings/`.
 It adds no normative requirements; each item's statement governs whom it binds (xref:../../contract-generations.adoc#req-ssr-requirements-bind[A requirement binds the actors to which it gives a duty]; xref:../../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect]; xref:../../contract-generations.adoc#req-ssr-item-reading[How an item is read]).
 
 == Shared binding and route-observation chapters (up-rust SEooC)
@@ -62,9 +62,9 @@ xref:../README.adoc#transport-deployment-prerequisites[transport deployment prer
 | xref:lola.adoc[`lola.adoc`] — LoLa binding profile, upstream LoLa reference context, xref:lola.adoc#lola-sample-layout[physical envelope] and general-rule index
 |===
 
-NOTE: Two non-binding protocol adapters remain at the `up-l1/` top level because they are not `UTransport` or SEooC middleware bindings:
-xref:../someip.adoc#someip-service-translation[SOME/IP (`../someip.adoc`)] defines a service translation to stock SOME/IP services (`SomeIpTranslator`), and
-xref:../cloudevents.adoc[CloudEvents (`../cloudevents.adoc`)] defines a message and envelope format mapping.
+NOTE: Two non-binding protocol chapters are colocated under `up-l1/bindings/` for navigation while remaining distinct from `UTransport` and SEooC middleware bindings:
+xref:someip.adoc#req-up-transport-someip-service-translation[The SOME/IP service translation] (`someip.adoc`) defines a service translation to stock SOME/IP services (`SomeIpTranslator`), and
+xref:cloudevents.adoc[CloudEvents (`cloudevents.adoc`)] defines a message and envelope format mapping.
 
 [[one-binding]]
 == What is specific to one binding

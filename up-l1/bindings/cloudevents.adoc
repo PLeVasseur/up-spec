@@ -53,7 +53,7 @@ The accompanying CloudEvents *protocol bindings* describe how events can be sent
 [.specitem,oft-sid="dsn~cloudevents-umessage-mapping~4",oft-needs="impl,utest",oft-title="Mapping of UMessages to CloudEvents"]
 == uMessage Mapping
 
-uProtocol uses xref:../basics/umessage.adoc[UMessages] to exchange information between uEntities.
+uProtocol uses xref:../../basics/umessage.adoc[UMessages] to exchange information between uEntities.
 The following sections define the mapping between UMessages and CloudEvents.
 
 === uAttributes Mapping
@@ -80,16 +80,16 @@ a|CloudEvents specification version. This is *NOT* the uProtocol version
 |`type`
 |https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#type[`type`]
 |String
-a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a|Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the value of the `uprotocol.ce_name` option defined for the
-link:../up-core-api/uprotocol/v1/uattributes.proto[UMessageType enum].
+link:../../up-core-api/uprotocol/v1/uattributes.proto[UMessageType enum].
 
 
 |`id`
 |https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#id[`id`]
 |String
-a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a|Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * *MUST* be set to the lower-case https://www.rfc-editor.org/rfc/rfc9562#section-4[hyphenated string representation] of the UUID (source: RFC 9562, section 4 UUID Format).
 
@@ -97,26 +97,26 @@ a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)]
 |`source`
 |https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#source-1[source]
 |Uri-Reference
-a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a|Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
-* *MUST* be set to either the long or short form xref:../basics/uri.adoc[serialization of the URI]
+* *MUST* be set to either the long or short form xref:../../basics/uri.adoc[serialization of the URI]
 
 
 |`sink`
 |`sink`
 |Uri-Reference
-a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a|Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
-* *MUST* be set to either the long or short form xref:../basics/uri.adoc[serialization of the URI]
+* *MUST* be set to either the long or short form xref:../../basics/uri.adoc[serialization of the URI]
 
 
 |`priority`
 |`priority`
 |String
-a| The message's priority as defined by xref:../basics/upriority.adoc[Message Priority].
+a| The message's priority as defined by xref:../../basics/upriority.adoc[Message Priority].
 
 * *MUST* be set to the value of the `uprotocol.ce_name` option defined for the
-link:../up-core-api/uprotocol/v1/uattributes.proto[UPriority enum].
+link:../../up-core-api/uprotocol/v1/uattributes.proto[UPriority enum].
 
 
 |`ttl`
@@ -132,12 +132,12 @@ a|The amount of time (in milliseconds) after which this message MUST no longer b
 |`token`
 |`token`
 |String
-a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a|Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 |`permission_level`
 |`plevel`
 |Integer
-a|The service consumer's permission level as defined in xref:../basics/permissions.adoc#_code_based_access_permissions_caps[Code-Based uEntity Access Permissions (CAPs)]
+a|The service consumer's permission level as defined in xref:../../basics/permissions.adoc#_code_based_access_permissions_caps[Code-Based uEntity Access Permissions (CAPs)]
 
 * This mapping admits only the values `0` to `2147483647` (source: the CloudEvents specification, version 1.0.2, section Type System, type `Integer`). A sender *MUST* fail the conversion of a larger value with `UCode.OutOfRange`, and *MUST NOT* clamp, wrap or reinterpret it.
 * A receiver *MUST* reject a negative value before it converts the value to `UInt32`.
@@ -147,27 +147,27 @@ a|The service consumer's permission level as defined in xref:../basics/permissio
 |`reqid`
 |`reqid`
 |String 
-a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a|Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 * MUST be set to the lower-case https://www.rfc-editor.org/rfc/rfc9562#section-4[hyphenated string representation] of the UUID (source: RFC 9562, section 4 UUID Format).
 
 |`commstatus`
 |`commstatus`
 |Integer
-a|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+a|Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
-* MUST be set to the link:../up-core-api/uprotocol/v1/ucode.proto[UCode]'s integer value
+* MUST be set to the link:../../up-core-api/uprotocol/v1/ucode.proto[UCode]'s integer value
 
 |`traceparent`
 |https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/extensions/distributed-tracing.md#traceparent[traceparent]
 |String
-|Defined in xref:../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
+|Defined in xref:../../basics/uattributes.adoc[uProtocol Attributes (UAttributes)].
 
 |`payload_encoding_id`
 |`pformat`
 |Integer
 a|The identifier defined in the
-xref:../basics/payload_encoding_registry.adoc[payload-encoding registry].
+xref:../../basics/payload_encoding_registry.adoc[payload-encoding registry].
 
 * `pformat` *MUST* be present if and only if the CloudEvent payload data field
   is present. A payload data field representing a zero-length byte sequence is
@@ -312,7 +312,7 @@ Base64 expansion and readability.
 
 ==== Additional Recommendations
 
-CloudEvents *SHOULD* only be serialized when they are about to be sent via the xref:utransport.adoc#_utransport[UTransport interface]
+CloudEvents *SHOULD* only be serialized when they are about to be sent via the xref:../utransport.adoc#_utransport[UTransport interface]
 
 == Examples
 

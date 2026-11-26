@@ -604,7 +604,7 @@ uProtocol defines bindings to the following communication protocols:
 * xref:bindings/mqtt_5.adoc[*MQTT 5*]
 * xref:bindings/iceoryx2.adoc[*Eclipse iceoryx2*]
 
-uProtocol also defines a xref:someip.adoc#someip-service-translation[service translation to stock SOME/IP services].
+uProtocol also defines a service translation to stock SOME/IP services in xref:bindings/someip.adoc#req-up-transport-someip-service-translation[The SOME/IP service translation].
 A component that performs it is a service translator for that conversion, and not a UTransport implementation.
 
 [#cap-caller-permission-level]
