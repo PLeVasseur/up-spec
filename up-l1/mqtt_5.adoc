@@ -39,11 +39,12 @@ A uProtocol message consists of _UAttributes_ and optional payload. The followin
 [.specitem,oft-sid="dsn~up-transport-mqtt5-attributes-mapping~3",oft-covers="req~utransport-send-preserve-data~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
 An MQTT 5 PUBLISH packet that is used to convey a uProtocol message *MUST*
-contain properties as defined in <<uAttributes Mapping to MQTT 5 PUBLISH Properties>>.
+contain properties as defined in <<mqtt5-uattributes-mapping,uAttributes Mapping to MQTT 5 PUBLISH Properties>>.
 Unless a mapping row defines presence explicitly, a property *MUST* be present
 if and only if the corresponding UMessage attribute has a non-empty value.
 --
 
+[#mqtt5-uattributes-mapping]
 .uAttributes Mapping to MQTT 5 PUBLISH Properties
 [cols="1,2,5"]
 |===
@@ -122,9 +123,9 @@ lifetime from a finite expiry interval.
 
 | _permissionLevel_
 | User Property [key: _7_]
-a| The service consumer's permission level as defined in xref:../up-l2/permissions.adoc#_code_based_access_permissions_caps[Code-Based uEntity Access Permissions (CAPs)]
+a| The service consumer's permission level as defined in xref:../basics/permissions.adoc#_code_based_access_permissions_caps[Code-Based Access Permissions (CAPs)]
 
-* *MUST* be set to the xref:../up-l2/permissions.adoc#_code_based_access_permissions_caps[CAP] value's decimal string representation. 
+* *MUST* be set to the xref:../basics/permissions.adoc#_code_based_access_permissions_caps[CAP] value's decimal string representation. 
 
 | _commStatus_
 | User Property [key: _8_]
