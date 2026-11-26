@@ -194,7 +194,7 @@ In the safety crate, only the platform backends reach the operating system in ru
 [[req-ssr-atomic-width]]
 == No target needs an atomic width it lacks
 
-[.specitem,oft-sid="req~ssr-atomic-width~6",oft-title="No target needs an atomic width it lacks",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-atomic-width~7",oft-title="No target needs an atomic width it lacks",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *The obligation.*
 On every supported target the element *MUST* keep the following without needing an atomic width that the target lacks:
@@ -227,9 +227,10 @@ A private interrupt mask is not a lock shared with another process, and it exclu
 
 *Core code.*
 Core code is the code of the safety crate, and the atomics facade is the one module of it through which its code outside the platform layer reaches atomic operations.
+A pointer-sized atomic integer is an atomic integer whose width follows the target's pointer width on every target; a fixed-width atomic integer is not a pointer-sized atomic integer, even on a target whose pointer width equals its width.
 
 * The element *MUST* have core code outside the platform layer reach every atomic, loads and stores included, through the atomics facade.
-* The element *MUST* keep only lengths and indices, whose meaning does not depend on their width, in core's pointer-sized atomics.
+* The element *MUST* keep only lengths and indices, whose meaning does not depend on their width, in core's pointer-sized atomic integers.
 * On every target, the element *MUST* have core read memory shared with another process in 32-bit words and bytes.
 * The element *MUST* keep core buildable for a 32-bit target without 64-bit atomics.
 
@@ -241,12 +242,15 @@ For such a backend, the integrator supplies that argument, and its other duties 
 Each platform backend that is not shipped with the element and that no integrator supplies (including one that an explicit extension composer provides with its explicit extension package) *MUST* keep, for its mechanism, the rules that this item gives a platform backend of the element, the mechanism's source-level safety argument included, and the element keeps its own rules of this item with it.
 
 *Scoped replacement.*
-Revision 6 of this item replaces revision 5 of this item for the element, for each platform backend of the element (part E4) and for each platform backend that an integrator supplies across all configurations (xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "Replacement"), retiring, reallocating or narrowing no duty of revision 5.
-For each platform backend that is not shipped with the element and that no integrator supplies, the rules that this item gives a platform backend of the element for its mechanism, the mechanism's source-level safety argument included, are new with this revision.
+Revision 7 of this item replaces one rule of revision 6 of this item (xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "Replacement"): the rule in "Core code" that the element keep only lengths and indices, whose meaning does not depend on their width, in core's pointer-sized atomics.
+That rule bound the element alone, and this revision replaces it for the element across all configurations, for the values that core keeps in its atomics.
+The wording of that rule admits a broader reading, under which it reaches an atomic pointer of core as well as core's pointer-sized atomic integers; in this revision, the rule reaches core's pointer-sized atomic integers, as "Core code" defines them, and not an atomic pointer.
+Every other rule of revision 6 of this item is unchanged in this revision for each actor to which both revisions give a duty: the element, each platform backend of the element (part E4), each platform backend that an integrator supplies and each platform backend that is not shipped with the element and that no integrator supplies.
+For each platform backend that is not shipped with the element and that no integrator supplies, the rules that this item gives a platform backend of the element for its mechanism, the mechanism's source-level safety argument included, are those of revision 6 of this item.
 --
 
 [horizontal]
-ID:: `+req~ssr-atomic-width~6+`
+ID:: `+req~ssr-atomic-width~7+`
 ASIL:: B
 Allocated to:: the element; each platform backend of the element (part E4), for its mechanism; each platform backend that an integrator supplies, for its mechanism, other than the mechanism's source-level safety argument; each platform backend that is not shipped with the element and that no integrator supplies (including one that an explicit extension composer provides with its explicit extension package), for its mechanism, the mechanism's source-level safety argument included
 Verification:: gate, test, review
@@ -260,7 +264,7 @@ Verification:: gate, test, review
 * *review*
 ** Each mechanism's source-level safety argument, against every participant that can reach its storage.
 ** The source where the element tells whether a target has 32-bit atomics with compare-and-swap: `+target_has_atomic+`, and no list of targets.
-** Each pointer-sized atomic of core, holding only a length or an index.
+** Each pointer-sized atomic integer of core, holding only a length or an index.
 ** Each read by core of memory shared with another process, in 32-bit words and bytes.
 ** Each mechanism's supported execution contexts, memory ordering, alignment, lifetime and interruption obligations, stated and packaged with its configuration.
 
