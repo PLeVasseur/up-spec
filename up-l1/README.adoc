@@ -541,4 +541,5 @@ uProtocol currently defines bindings to the following communication protocols:
 
 * xref:zenoh.adoc[*Eclipse Zenoh*]
 * xref:mqtt_5.adoc[*MQTT 5*]
+* xref:iceoryx2.adoc[*Eclipse iceoryx2*]
 * xref:someip.adoc[*SOME/IP*]
