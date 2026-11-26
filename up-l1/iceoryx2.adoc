@@ -46,7 +46,7 @@ A uProtocol message consists of _UAttributes_ and optional payload. The followin
 
 [.specitem,oft-sid="dsn~up-transport-iceoryx2-attributes-mapping~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-The value of a iceoryx2 Service that is used to convey a uProtocol message *MUST* have a https://docs.rs/iceoryx2/0.6.1/iceoryx2/service/builder/publish_subscribe/struct.Builder.html#method.user_header[user header] as defined in <<uAttributes Mapping to iceoryx2 user header>>.
+The value of an iceoryx2 Service that is used to convey a uProtocol message *MUST* have a https://docs.rs/iceoryx2/0.6.1/iceoryx2/service/builder/publish_subscribe/struct.Builder.html#method.user_header[user header] as defined in <<uAttributes Mapping to iceoryx2 user header>>.
 --
 
 ==== uAttributes Mapping to iceoryx2 user header
@@ -111,7 +111,7 @@ That encapsulates the following additional properties in Rust:
 
 == iceoryx2 Service Name Structure
 
-Message producers publish messages to the iceory2 inter-process communication using _ServiceNames_. Other clients can then use the same _ServiceName_ to receive the messages that are being published.
+Message producers publish messages to the iceoryx2 inter-process communication using _ServiceNames_. Other clients can then use the same _ServiceName_ to receive the messages that are being published.
 
 The iceoryx2 _ServiceName_ that is used to transfer a uProtocol message is derived from the message's `source` and `sink` attributes.
 
@@ -129,7 +129,7 @@ The ServiceName for sending an _RPC Request_ UMessage **MUST** consist of the fo
 
 `up/[sink.authority]/[sink.ue_type_id]/[sink.ue_instance_id]/[sink.ue_version]/[sink.resource]`
 
-Please refer to <<UUri Encoding Rules>> for details regarding the encoding of the `source` and `sink` UUris into the key expression's segments.
+Please refer to <<UUri Encoding Rules>> for details regarding the encoding of the `source` and `sink` UUris into the ServiceName's segments.
 
 --
 
@@ -269,5 +269,5 @@ The examples below assume that the local entity's authority name is `device1`.
 Note that subscribing to all Request messages pointed to this uEntity for a given invokable method
 means that we **MUST** determine the source in order to send Response messages.
 
-The source UUri **MUST** be determined by deserializing the `uatributes_serialized` in the UProtocolHeader
+The source UUri **MUST** be determined by deserializing the `uattributes_serialized` in the UProtocolHeader
 and then creating the appropriate fully-qualified ServiceName.
