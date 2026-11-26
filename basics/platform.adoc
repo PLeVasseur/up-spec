@@ -16,7 +16,7 @@ Rust-specific mechanisms referenced in these items are cross-linked from xref:..
 [[req-ssr-platform-contract]]
 == Every platform backend of the element keeps the platform's rules
 
-[.specitem,oft-sid="req~ssr-platform-contract~5",oft-title="Every platform backend of the element keeps the platform's rules",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-platform-contract~6",oft-title="Every platform backend of the element keeps the platform's rules",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *Basic rules.*
 Every runtime platform backend of the element *MUST NOT* use the heap, panic, create a thread, or need global state that requires first-use setup.
@@ -55,14 +55,18 @@ A platform backend that an integrator supplies is no part of the element.
 Each such backend *MUST* keep the rules that this item gives a platform backend of the element, and the element keeps its own rules of this item with it.
 The integrator's duties for such a backend, its qualification and the evidence that it keeps these rules, are stated in xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules].
 
+*Another backend outside the element.*
+Each platform backend that is not shipped with the element and that no integrator supplies (including one that an explicit extension composer provides with its explicit extension package) *MUST* keep the rules that this item gives a platform backend of the element, and the element keeps its own rules of this item with it.
+
 *Scoped replacement.*
-Revision 5 of this item replaces revision 4 of this item for each platform backend and for the element across all configurations; transport-specific deliberate-idle wait rechecks and message-TTL expiry rules are governed by their transport-layer items.
+Revision 6 of this item replaces revision 5 of this item for each platform backend and for the element across all configurations (xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "Replacement"), retiring, reallocating or narrowing no duty of revision 5; transport-specific deliberate-idle wait rechecks and message-TTL expiry rules are governed by their transport-layer items.
+For each platform backend that is not shipped with the element and that no integrator supplies, the rules that this item gives a platform backend of the element in the clauses "Basic rules", "Clock reads" and "Stated contracts" are new with this revision, and the rules that this item gives it in "Waits" and "Prefault" are those of revision 5 of this item.
 --
 
 [horizontal]
-ID:: `+req~ssr-platform-contract~5+`
+ID:: `+req~ssr-platform-contract~6+`
 ASIL:: B
-Allocated to:: each platform backend of the element (part E4); each platform backend that an integrator supplies, for the rules that this item gives a platform backend of the element; the element, for reaching the operating system only through a platform backend, for its recheck after its backend's wait returns, for its handling of a failed read or of a reading that steps back, and for having its startup memory made resident
+Allocated to:: each platform backend, for not letting its wait lose a wake that happens after the caller observed the expected value and for having its prefault service make the memory that the service is given resident before it returns; each platform backend of the element (part E4); each platform backend that an integrator supplies, for the rules that this item gives a platform backend of the element; each platform backend that is not shipped with the element and that no integrator supplies (including one that an explicit extension composer provides with its explicit extension package), for the rules that this item gives a platform backend of the element; the element, for reaching the operating system only through a platform backend, for its recheck after its backend's wait returns, for its handling of a failed read or of a reading that steps back, and for having its startup memory made resident
 Verification:: gate, test, review
 * *gate*: no path from the safety crate to the operating system outside its platform backends.
 * *test*
@@ -110,7 +114,7 @@ Because runtime code holds a platform value that offers neither service, a call 
 [[req-ssr-platform-entropy]]
 == Initialization entropy comes from a declared source
 
-[.specitem,oft-sid="req~ssr-platform-entropy~4",oft-title="Initialization entropy comes from a declared source",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-platform-entropy~5",oft-title="Initialization entropy comes from a declared source",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *A named source with a stated contract.*
 Every platform backend of the element *MUST* take its initialization entropy from a source that its supported configuration's package names, with a stated contract:
@@ -130,12 +134,19 @@ The rule for message IDs is stated in xref:uuid.adoc#req-ssr-ids-unique[Message 
 *A custom platform.*
 Each platform backend that an integrator supplies *MUST* keep the rules that this item gives a platform backend of the element, and the element keeps its own rules of this item with it.
 The integrator's duties for such a backend are stated in xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules].
+
+*Another backend outside the element.*
+Each platform backend that is not shipped with the element and that no integrator supplies (including one that an explicit extension composer provides with its explicit extension package) *MUST* keep the rules that this item gives a platform backend of the element, and the element keeps its own rules of this item with it.
+
+*Scoped replacement.*
+Revision 5 of this item replaces revision 4 of this item for each platform backend of the element (part E4), for each platform backend that an integrator supplies and for the element across all configurations (xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "Replacement"), retiring, reallocating or narrowing no duty of revision 4.
+For each platform backend that is not shipped with the element and that no integrator supplies, the rules that this item gives a platform backend of the element are new with this revision.
 --
 
 [horizontal]
-ID:: `+req~ssr-platform-entropy~4+`
+ID:: `+req~ssr-platform-entropy~5+`
 ASIL:: B
-Allocated to:: each platform backend of the element (part E4), and each platform backend that an integrator supplies, for its entropy source, for reporting a failed read and for not replacing it by a fixed value, a test seed or uptime; the element, for its setup check, for its report and refusal of a failed read or a short source, for not replacing either by a fixed value, a test seed or uptime, and for resting no guarantee of non-repetition on entropy and, where it gives one, resting it on a checked persistent construction
+Allocated to:: each platform backend of the element (part E4), and each platform backend that an integrator supplies, for its entropy source, for reporting a failed read and for not replacing it by a fixed value, a test seed or uptime; each platform backend that is not shipped with the element and that no integrator supplies (including one that an explicit extension composer provides with its explicit extension package), for its entropy source, for reporting a failed read and for not replacing it by a fixed value, a test seed or uptime; the element, for its setup check, for its report and refusal of a failed read or a short source, for not replacing either by a fixed value, a test seed or uptime, and for resting no guarantee of non-repetition on entropy and, where it gives one, resting it on a checked persistent construction
 Verification:: test, review
 * *test*
 ** A failed read is reported and refuses setup, through a fault-injected backend.
@@ -183,7 +194,7 @@ In the safety crate, only the platform backends reach the operating system in ru
 [[req-ssr-atomic-width]]
 == No target needs an atomic width it lacks
 
-[.specitem,oft-sid="req~ssr-atomic-width~5",oft-title="No target needs an atomic width it lacks",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-atomic-width~6",oft-title="No target needs an atomic width it lacks",oft-needs="impl,utest",oft-tags="SafetyUpRustCore"]
 --
 *The obligation.*
 On every supported target the element *MUST* keep the following without needing an atomic width that the target lacks:
@@ -225,12 +236,19 @@ Core code is the code of the safety crate, and the atomics facade is the one mod
 *A custom platform.*
 Each platform backend that an integrator supplies *MUST* keep, for its mechanism, the rules that this item gives a platform backend of the element, other than the mechanism's source-level safety argument, and the element keeps its own rules of this item with it.
 For such a backend, the integrator supplies that argument, and its other duties are stated with it, in xref:../safety/elements/up-rust/assumptions-of-use.adoc#aou-seooc-integrator-platform[A custom platform keeps the platform's rules].
+
+*Another backend outside the element.*
+Each platform backend that is not shipped with the element and that no integrator supplies (including one that an explicit extension composer provides with its explicit extension package) *MUST* keep, for its mechanism, the rules that this item gives a platform backend of the element, the mechanism's source-level safety argument included, and the element keeps its own rules of this item with it.
+
+*Scoped replacement.*
+Revision 6 of this item replaces revision 5 of this item for the element, for each platform backend of the element (part E4) and for each platform backend that an integrator supplies across all configurations (xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "Replacement"), retiring, reallocating or narrowing no duty of revision 5.
+For each platform backend that is not shipped with the element and that no integrator supplies, the rules that this item gives a platform backend of the element for its mechanism, the mechanism's source-level safety argument included, are new with this revision.
 --
 
 [horizontal]
-ID:: `+req~ssr-atomic-width~5+`
+ID:: `+req~ssr-atomic-width~6+`
 ASIL:: B
-Allocated to:: the element; each platform backend of the element (part E4), for its mechanism; each platform backend that an integrator supplies, for its mechanism, other than the mechanism's source-level safety argument
+Allocated to:: the element; each platform backend of the element (part E4), for its mechanism; each platform backend that an integrator supplies, for its mechanism, other than the mechanism's source-level safety argument; each platform backend that is not shipped with the element and that no integrator supplies (including one that an explicit extension composer provides with its explicit extension package), for its mechanism, the mechanism's source-level safety argument included
 Verification:: gate, test, review
 * *gate*
 ** Core builds for a bare-metal 32-bit target without 64-bit atomics.
@@ -260,7 +278,7 @@ The element tells by `+target_has_atomic+` because a list of targets can leave o
 [[req-ssr-atomic-windows]]
 == Every narrowed value states its window
 
-[.specitem,oft-sid="req~ssr-atomic-windows~3",oft-title="Every narrowed value states its window",oft-needs="impl,utest,uman",oft-tags="SafetyUpRustCore"]
+[.specitem,oft-sid="req~ssr-atomic-windows~4",oft-title="Every narrowed value states its window",oft-needs="impl,utest,uman",oft-tags="SafetyUpRustCore"]
 --
 *Stated windows.*
 The element *MUST* state, for every value that it keeps narrower than what it stands for, or lets wrap or saturate, its window and the event rate that would defeat it.
@@ -298,16 +316,21 @@ The element *MUST* report a read of a saturated fault counter as saturated, neve
 
 *Further narrowing.*
 Each platform backend of the element whose representation narrows a value further *MUST* list each window that it adds, in the package of each supported configuration that uses it.
+Each platform backend that is not shipped with the element and that no integrator supplies (including one that an explicit extension composer provides with its explicit extension package) and whose representation narrows a value further *MUST* list each window that it adds, in the package of each supported configuration that uses it.
 
 *The narrowed 32-bit-word representation.*
 No supported profile uses the narrowed 32-bit-word representation, which keeps some of these values narrower than their full width: the list above of values kept at full width binds every supported profile, whatever words a representation stores them in.
 Its windows are listed in the example after this item, and its one-word deadline monitor is exercised as a model, as the Verification line states.
+
+*Scoped replacement.*
+Revision 4 of this item replaces revision 3 of this item for the element and for each platform backend of the element (part E4) across all configurations (xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "Replacement"), retiring, reallocating or narrowing no duty of revision 3.
+For each platform backend that is not shipped with the element and that no integrator supplies, the duty to list each window that its representation adds is new with this revision.
 --
 
 [horizontal]
-ID:: `+req~ssr-atomic-windows~3+`
+ID:: `+req~ssr-atomic-windows~4+`
 ASIL:: B
-Allocated to:: the element; each platform backend of the element (part E4), for the windows that its representation adds
+Allocated to:: the element; each platform backend of the element (part E4), for the windows that its representation adds; each platform backend that is not shipped with the element and that no integrator supplies (including one that an explicit extension composer provides with its explicit extension package), for the windows that its representation adds
 Verification:: test, review
 * *test*
 ** Each remaining window's boundary driven through a test hook: a flow counter's wrap, a fault counter's and the deadline count's saturation, a pool retired, after the warning that its lifetime policy states, before its reuse count or a slot's generation wraps, and a route's message-ID generator at the end of its period, refusing as xref:uuid.adoc#req-ssr-ids-unique[Message IDs are unique] states.
