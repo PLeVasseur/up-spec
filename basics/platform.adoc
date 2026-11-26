@@ -244,7 +244,7 @@ Each platform backend that is not shipped with the element and that no integrato
 *Scoped replacement.*
 Revision 7 of this item replaces one rule of revision 6 of this item (xref:../contract-generations.adoc#req-ssr-contract-transition[What a part declares and claims, and when a replacement takes effect], "Replacement"): the rule in "Core code" that the element keep only lengths and indices, whose meaning does not depend on their width, in core's pointer-sized atomics.
 That rule bound the element alone, and this revision replaces it for the element across all configurations, for the values that core keeps in its atomics.
-The wording of that rule admits a broader reading, under which it reaches an atomic pointer of core as well as core's pointer-sized atomic integers; in this revision, the rule reaches core's pointer-sized atomic integers, as "Core code" defines them, and not an atomic pointer.
+In this revision, the rule reaches core's pointer-sized atomic integers, as "Core code" defines them, and not an atomic pointer.
 Every other rule of revision 6 of this item is unchanged in this revision for each actor to which both revisions give a duty: the element, each platform backend of the element (part E4), each platform backend that an integrator supplies and each platform backend that is not shipped with the element and that no integrator supplies.
 For each platform backend that is not shipped with the element and that no integrator supplies, the rules that this item gives a platform backend of the element for its mechanism, the mechanism's source-level safety argument included, are those of revision 6 of this item.
 --
