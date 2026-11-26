@@ -54,7 +54,7 @@ message UAttributes {
     optional UCode commstatus = 8;
 
     // The identifier that a service consumer can use to correlate an RPC Response message with its RPC Request.
-    // This is mandatory for RPC Request messages only.
+    // This is mandatory for RPC Response messages only.
     optional UUID reqid = 9;
 
     // The service consumer's access token.
