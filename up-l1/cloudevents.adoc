@@ -315,7 +315,7 @@ to the UTF-8 text `open`.
 {
     "specversion": "1.0",
     "id": "cf8b1bcd-30bd-43be-a8d3-ad1cde652e10",
-    "source": "//VCU.VIN/body.access/1/door.front_left#Door",
+    "source": "//vcu.vin/1AB/1/1/8001",
     "type": "up-pub.v1",
     "priority": "CS1",
     "ttl": 10000,
@@ -331,8 +331,8 @@ to the UTF-8 text `open`.
 {
     "specversion": "1.0",
     "id": "cf8b1bcd-30bd-43be-a8d3-ad1cde652e10",
-    "source": "//VCU.VIN/body.access/1/door.front_left#Door",
-    "sink": "//VCU.VIN/companion.app/1/status.update",
+    "source": "//vcu.vin/1AB/1/1/8001",
+    "sink": "//vcu.vin/2CD/1/1/0",
     "type": "up-not.v1",
     "pformat": 3,
     "datacontenttype": "application/octet-stream",
@@ -346,8 +346,8 @@ to the UTF-8 text `open`.
 {
     "specversion": "1.0",
     "id": "cf8b1bcd-30bd-43be-a8d3-ad1cde652e10",
-    "source": "//VCU.VIN/MyApp/1/rpc.response",
-    "sink": "//VCU.VIN/body.access/1/rpc.UpdateDoor",
+    "source": "//vcu.vin/3EF/1/1/0",
+    "sink": "//vcu.vin/1AB/1/1/2",
     "type": "up-req.v1",
     "priority": "CS4",
     "ttl": 50000,
@@ -364,8 +364,8 @@ to the UTF-8 text `open`.
 {
     "specversion": "1.0",
     "id": "5b9fe861-8c1c-4899-9b07-ad1cde652e10",
-    "source": "//VCU.VIN/body.access/1/rpc.UpdateDoor",
-    "sink": "//VCU.VIN/MyApp/1/rpc.response",
+    "source": "//vcu.vin/1AB/1/1/2",
+    "sink": "//vcu.vin/3EF/1/1/0",
     "type": "up-res.v1",
     "priority": "CS4",
     "reqid": "cf8b1bcd-30bd-43be-a8d3-ad1cde652e10",
