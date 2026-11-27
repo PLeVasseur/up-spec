@@ -30,8 +30,10 @@ For more information, please refer to https://mqtt.org/
 
 This document defines how MQTT 5 PUBLISH packets can be used to transfer uProtocol messages (UMessages) between uEntities for the following use cases:
 
-1. *uEntity-2-uEntity* (E2E): Communication between uEntities within the same vehicle by means of an _in-vehicle_ MQTT broker.
-2. *Device-2-Device* (D2D): Communication between uEntities in vehicles and a (cloud) back end system by means of an _off-vehicle_ MQTT broker, e.g. running in the back end. MQTT brokers running on cloud infrastructure often have limitations regarding the number of topics that can be subscribed and the number of segments those topics may contain. The mapping for this use case therefore uses a coarser grained topic structure than the one for in-vehicle only communication.
+1. *uEntity-2-uEntity*: Communication between uEntities within the same vehicle by means of an _in-vehicle_ MQTT broker.
+2. *Device-2-Device* (D2D): Communication between uEntities in vehicles and a (cloud) back end system by means of an _off-vehicle_ MQTT broker, e.g. running in the back end. The mapping for this use case uses a coarser grained topic structure than the one for in-vehicle only communication.
+
+NOTE: MQTT itself limits the number of levels in a Topic Name or Topic Filter only through the maximum length of a UTF-8 Encoded String, 65,535 bytes (source: MQTT Version 5.0, edition of 7 March 2019, sections 1.5.4 UTF-8 Encoded String and 4.7.3 Topic semantic and usage). A limit that a particular broker imposes is a matter of that broker's deployment, not of this mapping.
 
 == UMessage Mapping
 
