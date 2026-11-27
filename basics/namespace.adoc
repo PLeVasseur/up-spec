@@ -46,8 +46,6 @@ image::namespace.drawio.svg[Namespace]
 
 |===
 
-NOTE: TODO: Registry of names for uEntities
-
 == uDevice
 
 A device is a logical independent representation of a service bus in different execution environments. Below are some general requirements for deciding when an execution environment should or should not be considered a separate device:

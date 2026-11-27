@@ -537,7 +537,7 @@ Communication protocols like MQTT or HTTP define a specific Protocol Data Unit (
 
 A _communication protocol binding_ defines how the uProtocol Transport Layer API maps to the communication protocol's message exchange pattern(s) and how uProtocol messages are mapped to the protocol's PDU. Many communication protocols distinguish between a message's metadata and the (raw) payload. This is often reflected by the structure of the protocol's PDU. For example, HTTP supports _header_ fields and a _body_ which can be used to convey a uProtocol message's attributes and payload respectively.
 
-uProtocol currently defines bindings to the following communication protocols:
+uProtocol defines bindings to the following communication protocols:
 
 * xref:zenoh.adoc[*Eclipse Zenoh*]
 * xref:mqtt_5.adoc[*MQTT 5*]

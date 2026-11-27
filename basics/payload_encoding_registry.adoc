@@ -95,9 +95,9 @@ deployment-level agreement.
 
 |`0xFFFF`
 |Reserved
-|Reserved for possible future matching on payload-encoding identity. Not
-available for assignment or private use. Structurally valid for preservation;
-producer restrictions are defined in xref:#allocation[Allocation and Origination].
+|Reserved. Not available for assignment or private use. Structurally valid for
+preservation; producer restrictions are defined in
+xref:#allocation[Allocation and Origination].
 |===
 
 This revision defines no wildcard matching behavior. A carrying component

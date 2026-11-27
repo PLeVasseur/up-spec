@@ -24,9 +24,9 @@ Like IP packets, xref:../../basics/umessage.adoc[uProtocol messages] (UMessage) 
 
 NOTE: The terms _dispatcher_ and _router_ will be used synonymously in the remainder of the document.
 
-A UMessage contains data (the payload) as well as meta data describing the nature of the payload. One of the core principles of uProtocol is that the data portion of a UMessage does not need to be examined by message routers, this is very similar to how most Internet standards work today. Only the source uEntity that originally created the message and the sink uEntity(s) which will eventually consume the message need to understand/analyze the payload of the UMessage.
+A UMessage contains data (the payload) as well as meta data describing the nature of the payload. One of the core principles of uProtocol is that the data portion of a UMessage does not need to be examined by message routers, this is very similar to how most Internet standards work today. Only the source uEntity that originally created the message and the sink uEntity(s) which consume the message need to understand/analyze the payload of the UMessage.
 
-To be able to forward/dispatch/route UMessages through the network, we must define specific purpose built uEntities to perform these tasks (ex. Ethernet switches, IP routers, etc...). Platform uEntities that are responsible for event dispatching and implementing the communication layer are described in the sections below. We will elaborate on these specific uEntities in the Platform uEntities section below.
+To be able to forward/dispatch/route UMessages through the network, we define specific purpose built uEntities to perform these tasks (ex. Ethernet switches, IP routers, etc...). Platform uEntities responsible for event dispatching and implementing the communication layer are specified in the sections below.
 
 .Types of Dispatchers
 [#dispatcher-types,width="100%",cols="30%,70%"]
@@ -51,7 +51,7 @@ image::dispatchers.drawio.svg[Dispatchers]
 
 == Requirements
 
-In this section we will elaborate on the requirements of the platform Dispatchers (uBus, uStreamer, etc...) and their role in message delivery. Dispatchers build upon the transport layer delivery requirement assumptions.
+This section specifies the requirements of the platform Dispatchers (uBus, uStreamer, etc.) and their role in message delivery. Dispatchers build upon the transport layer delivery requirement assumptions.
 
 NOTE: These communication layer requirements are still for point-2-point uEntity communication to and from a dispatcher
 
@@ -60,7 +60,7 @@ NOTE: These communication layer requirements are still for point-2-point uEntity
   ** *MUST* attempt to retry transmission of the UMessage. Retry policy is specific to the dispatcher implementation
   ** Dispatcher *MUST NOT* discard UMessages unless either UMessage has expired, or the egress queue is full. UMessages that cannot be delivered are sent to a Dead Letter Office Topic
 
-* *MAY* support additional UMessage delivery policies in general or per topic in the future
+* *MAY* support additional UMessage delivery policies in general or per topic
 * *SHOULD* maintain the (relative) order that messages have been received in, when dispatching messages to receivers
 * *SHOULD* consider a received UMessage's xref:../../basics/upriority.adoc[priority class] in their message dispatching strategy
 * *MAY* batch UMessages when delivering to the Receiver
