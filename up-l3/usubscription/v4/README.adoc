@@ -190,7 +190,7 @@ The uSubscription `Subscribe()` operation *MUST* implement the following respons
 | {uuri_ref}
 | Subscribed topic, as passed to SubscriptionRequest
 
-| xref:SubscriptionStatus[SubscriptionStatus]
+| xref:subscription-status[SubscriptionStatus]
 | Current status of the subscription.
 |===
 --
@@ -931,7 +931,7 @@ Subscription is an information object containing all available information about
 | Subscriber URI of the subscription relationship.
 
 | `status`
-| xref:SubscriptionStatus[SubscriptionStatus]
+| xref:subscription-status[SubscriptionStatus]
 | yes
 | Current status of the subscription.
 
