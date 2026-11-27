@@ -449,7 +449,7 @@ Subscribe (and unsubscribe) to remote topics are handled by RPC calls between uS
 
 [.specitem,oft-sid="req~usubscription-remote-retry-indefinitely~1",oft-needs="impl"]
 ****
-- Timed-out remote commands *MUST* be retried indefinitely until the business logic behind it no longer requires the command to be sent (e.g. because the last entity unsubscribed from a topic that is in state `SUBSCRIPTION_PENDING`).
+- Timed-out remote commands *MUST* be retried indefinitely until the business logic behind it no longer requires the command to be sent (e.g. because the last entity unsubscribed from a topic that is in state `SUBSCRIBE_PENDING`).
 ****
 
 [#reset-operation]
@@ -547,7 +547,7 @@ sequenceDiagram
     uApp->>+local uSubscription: Subscribe(SubscriptionRequest)
 
     alt first subscription
-        local uSubscription-->>uApp: SubscriptionResponse(SUBSCRIPTION_PENDING)
+        local uSubscription-->>uApp: SubscriptionResponse(SUBSCRIBE_PENDING)
         local uSubscription-->>remote uSubscription: Subscribe(SubscriptionRequest)
         alt success
             remote uSubscription-->>local uSubscription: SubscriptionResponse(SUBSCRIBED)
