@@ -295,7 +295,7 @@ registerListener(sourceFilter: UUri, sinkFilter: UUri [0..1], listener: UListene
 
 | sinkFilter
 | xref:../basics/uri.adoc[UUri]
-| The _sink_ address pattern that messages need to match. If omitted, a message must not contain any sink address in order to match.
+| The _sink_ address pattern that messages need to match. What an omitted filter matches is stated in the requirements below.
 
 | listener
 | <<UListener>>
@@ -377,6 +377,11 @@ Implementations *SHOULD* fail invocations of <<register-listener>> with a `UCode
 --
 
 NOTE: Certain uEntities like the xref:../up-l2/dispatchers/README.adoc[uStreamer component] are actually _intended_ to consume and forward messages that originate from other uEntities. However, even in this case a mechanism as described above may be used to restrict the uStreamer's ability to forward only those messages that match its defined forwarding rules.
+
+[.specitem,oft-sid="dsn~utransport-registerlistener-sink-filter~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPush"]
+--
+* A UTransport implementation that supports the _push_ delivery method *MUST* match an omitted sink filter of <<register-listener>> only with a message that does not contain any sink address.
+--
 
 .Registering a Listener
 ====
