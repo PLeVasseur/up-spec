@@ -68,13 +68,13 @@ This special purpose built uEntities are required to implement uProtocol and mus
 
 == Name & Number Registry
 
-uProtocol URIs (UUri) contain a uEntity Identifier (`ue_id`) to refer to a particular service _type_. The `ue_id` is a 32 bit unsigned integer of which the least significant 16 bit are used to indicate the service type.
+uProtocol URIs (UUri) contain a uEntity type identifier (`ue_type_id`) that refers to a particular service _type_, and a uEntity instance identifier (`ue_instance_id`). Both are 16 bit unsigned integers, as xref:../basics/uri.adoc#data-model-definition[the UUri data model] defines them. The uEntity numbers of this registry are `ue_type_id` values.
 
 The following section defines sub-ranges of the 16 bit service type address space to be used for different purposes. This will make sure that custom service types defined in a private scope can co-exist with standard uProtocol service types without ambiguities and interference.
 
 === uEntity ID Ranges
 
-.Reserved ue_ids
+.Reserved ue_type_id ranges
 [width="75%",cols="25%,75%",options="header",]
 |===
 | ID Range | Purpose
