@@ -38,7 +38,7 @@ A language library
 
 [.specitem,oft-sid="dsn~up-language-naming~1",oft-title="Library follows naming pattern",oft-tags="LanguageLibrary"]
 --
-* *MUST* be named according to pattern `up-[LANGUAGE]`, e.g. `up-rust` or `up-python`.
+* *MUST* be named according to pattern `up-[LANGUAGE]`.
 --
 
 [.specitem,oft-sid="dsn~up-language-structure~1",oft-title="Library uses uProtocol namespace",oft-tags="LanguageLibrary"]
@@ -50,6 +50,11 @@ A language library
 --
 * *MUST* contain a `README` file that explains how to build and use the library.
 --
+
+.Names that follow the naming pattern
+====
+The libraries `up-rust` and `up-python` are named according to the pattern `up-[LANGUAGE]`.
+====
 
 === Build
 

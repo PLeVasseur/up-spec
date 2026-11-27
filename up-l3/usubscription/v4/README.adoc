@@ -207,8 +207,13 @@ When a client calls the `Subscribe()` operation, uSubscription service *MUST* pe
 
 [.specitem,oft-sid="req~usubscription-subscribe-multiple~1",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
-When a client calls the `Subscribe()` operation for a topic that it is already subscribed to, uSubscription service *MUST* return a response message containing the current xref:subscription-status[SubscriptionStatus] of this client/topic combination (e.g. `SUBSCRIBED` or `SUBSCRIBE_PENDING`).
+When a client calls the `Subscribe()` operation for a topic that it is already subscribed to, uSubscription service *MUST* return a response message containing the current xref:subscription-status[SubscriptionStatus] of this client/topic combination.
 --
+
+.Status returned for a repeated subscription
+====
+`SUBSCRIBED` or `SUBSCRIBE_PENDING`
+====
 
 [.specitem,oft-sid="req~usubscription-subscribe-no-expiration~1",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
@@ -247,8 +252,13 @@ When a local uSubscription service sends a `Subscribe()` request to a remote uSu
 
 [.specitem,oft-sid="req~usubscription-subscribe-remote-response~1",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
-When a local uSubscription service receives a reply to a remote `Subscribe()` request, the local uSubscription service *MUST* set the xref:subscription-status[SubscriptionStatus] for any client/topic combination involving the subscribed remote topic to the status returned by the remote uSubscription service (e.g. `SUBSCRIBED` or `UNSUBSCRIBED`).
+When a local uSubscription service receives a reply to a remote `Subscribe()` request, the local uSubscription service *MUST* set the xref:subscription-status[SubscriptionStatus] for any client/topic combination involving the subscribed remote topic to the status returned by the remote uSubscription service.
 --
+
+.Status returned by a remote uSubscription service
+====
+`SUBSCRIBED` or `UNSUBSCRIBED`
+====
 
 [.specitem,oft-sid="req~usubscription-subscribe-unsubscribe-pending~1",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
@@ -852,8 +862,13 @@ Remote Subscribe/Unsubscribe requests *MUST* use a timeout of 5 minutes.
 
 [.specitem,oft-sid="req~usubscription-remote-retry-indefinitely~1",oft-needs="impl",oft-tags="uSubscription"]
 --
-Timed-out remote commands *MUST* be retried indefinitely until the business logic behind it no longer requires the command to be sent (e.g. because the last client entity unsubscribed from the remote topic).
+Timed-out remote commands *MUST* be retried indefinitely until the business logic behind it no longer requires the command to be sent.
 --
+
+.A remote command that is no longer required
+====
+Because the last client entity unsubscribed from the remote topic
+====
 
 [#common-objects]
 == Common Objects

@@ -174,7 +174,7 @@ The `ue_version_major` *MUST* be mapped to the _third_ path segment containing t
 
 The `resource_id` *MUST* be mapped to the _fourth_ path segment containing the _upper-case_ link:https://www.rfc-editor.org/rfc/rfc4648#section-8[base16 encoding] of its property value.
 
-Leading zeros (`0`) *SHOULD* be omitted in order to reduce the length of the URI. When creating a UUri from a URI, lower-case base16 encoded values *MUST* be accepted as well in order to improve interoperability. Note that this does not conflict with the rules defined in <<Pattern Matching>>.
+Leading zeros (`0`) *SHOULD* be omitted in order to reduce the length of the URI. When creating a UUri from a URI, lower-case base16 encoded values *MUST* be accepted as well in order to improve interoperability.
 --
 
 === Examples
