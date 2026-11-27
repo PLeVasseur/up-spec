@@ -287,8 +287,11 @@ Registry-range identifiers that are not listed in the table are unassigned.
 its type URL and serialized embedded message.
 |Binary
 |https://www.iana.org/assignments/media-types/application/protobuf[`application/protobuf`]
-|https://protobuf.dev/programming-guides/encoding/[Protobuf wire format] and
-https://protobuf.dev/reference/protobuf/google.protobuf/#any[`google.protobuf.Any`]
+|https://protobuf.dev/programming-guides/encoding/[Protobuf wire format], as documented at
+https://github.com/protocolbuffers/protocolbuffers.github.io/blob/d75b49a09168103d132dcccf7dc9d6e126ba1f98/content/programming-guides/encoding.md[protocolbuffers.github.io, commit `d75b49a`]
+(8 October 2026), and
+https://protobuf.dev/reference/protobuf/google.protobuf/#any[`google.protobuf.Any`], as declared in
+https://github.com/protocolbuffers/protobuf/blob/a79f2d2e9fadd75e94f3fe40a0399bf0a5d90551/src/google/protobuf/any.proto[`any.proto` of protobuf v33.0]
 
 |2
 |Protobuf
@@ -296,7 +299,9 @@ https://protobuf.dev/reference/protobuf/google.protobuf/#any[`google.protobuf.An
 the applicable service or schema contract.
 |Binary
 |https://www.iana.org/assignments/media-types/application/protobuf[`application/protobuf`]
-|https://protobuf.dev/programming-guides/encoding/[Protobuf wire format]
+|https://protobuf.dev/programming-guides/encoding/[Protobuf wire format], as documented at
+https://github.com/protocolbuffers/protocolbuffers.github.io/blob/d75b49a09168103d132dcccf7dc9d6e126ba1f98/content/programming-guides/encoding.md[protocolbuffers.github.io, commit `d75b49a`]
+(8 October 2026)
 
 |3
 |JSON

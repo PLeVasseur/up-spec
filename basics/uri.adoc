@@ -139,7 +139,7 @@ It is often helpful to represent UUris in a textual format, for example when ser
 
 The URIs mapped from UUris use the syntax defined in https://datatracker.ietf.org/doc/html/rfc3986#appendix-A[RFC3986, Appendix A] with a few modifications:
 
-NOTE: The ABNF fragments below only contain the rules that differ from the original definitions in RFC3986.
+NOTE: The ABNF fragments below, written in the notation of https://www.rfc-editor.org/rfc/rfc5234[RFC5234], only contain the rules that differ from the original definitions in RFC3986.
 
 [.specitem,oft-sid="dsn~uri-scheme~1",oft-needs="impl,utest"]
 --
