@@ -1031,7 +1031,7 @@ end %% rect
 
 === Remote publisher, local subscriber
 
-This is an illustration of how remote subscriptions are set up in deployment scenarios where the message publisher is located in a local __Authority A__ transport network segment, whereas the publisher resides on a remote transport network (dubbed __Authority B__).
+This is an illustration of how remote subscriptions are set up in deployment scenarios where the message subscriber is located in a local __Authority A__ transport network segment, whereas the publisher resides on a remote transport network (dubbed __Authority B__).
 
 [mermaid]
 ifdef::env-github[[source,mermaid]]
