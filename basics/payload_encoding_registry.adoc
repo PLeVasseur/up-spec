@@ -33,14 +33,14 @@ The registry answers one question: _how are these payload bytes encoded?_ It
 deliberately does not answer three neighbouring questions, which are governed
 elsewhere:
 
-* whether a particular producer is permitted to put a given identifier on the
-  wire (xref:#allocation[allocation and origination]);
+* whether a particular producer is permitted to put a given identifier in a
+  message (xref:#allocation[allocation and origination]);
 * whether a particular component supports decoding a given encoding
   (xref:#acceptance[carrying a payload versus reading it]); and
 * which concrete message type, schema, or memory layout a payload conforms to
   (xref:#type-identity[encoding identity versus type identity]).
 
-Keeping these separate lets intermediaries preserve identifiers they do not
+Keeping these separate lets carrying components preserve identifiers they do not
 understand, lets deployments extend the space privately, and lets decoders
 reject what they cannot process without making the protocol reject what it can
 carry.
@@ -85,12 +85,12 @@ xref:#allocation[Allocation and Origination].
 |`0xE000` to `0xEFFF`
 |Reserved
 |Not available for assignment or private use. Reserved identifiers are
-structurally valid so that they can be preserved by intermediaries; producer
+structurally valid so that they can be preserved by carrying components; producer
 restrictions are defined in xref:#allocation[Allocation and Origination].
 
 |`0xF000` to `0xFFFE`
 |Private use
-|Never assigned by this registry. Valid on the wire and carry meaning only by
+|Never assigned by this registry. Valid in a message, and carry meaning only by
 deployment-level agreement.
 
 |`0xFFFF`
@@ -191,7 +191,7 @@ reject the payload if it cannot determine or does not support that encoding.
 [#allocation]
 == Allocation and Origination
 
-This section says who may put which identifiers on the wire. These are
+This section says who may put which identifiers in a message. These are
 obligations on producers and deployments, not checks a receiver performs.
 A component that forwards a message it did not create is not its producer.
 
