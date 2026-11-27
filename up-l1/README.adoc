@@ -20,10 +20,13 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview
 
-The Transport & Session Layer is responsible for bidirectional point-2-point communication between uEntities (occasionally abbreviated as `uE`, especially in diagrams). 
+[NOTE]
+====
+The Transport & Session Layer is responsible for bidirectional point-2-point communication between uEntities. 
 The purpose of this layer of uProtocol is to define a common API for sending and receiving messages across different transport protocols like Eclipse Zenoh, MQTT 5 or Android Binder, runtime environments like Android, Linux or MCUs, and programming languages like Java, Rust, Python or C/C++.
 
 This specification defines the transport layer's abstract API which is mapped to supported programming languages by means of uProtocol's xref:../languages.adoc[language specific libraries]. The API is _implemented_ for particular transport protocols and programming languages by _uProtocol Transport Libraries_.
+====
 
 The Transport Layer API is defined by the following class diagram, written in Mermaid class diagram notation.
 
@@ -59,7 +62,7 @@ NOTE: The data types used in the following sections are defined in xref:../basic
 
 == UListener
 
-A uEntity registers a `UListener` with the transport in order to process (incoming) messages that are of interest to the uEntity.
+NOTE: A uEntity registers a `UListener` with the transport in order to process (incoming) messages that are of interest to the uEntity.
 
 [.specitem,oft-sid="dsn~ulistener-declaration~1",oft-needs="impl",oft-tags="LanguageLibrary"]
 --
@@ -69,7 +72,7 @@ Each language library *MUST* declare the UListener interface using corresponding
 [#on-receive]
 === OnReceive
 
-A <<UTransport>> implementation invokes this method for each newly arrived message that matches the criteria specified during <<register-listener,registration of the listener>>.
+NOTE: A <<UTransport>> implementation passes a message to a registered listener through this method. When it does so is stated in the requirements under <<register-listener>>.
 
 [source]
 ----
@@ -87,6 +90,8 @@ onReceive(message: UMessage)
 
 |===
 
+.Passing a Message to a Listener
+====
 [mermaid]
 ifdef::env-github[[source,mermaid]]
 ----
@@ -99,10 +104,11 @@ T-)L : onReceive(UMessage)
 activate L
 deactivate L
 ----
+====
 
 == UTransport
 
-This is the main entry point into a transport's messaging functionality.
+NOTE: This is the main entry point into a transport's messaging functionality.
 
 [.specitem,oft-sid="dsn~utransport-declaration~1",oft-needs="impl",oft-tags="LanguageLibrary"]
 --
@@ -112,7 +118,7 @@ Each language library *MUST* declare the UTransport interface using correspondin
 [#send]
 === Send
 
-Clients use this method to transmit a single message.
+NOTE: Clients use this method to transmit a single message.
 
 [source]
 ----
@@ -165,6 +171,8 @@ NOTE: Certain uEntities like the xref:../up-l2/dispatchers/README.adoc[uStreamer
 NOTE: An implementation *MAY* also handle all messages equally, regardless of priority class.
 --
 
+.Sending a Message
+====
 [mermaid]
 ifdef::env-github[[source,mermaid]]
 ----
@@ -181,11 +189,12 @@ T--)C : error : UStatus
 end
 deactivate T
 ----
+====
 
 [#receive]
 === Receive
 
-Clients use this method to receive a single message matching given filter criteria.
+NOTE: Clients use this method to receive a single message matching given filter criteria.
 
 [source]
 ----
@@ -211,7 +220,7 @@ receive(sourceFilter: UUri, sinkFilter: UUri [0..1]) : UMessage
 
 |===
 
-This method implements the _pull_ <<delivery-method, delivery method>> on top of the underlying communication protocol.
+NOTE: This method implements the _pull_ <<delivery-method, delivery method>> on top of the underlying communication protocol.
 
 UTransport implementations
 
@@ -225,6 +234,8 @@ UTransport implementations
 * *MUST* fail invocations of <<receive>> with a `UCode.NotFound`, if there are no matching messages available. This is also the case if a package data unit cannot be deserialized into a valid xref:../basics/umessage.adoc[uProtocol message]. Transport implementations *SHOULD* use the validation functionality provided by language libraries for this purpose, if available.
 --
 
+.Receiving a Message
+====
 [mermaid]
 ifdef::env-github[[source,mermaid]]
 ----
@@ -244,11 +255,12 @@ T--)C : matching message : UMessage
 end
 deactivate T
 ----
+====
 
 [#register-listener]
 === RegisterListener
 
-Clients use this method to register a listener for messages matching given filter criteria.
+NOTE: Clients use this method to register a listener for messages matching given filter criteria.
 
 [source]
 ----
@@ -273,7 +285,7 @@ registerListener(sourceFilter: UUri, sinkFilter: UUri [0..1], listener: UListene
 | The listener to be registered.
 |===
 
-This API is used to implement the _push_ <<delivery-method, delivery method>> on top of the underlying communication protocol.
+NOTE: This API is used to implement the _push_ <<delivery-method, delivery method>> on top of the underlying communication protocol.
 
 UTransport implementations
 
@@ -352,6 +364,7 @@ NOTE: Certain uEntities like the xref:../up-l2/dispatchers/README.adoc[uStreamer
 --
 
 .Registering a Listener
+====
 [mermaid]
 ifdef::env-github[[source,mermaid]]
 ----
@@ -375,6 +388,7 @@ end
 end
 deactivate T
 ----
+====
 
 Sometimes it's necessary to distinguish the message types which should be listened to.
 
@@ -391,7 +405,7 @@ Sometimes it's necessary to distinguish the message types which should be listen
 [#unregister-listener]
 === UnregisterListener
 
-Clients use this method to unregister a previously registered listener.
+NOTE: Clients use this method to unregister a previously registered listener.
 
 [source]
 ----
@@ -439,6 +453,7 @@ UTransport implementations
 --
 
 .Unregistering a Listener
+====
 [mermaid]
 ifdef::env-github[[source,mermaid]]
 ----
@@ -462,12 +477,16 @@ end
 end
 deactivate T
 ----
+====
 
 == LocalUriProvider
 
+[NOTE]
+====
 A uEntity can use the `LocalUriProvider` to create URIs representing the uEntity's local resources during runtime. This information can then be used in messages to be sent to other uEntities.
 
 A `UTransport` implementation can use the `LocalUriProvider` to determine the uEntity's authority during runtime. This information might be useful for normalizing _local_ URIs passed into the Transport Layer API methods which do not contain an _authority name_.
+====
 
 [.specitem,oft-sid="dsn~localuriprovider-declaration~1",oft-needs="impl",oft-tags="LanguageLibrary"]
 --
@@ -476,7 +495,7 @@ Each language library *MUST* declare the LocalUriProvider interface using corres
 
 === GetAuthority
 
-A uEntity invokes this method to get its own authority.
+NOTE: A uEntity invokes this method to get its own authority.
 
 [.specitem,oft-sid="dsn~localuriprovider-getauthority~1",oft-needs="impl,utest",oft-tags="LocalUriProvider"]
 --
@@ -486,7 +505,7 @@ Implementations *MAY* use any appropriate mechanism to determine the local autho
 
 === GetSource
 
-A uEntity invokes this method to get the address that it expects incoming Notification or RPC Response messages to be sent to.
+NOTE: A uEntity invokes this method to get the address that it expects incoming Notification or RPC Response messages to be sent to.
 
 [.specitem,oft-sid="dsn~localuriprovider-getsource-uri-segments~1",oft-needs="impl,utest",oft-tags="LocalUriProvider"]
 --
@@ -496,7 +515,7 @@ Implementations *MAY* use any appropriate mechanism to determine these values du
 
 === GetResource
 
-A uEntity invokes this method to get a resource specific address to publish messages to or that it expects incoming RPC Request messages to be sent to.
+NOTE: A uEntity invokes this method to get a resource specific address to publish messages to or that it expects incoming RPC Request messages to be sent to.
 
 [.specitem,oft-sid="dsn~localuriprovider-getresource~1",oft-needs="impl,utest",oft-tags="LocalUriProvider"]
 --
@@ -533,7 +552,7 @@ UTransport implementations
 
 == Communication Protocol Binding
 
-Communication protocols like MQTT or HTTP define a specific Protocol Data Unit (PDU) for conveying control information and user data. A uProtocol Transport Library implements the Transport Layer API defined above on top of such a communication protocol.
+NOTE: Communication protocols like MQTT or HTTP define a specific Protocol Data Unit (PDU) for conveying control information and user data. A uProtocol Transport Library implements the Transport Layer API defined above on top of such a communication protocol.
 
 A _communication protocol binding_ defines how the uProtocol Transport Layer API maps to the communication protocol's message exchange pattern(s) and how uProtocol messages are mapped to the protocol's PDU. Many communication protocols distinguish between a message's metadata and the (raw) payload. This is often reflected by the structure of the protocol's PDU. For example, HTTP supports _header_ fields and a _body_ which can be used to convey a uProtocol message's attributes and payload respectively.
 
