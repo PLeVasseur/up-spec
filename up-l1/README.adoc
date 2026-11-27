@@ -141,21 +141,19 @@ On the other hand, unsuccessful completion of this method does not necessarily m
 
 NOTE: The above strategy for retrying failed attempts to send a message results in https://www.cloudcomputingpatterns.org/at_least_once_delivery/[at-least-once delivery]. Recipient(s) of these messages should therefore be https://www.cloudcomputingpatterns.org/idempotent_processor/[Idempotent Processors].
 
-UTransport implementations
-
 [.specitem,oft-sid="req~utransport-send-preserve-data~1",oft-needs="dsn",oft-tags="TransportLayerImpl"]
 --
-* *MUST* preserve all of the message's meta data and payload during transmission
+* A UTransport implementation *MUST* preserve all of the message's meta data and payload during transmission
 --
 
 [.specitem,oft-sid="dsn~utransport-send-error-invalid-parameter~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-* *MUST* fail invocations of <<send>> with a `UCode.InvalidArgument`, if the passed UMessage failed validation.
+* A UTransport implementation *MUST* fail invocations of <<send>> with a `UCode.InvalidArgument`, if the passed UMessage failed validation.
 --
 
 [.specitem,oft-sid="req~utransport-send-prevent-address-spoofing~1",oft-needs="dsn,uman",oft-tags="TransportLayerImpl"]
 --
-* *MUST* provide means to prevent consumers from processing of messages with a xref:../basics/uattributes.adoc#data-model-definition[source address] that does not match the identity of the uEntity that the message being sent originates from.
+* A UTransport implementation *MUST* provide means to prevent consumers from processing of messages with a xref:../basics/uattributes.adoc#data-model-definition[source address] that does not match the identity of the uEntity that the message being sent originates from.
 +
 In general, an implementation of this specification will run in the same process as the uEntity code and thus has no way of objectively asserting the uEntity's authorities _on its own_. However, most transports will support or require clients to provide credentials for authentication as part of establishing a connection or sending messages. In most of these cases, the messaging infrastructure (like MQTT brokers or Eclipse Zenoh) also support the definition of authenticated clients' authorities by means of _Access Control Lists_ (ACLs). These mechanisms *MAY* then be used to implement this requirement.
 +
@@ -166,7 +164,7 @@ NOTE: Certain uEntities like the xref:../up-l2/dispatchers/README.adoc[uStreamer
 
 [.specitem,oft-sid="req~utransport-send-qos-mapping~1",oft-needs="dsn,uman",oft-tags="TransportLayerImpl"]
 --
-* *MUST* document if and how the implementation maps the xref:../basics/upriority.adoc[UMessage Priority Classes] to an existing corresponding mechanism for message prioritization of the underlying transport protocol.
+* A UTransport implementation *MUST* document if and how the implementation maps the xref:../basics/upriority.adoc[UMessage Priority Classes] to an existing corresponding mechanism for message prioritization of the underlying transport protocol.
 +
 NOTE: An implementation *MAY* also handle all messages equally, regardless of priority class.
 --
@@ -222,16 +220,14 @@ receive(sourceFilter: UUri, sinkFilter: UUri [0..1]) : UMessage
 
 NOTE: This method implements the _pull_ <<delivery-method, delivery method>> on top of the underlying communication protocol.
 
-UTransport implementations
-
 [.specitem,oft-sid="dsn~utransport-receive-error-unimplemented~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-* *MUST* fail invocations of <<receive>> with a `UCode.Unimplemented`, if the transport does not support the _pull_ <<delivery-method, delivery method>>.
+* A UTransport implementation *MUST* fail invocations of <<receive>> with a `UCode.Unimplemented`, if the transport does not support the _pull_ <<delivery-method, delivery method>>.
 --
 
 [.specitem,oft-sid="dsn~utransport-receive-error-notfound~2",oft-needs="impl,utest",oft-tags="TransportLayerImplPull"]
 --
-* *MUST* fail invocations of <<receive>> with a `UCode.NotFound`, if there are no matching messages available. This is also the case if a package data unit cannot be deserialized into a valid xref:../basics/umessage.adoc[uProtocol message]. Transport implementations *SHOULD* use the validation functionality provided by language libraries for this purpose, if available.
+* A UTransport implementation *MUST* fail invocations of <<receive>> with a `UCode.NotFound`, if there are no matching messages available. This is also the case if a package data unit cannot be deserialized into a valid xref:../basics/umessage.adoc[uProtocol message]. Transport implementations *SHOULD* use the validation functionality provided by language libraries for this purpose, if available.
 --
 
 .Receiving a Message
@@ -287,29 +283,27 @@ registerListener(sourceFilter: UUri, sinkFilter: UUri [0..1], listener: UListene
 
 NOTE: This API is used to implement the _push_ <<delivery-method, delivery method>> on top of the underlying communication protocol.
 
-UTransport implementations
-
 [.specitem,oft-sid="dsn~utransport-registerlistener-error-unimplemented~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-* *MUST* fail invocations of <<register-listener>> with a `UCode.Unimplemented` if the transport does not support the _push_ <<delivery-method, delivery method>>. In that case, the <<unregister-listener, unregisterListener>> method *MUST* also fail accordingly.
+* A UTransport implementation *MUST* fail invocations of <<register-listener>> with a `UCode.Unimplemented` if the transport does not support the _push_ <<delivery-method, delivery method>>. In that case, the <<unregister-listener, unregisterListener>> method *MUST* also fail accordingly.
 --
 
 [.specitem,oft-sid="req~utransport-registerlistener-max-listeners~1",oft-needs="impl,utest,uman",oft-tags="TransportLayerImplPush"]
 --
-* *MUST* provide means to configure upper limits for
+* A UTransport implementation *MUST* provide means to configure upper limits for
 ** the overall number of listeners that can be registered and
 ** the number of listeners that can be registered per address filter pattern.
-* *SHOULD* use a reasonable default value for both limits.
+* It *SHOULD* use a reasonable default value for both limits.
 --
 
 [.specitem,oft-sid="dsn~utransport-registerlistener-error-resource-exhausted~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPush"]
 --
-* *MUST* fail invocations of <<register-listener>> with a `UCode.ResourceExhausted`, if the maximum number of listeners supported by the transport has already been registered.
+* A UTransport implementation *MUST* fail invocations of <<register-listener>> with a `UCode.ResourceExhausted`, if the maximum number of listeners supported by the transport has already been registered.
 --
 
 [.specitem,oft-sid="dsn~utransport-registerlistener-error-invalid-parameter~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPush"]
 --
-* *MUST* fail invocations of <<register-listener>> with a `UCode.InvalidArgument`, if the source and sink filter arguments' resource IDs do not match any of the entries from the table below:
+* A UTransport implementation *MUST* fail invocations of <<register-listener>> with a `UCode.InvalidArgument`, if the source and sink filter arguments' resource IDs do not match any of the entries from the table below:
 +
 [#valid-source-sink-filters]
 .Valid Source/Sink Resource IDs
@@ -329,32 +323,32 @@ UTransport implementations
 
 [.specitem,oft-sid="dsn~utransport-registerlistener-number-of-listeners~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPush"]
 --
-* *MUST* support registering more than one listener for any given address filter patterns
+* A UTransport implementation *MUST* support registering more than one listener for any given address filter patterns
 --
   
 [.specitem,oft-sid="dsn~utransport-registerlistener-listener-reuse~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPush"]
 --
-* *MUST* support registering the same listener for multiple address filter patterns
+* A UTransport implementation *MUST* support registering the same listener for multiple address filter patterns
 --
 
 [.specitem,oft-sid="dsn~utransport-registerlistener-idempotent~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPush"]
 --
-* *MUST* make sure that multiple calls to <<register-listener>> with the same parameters have the same effect as a single call.
+* A UTransport implementation *MUST* make sure that multiple calls to <<register-listener>> with the same parameters have the same effect as a single call.
 --
 
 [.specitem,oft-sid="dsn~utransport-registerlistener-start-invoking-listeners~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPush"]
 --
-* *MUST* deliver matching messages to a successfully registered listener. This means that for each message that the transport receives _after_ <<register-listener>> has completed successfully, and which matches the listener's source and sink filter criteria according to the xref:../basics/uri.adoc#pattern-matching[UUri pattern matching rules], the transport *MUST* invoke the listener's <<on-receive>> method _at least once_.
+* A UTransport implementation *MUST* deliver matching messages to a successfully registered listener. This means that for each message that the transport receives _after_ <<register-listener>> has completed successfully, and which matches the listener's source and sink filter criteria according to the xref:../basics/uri.adoc#pattern-matching[UUri pattern matching rules], the transport *MUST* invoke the listener's <<on-receive>> method _at least once_.
 --
 
 [.specitem,oft-sid="dsn~utransport-registerlistener-discard-invalid-messages~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPush"]
 --
-* *MUST* discard any inbound transport specific package data unit that cannot be deserialized into a valid xref:../basics/umessage.adoc[uProtocol message]. Transport implementations *SHOULD* use the validation functionality provided by language libraries for this purpose, if available.
+* A UTransport implementation *MUST* discard any inbound transport specific package data unit that cannot be deserialized into a valid xref:../basics/umessage.adoc[uProtocol message]. Transport implementations *SHOULD* use the validation functionality provided by language libraries for this purpose, if available.
 --
 
 [.specitem,oft-sid="req~utransport-registerlistener-prevent-unauthorized-access~1",oft-needs="dsn,uman",oft-tags="TransportLayerImpl"]
 --
-* *MUST* provide means to prevent a uEntity using this transport from consuming messages that it is not authorized to process.
+* A UTransport implementation *MUST* provide means to prevent a uEntity using this transport from consuming messages that it is not authorized to process.
 +
 In general, an implementation of this specification will run in the same process as the uEntity code and thus has no way of objectively asserting the uEntity's authorities _on its own_. However, most transports will support or require clients to provide credentials for authentication as part of establishing a connection or sending messages. In most of these cases, the messaging infrastructure (like MQTT brokers or Eclipse Zenoh) also support the definition of authenticated clients' authorities by means of _Access Control Lists_ (ACLs). These mechanisms *MAY* then be used to implement this requirement.
 +
@@ -430,26 +424,24 @@ unregisterListener(sourceFilter: UUri, sinkFilter: UUri [0..1], listener: UListe
 | The listener to be unregistered.
 |===
 
-UTransport implementations
-
 [.specitem,oft-sid="dsn~utransport-unregisterlistener-error-unimplemented~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-* *MUST* fail invocations of <<unregister-listener>> with a `UCode.Unimplemented`, if the transport does not support the _push_ <<delivery-method>>. In that case, the <<register-listener>> method *MUST* also fail accordingly.
+* A UTransport implementation *MUST* fail invocations of <<unregister-listener>> with a `UCode.Unimplemented`, if the transport does not support the _push_ <<delivery-method>>. In that case, the <<register-listener>> method *MUST* also fail accordingly.
 --
 
 [.specitem,oft-sid="dsn~utransport-unregisterlistener-error-notfound~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPush"]
 --
-* *MUST* fail invocations of <<unregister-listener>> with a `UCode.NotFound`, if no such listener had been registered before.
+* A UTransport implementation *MUST* fail invocations of <<unregister-listener>> with a `UCode.NotFound`, if no such listener had been registered before.
 --
 
 [.specitem,oft-sid="dsn~utransport-unregisterlistener-error-invalid-parameter~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPush"]
 --
-* *MUST* fail invocations of <<unregister-listener>> with a `UCode.InvalidArgument`, if the source and sink filter arguments' resource IDs do not match any of entries from <<valid-source-sink-filters>>.
+* A UTransport implementation *MUST* fail invocations of <<unregister-listener>> with a `UCode.InvalidArgument`, if the source and sink filter arguments' resource IDs do not match any of entries from <<valid-source-sink-filters>>.
 --
 
 [.specitem,oft-sid="dsn~utransport-unregisterlistener-stop-invoking-listeners~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPush"]
 --
-* *MUST NOT* deliver any messages to a successfully unregistered listener.
+* A UTransport implementation *MUST NOT* deliver any messages to a successfully unregistered listener.
 --
 
 .Unregistering a Listener
@@ -542,11 +534,9 @@ uProtocol distinguishes between the following message delivery methods:
 
 |===
 
-UTransport implementations
-
 [.specitem,oft-sid="req~utransport-delivery-methods~1",oft-needs="dsn,uman",oft-tags="TransportLayerImpl"]
 --
-* *MUST* support at least one of _push_ or _pull_ delivery methods and *MAY* support both.
+* A UTransport implementation *MUST* support at least one of _push_ or _pull_ delivery methods and *MAY* support both.
 --
 
 
