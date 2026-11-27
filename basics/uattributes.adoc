@@ -181,10 +181,11 @@ a|The encoding of the message payload, represented by an identifier whose
 meaning is defined in the
 xref:payload_encoding_registry.adoc[payload-encoding registry].
 
-[.specitem,oft-sid="dsn~up-attributes-payload-encoding-id~1",oft-needs="impl,utest",oft-tags="LanguageLibrary"]
+[.specitem,oft-sid="dsn~up-attributes-payload-encoding-id~2",oft-needs="impl,utest",oft-tags="LanguageLibrary"]
 --
 *Presence:* This property and the UMessage's `payload` field *MUST* either both be present or
-both be absent. A present zero-length `payload` field is a present payload.
+both be absent. Payload presence is determined by whether the optional `payload` field is
+explicitly set. An explicitly set zero-length byte sequence is therefore a present payload.
 
 *Range:* If present, the value *MUST* be between `0x0000` and `0xFFFF`.
 Message validation *MUST NOT* reject it because the identifier is reserved,
