@@ -48,8 +48,6 @@ If you would like to contribute to uProtocol to develop a new language library o
 
 Implementers of the uProtocol specification are encouraged to use link:https://github.com/itsallcode/openfasttrace[OpenFastTrace] (OFT) for making sure that they actually cover all requirements from the specification that are relevant for the implemented component.
 
-The link:https://github.com/eclipse-uprotocol/ci-cd[uProtocol CI/CD repository] contains a reusable GitHub Action workflow for link:https://github.com/eclipse-uprotocol/ci-cd/.github/workflows/trace-requirements.yaml[tracing requirements] which can be used for that purpose. The link:https://github.com/eclipse-uprotocol/up-rust[uProtocol Rust Language Library] also makes use of this workflow in its link:https://github.com/eclipse-uprotocol/up-rust/.github/workflows/nightly.yaml[nightly build] and can serve as a blueprint.
-
 The uProtocol specification documents contain a lot of requirements that are defined as OFT specification items, which cover all aspects of uProtocol. In most cases, only of a subset of these requirements will be relevant/applicable for specific components. In order to make it easier for component developers to filter out these relevant requirements, the specification items that define more specific aspects of uProtocol have been _tagged_ with corresponding labels. When running OpenFastTrace to trace the requirements, these labels can be used to filter out the relevant specification items.
 
 .OpenFastTrace Specification Item Tags
