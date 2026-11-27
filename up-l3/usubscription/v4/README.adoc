@@ -332,7 +332,6 @@ unsubscribe(topic: UUri)
 NOTE: Clients use this operation to unsubscribe from a topic. 
 
 * Unsubscribing from a topic always succeeds from the client's point of view.
-* Calling this endpoint also unregisters the client from receiving any future change notifications regarding the subscription.
 
 [.specitem,oft-sid="req~usubscription-unsubscribe-method_id~1",oft-needs="dsn,impl,utest",oft-tags="uSubscription"]
 --
