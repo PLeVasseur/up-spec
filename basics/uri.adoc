@@ -22,10 +22,12 @@ SPDX-License-Identifier: Apache-2.0
 == Overview 
 
 NOTE: uProtocol uses https://datatracker.ietf.org/doc/html/rfc3986[Uniform Resource Identifiers] (URI) to uniquely identify (and/or address) resources such as devices,
-software components, topics, methods, etc on a computer network. https://datatracker.ietf.org/doc/html/rfc3986[RFC3986] defines the structure of a URI as follows:
+software components, topics, methods, etc on a computer network.
 
-.URI
-image::rfc3986.png[RFC3986 URI]
+https://datatracker.ietf.org/doc/html/rfc3986#section-3[RFC3986, Section 3] defines the structure of a URI as follows:
+
+.Illustration of the generic URI syntax of RFC3986, Section 3
+image::uri-syntax.svg["Syntax diagram of a URI: a scheme and a colon; optionally two slashes, then optionally user information and an at sign, a host, and optionally a colon and a port; a path; optionally a question mark and a query; optionally a number sign and a fragment", align="center"]
 
 Using this terminology, a uProtocol URI (UUri) can be structured like this:
 
