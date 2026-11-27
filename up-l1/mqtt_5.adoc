@@ -66,7 +66,7 @@ a| The uProtocol version being used
 | User Property [key: _1_]
 a| The unique identifier of the message
 
-* *MUST* be set to the https://www.rfc-editor.org/rfc/rfc4122.html#section-3[hyphenated string representation] of the UUID.
+* *MUST* be set to the lower-case https://www.rfc-editor.org/rfc/rfc9562#section-4[hyphenated string representation] of the UUID (source: RFC 9562, section 4 UUID Format).
 
 | _type_
 | User Property [key: _2_]
