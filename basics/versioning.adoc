@@ -18,7 +18,7 @@ SPDX-FileType: DOCUMENTATION
 SPDX-License-Identifier: Apache-2.0
 ----
 
-This section specifies the versioning rules for protocol artifacts and components.
+NOTE: This section specifies the versioning rules for protocol artifacts and components.
 
 == Format
 

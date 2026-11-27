@@ -18,7 +18,7 @@ SPDX-FileType: DOCUMENTATION
 SPDX-License-Identifier: Apache-2.0
 ----
 
-In the following section we will outline fundamental rules for naming conventions for uProtocol things like uDomains, uDevices, and uEntities, these names are used to address the uThings by distributed apps and services.
+NOTE: In the following section we will outline fundamental rules for naming conventions for uProtocol things like uDomains, uDevices, and uEntities, these names are used to address the uThings by distributed apps and services.
 
 == uEntities
 

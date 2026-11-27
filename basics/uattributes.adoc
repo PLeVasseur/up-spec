@@ -21,12 +21,12 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview 
 
-UAttributes contain meta data describing a particular message's purpose, content and processing requirements.
+NOTE: UAttributes contain meta data describing a particular message's purpose, content and processing requirements.
 
 [#data-model-definition]
 == Data Model
 
-The diagram below shows the UAttributes class and its properties using UML2 notation.
+The class diagram below shows the UAttributes class and its properties.
 
 NOTE: The UCode, UUri and UUID classes are defined in detail in xref:error_model.adoc[Error Model Specification], xref:uri.adoc[UUri Specification] and xref:uuid.adoc[UUID Specification] respectively.
 
