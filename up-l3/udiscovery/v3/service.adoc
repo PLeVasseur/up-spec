@@ -53,7 +53,7 @@ In the following section we will elaborate on the requirements for implementing 
 
 === FindServices()
 
-A client uEntity invokes `FindServices()` to get meta data (authority, version, instance ID) of (deployed) service instances of a given type.```
+NOTE: A client uEntity invokes `FindServices()` to get meta data (authority, version, instance ID) of (deployed) service instances of a given type.
 
 [.specitem,oft-sid="dsn~discovery-findservices-error-invalid~1",oft-needs="impl,test"]
 --
@@ -74,7 +74,7 @@ A client uEntity invokes `FindServices()` to get meta data (authority, version, 
 
 === GetServiceTopics()
 
-`GetServiceTopics()` is used to fetch metadata about one or more topics based on the passed `UUri`. Clients call this API to get additional information about the topic(s) such as the message format, id, permission level, etc.
+NOTE: `GetServiceTopics()` is used to fetch metadata about one or more topics based on the passed `UUri`. Clients call this API to get additional information about the topic(s) such as the message format, id, permission level, etc.
 
 [.specitem,oft-sid="dsn~discovery-getservicetopics-error-invalid~1",oft-needs="impl,test"]
 --
@@ -119,8 +119,9 @@ UDiscovery services perform a recursive search when the local or domain instance
 --
 
 
-.Recursive Search to Central
 [#recursive-search-central]
+.Recursive Search to Central
+====
 [mermaid]
 ifdef::env-github[[source,mermaid]]
 ----
@@ -133,13 +134,16 @@ Central-UDiscovery -->> Domain-UDiscovery: FindServicesResponse
 Domain-UDiscovery -->> Local-UDiscovery: FindServicesResponse
 Local-UDiscovery -->> Client: FindServicesResponse
 ----
+====
 
 
 == Replication API
 
 
 === SetServiceTopics()
-The `SetServiceTopics()` API is used by uDiscovery service instances to add, update or remove information along branches in the uDiscovery instance tree. The `SetServiceTopicsRequest` message contains a list of `UServiceTopicInfo` and corresponding `ttl` for when the info will expire. The `SetServiceTopicsResponse` message indicates the outcome of the operation. 
+The `SetServiceTopics()` API is used by uDiscovery service instances to add, update or remove information along branches in the uDiscovery instance tree.
+
+NOTE: The `SetServiceTopicsRequest` message contains a list of `UServiceTopicInfo` and corresponding `ttl` for when the info will expire. The `SetServiceTopicsResponse` message indicates the outcome of the operation. 
 
 
 * link:../../../languages.adoc[uProtocol Language Libraries] *MUST NOT* implement the client-side of {replicator-proto-ref} API as these APIs are only used internally by uDiscovery business logic.
@@ -174,6 +178,8 @@ To replicate removal of `UServiceTopic` metadata:
 * *MUST* return `UCode.NotFound` if no topic matching the URI was found when the `UServiceTopic` is being removed (i.e. `ttl=0`).
 --
 
+.Replication started by a trusted OTA uEntity
+====
 <<udiscovery-replication-design>> below illustrates how data is replicated using a trusted OTA (_over-the-air_) uEntity that is responsible for installing or removing applications for said device. 
 
 .Replication API Design
@@ -192,6 +198,7 @@ Domain-UDiscovery -->> Local-UDiscovery: SetServiceTopicsResponse
 Domain-UDiscovery ->> Central-UDiscovery: SetServiceTopics()
 Central-UDiscovery -->> Domain-UDiscovery: SetServiceTopicsResponse
 ----
+====
 
 
 == Implementation Consideration
@@ -219,6 +226,8 @@ It is possible the information in domain or central instances might become out o
 If the reconciliation fails, the service *MUST* log the error and continue to use the current cached data.
 --
 
+.A domain instance reconciling with a local instance
+====
 <<udiscovery-reconciliation>> below provides an example of the domain instance reconciling with local instance and then propagating the change to the central instance. In the example the reconciliation (determining if the data is out of sync or not) happens in the `ReconcileData()` function.
 
 .Reconciliation Example
@@ -239,5 +248,6 @@ Domain-UDiscovery ->> Domain-UDiscovery: ReconcileData()
 Domain-UDiscovery ->> Central-UDiscovery: SetServiceTopics()
 Central-UDiscovery -->> Domain-UDiscovery: SetServiceTopicsResponse
 ----
+====
 
 
