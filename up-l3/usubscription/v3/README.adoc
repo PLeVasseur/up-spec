@@ -23,10 +23,13 @@ SPDX-License-Identifier: Apache-2.0
 ----
 
 ****
-This specification defines formal requirements for the implementation of a uProtocol uSubscription service. Requirements are highlighted by a frame, like this.
+This specification defines formal requirements for the implementation of a uProtocol uSubscription service. Normative requirement blocks are marked with the `specitem` role in the source and displayed in shaded frames. A framed block labelled Example is an illustration, not a requirement.
 ****
 
 == Overview
+
+[NOTE]
+====
 
 The https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern[Publish & Subscribe (_pubsub_) architecture pattern] allows the decoupling of senders and receives of messages on the levels of code-dependency, sender-receiver relationship, deployment context, network topology and even temporal coincidence. There exist a large number of implementations of this pattern for all sorts of domains and requirements, both in open source and proprietary development models.
 
@@ -39,6 +42,7 @@ A distributed publish-subscribe network requires the following capabilities to b
 - xref:../../udiscovery/v3/README.adoc[discoverability] of available publishers/publications
 - cross-system tracking of subscriptions, especially to/from remote systems (this specification)
 - option for xref:../../utwin/v2/README.adoc[local caching and temporally decoupled access] to published data
+====
 
 The remainder of this document defines the use cases, interfaces, state machines and application flows to support cross-system tracking of subscriptions, especially to/from remote systems.
 
@@ -51,16 +55,22 @@ In the local case a client subscribes to messages published by a uEntity (might 
 
 In contrast, a remote subscription scenario involves publishers and subscribers using different pubsub implementations and/or being located on different systems. For instance, a client interacting with a co-located MQTT broker to subscribe to messages that originate from a low-level mechatronics device, being published via SOME/IP.
 
+[NOTE]
+====
 To be workable, the remote subscription scenario requires a dispatcher (`uStreamer`) which is able to forward published messages from one pubsub network to another. To do so intelligently, i.e. only forward traffic that actually is requested by a remote entity, some form of bookkeeping is needed to keep track of local and remote subscriptions, synchronize remote subscription requests with their bookkeeping counterpart on the remote system, and serve as information source for subscription states for the dispatcher entity. 
 
 The `uSubscription` service component provides this bookkeeping capability.  
+====
 
 [#usubscription-publisher]
 == Publisher
 
+[NOTE]
+====
 A _Publisher_ is a uEntity that sends messages to a _topic_, thus making the information available to other uEntities interested in the topic. Publishers typically use the {communication_layer_api_ref} for this purpose. 
 
 A Publisher in a uProtocol network usually does not perform any additional actions beyond what is necessary to publish messages to the transport it is connected to.
+====
 
 [#usubscription-subscriber]
 == Subscriber
@@ -292,12 +302,12 @@ A topic identifies the message resource that a link:#usubscription-subscriber[Su
 Topic URIs used in uSubscription APIs *MUST* contain a specific (non-wildcard) `ue_version_major`.
 ****
 
-NOTE: As the major version is part of the topic URI, a change in the major version requires Subscribers to (re-)subscribe to the updated topic URI in order to keep receiving messages for that topic.
+NOTE: As the major version is part of the topic URI, a change in the major version changes the topic URI. The item under <<usubscription-subscriber,Subscriber>> states how Subscribers indicate the topics that they subscribe to.
 
 [#usubscription-states]
 == Subscription States
 
-A subscription state defines the relationship between exactly one subscriber and one topic. In this section we elaborate on the states that a this relationship can take, based on uSubscription service API calls from uEntities. 
+NOTE: A subscription state defines the relationship between exactly one subscriber and one topic. In this section we elaborate on the states that a this relationship can take, based on uSubscription service API calls from uEntities. 
 
 The following diagram illustrates the subscriber-topic states, and the transitions between them.
 
@@ -371,7 +381,7 @@ a|* Received a (positive) response from the remote uSubscription service
 
 |===
 
-NOTE: The Action column in the above table describes that action to be taken by a uSubscription service instance to effect a specific state transition. 
+NOTE: The items under <<subscribe-operation,Subscribe()>> and <<unsubscribe-operation,Unsubscribe()>> state the requests in the Action column of the table above.
 
 == Subscription Change Notifications
 
@@ -495,6 +505,8 @@ When receiving a `Reset()` call from a source that is not another uSubscription 
 
 In the following section, we will elaborate on the various subscription flows for local and remote topics. When a consumer subscribes to a remote topic, it is the responsibility of the (local) uSubscription service to relay the subscription request to the remote uSubscription service as can be seen in the sequence diagrams below.
 
+[NOTE]
+====
 There are different types of messages passed between uEntities (_Request_/_Response_, _Publish_, _Notify_), this is how they are represented in the following sequence diagrams:
 
 [mermaid]
@@ -515,6 +527,7 @@ sequenceDiagram
     App1--)App2: Notify
     end
 ----
+====
 
 === Subscription
 
@@ -523,6 +536,7 @@ Subscription flow will show how a subscriber can subscribe to a topic when uApp 
 ==== Within a uDevice
 
 .Local Subscription Flow
+====
 [mermaid]
 ifdef::env-github[[source,mermaid]]
 ----
@@ -541,10 +555,12 @@ sequenceDiagram
         uSubscription-->>-uApp: SubscriptionResponse(UNSUBSCRIBED)
     end
 ----
+====
 
 ==== Between uDevices
 
 .Remote Subscription Flow
+====
 [mermaid]
 ifdef::env-github[[source,mermaid]]
 ----
@@ -580,6 +596,7 @@ sequenceDiagram
     end
     uEntity->>+remote uSubscription: UnregisterForNotification()
 ----
+====
 
 To allow the reverse flow (publication) to be properly multicast to local subscribers by the local disaptcher when it queries the local uSubscription for a list of local subscribers, remote subscriptions are always performed between uSubscription services using their own uEntity identifiers (`core.usubscription`). 
 
@@ -588,6 +605,7 @@ To allow the reverse flow (publication) to be properly multicast to local subscr
 ==== Within a uDevice
 
 .Local Unsubscribe Flow
+====
 [mermaid]
 ifdef::env-github[[source,mermaid]]
 ----
@@ -602,10 +620,12 @@ sequenceDiagram
     uSubscription-->>uApp: Ok
     uSubscription--)uApp: Update(UNSUBSCRIBED)
 ----
+====
 
 ==== Between uDevices
 
 .Remote Unsubscribe Flow
+====
 [mermaid]
 ifdef::env-github[[source,mermaid]]
 ----
@@ -639,5 +659,6 @@ sequenceDiagram
     end
     uEntity->>+remote uSubscription: UnregisterForNotification()
 ----
+====
 
 To allow the reverse flow (publication) to be properly multicast to local subscribers by the local disaptcher when it queries the local uSubscription for a list of local subscribers, remote subscriptions are always performed between uSubscription services using their own uEntity identifiers (`core.usubscription`). 
