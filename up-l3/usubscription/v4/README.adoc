@@ -534,10 +534,10 @@ Topic UURIs passed to uSubscription operations must
 * be a valid {uuri_ref} and
 * contain a `resource_id` that is within range `[0x8000, 0xFFFE]` and
 * not contain an _empty_ or _wildcard_ `authority_name` and
-* not contain a _wildcard_ _service ID_ (_least_ significant 16 bits of `ue_id`) and
+* not contain a _wildcard_ _service ID_ (`ue_type_id`) and
 * not contain a _wildcard_ `resource_id`.
 
-It is permissible for topic UURIs to contain wildcard _service instance ID_ (_most_ significant 16 bits of `ue_id`). For example, imagine the case where a client wants to "subscribe to the _door open_ event, from any instance of _door_ in the vehicle".
+It is permissible for topic UURIs to contain wildcard _service instance ID_ (`ue_instance_id`). For example, imagine the case where a client wants to "subscribe to the _door open_ event, from any instance of _door_ in the vehicle".
 
 [#usubscription-states]
 == Subscription States
