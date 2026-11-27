@@ -51,7 +51,7 @@ The remainder of this document defines the use cases, interfaces, state machines
 
 In a distributed pubsub network, there exist two subscription scenarios: local subscriptions and remote subscriptions. 
 
-In the local case a client subscribes to messages published by a uEntity (might be abbreviated as `uE`, especially in diagrams) on the same transport network, both parties using the same pubsub implementation. For instance, imagine an MQTT broker used by publishers and subscribers, all deployed within the same system context.
+In the local case a client subscribes to messages published by a uEntity on the same transport network, both parties using the same pubsub implementation. For instance, imagine an MQTT broker used by publishers and subscribers, all deployed within the same system context.
 
 In contrast, a remote subscription scenario involves publishers and subscribers using different pubsub implementations and/or being located on different systems. For instance, a client interacting with a co-located MQTT broker to subscribe to messages that originate from a low-level mechatronics device, being published via SOME/IP.
 
@@ -384,8 +384,6 @@ a|* Received a (positive) response from the remote uSubscription service
 NOTE: The items under <<subscribe-operation,Subscribe()>> and <<unsubscribe-operation,Unsubscribe()>> state the requests in the Action column of the table above.
 
 == Subscription Change Notifications
-
-When the subscription state of a client-topic relationship changes, uSubscription service sends subscription change notification messages to the client, as well as to any uEntities that have explicitly registered to receive such messages. 
 
 [.specitem,oft-sid="dsn~usubscription-change-notification-type~1",oft-needs="impl,utest"]
 ****

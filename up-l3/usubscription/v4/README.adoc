@@ -148,7 +148,6 @@ subscribe(topic: UUri, expiration: Instant[0..1], samplePeriod: UInt32[0..1]) : 
 NOTE: Clients use this operation to subscribe to a topic. 
 
 * Returns the current status of the requested subscription. 
-* Calling this endpoint also registers the subscribing client to receive subscription change notifications when the subscription status changes.
 
 [.specitem,oft-sid="req~usubscription-subscribe-method_id~1",oft-needs="dsn,impl,utest",oft-tags="uSubscription"]
 --
@@ -420,7 +419,6 @@ fetchSubscriptions(topicFilter: UUri[0..1], subscriberFilter: UUri[0..1]) : Subs
 ----
 
 NOTE: Clients use this operation to get details about subscriptions that are currently tracked by uSubscription service.
-Clients can provide {uuri_ref}s to filter subscriptions by topic and/or subscriber. Filter UURIs may contain wildcards. 
 
 [.specitem,oft-sid="req~usubscription-fetch-subscriptions-method_id~1",oft-needs="dsn,impl,utest",oft-tags="uSubscription"]
 --
