@@ -65,7 +65,7 @@ class SubscriptionStatus {
     <<enumeration>>
     UNSUBSCRIBED
     SUBSCRIBE_PENDING
-    UNSUBSCRIBED
+    SUBSCRIBED
     UNSUBSCRIBE_PENDING
 }
 
