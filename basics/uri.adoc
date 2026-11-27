@@ -80,6 +80,15 @@ Each link:../languages.adoc[uProtocol Language Library] *MUST* implement the dat
 Each link:../languages.adoc[uProtocol Language Library] *MUST* support writing and reading of an instance of the data model to/from a protobuf as defined in link:../up-core-api/uprotocol/v1/uri.proto[uri.proto].
 --
 
+[.specitem,oft-sid="dsn~uri-schema-generation~1",oft-needs="impl,utest"]
+--
+Each link:../languages.adoc[uProtocol Language Library] that reads or writes a UUri in its protobuf form *MUST* fix the generation of the UUri descriptor that it uses before it interprets any byte of a serialized UUri: from fixed setup context, such as the descriptor that its build selects or its setup, or from a selector that it can read without that descriptor.
+It *MUST NOT* choose a generation by trying to decode the bytes under more than one descriptor and keeping one that succeeds, and *MUST NOT* choose one from a package name, a payload encoding identifier or an envelope's version.
+A decoding that succeeds selects no generation: the bytes `10 01 18 01 20 01` decode under the ancestor descriptor of the UUri message as type 1, instance 0, version 1 and resource 1, and under the current descriptor as type 1, instance 1, version 1 and resource 0.
+A range check accepts some encodings of an earlier generation and rejects others, so it detects no generation either.
+A library *MUST* read bytes that were written under another generation only through an explicitly selected adapter whose conversion rules are stated, and *MUST NOT* let that conversion supply a default for a field that the bytes do not hold, such as an instance.
+--
+
 The remainder of this section defines the requirements for the data model by means of _invariants_ which must hold true at all times. Additionally, there are some _predicates_ that can be used by uEntities to determine if a UUri contains the information they are interested in. Both the invariants and the predicates are (formally) defined by means of link:https://www.omg.org/spec/OCL/2.4[Object Constraint Language] (OCL) expressions on the UUri data model. The link:https://modeling-languages.com/ocl-tutorial/[OCL Tutorial] provides an overview of the basic concepts used in the definitions.
 
 
