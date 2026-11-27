@@ -3,7 +3,7 @@
 :sectnums:
 :source-highlighter: highlight.js
 :client-proto-ref: link:../../../up-core-api/uprotocol/core/udiscovery/v3/udiscovery.proto[udiscovery.proto]
-:replicator-proto-ref: link:../../../up-core-api/uprotocol/core/udiscovery/v3/udiscovery.proto[udiscovery_replicator.proto]
+:replicator-proto-ref: link:../../../up-core-api/uprotocol/core/udiscovery/v3/udiscovery_replicator.proto[udiscovery_replicator.proto]
 
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
@@ -142,7 +142,7 @@ Local-UDiscovery -->> Client: FindServicesResponse
 The `SetServiceTopics()` API is used by uDiscovery service instances to add, update or remove information along branches in the uDiscovery instance tree. The `SetServiceTopicsRequest` message contains a list of `UServiceTopicInfo` and corresponding `ttl` for when the info will expire. The `SetServiceTopicsResponse` message indicates the outcome of the operation. 
 
 
-* link:../languages.adoc[uProtocol Language Libraries] *MUST NOT* implement the client-side of {replicator-proto-ref} API as these APIs are only used internally by uDiscovery business logic.
+* link:../../../languages.adoc[uProtocol Language Libraries] *MUST NOT* implement the client-side of {replicator-proto-ref} API as these APIs are only used internally by uDiscovery business logic.
 
 To replicate new or updated `UServiceTopic` metadata:
 [.specitem,oft-sid="dsn~discovery-setservicetopic-update~1",oft-needs="impl,test"]

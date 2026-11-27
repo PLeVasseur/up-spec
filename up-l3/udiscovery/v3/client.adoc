@@ -3,7 +3,7 @@
 :sectnums:
 :source-highlighter: highlight.js
 :discovery-proto-ref: xref:../../../up-core-api/uprotocol/core/udiscovery/v3/udiscovery.proto[udiscovery.proto]
-:up-l2-ref: xref:up-l2/README.adoc[uProtocol Communication Layer (uP-L2) API]
+:up-l2-ref: xref:../../../up-l2/README.adoc[uProtocol Communication Layer (uP-L2) API]
 
 
 The key words "*MUST*", "*MUST NOT*", "*REQUIRED*", "*SHALL*", "*SHALL NOT*", "*SHOULD*", "*SHOULD NOT*", "*RECOMMENDED*", "*MAY*", and "*OPTIONAL*" in this document are to be interpreted as described in https://www.rfc-editor.org/info/bcp14[IETF BCP14 (RFC2119 & RFC8174)]
@@ -46,7 +46,7 @@ The client facing APIs of uDiscovery provide the means for uEntities to discover
 
 [.specitem,oft-sid="dsn~discovery-client-apis~1",oft-needs="impl"]
 --
-Each link:../languages.adoc[uProtocol Language Library] *MUST* implement the client-side APIs of {discovery-proto-ref} using the {up-l2-ref} RpcClient. 
+Each link:../../../languages.adoc[uProtocol Language Library] *MUST* implement the client-side APIs of {discovery-proto-ref} using the {up-l2-ref} RpcClient. 
 --
 
 === FindServices()

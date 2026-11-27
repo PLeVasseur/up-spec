@@ -205,7 +205,7 @@ The examples below can be used as test vectors for implementing client libraries
 
 [.specitem,oft-sid="req~uri-serialization~1",oft-needs="impl,utest"]
 --
-Each link:../languages.adoc[uProtocol Language Library] *MUST* provide means to serialize UUris to the <<_mapping_to_uri, URI format>> and vice versa. A concrete implementation should follow common practices for the particular programming language.
+Each link:../languages.adoc[uProtocol Language Library] *MUST* provide means to serialize UUris to the <<uri-definition, URI format>> and vice versa. A concrete implementation should follow common practices for the particular programming language.
 --
 
 For example, a Java library might implement a `UriSerializer` class providing corresponding _static_ methods.
