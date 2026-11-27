@@ -25,7 +25,3 @@ For more information about the generated code and extensions to the generated co
 * https://github.com/eclipse-uprotocol/up-cpp[up-cpp]
 * https://github.com/eclipse-uprotocol/up-python[up-python]
 * https://github.com/eclipse-uprotocol/up-kotlin[up-kotlin]
-
-
-If you want to validate a change to a proto, simply run the command `mvn verify -f "pom.xml"`
-
