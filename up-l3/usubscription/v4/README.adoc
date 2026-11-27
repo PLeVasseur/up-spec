@@ -803,7 +803,7 @@ When a client invokes the uSubscription service's `Reset()` operation, uSubscrip
 
 [.specitem,oft-sid="req~usubscription-reset-only-usubscription~1",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
-When receiving a `Reset()` call from a source that is not another uSubscription services (i.e. from source URIs where uEntity type does not equal `0x0`), uSubscription service *MUST* return a failure status message with {ucode_link} `PermissionDenied`.
+When receiving a `Reset()` call from a source that is not another uSubscription services (i.e. from source URIs where uEntity type does not equal `0x0`), uSubscription service *MUST* return a failure status message with {ucode_proto_ref} `PermissionDenied`.
 --
 
 [discrete]
