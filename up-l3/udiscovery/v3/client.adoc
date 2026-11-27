@@ -80,10 +80,10 @@ The FindServices() API is used to find service instances matching search criteri
 |===
 | URI | `recursive` | Description
 
-| `up:/FFFF1234/FF/0` | false | Find local instances & versions of service 1234.
-| `up://*/FFFF1234/FF/0` | false | Find instances & versions of service 1234 that are known to the local uDiscovery service instance.
-| `up://*/FFFF0004/FF/0` | true | Find instances & versions of service 4 that are known to the local uDiscovery service instance or any of its parent nodes.
-| `up://*/11234/2/0` | false | Find the authority_name for version 2 & instance 1 of service 1234.
+| `up:/1234/FFFF/FF/0` | false | Find local instances & versions of service 1234.
+| `up://*/1234/FFFF/FF/0` | false | Find instances & versions of service 1234 that are known to the local uDiscovery service instance.
+| `up://*/4/FFFF/FF/0` | true | Find instances & versions of service 4 that are known to the local uDiscovery service instance or any of its parent nodes.
+| `up://*/1234/1/2/0` | false | Find the authority_name for version 2 & instance 1 of service 1234.
 
 |===
 
@@ -116,9 +116,9 @@ Below are example use cases for the API when passed certain URIs (shown in strin
 |===
 | URI | Description
 
-| `up:/1234/2/8000` | Return the `UServiceTopic` for topic 8000 of service 1234 version 2.
+| `up:/1234/1/2/8000` | Return the `UServiceTopic` for topic 8000 of instance 1 of service 1234 version 2.
 
-| `up:/1234/2/FFFF` | Return repeated list of `UServiceTopic` for all tpoics from service 1234 version 2.
+| `up:/1234/1/2/FFFF` | Return repeated list of `UServiceTopic` for all topics from instance 1 of service 1234 version 2.
 
 |===
 
