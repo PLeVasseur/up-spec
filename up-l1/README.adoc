@@ -384,18 +384,6 @@ deactivate T
 ----
 ====
 
-Sometimes it's necessary to distinguish the message types which should be listened to.
-
-[%autowidth]
-|===
-| Message Type | Possible resource ID combinations `{source resource_id, sink resource_id}`
-
-| Publish      | {[8000-FFFE], None}
-| Notification | {[8000-FFFE], 0}, {FFFF, 0}, {FFFF, FFFF}
-| Request      | {0, [1-7FFF]}, {FFFF, FFFF}
-| Response     | {[1-7FFF], 0}, (FFFF, 0), {FFFF, FFFF}
-|===
-
 [#unregister-listener]
 === UnregisterListener
 
