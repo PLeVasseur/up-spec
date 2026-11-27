@@ -225,11 +225,11 @@ receive(sourceFilter: UUri, sinkFilter: UUri [0..1]) : UMessage
 
 | sinkFilter
 | xref:../basics/uri.adoc[UUri]
-| The _sink_ address pattern that messages need to match. If omitted, a message **MUST NOT** contain any sink address in order to match.
+| The _sink_ address pattern that messages need to match. What an omitted filter matches is stated in the requirements below.
 
 | result
 | xref:../basics/umessage.adoc[UMessage]
-| The least recent message that matches the given filter criteria and has not expired yet.
+| The matching message, as the requirements below state.
 
 |===
 
@@ -243,6 +243,12 @@ NOTE: This method implements the _pull_ <<delivery-method, delivery method>> on 
 [.specitem,oft-sid="dsn~utransport-receive-error-notfound~3",oft-needs="impl,utest",oft-tags="TransportLayerImplPull"]
 --
 * A UTransport implementation that supports the _pull_ delivery method *MUST* fail invocations of <<receive>> with a `UCode.NotFound`, if there are no matching messages available. This is also the case if a package data unit cannot be deserialized into a valid xref:../basics/umessage.adoc[uProtocol message]. Transport implementations *SHOULD* use the validation functionality provided by language libraries for this purpose, if available.
+--
+
+[.specitem,oft-sid="dsn~utransport-receive-filter-match~1",oft-needs="impl,utest",oft-tags="TransportLayerImplPull"]
+--
+* A UTransport implementation that supports the _pull_ delivery method *MUST* return from <<receive>> the least recent message that matches the given filter criteria and has not expired yet.
+* It *MUST* match an omitted sink filter only with a message that does not contain any sink address.
 --
 
 .Receiving a Message
