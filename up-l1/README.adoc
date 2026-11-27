@@ -147,6 +147,28 @@ What a successful completion of this method means is stated in the requirements 
 * A UTransport implementation *MUST* fail invocations of <<send>> with a `UCode.InvalidArgument`, if the passed UMessage failed validation.
 --
 
+[.specitem,oft-sid="dsn~utransport-send-error-unrepresentable~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
+--
+A UTransport implementation *MUST* fail invocations of <<send>> with a `UCode.OutOfRange`, and *MUST NOT* hand the message over, if the passed UMessage is valid and lies outside the intrinsic domain of the implementation's selected message mapping.
+It *MUST NOT* clamp, wrap, default, omit or reinterpret a value to make the message fit.
+
+The _selected message mapping_ is the mapping specification that the implementation applies, together with its _declared mapping context_: the parameters that the mapping's own specification names as inputs of the mapping and that are fixed when the mapping is selected, such as a mapping generation or, for a translation table, the service contract's declared kinds, identifier table, fixed encoding and payload-presence declaration.
+Selecting a mapping, and fixing its declared mapping context, are setup acts, and they are part of the mapping.
+The mapping's _intrinsic domain_ is the set of valid UMessages for which its specification, with that context, defines an image; whether a message belongs to it is decided from the message and the declared mapping context alone.
+
+A limit is _intrinsic_ where the mapping's specification fixes it for every deployment that selects the mapping with that context, such as the width or the value range of a target field, or a reserved value that has no image.
+A limit that a route declaration, a deployment setting, a negotiation or the current state sets is not intrinsic: a route's payload bound or token limit, a size negotiated for a broker connection, an encoding filter, an authority or permission policy, the depth of a queue, the availability of a slot, a loan or memory, the presence of a peer, or the expiry of a TTL.
+Where a protocol has both a fixed wire maximum and a smaller negotiated limit, exceeding the fixed maximum is intrinsic, and exceeding only the negotiated limit is not.
+
+Where more than one condition applies to an invocation of <<send>>, they are judged in this order:
+
+. A message that fails validation fails with `UCode.InvalidArgument`, as `+dsn~utransport-send-error-invalid-parameter~1+` requires, whatever else is true of it.
+. A valid message outside the intrinsic domain fails with `UCode.OutOfRange`, unless a check that the implementation's own contract places before the mapping is applied has already refused it; that earlier refusal keeps its own result and its cause, and it is the one refusal.
+. A message inside the intrinsic domain is never refused under this requirement; whatever else refuses it does so with the result and the cause that apply to that refusal.
+
+This requirement gives no result to a refusal that depends on a bound, a quota, a filter, a policy, a negotiated limit, capacity or the state of a peer: each such refusal keeps the result and the cause that its own requirement or its binding states.
+--
+
 [.specitem,oft-sid="req~utransport-send-prevent-address-spoofing~1",oft-needs="dsn,uman",oft-tags="TransportLayerImpl"]
 --
 * A UTransport implementation *MUST* provide means to prevent consumers from processing of messages with a xref:../basics/uattributes.adoc#data-model-definition[source address] that does not match the identity of the uEntity that the message being sent originates from.
