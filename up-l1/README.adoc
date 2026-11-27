@@ -158,15 +158,15 @@ NOTE: The above strategy for retrying failed attempts to send a message results 
 In general, an implementation of this specification will run in the same process as the uEntity code and thus has no way of objectively asserting the uEntity's authorities _on its own_. However, most transports will support or require clients to provide credentials for authentication as part of establishing a connection or sending messages. In most of these cases, the messaging infrastructure (like MQTT brokers or Eclipse Zenoh) also support the definition of authenticated clients' authorities by means of _Access Control Lists_ (ACLs). These mechanisms *MAY* then be used to implement this requirement.
 +
 Implementations *SHOULD* fail invocations of <<send>> with a `UCode.PermissionDenied`, if the message can be determined to be in violation of any of the uEntity's configured authorities _at the time of sending_. Otherwise, implementations *MUST* succeed the invocation and *MAY* rely on the messaging infrastructure to (silently) ignore the message.
-+
-NOTE: Certain uEntities like the xref:../up-l2/dispatchers/README.adoc[uStreamer component] are actually _intended_ to consume and forward messages that originate from other uEntities. However, even in this case a mechanism as described above may be used to restrict the uStreamer's ability to forward only those messages that match its defined forwarding rules.
 --
+
+NOTE: Certain uEntities like the xref:../up-l2/dispatchers/README.adoc[uStreamer component] are actually _intended_ to consume and forward messages that originate from other uEntities. However, even in this case a mechanism as described above may be used to restrict the uStreamer's ability to forward only those messages that match its defined forwarding rules.
 
 [.specitem,oft-sid="req~utransport-send-qos-mapping~1",oft-needs="dsn,uman",oft-tags="TransportLayerImpl"]
 --
 * A UTransport implementation *MUST* document if and how the implementation maps the xref:../basics/upriority.adoc[UMessage Priority Classes] to an existing corresponding mechanism for message prioritization of the underlying transport protocol.
 +
-NOTE: An implementation *MAY* also handle all messages equally, regardless of priority class.
+An implementation *MAY* also handle all messages equally, regardless of priority class.
 --
 
 .Sending a Message
@@ -353,9 +353,9 @@ NOTE: This API is used to implement the _push_ <<delivery-method, delivery metho
 In general, an implementation of this specification will run in the same process as the uEntity code and thus has no way of objectively asserting the uEntity's authorities _on its own_. However, most transports will support or require clients to provide credentials for authentication as part of establishing a connection or sending messages. In most of these cases, the messaging infrastructure (like MQTT brokers or Eclipse Zenoh) also support the definition of authenticated clients' authorities by means of _Access Control Lists_ (ACLs). These mechanisms *MAY* then be used to implement this requirement.
 +
 Implementations *SHOULD* fail invocations of <<register-listener>> with a `UCode.PermissionDenied`, if the source and/or sink filters can be determined to be in violation of any of the uEntity's configured authorities _at the time of registering the listener_. Otherwise, implementations *MUST* succeed the invocation and *MAY* rely on the messaging infrastructure to (silently) ignore any messages that the uEntity is not authorized to process.
-+
-NOTE: Certain uEntities like the xref:../up-l2/dispatchers/README.adoc[uStreamer component] are actually _intended_ to consume and forward messages that originate from other uEntities. However, even in this case a mechanism as described above may be used to restrict the uStreamer's ability to forward only those messages that match its defined forwarding rules.
 --
+
+NOTE: Certain uEntities like the xref:../up-l2/dispatchers/README.adoc[uStreamer component] are actually _intended_ to consume and forward messages that originate from other uEntities. However, even in this case a mechanism as described above may be used to restrict the uStreamer's ability to forward only those messages that match its defined forwarding rules.
 
 .Registering a Listener
 ====
@@ -492,8 +492,13 @@ NOTE: A uEntity invokes this method to get its own authority.
 [.specitem,oft-sid="dsn~localuriprovider-getauthority~1",oft-needs="impl,utest",oft-tags="LocalUriProvider"]
 --
 The value returned by an implementation *MUST* be the uEntity's (fixed) local _authority name_.
-Implementations *MAY* use any appropriate mechanism to determine the local authority during runtime, e.g. by means of a configuration file, environment variables or a central registry.
+Implementations *MAY* use any appropriate mechanism to determine the local authority during runtime.
 --
+
+.How an implementation can determine the local authority
+====
+By means of a configuration file, environment variables or a central registry.
+====
 
 === GetSource
 
@@ -502,8 +507,13 @@ NOTE: A uEntity invokes this method to get the address that it expects incoming 
 [.specitem,oft-sid="dsn~localuriprovider-getsource-uri-segments~1",oft-needs="impl,utest",oft-tags="LocalUriProvider"]
 --
 The address returned by an implementation *MUST* consist of the uEntity's (fixed) _authority_, _identifier_, _major version_ and _resource ID_ `0x0000`.
-Implementations *MAY* use any appropriate mechanism to determine these values during runtime, e.g. by means of a configuration file, environment variables or a central registry.
+Implementations *MAY* use any appropriate mechanism to determine these values during runtime.
 --
+
+.How an implementation can determine the values of the source address
+====
+By means of a configuration file, environment variables or a central registry.
+====
 
 === GetResource
 
@@ -512,8 +522,13 @@ NOTE: A uEntity invokes this method to get a resource specific address to publis
 [.specitem,oft-sid="dsn~localuriprovider-getresource~1",oft-needs="impl,utest",oft-tags="LocalUriProvider"]
 --
 The address returned by an implementation *MUST* consist of the uEntity's (fixed) _authority_, _identifier_, _major version_ and the passed in _resource ID_.
-Implementations *MAY* use any appropriate mechanism to determine these values during runtime, e.g. by means of a configuration file, environment variables or a central registry.
+Implementations *MAY* use any appropriate mechanism to determine these values during runtime.
 --
+
+.How an implementation can determine the values of a resource address
+====
+By means of a configuration file, environment variables or a central registry.
+====
 
 == Message Delivery
 
