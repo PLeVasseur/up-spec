@@ -886,7 +886,7 @@ SubscriptionStatus is an enum-style object, describing the status of a subscribe
 [#expiration-time]
 === Expiration time
 
-Expiration time is used to define when a subscription should automatically expire. Expiration time should be set in the future: uSubscription service will ignore subscription requests with a timestamp that has already expired at the time of request processing. 
+Expiration time is used to define when a subscription should automatically expire. Expiration time should be set in the future. What uSubscription service does with a subscription request whose expiration time has already passed is stated in <<subscribe-operation,Subscribe()>>.
 
 [.specitem,oft-sid="dsn~usubscription-subscription-expiration-datatype~1",oft-needs="impl,utest",oft-tags="uSubscription"]
 --
