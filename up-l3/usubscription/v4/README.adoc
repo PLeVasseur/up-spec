@@ -104,9 +104,19 @@ NOTE: The data types used in the following sections are defined in {basic_types_
 
 In a distributed pubsub network, there exist two subscription scenarios: local subscriptions and remote subscriptions. 
 
-In the local case a client subscribes to messages published by a _uEntity_ (might be abbreviated as _uE_, especially in diagrams) on the same transport network, with both parties using the same pubsub implementation. For instance, imagine an MQTT broker used by publishers and subscribers, all deployed within the same system context.
+[.specitem,oft-sid="req~usubscription-local-and-remote~1",oft-needs="impl,utest",oft-tags="uSubscription"]
+In the local case a client subscribes to messages published by a _uEntity_ on the same transport network, with both parties using the same pubsub implementation.
+In contrast, a remote subscription scenario involves publishers and subscribers using different pubsub implementations and/or being located on different systems.
 
-In contrast, a remote subscription scenario involves publishers and subscribers using different pubsub implementations and/or being located on different systems. For instance, a client interacting with a co-located MQTT broker to subscribe to messages that originate from a low-level mechatronics device, being published via SOME/IP.
+.A local subscription
+====
+Imagine an MQTT broker used by publishers and subscribers, all deployed within the same system context.
+====
+
+.A remote subscription
+====
+A client interacting with a co-located MQTT broker to subscribe to messages that originate from a low-level mechatronics device, being published via SOME/IP.
+====
 
 [NOTE]
 ====
@@ -555,6 +565,8 @@ deactivate T
 
 A topic identifies the message resource that a <<usubscription-subscriber>> wants to subscribe to. Topic are expressed in {uuri_ref} format.
 
+[.specitem,oft-sid="req~usubscription-topic-uuris~1",oft-needs="impl,utest",oft-tags="uSubscription"]
+--
 Topic UURIs passed to uSubscription operations must
 
 * be a valid {uuri_ref} and
@@ -563,7 +575,13 @@ Topic UURIs passed to uSubscription operations must
 * not contain a _wildcard_ _service ID_ (`ue_type_id`) and
 * not contain a _wildcard_ `resource_id`.
 
-It is permissible for topic UURIs to contain wildcard _service instance ID_ (`ue_instance_id`). For example, imagine the case where a client wants to "subscribe to the _door open_ event, from any instance of _door_ in the vehicle".
+It is permissible for topic UURIs to contain wildcard _service instance ID_ (`ue_instance_id`).
+--
+
+.A topic with a wildcard service instance ID
+====
+Imagine the case where a client wants to "subscribe to the _door open_ event, from any instance of _door_ in the vehicle".
+====
 
 [#usubscription-states]
 == Subscription States
@@ -909,6 +927,8 @@ Objects commonly used throughought this document are defined in this section.
 
 NOTE: SubscriptionStatus is an enum-style object, describing the status of a subscriber-topic relationship.
 
+[.specitem,oft-sid="req~usubscription-subscription-status~1",oft-needs="impl,utest",oft-tags="uSubscription"]
+--
 .SubscriptionStatus
 [cols="1,3"]
 |===
@@ -926,6 +946,7 @@ NOTE: SubscriptionStatus is an enum-style object, describing the status of a sub
 | `UNSUBSCRIBE_PENDING`
 | Unsubscribe is pending confirmation from remote uSubscription service instance
 |=== 
+--
 
 [#expiration-time]
 === Expiration time
