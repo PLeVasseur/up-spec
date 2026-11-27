@@ -25,7 +25,7 @@ The purpose of this layer of uProtocol is to define a common API for sending and
 
 This specification defines the transport layer's abstract API which is mapped to supported programming languages by means of uProtocol's xref:../languages.adoc[language specific libraries]. The API is _implemented_ for particular transport protocols and programming languages by _uProtocol Transport Libraries_.
 
-The Transport Layer API is defined using UML2 notation.
+The Transport Layer API is defined by the following class diagram, written in Mermaid class diagram notation.
 
 [mermaid]
 ifdef::env-github[[source,mermaid]]
@@ -177,7 +177,7 @@ C->>T : send(UMessage)
 activate T
 opt error while sending
 Note right of T: message may or may<br>not have been sent
-T--)C : error : Ustatus
+T--)C : error : UStatus
 end
 deactivate T
 ----
@@ -222,7 +222,7 @@ UTransport implementations
 
 [.specitem,oft-sid="dsn~utransport-receive-error-notfound~2",oft-needs="impl,utest",oft-tags="TransportLayerImplPull"]
 --
-* *MUST* fail invocations of <<receive>> with a `UCode.NotFound`, if there are no matching messages available. This is also the case if the a package data unit cannot be deserialized into a valid xref:../basics/umessage.adoc[uProtocol message]. Transport implementations *SHOULD* use the validation functionality provided by language libraries for this purpose, if available.
+* *MUST* fail invocations of <<receive>> with a `UCode.NotFound`, if there are no matching messages available. This is also the case if a package data unit cannot be deserialized into a valid xref:../basics/umessage.adoc[uProtocol message]. Transport implementations *SHOULD* use the validation functionality provided by language libraries for this purpose, if available.
 --
 
 [mermaid]
@@ -398,7 +398,7 @@ Clients use this method to unregister a previously registered listener.
 unregisterListener(sourceFilter: UUri, sinkFilter: UUri [0..1], listener: UListener)
 ----
 
-.RegisterListener Parameters
+.unregisterListener Parameters
 [width="100%",cols="1,1,5"]
 |===
 |Parameter | Type | Description
@@ -533,7 +533,7 @@ UTransport implementations
 
 == Communication Protocol Binding
 
-Communication protocols like MQTT or HTTP define a specific Protocol Data Unit (PDU) for conveying control information and user data. A uProtocol Client implements the Transport Layer API defined above on top of such a communication protocol.
+Communication protocols like MQTT or HTTP define a specific Protocol Data Unit (PDU) for conveying control information and user data. A uProtocol Transport Library implements the Transport Layer API defined above on top of such a communication protocol.
 
 A _communication protocol binding_ defines how the uProtocol Transport Layer API maps to the communication protocol's message exchange pattern(s) and how uProtocol messages are mapped to the protocol's PDU. Many communication protocols distinguish between a message's metadata and the (raw) payload. This is often reflected by the structure of the protocol's PDU. For example, HTTP supports _header_ fields and a _body_ which can be used to convey a uProtocol message's attributes and payload respectively.
 
