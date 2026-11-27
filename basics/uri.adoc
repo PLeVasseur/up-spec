@@ -108,9 +108,9 @@ NOTE: uEntities which produce events for consumption by other uEntities assume a
 uEntities which consume events produced by other uEntities assume an _Application_ role. +
 uEntities *MAY* assume both the Service and Application roles.
 
-[.specitem,oft-sid="dsn~uri-entity-type-id~1"]
+[.specitem,oft-sid="dsn~uri-entity-type-id~2"]
 --
-A UUri's `ue_type_id` property value represents the uEntity's _type of service_. Its value is a numeric identifier as defined by the uProtocol Service Registry.
+A UUri's `ue_type_id` property value represents the uEntity's _type of service_. Its value is a numeric identifier as assigned in the xref:../up-l3/README.adoc[Name & Number Registry] of the uP-L3 specification.
 --
 
 [.specitem,oft-sid="dsn~uri-entity-instance-id~1",oft-needs="impl,utest"]
