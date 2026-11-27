@@ -408,7 +408,7 @@ a| The segment *MUST* contain the (UTF8) string representation of the
 
 [.specitem,oft-sid="req~up-transport-mqtt5-session-config~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
 --
-Each transport implementing this specification *MUST* provide means to configure the values of the https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901048[Session Expiry Interval] and https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901039[Clean Start] properties of the MQTT CONNECT packet being used when establishing a connection to a broker.
+Each transport implementing this specification *MUST* provide means to configure the value of the https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901048[Session Expiry Interval] property and the value of the https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901039[Clean Start] flag of the MQTT CONNECT packet being used when establishing a connection to a broker.
 --
 
 [.specitem,oft-sid="req~up-transport-mqtt5-reconnection~1",oft-needs="impl,utest",oft-tags="TransportLayerImpl"]
@@ -417,7 +417,10 @@ Each transport implementing this specification *MUST*
 
 * re-establish a lost connection to an MQTT broker using an exponential backoff strategy.
 * re-subscribe to all previously subscribed topics, if the broker indicates that https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901078[no session is present] after successful reconnection.
+--
 
+.Backoff values for reconnecting to a broker
+====
 The following table provides some guidance for implementation:
 
 [cols="3,2,2,2,2,2"]
@@ -425,4 +428,4 @@ The following table provides some guidance for implementation:
 | Reconnect attempt | 1 | 2 | 3 | 4 | n > 4
 | Backoff (ms)      | `500` | `1000` | `2000` | `4000` | `10000`
 |===
---
+====
