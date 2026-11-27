@@ -603,3 +603,8 @@ uProtocol defines bindings to the following communication protocols:
 * xref:mqtt_5.adoc[*MQTT 5*]
 * xref:iceoryx2.adoc[*Eclipse iceoryx2*]
 * xref:someip.adoc[*SOME/IP*]
+
+[#cap-caller-permission-level]
+== Caller permission level for CAP
+
+Where CAP is used with UTransport, the UTransport implementation provides a means to determine the client's claimed uPL securely. The mechanism depends on the UTransport implementation. The permission values and comparisons are defined in xref:../basics/permissions.adoc[Permissions]; runtime enforcement remains implementation-specific.

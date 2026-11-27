@@ -56,9 +56,7 @@ For pre-installed client entities only runtime enforcement is applied.
 
 IMPORTANT: The runtime enforcement of CAPs is implementation specific and not covered by this specifications.
 
-CAP assumes that the xref:../up-l1/README.adoc[uTransport] implementation provides a means to determine client’s uPL.
-
-NOTE: The importance of permissions will vary between implementations. The key initially will be a robust solution for CAPs covering clients residing in-vehicle devices (i.e. Android & Linux implementations). We do not expect CAPs to be applicable to less dynamic and more controlled environments such as mechatronic, Mobile or Cloud implementations.
+CAP uses the caller's securely determined uPL as an input to its permission comparison. This comparison does not prescribe how an implementation establishes that input. Runtime enforcement of CAP remains implementation-specific and is not specified here.
 
 === CAPs vs Android AOSP Permissions
 
@@ -99,8 +97,6 @@ NOTE: *MUST* assumes the most permissive level, N, if the the declarations above
 
 
 === Client Declaration of uPLs
-
-Claimed level of a uEntity is also handled by xref:../up-l1/README.adoc[uTransport]. Implementations will determine the claimed level of the caller in a secure manner, and this will also be done differently depending on the xref:../up-l1/README.adoc[uTransport] implementation.
 
 When the calling uEntity permission level needs to be carried across different uTransport implementations, or across hops (i.e. across dispatchers such as the uBus), the callers permission level is placed in link:../up-core-api/uprotocol/v1/uattributes.proto[uAttributes `permission_level`].
 
