@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview
 
-NOTE: https://zenoh.io[Eclipse Zenoh&trade;] (/zeno/) is a pub/sub/query protocol unifying data in motion, data at rest and computations. It elegantly blends traditional pub/sub with geo distributed storage, queries and computations, while retaining a level of time and space efficiency that is well beyond any of the mainstream stacks.
+NOTE: https://zenoh.io[Eclipse Zenoh&trade;] (/zeno/) is a protocol for publishing, subscribing and querying that brings moving data, stored data and computation together. It joins classic publish/subscribe with geographically distributed storage, queries and computations.
 
 This document defines how uProtocol messages can be exchanged by means of Zenoh _Resources_.
 
@@ -49,7 +49,7 @@ The value of a Zenoh Resource that is used to convey a uProtocol message *MUST* 
 | order | value
 
 | 1
-a| *MUST* be set to a single byte representing the UProtocol major version (`0x01` at the time of writing)
+a| *MUST* be set to a single byte representing the UProtocol major version (`0x01` for major version 1)
 
 | 2
 a| *MUST* be set to the bytes representing the link:../up-core-api/uprotocol/v1/uattributes.proto[protobuf encoding of the UAttributes object]

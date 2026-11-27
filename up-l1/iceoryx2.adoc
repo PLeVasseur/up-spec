@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
 
 [NOTE]
 ====
-https://iceoryx.io[Eclipse iceoryx2&trade;] is an efficient, and ultra-low latency inter-process communication middleware. The library is designed to provide you with fast and reliable zero-copy and lock-free inter-process communication mechanisms.
+https://iceoryx.io[Eclipse iceoryx2&trade;] is a middleware for inter-process communication, built to be efficient and to have extremely low latency. Its library is designed to offer fast and reliable mechanisms of inter-process communication that are zero-copy and lock-free.
 
 This document defines how uProtocol messages can be exchanged by means of iceoryx2 _Services_.
 ====
@@ -74,7 +74,7 @@ struct UProtocolHeader {
 | field | value
 
 | `uprotocol_major_version`
-a| *MUST* be set to a single byte representing the uProtocol major version (`0x01` at the time of writing)
+a| *MUST* be set to a single byte representing the uProtocol major version (`0x01` for major version 1)
 
 | `uattributes_serialized`
 a| *MUST* be set to the bytes representing the protobuf encoding of the UAttributes object as defined by the link:../up-core-api/uprotocol/v1/uattributes.proto[UAttributes Protocol Buffers definition]
