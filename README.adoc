@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview
 
-uProtocol is a communication protocol that enables software applications (uEntities) to easily communicate with each other running in distributed systems. The protocol is designed to be lightweight, efficient, easy to use, and run on top of any other communication middleware (transport) such as SOME/IP, MQTT, zenoh, HTTP, etc...
+NOTE: uProtocol is a communication protocol that enables software applications (uEntities) to easily communicate with each other running in distributed systems. The protocol is designed to be lightweight, efficient, easy to use, and run on top of any other communication middleware (transport) such as SOME/IP, MQTT, zenoh, HTTP, etc...
 
 To achieve the above mentioned objectives, we have split the specifications into sections (folders) that are:
 
@@ -46,7 +46,7 @@ If you would like to contribute to uProtocol to develop a new language library o
 
 == Tracing Requirements
 
-Implementers of the uProtocol specification are encouraged to use link:https://github.com/itsallcode/openfasttrace[OpenFastTrace] (OFT) for making sure that they actually cover all requirements from the specification that are relevant for the implemented component.
+NOTE: Implementers of the uProtocol specification are encouraged to use link:https://github.com/itsallcode/openfasttrace[OpenFastTrace] (OFT) for making sure that they actually cover all requirements from the specification that are relevant for the implemented component.
 
 The uProtocol specification documents contain a lot of requirements that are defined as OFT specification items, which cover all aspects of uProtocol. In most cases, only of a subset of these requirements will be relevant/applicable for specific components. In order to make it easier for component developers to filter out these relevant requirements, the specification items that define more specific aspects of uProtocol have been _tagged_ with corresponding labels. When running OpenFastTrace to trace the requirements, these labels can be used to filter out the relevant specification items.
 
@@ -67,4 +67,4 @@ The uProtocol specification documents contain a lot of requirements that are def
 
 === Gherkin Feature Files
 
-Along with the specification itself, this repository contains Gherkin Features and Scenarios, defined in files with a `.feature` suffix, which can be used with test frameworks like https://cucumber.io/[Cucumber] to assert compliance of implementations with the parts of the uProtocol specification that the scenarios cover.
+NOTE: Along with the specification itself, this repository contains Gherkin Features and Scenarios, defined in files with a `.feature` suffix, which can be used with test frameworks like https://cucumber.io/[Cucumber] to assert compliance of implementations with the parts of the uProtocol specification that the scenarios cover.
