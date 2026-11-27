@@ -139,7 +139,7 @@ Every message *MUST* have a unique message identifier. The timestamp contained i
 |yes
 |xref:upriority.adoc#default-priority[default priority]
 a|
-The level of priority that this message should be processed/delivered with.
+The message's priority class, as xref:upriority.adoc[Message Priority (UPriority)] defines it.
 
 |`ttl`
 |`UInt32`
@@ -337,7 +337,7 @@ The invoked method UUri *MUST NOT* contain any wildcard values in any of its fie
 |xref:upriority.adoc[UPriority]
 |yes
 a|`CS4`
-a|The xref:upriority.adoc[level of priority] that this message should be processed/delivered with.
+a|The message's priority class, as xref:upriority.adoc[Message Priority (UPriority)] defines it.
 
 [.specitem,oft-sid="dsn~up-attributes-request-priority~1",oft-needs="impl,utest",oft-tags="LanguageLibrary"]
 --
@@ -349,7 +349,7 @@ The priority of an RPC Request message *MUST* be set to `CS4` or higher.
 |`UInt32`
 |yes
 |none
-a|The amount of time (in milliseconds) after which this request message should no longer be delivered to or processed by a service provider.
+a|The message's `ttl`, as <<common-attributes,Common Message Attributes>> defines it.
 
 [.specitem,oft-sid="dsn~up-attributes-request-ttl~1",oft-needs="impl,utest",oft-tags="LanguageLibrary"]
 --
@@ -441,7 +441,7 @@ a|
 --
 *MUST* be the same value as that of the corresponding request message's `priority` attribute.
 --
-|The xref:upriority.adoc[level of priority] that this message should be processed/delivered with. 
+|The message's priority class, as xref:upriority.adoc[Message Priority (UPriority)] defines it.
 
 
 |`ttl`
@@ -452,7 +452,7 @@ a|
 --
 *MUST* be the same value as that of the corresponding request message's `ttl` attribute.
 --
-|The amount of time (in milliseconds) after which this response message should no longer be delivered to or processed by the service consumer.
+|The message's `ttl`, as <<common-attributes,Common Message Attributes>> defines it.
 
 |`commstatus`
 |xref:error_model.adoc#data-model-definition[UCode]

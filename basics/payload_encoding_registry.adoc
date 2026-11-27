@@ -112,12 +112,10 @@ enumeration that this registry replaces.
 
 === Private-use Identifiers
 
-Private use is a normative part of the identifier model. Identifiers in
-`0xF000` to `0xFFFE` are valid on the wire, are never assigned by this registry,
-and have meanings defined by deployment-level agreement. The assumptions of use in
+NOTE: The assumptions of use in
 xref:#allocation[Allocation and Origination] and
-xref:#acceptance[Carrying a Payload versus Reading It] govern their origination,
-preservation and interpretation.
+xref:#acceptance[Carrying a Payload versus Reading It] govern the origination,
+preservation and interpretation of private-use identifiers.
 
 ==== Example of Private Allocation Coordination (Non-normative)
 
@@ -189,9 +187,6 @@ on `payloadEncodingId` in xref:uattributes.adoc[UAttributes].
 A component that reads a payload *SHALL* first determine its encoding. It *SHALL*
 reject the payload if it cannot determine or does not support that encoding.
 --
-
-This is a decoding decision, not a restriction on which valid identifiers a
-message can carry.
 
 [#allocation]
 == Allocation and Origination

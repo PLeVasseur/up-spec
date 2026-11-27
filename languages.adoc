@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
 
 == Overview 
 
-uProtocol _Language Libraries_ are written for specific programming languages like Java, C++ or Rust to provide the basic data types and functionality that is needed by uEntities like Applications and Services to interact with each other. The libraries declare the API for the uProtocol Transport and Communication Layers and provide a generic implementation of the Communication Layer API.
+uProtocol _Language Libraries_ are written for specific programming languages like Java, C++ or Rust to provide the basic data types and functionality that is needed by uEntities like Applications and Services to interact with each other.
 
 .A language library with its transport and communication layers, and two transport libraries
 [#up-libraries]

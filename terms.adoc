@@ -74,7 +74,7 @@ _socket_ is also used for the software endpoint of node-internal https://en.wiki
 |*D2C* |Device-2-Cloud Communication
 |*D2D* |Device-2-Device Communication
 |*uDevice* |Independent software execution environment that will implement uProtocol and contain a collection of uEntities along with dispatcher(s)
-|*Device Proxy Router (DPR)* |Proxies D2D communication when devices are unable to connect directly with each other
+|*Device Proxy Router (DPR)* |See xref:up-l2/dispatchers/README.adoc#dispatcher-types[Types of Dispatchers]
 |*uDomain* |Collection of uDevices using DNS nomenclature
 |*Message* |Protobuf defined data structure used for communication in the uProtocol
 |*Property* |An attribute, quality, or characteristic of a uThing that are stored in the uDiscovery database
