@@ -137,10 +137,6 @@ send(message: UMessage)
 
 What a successful completion of this method means is stated in the requirements below.
 
-On the other hand, unsuccessful completion of this method does not necessarily mean that the given message has not been sent at all. For example, an MQTT based implementation might lose its connection to the MQTT broker _after_ it has sent its MQTT `PUBLISH` packet but _before_ it has received the broker's `PUBACK`. In such a case, clients should use the returned error to determine, if another attempt to send the message is feasible or not. For example, if the initial attempt to send the message has failed with a `UCode.InvalidArgument`, then trying to send the same unaltered message again will most likely yield the same result. However, if the initial attempt failed with a `UCode.Unavailable`, then resending the message using some back-off mechanism will likely succeed eventually.
-
-NOTE: The above strategy for retrying failed attempts to send a message results in https://www.cloudcomputingpatterns.org/at_least_once_delivery/[at-least-once delivery]. Recipient(s) of these messages should therefore be https://www.cloudcomputingpatterns.org/idempotent_processor/[Idempotent Processors].
-
 [.specitem,oft-sid="req~utransport-send-preserve-data~1",oft-needs="dsn",oft-tags="TransportLayerImpl"]
 --
 * A UTransport implementation *MUST* preserve all of the message's meta data and payload during transmission
@@ -179,7 +175,14 @@ An implementation *MAY* also handle all messages equally, regardless of priority
 For a hub-and-spoke based communication protocol like MQTT, a successful completion typically means that the `send` method implementation has received the MQTT `PUBACK` packet, which indicates that the message has been transferred successfully to the broker from where the message remains to be retrieved by potential recipients. For a peer-to-peer based protocol like HTTP, this typically means that the `send` method implementation has received the peer's HTTP response message, which indicates that the message has been transferred successfully to the peer's HTTP endpoint.
 ====
 
+[NOTE]
+====
 Based on that, a client using this method should not assume that the given message has already reached its destination nor that it has already been processed once the method has completed successfully.
+
+On the other hand, unsuccessful completion of this method does not necessarily mean that the given message has not been sent at all. For example, an MQTT based implementation might lose its connection to the MQTT broker _after_ it has sent its MQTT `PUBLISH` packet but _before_ it has received the broker's `PUBACK`. In such a case, clients should use the returned error to determine, if another attempt to send the message is feasible or not. For example, if the initial attempt to send the message has failed with a `UCode.InvalidArgument`, then trying to send the same unaltered message again will most likely yield the same result. However, if the initial attempt failed with a `UCode.Unavailable`, then resending the message using some back-off mechanism will likely succeed eventually.
+
+A client that retries failed attempts in this way can hand the same message over more than once, so that a recipient can receive it more than once. Recipient(s) of these messages should therefore be https://www.cloudcomputingpatterns.org/idempotent_processor/[Idempotent Processors]. Retrying does not by itself establish https://www.cloudcomputingpatterns.org/at_least_once_delivery/[at-least-once delivery] to a recipient: a successful `send` confirms only the handover that the requirements above state.
+====
 
 .Sending a Message
 ====
